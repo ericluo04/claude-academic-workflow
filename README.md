@@ -82,7 +82,7 @@ Then in Claude Code: `/daily-brief --hours 4` to verify the loop end-to-end. Ful
 - [`/skill-creator`](skills/skill-creator/SKILL.md) — create / edit / eval / benchmark skills
 - [`/init`](skills/init/SKILL.md), [`/review`](skills/review/SKILL.md), [`/security-review`](skills/security-review/SKILL.md), [`/simplify`](skills/simplify/SKILL.md), [`/update-config`](skills/update-config/SKILL.md), [`/keybindings-help`](skills/keybindings-help/SKILL.md), [`/fewer-permission-prompts`](skills/fewer-permission-prompts/SKILL.md), [`/loop`](skills/loop/SKILL.md), [`/schedule`](skills/schedule/SKILL.md), [`/claude-api`](skills/claude-api/SKILL.md)
 
-Full per-skill index with one-line descriptions: [skills/README.md](skills/README.md).
+One-page 4-way lookup table (by task, by trigger phrase, by category, by composition): [SKILL_INDEX.md](SKILL_INDEX.md). Full per-skill index with one-line descriptions: [skills/README.md](skills/README.md).
 
 ## Requirements
 
