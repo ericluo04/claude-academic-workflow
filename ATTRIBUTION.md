@@ -29,6 +29,7 @@ The skills and patches that came from other repos were adapted, not copied verba
 | `/create-lecture --triage` | [`scunning1975/MixtapeTools:beautiful_deck`](https://github.com/scunning1975/MixtapeTools) Step 0 | Scott Cunningham | Audience + closing-claim triage at the start of slide creation |
 | `/academic-pptx` (entire skill) | [`Gabberflast/academic-pptx-skill`](https://github.com/Gabberflast/academic-pptx-skill) | Gabberflast | Entire skill (SKILL.md, content_guidelines.md, slide_patterns.md). Frontmatter description verbatim; "Structured Argument" mode, ghost-deck test, action titles, communication-first design |
 | `/posterskill` (entire skill) | [`ethanweber/posterskill`](https://github.com/ethanweber/posterskill) | Ethan Weber | Skill name, paper-+-project-website → single-file output design, React-via-CDN interactive HTML poster architecture |
+| `/academic-slides` (entire skill) | [`zarazhangrui/frontend-slides`](https://github.com/zarazhangrui/frontend-slides) | Zara Zhang | Entire skill scaffolding — Phase 0-5 architecture, "Show Don't Tell" preview UX, STYLE_PRESETS 12-preset convention, viewport-fit invariant, python-pptx PPT ingest. The academic fork swaps themes (Beamer-flavored), adds Phase 0.5 audience/takeaway/arc, and layers in theorem/lemma/proof CSS + KaTeX + `data-pause`. |
 | `/review-paper`, `/review-paper-light`, `/review-paper-code`, `/review-pap`, `/review-grant` (base designs) | [`claesbackman/AI-research-feedback`](https://github.com/claesbackman/AI-research-feedback) | Claes Bäckman | Base skill names, agent-count topology (6 / 2 / 5-phase / 6 / 6), and agent role names for all five review skills. The aspi6246 buried-contribution gate is layered on top of `/review-paper` and `/review-paper-light` only. |
 | `/preregister` | [`pedrohcgs/claude-code-my-workflow`](https://github.com/pedrohcgs/claude-code-my-workflow) | Pedro H.C. Sant'Anna | OSF / AsPredicted / AEA RCT three-registry structure, MUST / SHOULD / MAY clarity-flag taxonomy, retrospective-preregistration refusal gate |
 | `/seven-pass-review` | [`pedrohcgs/claude-code-my-workflow`](https://github.com/pedrohcgs/claude-code-my-workflow) | Pedro H.C. Sant'Anna | Seven-lens parallel review (Abstract / Intro / Methods / Results / Robustness / Prose / Citations), parallel-subagent-then-synthesizer topology, 80 / 90 / 95 threshold scoring |
@@ -86,6 +87,10 @@ Gabberflast's `academic-pptx-skill` is the source of `/academic-pptx` in its ent
 
 Ethan's `posterskill` is the source of `/posterskill` — the same skill name, the same paper-plus-project-website ingestion design, the same single-file interactive React-HTML poster architecture (React/Babel via CDN, no build step, drag-to-resize layout). This fork adapts the prompt surface for quantitative-marketing conference posters and adds project-folder conventions consistent with the rest of this workflow. Thank you, Ethan.
 
+### Zara Zhang — [`zarazhangrui/frontend-slides`](https://github.com/zarazhangrui/frontend-slides)
+
+Zara's `frontend-slides` repo is the structural parent of this repo's `/academic-slides`. The Phase 0-5 architecture, the "Show Don't Tell" preview UX (Phase 2 generates 3 mini-HTML style previews instead of asking abstract questions), and the `STYLE_PRESETS.md` 12-preset convention all come from her work. The academic fork retains the scaffolding and swaps in Beamer-flavored themes plus academic-deck primitives (theorem/lemma/proof boxes, KaTeX, `\pause` analogue). Thank you, Zara.
+
 ---
 
 ## License compatibility notes
@@ -102,6 +107,7 @@ This repo ships under the MIT License (see [LICENSE](LICENSE)). Each source repo
 - `claesbackman/AI-research-feedback` — MIT. Compatible.
 - `Gabberflast/academic-pptx-skill` — MIT. Compatible.
 - `ethanweber/posterskill` — MIT (verified). Compatible.
+- `zarazhangrui/frontend-slides` — MIT. Compatible.
 
 If you spot an incompatibility (a source repo has changed license, or an adoption falls outside MIT permissions), please open an issue and we will fix the credit, remove the adoption, or seek explicit permission.
 

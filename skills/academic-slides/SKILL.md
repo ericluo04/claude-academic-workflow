@@ -5,6 +5,8 @@ description: Create Beamer-inspired academic HTML presentations from scratch or 
 
 # Academic Slides Skill
 
+> **Source.** This skill is a rethemed academic derivative of [`zarazhangrui/frontend-slides`](https://github.com/zarazhangrui/frontend-slides) by Zara Zhang. The Phase 0-5 architecture, "Show Don't Tell" preview UX, `STYLE_PRESETS.md` 12-preset convention, viewport-fit invariant, and `python-pptx`-based PPT ingest are all inherited. The academic fork swaps the 12 design themes for 12 Beamer-flavored themes (Madrid, Berlin, Copenhagen, Warsaw, Metropolis, etc.), adds Phase 0.5 (audience / takeaway / narrative arc), and layers in theorem / lemma / proof CSS classes, KaTeX math, and `data-pause` Beamer-style progressive disclosure.
+
 Create zero-dependency, Beamer-inspired HTML presentations that run entirely in the browser. This skill helps academics and researchers build professional presentations with proper theorem environments, equation rendering via KaTeX, and structured frame navigation. Users discover their preferred theme through visual exploration ("show, don't tell"), then the skill generates production-quality frame decks.
 
 ## Core Philosophy
