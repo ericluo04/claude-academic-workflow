@@ -54,4 +54,6 @@ Both compaction hooks write to `~/.claude/sessions/<md5(project_dir)[:8]>/`:
 
 ## Attribution
 
-Authored by Lan Luo (https://github.com/ericluo04).
+`pre-compact.py` and `post-compact-restore.py` are adapted near-verbatim from Pedro H.C. Sant'Anna's [`pedrohcgs/claude-code-my-workflow`](https://github.com/pedrohcgs/claude-code-my-workflow) — both the docstrings, the `CLAUDE_PRECOMPACT_BLOCK_ON_DRAFT` opt-in DRAFT-plan guard, the session-dir hash convention, and the active-plan + recent-decisions snapshot format come from Pedro's hooks. See `ATTRIBUTION.md` for the full credit.
+
+`format-on-edit.py` is original to this repo, authored by Lan Luo (https://github.com/ericluo04).

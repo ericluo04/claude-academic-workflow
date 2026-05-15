@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Author: Lan Luo (https://github.com/ericluo04)
+# Adapted from pedrohcgs/claude-code-my-workflow by Pedro H.C. Sant'Anna
+# https://github.com/pedrohcgs/claude-code-my-workflow/blob/main/.claude/hooks/post-compact-restore.py
 """
 Post-Compact Context Restoration Hook
 
