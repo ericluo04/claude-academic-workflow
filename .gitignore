@@ -1,0 +1,67 @@
+# Secrets and credentials — NEVER COMMIT
+.credentials.json
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Personal config (per-user, gitignored on purpose)
+**/personal_config.json
+**/settings.local.json
+**/.claude.local.json
+**/.blocklist.json
+scripts/.blocklist.json
+
+# Local Claude Code state
+**/state/
+**/_archive/
+**/today_brief.json
+**/last_3_briefs.json
+**/telegram_offset.json
+
+# Logs
+*.log
+**/logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# LaTeX build artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+*.out
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+
+# Cursor / Claude
+.cursor/
+.claude-tmp/

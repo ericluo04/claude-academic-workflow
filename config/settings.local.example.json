@@ -1,0 +1,60 @@
+{
+  "_comments": [
+    "Template for ~/.claude/settings.local.json. Loaded AFTER settings.json and",
+    "merges into (does not replace) the permissions allowlist.",
+    "",
+    "Format: 'Bash(<command>)' for exact match, 'Bash(<prefix>:*)' for prefix match.",
+    "Example: 'Bash(git status)' matches only 'git status'; 'Bash(git:*)' matches",
+    "any git invocation. Quote paths with spaces and escape backslashes in regex.",
+    "",
+    "The allowlist below is minimal -- safe read-only commands plus the tools the",
+    "repo's skills actually invoke (latexmk, pdftoppm for /tikz-iterate; python and",
+    "node for general use). Add project-specific entries as you go; Claude Code will",
+    "prompt on first use and offer to remember.",
+    "",
+    "_personalized_examples shows how to structure project-scoped entries with your",
+    "own paths. Copy entries you want into the 'allow' array and replace the",
+    "<OVERLEAF_ROOT> / <PROJECT_SUBDIR> placeholders. We deliberately do NOT ship",
+    "Lan's full allowlist because it pins his Dropbox/Overleaf project paths."
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(python --version)",
+      "Bash(python3 --version)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(node --version)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(pwd)",
+      "Bash(wc:*)",
+      "Bash(latexmk -v)",
+      "Bash(pdftoppm -v)",
+      "Bash(echo \"EXIT:$?\")"
+    ]
+  },
+  "_personalized_examples": {
+    "_comments": [
+      "Not loaded by Claude Code -- this block is documentation only. Strip or",
+      "ignore. Copy individual lines into 'permissions.allow' above with your own",
+      "paths substituted for the placeholders."
+    ],
+    "patterns": [
+      "Bash(ls -d \"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>\"/*/)",
+      "Bash(ls -la \"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>/\")",
+      "Bash(cat -n \"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>/main.tex\")",
+      "Bash(find \"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>\" -type f -name \"*.tex\" -o -name \"*.bib\")",
+      "Bash(latexmk -pdf -interaction=nonstopmode \"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>/main.tex\")",
+      "Bash(SRC=\"<OVERLEAF_ROOT>/<PROJECT_SUBDIR>/Figures\")",
+      "Bash(DST=\"<OVERLEAF_ROOT>/<DEST_SUBDIR>/Figures\")",
+      "Bash(mkdir -p \"$DST/<SUBFOLDER>\")"
+    ]
+  }
+}

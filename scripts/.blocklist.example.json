@@ -1,0 +1,27 @@
+{
+  "_documentation": "Copy this file to scripts/.blocklist.json (which is gitignored) and fill in your specific values. The redact-check.py scanner will load it at runtime and add these to the exact-match secret detection. Without it, the scanner falls back to generic regex patterns only (still catches Anthropic/Notion/Telegram tokens by shape, just no project-specific UUIDs).",
+  "_schema": "Each key is a human-readable label; each value is the exact string to flag if it appears anywhere in the repo. Keys starting with underscore are ignored. Strings must be at least 6 characters or the scanner will refuse to use them (prevents accidental over-matching on short strings).",
+  "_example_values_redacted": "All examples below are placeholders. Replace with your own.",
+
+  "Telegram bot token prefix": "<paste-the-numeric-prefix-before-the-colon-of-your-telegram-bot-token>",
+  "Telegram chat ID": "<paste-your-numeric-telegram-chat-id>",
+  "Telegram bot handle": "<your_bot_handle>",
+
+  "Personal email": "you@example.com",
+  "University / work email": "you@uni.edu",
+
+  "Home path (Windows backslash)": "C:\\Users\\<your-username>",
+  "Home path (Windows forward)": "C:/Users/<your-username>",
+  "Home path (macOS)": "/Users/<your-username>",
+  "Home path (Linux)": "/home/<your-username>",
+
+  "Notion: Tasks DB ID": "<paste-32-hex-uuid-of-your-tasks-database>",
+  "Notion: Tasks data source ID": "<paste-uuid-of-your-tasks-data-source>",
+  "Notion: Tasks parent page ID (dashed)": "<paste-uuid-with-dashes>",
+  "Notion: Tasks parent page ID (undashed)": "<paste-uuid-without-dashes>",
+  "Notion: Weekly Agenda page": "<paste-uuid>",
+
+  "Notion: Project A page": "<paste-uuid-of-project-page>",
+  "Notion: Project B page": "<paste-uuid-of-project-page>",
+  "Notion: Project C page": "<paste-uuid-of-project-page>"
+}

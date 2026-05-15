@@ -1,0 +1,78 @@
+{
+  "_documentation": "See _config/README.md for setup instructions. Copy this file to ~/.claude/state/personal_config.json (Mac: ~/.claude/state/personal_config.json; Windows: %USERPROFILE%\\.claude\\state\\personal_config.json) and fill in values. The live file is gitignored. Skills that depend on these values must refuse to run if a needed field is unset.",
+  "user": {
+    "name": "Your Name",
+    "aliases": ["Your nickname or initials, or 'you' / 'I' / 'me' for self-recognition in meeting transcripts"],
+    "local_username": "OS username (e.g. 'alex' for /Users/alex/ — used by /replication-package to strip absolute paths during sanitization)",
+    "personal_email": "you@example.com",
+    "university_email": "you@uni.edu",
+    "affiliation": "Your institution",
+    "voice_style_ref": "/absolute/path/to/a/file/that/captures/your/writing/voice.tex"
+  },
+  "collaborators": [
+    "FirstNameA",
+    "FirstNameB",
+    "FirstNameC"
+  ],
+  "notion": {
+    "tasks_db_id": "<uuid of your Tasks database>",
+    "tasks_data_source_id": "<uuid of the Tasks DB's data source — pass to mcp__notion__notion-query-database-view>",
+    "tasks_parent_page_id": "<32-char hex page ID of the page that holds the Tasks DB plus daily Brief children>",
+    "weekly_agenda_page_id": "<uuid of the Weekly Agenda page>",
+    "project_pages": {
+      "ProjectA": "<uuid>",
+      "ProjectB": "<uuid>",
+      "ProjectC": "<uuid>"
+    },
+    "off_limits_pages": [
+      "<uuid of any personal / never-write-to page>",
+      "<uuid of another off-limits page>"
+    ]
+  },
+  "telegram": {
+    "bot_username": "<your_bot_handle>",
+    "chat_id": "<your numeric chat id (string is fine)>",
+    "_bot_token_lives_in": "GitHub Actions secrets only, never in this file"
+  },
+  "paths": {
+    "overleaf_root": "C:/Users/you/Dropbox/Apps/Overleaf",
+    "overleaf_root_mac": "/Users/you/Dropbox/Apps/Overleaf",
+    "research_root": "C:/Users/you/Dropbox/Research",
+    "claude_state_dir": "C:/Users/you/.claude/state",
+    "claude_state_dir_mac": "/Users/you/.claude/state",
+    "home_paths_to_redact": [
+      "C:\\Users\\you\\",
+      "C:/Users/you/",
+      "/Users/you/"
+    ]
+  },
+  "projects": [
+    {
+      "name": "ProjectA",
+      "aliases": ["projA", "first paper"],
+      "kind": "research-paper",
+      "stage": "R&R at MKSCI",
+      "overleaf_subdir": "ProjectA Manuscript",
+      "main_tex": "main.tex",
+      "bib_file": "references.bib",
+      "preamble_tex": "preamble.tex",
+      "r2r_glob": "R2R_*.tex",
+      "paper_slug": "projecta",
+      "zotero_collection_key": "<COLLECTION_KEY_FROM_ZOTERO>",
+      "collaborators": ["FirstNameA"]
+    },
+    {
+      "name": "ProjectB",
+      "aliases": ["projB", "JMP"],
+      "kind": "research-paper",
+      "stage": "JMP / working paper",
+      "overleaf_subdir": "ProjectB Manuscript",
+      "main_tex": "main.tex",
+      "bib_file": "references.bib",
+      "preamble_tex": "preamble.tex",
+      "paper_slug": "projectb",
+      "zotero_collection_key": "<COLLECTION_KEY_FROM_ZOTERO>",
+      "collaborators": ["FirstNameB"]
+    }
+  ]
+}
