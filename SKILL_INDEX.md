@@ -2,6 +2,36 @@
 
 A one-page lookup for the 32 skills in this repo, indexed four different ways: by task, by trigger phrase, by category, and by composition. For full per-skill descriptions, see [skills/README.md](skills/README.md).
 
+## Review-skill decision tree
+
+Ten skills target reviewing. They are not redundant — they sit at different stages of the manuscript / project lifecycle.
+
+**What are you reviewing?**
+
+- **A manuscript (draft or near-final)**
+  - 1-minute sanity check → [`/review-paper-light`](skills/review-paper-light/SKILL.md) (2 agents: contribution + identification)
+  - Structured pre-submission referee report → [`/review-paper`](skills/review-paper/SKILL.md) (6 agents: spelling, internal consistency, unsupported claims, math, tables, contribution)
+  - Deep adversarial read with quality thresholds → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) (7 lenses: abstract, intro, methods, results, robustness, prose, citations; 80/90/95 score targets)
+  - 5-critic adversarial cross-section, not manuscript-bound → [`/council`](skills/council/SKILL.md) (target-agnostic; also works on plans, R&R strategies, drafts, skill designs)
+
+- **A single figure or table** → [`/blindspot`](skills/blindspot/SKILL.md) (Shklovsky 4-quadrant: unexplained / convenient-absence / unasked-question / unexploited-strength). Composes with `/seven-pass-review` (figure-level early, manuscript-level later).
+
+- **Numeric claims in a manuscript (do the paper numbers match the code?)**
+  - Single-language tolerance check → [`/audit-reproducibility`](skills/audit-reproducibility/SKILL.md)
+  - Stricter cross-language audit (reimplement R↔Python, compare to 6 decimals) → [`/referee2`](skills/referee2/SKILL.md)
+
+- **Research code itself (reproducible? matches paper?)** → [`/review-paper-code`](skills/review-paper-code/SKILL.md) (Discovery → Paper Analysis → Parallel Code Review → Synthesis → Report)
+
+- **A pre-analysis plan / preregistration draft** → [`/review-pap`](skills/review-pap/SKILL.md) (6 agents: clarity/pre-spec, hypotheses/outcomes, identification, statistical plan, data/operational, adversarial referee)
+
+- **A grant proposal** → [`/review-grant`](skills/review-grant/SKILL.md) (6-agent panel: clarity/compliance, internal consistency, significance/innovation, design/feasibility, budget/timeline/team, adversarial panel)
+
+- **A skill design or workflow plan** → [`/council --chef-skill`](skills/council/SKILL.md) (skill-design critic roster; complements `/skill-creator`)
+
+**Typical R&R sequencing:** [`/blindspot`](skills/blindspot/SKILL.md) (per disputed figure) → [`/audit-reproducibility`](skills/audit-reproducibility/SKILL.md) (changed numbers) → [`/review-paper-light`](skills/review-paper-light/SKILL.md) (quick re-read) → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) (deep pass) → [`/referee2`](skills/referee2/SKILL.md) (cross-language re-audit) → [`/replication-package`](skills/replication-package/SKILL.md) (assembly).
+
+**Rule of thumb:** pre-draft / ideation → `/council`; draft-stage quick scan → `/review-paper-light`; draft-stage structured → `/review-paper`; pre-submission deepest pass → `/seven-pass-review`.
+
 ## By task
 
 | I want to... | Use |
