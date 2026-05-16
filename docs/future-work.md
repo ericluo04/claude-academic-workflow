@@ -4,11 +4,11 @@ Roadmap items that are not yet shipped. Each is on the queue; none are blockers 
 
 ## `/compile-latex`
 
-A wrapper that runs `latexmk` with project-specific defaults, parses the log for errors, surfaces only the relevant lines, and suggests fixes. Inspired by Scott Cunningham's `compiledeck` from [MixtapeTools](https://github.com/scunning1975/mixtape-tools), which does this for Beamer decks specifically. The plan is to generalize to articles too and emit a structured diff of warnings (overfull boxes, missing references) between successive compiles.
+A wrapper that runs `latexmk` with project-specific defaults, parses the log for errors, surfaces only the relevant lines, and suggests fixes. Inspired by Scott Cunningham's `compiledeck` from [MixtapeTools](https://github.com/scunning1975/MixtapeTools), which does this for Beamer decks specifically. The plan is to generalize to articles too and emit a structured diff of warnings (overfull boxes, missing references) between successive compiles.
 
 ## `/email-triage`
 
-Pull the morning's Gmail threads, classify each as `urgent` / `respond-today` / `respond-this-week` / `archive`, and optionally draft a reply for high-priority items. Inspired by Chris Blattman's `triage-inbox` skill from [claudeblattman](https://github.com/cblatts/claudeblattman). Would need the Gmail connector (see [outlook-gmail.md](outlook-gmail.md)) and a per-user calibration pass.
+Pull the morning's Gmail threads, classify each as `urgent` / `respond-today` / `respond-this-week` / `archive`, and optionally draft a reply for high-priority items. Inspired by Chris Blattman's `triage-inbox` skill from [claudeblattman](https://github.com/chrisblattman/claudeblattman). Would need the Gmail connector (see [outlook-gmail.md](outlook-gmail.md)) and a per-user calibration pass.
 
 ## `/eval-skill` runner
 
