@@ -1,6 +1,6 @@
 # claude-academic-workflow
 
-A complete academic-research workflow for Claude Code — 31 skills, 4 sub-agents, 3 hooks, 8 MCPs, Notion + Telegram task orchestration, cross-platform (Windows + macOS).
+A complete academic-research workflow for Claude Code — 32 skills, 4 sub-agents, 3 hooks, 6 stdio MCPs plus the claude.ai connector catalog, Notion + Telegram task orchestration, cross-platform (Windows + macOS).
 
 ## What this is
 
@@ -36,6 +36,20 @@ Then in Claude Code: `/daily-brief --hours 4` to verify the loop end-to-end. Ful
 
 ## What's inside
 
+At a glance:
+
+| Component | Count | Location | Index |
+|---|---|---|---|
+| Skills | 32 | [`skills/`](skills/) | [SKILL_INDEX.md](SKILL_INDEX.md) (4-way lookup), [skills/README.md](skills/README.md) (one-liners) |
+| Sub-agents | 4 | [`agents/`](agents/) | [agents/README.md](agents/README.md) |
+| Hooks | 3 | [`hooks/`](hooks/) | [hooks/README.md](hooks/README.md) |
+| Personal config (template) | 1 | [`skills/_config/`](skills/_config/) | [skills/_config/README.md](skills/_config/README.md) |
+| Settings templates | 2 | [`config/`](config/) | [config/README.md](config/README.md) |
+| Docs | 11 | [`docs/`](docs/) | see [Documentation](#documentation) below |
+| Helper scripts | 6 | [`scripts/`](scripts/) | see [Scripts](#scripts) below |
+
+The skill listing below is grouped by task. The full alphabetical index with trigger phrases and composition pointers is in [SKILL_INDEX.md](SKILL_INDEX.md).
+
 **Drafting and writing** ([skills/](skills/))
 
 - [`/draft`](skills/draft/SKILL.md) — section drafting in your configured voice (intro, methods, limitations, etc.)
@@ -58,7 +72,7 @@ Then in Claude Code: `/daily-brief --hours 4` to verify the loop end-to-end. Ful
 **Slides and figures** ([skills/](skills/))
 
 - [`/academic-pptx`](skills/academic-pptx/SKILL.md) — academic PowerPoint structure
-- [`/academic-slides`](skills/academic-slides/SKILL.md) — Beamer-style HTML slides
+- [`/academic-slides`](skills/academic-slides/SKILL.md) — Beamer-style HTML slides (with [`STYLE_PRESETS.md`](skills/academic-slides/STYLE_PRESETS.md) and [`references/`](skills/academic-slides/references/) for theme / viewport / PPT-ingest rules)
 - [`/create-lecture`](skills/create-lecture/SKILL.md) — scaffold a Beamer lecture or research-talk `.tex`
 - [`/slide-excellence`](skills/slide-excellence/SKILL.md) — multi-agent slide review (visual + pedagogy + proofreading + TikZ)
 - [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) — compile → render → review → refine TikZ until it visually checks out
@@ -84,6 +98,19 @@ Then in Claude Code: `/daily-brief --hours 4` to verify the loop end-to-end. Ful
 
 One-page 4-way lookup table (by task, by trigger phrase, by category, by composition): [SKILL_INDEX.md](SKILL_INDEX.md). Full per-skill index with one-line descriptions: [skills/README.md](skills/README.md).
 
+**Sub-agents** ([agents/](agents/)) — specialist reviewers spawned by the slide-quality skills, restricted to read-only tools.
+
+- [`tikz-reviewer`](agents/tikz-reviewer.md) — devil's-advocate TikZ diagram review (used by `/slide-excellence`, `/tikz-iterate`)
+- [`proofreader`](agents/proofreader.md), [`slide-auditor`](agents/slide-auditor.md), [`pedagogy-reviewer`](agents/pedagogy-reviewer.md) — Beamer deck review (used by `/slide-excellence`)
+
+**Hooks** ([hooks/](hooks/)) — harness-lifecycle scripts, all fail-open so a bug never blocks Claude Code.
+
+- [`pre-compact.py`](hooks/pre-compact.py) — snapshot active plan + first unchecked task before compaction
+- [`post-compact-restore.py`](hooks/post-compact-restore.py) — replay the snapshot on `SessionStart`
+- [`format-on-edit.py`](hooks/format-on-edit.py) — auto-run `ruff format` / `styler::style_file()` after every Edit/Write
+
+**Personalization** — every skill resolves personal data at runtime from `~/.claude/state/personal_config.json` (Notion IDs, Telegram chat ID, Overleaf root, project list, voice-reference `.tex`). Template + field-by-field documentation in [`skills/_config/`](skills/_config/README.md). To adapt the workflow to your own projects: [docs/adapting.md](docs/adapting.md).
+
 ## Requirements
 
 - Claude Code (latest)
@@ -94,20 +121,35 @@ One-page 4-way lookup table (by task, by trigger phrase, by category, by composi
 
 Per-OS install commands and recommended optional tooling: [docs/clis.md](docs/clis.md).
 
-## MCPs used
+## MCPs
 
-Eight MCP servers wire Claude Code into external systems. Install details and OAuth flows in [docs/mcps.md](docs/mcps.md).
+Three integration shapes — install commands, OAuth flows, and per-skill consumption table in [docs/mcps.md](docs/mcps.md).
 
-- **arxiv** — paper search / download / citation graph (stdio, no secrets)
-- **semantic-scholar** — paper search, used by `/bibcheck` and `/litreview` (stdio, no secrets)
-- **openalex** — academic search + trend analysis (stdio, free API key)
-- **zotero** — read-only library lookup for `/cite` (stdio, API key)
-- **playwright** — browser automation for OAuth flows and verification (stdio, no secrets)
+**1. Stdio MCPs (6, open-source, run locally via `claude mcp add`)**
+
+- **arxiv** — paper search / download / citation graph (no secrets)
+- **semantic-scholar** — paper / author / citation-graph queries (free API; optional key for higher quota)
+- **openalex** — bibliographic graph, author disambiguation (free "polite pool" email)
+- **zotero** — read-only library lookup for `/cite` (API key)
+- **playwright** — browser automation for OAuth flows and verification (no secrets)
 - **github** — PR / issue / repo ops (local binary, GitHub PAT)
-- **notion** — workspace I/O; backbone of `/log-todo`, `/notion-log`, `/capture`, `/task-pulse` (HTTP gateway, OAuth)
-- **google-drive** — Drive file search (claude.ai web-portal connector, OAuth)
 
-Several of the above (notably Google Drive, plus Gmail, Hugging Face, Scholar Gateway, and the lifestyle/travel set) are installed through the claude.ai connector catalog in the browser rather than via `claude mcp add`. See [docs/mcps.md](docs/mcps.md) for the OAuth flow and full per-connector breakdown.
+**2. HTTP / OAuth gateway MCPs (1, CLI-added)**
+
+- **notion** — workspace I/O; backbone of `/log-todo`, `/notion-log`, `/capture`, `/task-pulse`, `/notion-meeting-notes`, `/daily-brief`
+
+**3. claude.ai web-portal connectors (OAuth, browser-based — no `claude mcp add` needed)**
+
+Installed by clicking "Connect" in the claude.ai Settings → Connectors catalog. Tools then appear inside Claude Code with the `mcp__claude_ai_<Provider>__<action>` prefix. The catalog evolves — verify the live set on the connector page.
+
+- **Google Drive** — Drive file search; used ad hoc by `/cite` and reference lookups
+- **Gmail** — email read/triage and draft creation; planned `/email-triage` skill
+- **Hugging Face** — search models / datasets / papers / spaces; used by `/litreview` on ML topics
+- **Scholar Gateway** — institutional-access bridge for paywalled content; best-effort assist to `/cite`, `/bibcheck`, `/litreview`
+- **Microsoft 365** — Outlook / Calendar / Teams / OneDrive; **commonly blocked by university tenants** — substitute via Gmail forwarding + iCal, see [docs/outlook-gmail.md](docs/outlook-gmail.md)
+- **Lifestyle / travel** — Resy, StubHub, Booking.com, Expedia, Tripadvisor, Trivago. Optional; useful for conference-trip logistics from `/log-todo`-style asks.
+
+Full per-connector breakdown (scopes, why-useful, status): [docs/mcps.md](docs/mcps.md#claudeai-web-portal-connectors-oauth-browser-based-setup).
 
 ## Workflow architecture
 
@@ -122,9 +164,13 @@ Several of the above (notably Google Drive, plus Gmail, Hugging Face, Scholar Ga
             | reads / writes
             v
 +-------------------------+
-|  MCPs                   |     Notion, Zotero, arXiv, Semantic
-|  (8 servers)            | --> Scholar, OpenAlex, Playwright,
-+-------------------------+     GitHub, Google Drive
+|  MCPs                   |     6 stdio: arxiv, semantic-scholar,
+|  6 stdio + 1 HTTP       | --> openalex, zotero, playwright, github
+|  + claude.ai connectors |     1 HTTP gateway: notion
++-------------------------+     claude.ai catalog: Google Drive, Gmail,
+                                Hugging Face, Scholar Gateway, M365,
+                                Resy/StubHub/Booking/Expedia/Tripadvisor/
+                                Trivago
             |
             | task data + diary entries
             v
@@ -140,15 +186,55 @@ Several of the above (notably Google Drive, plus Gmail, Hugging Face, Scholar Ga
                                        capture replies)
 ```
 
-Skills live under `~/.claude/` and read all personal data from `~/.claude/state/personal_config.json`. The orchestration repo runs scheduled GitHub Actions that call the same Notion API and push to a Telegram bot — see [orchestration/README.md](orchestration/README.md).
+Skills live under `~/.claude/` and read all personal data from `~/.claude/state/personal_config.json`. The orchestration repo runs scheduled GitHub Actions that call the same Notion API and push to a Telegram bot — see [orchestration/README.md](orchestration/README.md) for the high-level shape and the link to the companion repo [`ericluo04/lan-daily-brief`](https://github.com/ericluo04/lan-daily-brief).
+
+## Documentation
+
+Eleven docs under [`docs/`](docs/), one per concern. Start with `platforms.md` if you are setting up a fresh machine.
+
+| Doc | Covers |
+|---|---|
+| [platforms.md](docs/platforms.md) | Side-by-side Windows / macOS / Linux paths, package managers, and toolchain matrix |
+| [clis.md](docs/clis.md) | Recommended CLIs with install commands and version checks |
+| [mcps.md](docs/mcps.md) | Full MCP catalog: stdio installs, HTTP gateway, claude.ai connectors, token refresh |
+| [tex-setup.md](docs/tex-setup.md) | MiKTeX / MacTeX / TeX Live for slide and replication skills |
+| [notion-setup.md](docs/notion-setup.md) | Notion Tasks DB + Weekly Agenda + project pages layout and integration |
+| [telegram-setup.md](docs/telegram-setup.md) | Bot creation, token handling, chat-ID retrieval |
+| [overleaf-dropbox.md](docs/overleaf-dropbox.md) | Overleaf ↔ Dropbox sync for the project tree the skills read from |
+| [outlook-gmail.md](docs/outlook-gmail.md) | Substitute path when Microsoft 365 OAuth is blocked at your university |
+| [adapting.md](docs/adapting.md) | How a friend forks the repo and rewires it to their own projects |
+| [future-work.md](docs/future-work.md) | Roadmap of unshipped skills and patches |
+| [attribution-table.md](docs/attribution-table.md) | Master attribution table (per-skill, per-source, per-license) |
+
+## Scripts
+
+Helper scripts in [`scripts/`](scripts/):
+
+- [`install.ps1`](scripts/install.ps1) / [`install.sh`](scripts/install.sh) — copy skills / agents / hooks into `~/.claude/`, render `settings.json` from the template, scaffold `state/`.
+- [`verify.ps1`](scripts/verify.ps1) / [`verify.sh`](scripts/verify.sh) — post-install sanity check (MCPs reachable, personal_config fields filled, hook scripts executable).
+- [`redact-check.py`](scripts/redact-check.py) — local pre-commit gate that scans for secrets and personal IDs against `scripts/.blocklist.json`. CI runs gitleaks over the same surface — see [Security](#security).
+- [`_render_settings.py`](scripts/_render_settings.py) — template substitution helper used by the installers.
+
+## Configuration
+
+Two settings templates in [`config/`](config/), both rendered by the installer into `~/.claude/`:
+
+- [`settings.example.json`](config/settings.example.json) → `~/.claude/settings.json` (global config; registers the three hooks)
+- [`settings.local.example.json`](config/settings.local.example.json) → `~/.claude/settings.local.json` (per-user permission allowlist; merged over the base)
+
+Both target files are user-local and gitignored once installed. Details and the `${HOME}` substitution rule: [config/README.md](config/README.md).
+
+## Security
+
+Three layers, all on by default:
+
+1. **`personal_config.json` is gitignored** and lives only under `~/.claude/state/`. Skills surface a "config missing" error and refuse to proceed rather than guess if a field is unset — guessing produces silently wrong Notion writes. Bot tokens and API keys never go in this file; they live in `~/.claude/state/telegram.json` (gitignored) or GitHub Actions Secrets. See [skills/_config/README.md](skills/_config/README.md#safe-to-share-vs-never-share) for the safe-to-share table.
+2. **`scripts/redact-check.py`** runs locally before every commit, scanning files against an exact-string blocklist (`scripts/.blocklist.json`, gitignored; example at `.blocklist.example.json`) and a pattern set.
+3. **CI secret scan** — [`.github/workflows/secret-scan.yml`](.github/workflows/secret-scan.yml) runs gitleaks against [`.gitleaks.toml`](.gitleaks.toml) on every PR to catch anything the local check missed.
 
 ## Setup
 
-Full step-by-step in [SETUP.md](SETUP.md). The installer scripts (`scripts/install.ps1` / `scripts/install.sh`) handle the file copies; the rest is configuring Notion, Telegram, and MCPs in order.
-
-## Personalization
-
-Every skill resolves personal data at runtime from `~/.claude/state/personal_config.json` — Notion page / database IDs, Telegram chat ID, Overleaf root path, project list, voice-reference `.tex` file. To adapt this workflow to your own projects: [docs/adapting.md](docs/adapting.md).
+Full step-by-step in [SETUP.md](SETUP.md). The installer scripts (`scripts/install.ps1` / `scripts/install.sh`) handle the file copies; the rest is configuring Notion, Telegram, and MCPs in order. To adapt to your own projects: [docs/adapting.md](docs/adapting.md).
 
 ## Attribution
 
