@@ -1,5 +1,7 @@
 # Style Presets Reference
 
+This file is a higher-level overview of the 12 presets (vibe, best-for, signature colors, font pairing). For full CSS / layout / typography per theme — including per-theme `:root` token blocks, Berlin's sidebar markup, Warsaw's gradient handling, and the Classic Serif jsDelivr font wiring — see [`references/themes.md`](references/themes.md).
+
 Curated Beamer-inspired academic themes for Academic Slides. Each preset is modeled after real LaTeX/Beamer presentation themes used in mathematics, computer science, and engineering talks. **Structural chrome and theorem environments only — no decorative illustrations.**
 
 ---
