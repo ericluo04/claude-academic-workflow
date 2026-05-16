@@ -238,16 +238,19 @@ Full step-by-step in [SETUP.md](SETUP.md). The installer scripts (`scripts/insta
 
 ## Attribution
 
-This repo stands on the shoulders of other Claude Code workflow authors who shared their setups publicly:
+This repo stands on the shoulders of other Claude Code workflow authors who shared their setups publicly. High-level credits below; full per-item attribution with the lines that were borrowed is in [ATTRIBUTION.md](ATTRIBUTION.md).
 
-- **Scott Cunningham** ([`scunning1975/MixtapeTools`](https://github.com/scunning1975/MixtapeTools)) — `/referee2`, `/blindspot`, `/bibcheck`, `/tikz-iterate` (concept), `/slide-excellence` patches, `/create-lecture --triage`
-- **Chris Blattman** ([`chrisblattman/claudeblattman`](https://github.com/chrisblattman/claudeblattman)) — `/council`, daily-brief scoring patches, atomic-write discipline, `/notion-meeting-notes` thin-content gate, `/litreview --four-axis`, `/skill-creator` catalog-conflict gate
-- **aspi6246** ([`aspi6246/Claude-Code-Presentation`](https://github.com/aspi6246/Claude-Code-Presentation)) — `/referee-response --five-q`, `/review-paper` buried-contribution check
-- **Andrej Karpathy** ([`karpathy/autoresearch`](https://github.com/karpathy/autoresearch)) — reviewed; inspiration cited
-- **Hugo Sant'Anna** ([`hugosantanna/clo-author`](https://github.com/hugosantanna/clo-author)) — reviewed; surfaced ideas in `docs/future-work.md`
-- **Pedro H.C. Sant'Anna** ([`pedrohcgs/claude-code-my-workflow`](https://github.com/pedrohcgs/claude-code-my-workflow)) — earlier reference for the workflow-as-config-repo pattern
-
-Full per-item attribution with the lines that were borrowed: [ATTRIBUTION.md](ATTRIBUTION.md).
+- **Anthropic** ([`anthropics/skills`](https://github.com/anthropics/skills)) — `/skill-creator` (entire skill, including analyzer / comparator / grader sub-agents, eval viewer, and benchmark scripts); the foundation every other skill in this repo was built on
+- **Scott Cunningham** ([`scunning1975/MixtapeTools`](https://github.com/scunning1975/MixtapeTools)) — `/referee2`, `/blindspot`, `/bibcheck`, `/tikz-iterate` (concept), `/slide-excellence` pedagogy lenses, `/create-lecture --triage`
+- **Pedro H.C. Sant'Anna** ([`pedrohcgs/claude-code-my-workflow`](https://github.com/pedrohcgs/claude-code-my-workflow)) — all four sub-agents (`slide-auditor`, `pedagogy-reviewer`, `proofreader`, `tikz-reviewer`), `/seven-pass-review`, `/preregister`, `/slide-excellence` base orchestrator, `/create-lecture` base workflow, `/audit-reproducibility` 5-phase audit, both compaction hooks (`pre-compact.py`, `post-compact-restore.py`), and the workflow-as-config-repo pattern itself
+- **Chris Blattman** ([`chrisblattman/claudeblattman`](https://github.com/chrisblattman/claudeblattman)) — `/council`, `/daily-brief` wait-factor + type-balance scoring, atomic-write discipline, `/notion-meeting-notes` thin-content gate, `/litreview --four-axis`, `/skill-creator` catalog-conflict gate
+- **Claes Bäckman** ([`claesbackman/AI-research-feedback`](https://github.com/claesbackman/AI-research-feedback)) — base designs for all five review skills (`/review-paper`, `/review-paper-light`, `/review-paper-code`, `/review-pap`, `/review-grant`), including agent counts and role names
+- **Zara Zhang** ([`zarazhangrui/frontend-slides`](https://github.com/zarazhangrui/frontend-slides)) — `/academic-slides` scaffolding (Phase 0-5 architecture, "Show Don't Tell" preview UX, STYLE_PRESETS convention, viewport-fit invariant, python-pptx ingest)
+- **Gabberflast** ([`Gabberflast/academic-pptx-skill`](https://github.com/Gabberflast/academic-pptx-skill)) — `/academic-pptx` (entire skill — SKILL.md, content_guidelines.md, slide_patterns.md, "Structured Argument" mode, ghost-deck test, action titles)
+- **Ethan Weber** ([`ethanweber/posterskill`](https://github.com/ethanweber/posterskill)) — `/posterskill` (entire skill — paper + project-website ingestion, single-file React-via-CDN interactive HTML poster architecture)
+- **aspi6246** ([`aspi6246/Claude-Code-Presentation`](https://github.com/aspi6246/Claude-Code-Presentation)) — `/referee-response --five-q`, `/review-paper` and `/review-paper-light` buried-contribution check
+- **Andrej Karpathy** ([`karpathy/autoresearch`](https://github.com/karpathy/autoresearch)) — reviewed; broader "Claude Code as iterative research collaborator" framing cited
+- **Hugo Sant'Anna** ([`hugosantanna/clo-author`](https://github.com/hugosantanna/clo-author)) — reviewed; non-overlapping ideas surfaced in [docs/future-work.md](docs/future-work.md)
 
 ## License
 
