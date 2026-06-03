@@ -1,6 +1,6 @@
 # Skills
 
-32 skills + 4 sub-agents + 3 hooks. Each skill is a self-contained `SKILL.md` file in its own directory.
+33 skills + 4 sub-agents + 3 hooks. Each skill is a self-contained `SKILL.md` file in its own directory.
 
 Most skills are venue-agnostic. The ones that touch Notion, Telegram, or the user's filesystem read placeholders from `~/.claude/state/personal_config.json` at runtime. See [`_config/README.md`](_config/README.md) for setup; an example config lives at [`_config/personal_config.example.json`](_config/personal_config.example.json).
 
@@ -10,6 +10,7 @@ For attribution and source credits, see [`../ATTRIBUTION.md`](../ATTRIBUTION.md)
 
 - [`draft`](draft/SKILL.md) — paper-section drafts in user voice (intro / lit review / methods / empirical setting / empirics / discussion / limitations), with natbib-apa citations, `\Cref` cross-refs, `\emph` over `\textit`, and figure/table notes minipages. Output goes to dated draft files; never edits the main `.tex`.
 - [`referee-response`](referee-response/SKILL.md) — R&R response letters with per-role sections (SE / AE / R1 / R2), `\textit{...}` reviewer quotes, location-pinned changes verified against the actual manuscript, "Done." for trivials, polite pushback with cited authority, and abandoned drafts preserved in `\begin{comment}` blocks. Optional `--five-q` mode applies a so-what gate to pushback paragraphs.
+- [`deslop`](deslop/SKILL.md) — scrub AI-writing tells (em-dash overuse, the "delve list", not-only-but-also, "it's important to note", vague attributions, rule-of-three, title-case headings, `oaicite` artifacts) from public-facing text and rewrite AI cadence into the user's voice. Two-pass: mechanical regex scrub + semantic rewrite. Auto-applies (edits files in place; returns cleaned text for pasted input). Domain-whitelists econometrics terms (robust SEs, leverage points, significance). `--report` previews the scorecard; `--mechanical-only` skips the rewrite pass. (taxonomy derived from [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), CC BY-SA)
 - [`cite`](cite/SKILL.md) — resolve a paper (DOI, arXiv ID, title, URL) via Semantic Scholar / OpenAlex / arXiv MCPs, file it in Zotero via the Web API, append a Better-BibTeX entry to the active project's `.bib`, and return the citation key ready for `\citep{}`.
 - [`bibcheck`](bibcheck/SKILL.md) — per-entry audit of a `.bib` against DOI / Semantic Scholar / OpenAlex / arXiv / Zotero, with one focused subagent per entry. Catches wrong years, swapped title-author pairs, fabricated DOIs, hallucinated entries. Read-only — writes a separate `corrected.bib` for review. (adapted from [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools))
 - [`litreview`](litreview/SKILL.md) — multi-source literature search across arXiv / Semantic Scholar / OpenAlex (Crossref fallback), dedupes by DOI / arXiv ID / fuzzy title, scores 1–5 for relevance, and emits a ranked summarized list. Optional `--four-axis` mode replaces the single score with Novelty / Credibility / Relevance / Actionability composite.

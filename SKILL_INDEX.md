@@ -1,6 +1,6 @@
 # SKILL_INDEX
 
-A one-page lookup for the 32 skills in this repo, indexed four different ways: by task, by trigger phrase, by category, and by composition. For full per-skill descriptions, see [skills/README.md](skills/README.md).
+A one-page lookup for the 33 skills in this repo, indexed four different ways: by task, by trigger phrase, by category, and by composition. For full per-skill descriptions, see [skills/README.md](skills/README.md).
 
 ## Review-skill decision tree
 
@@ -37,6 +37,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 | I want to... | Use |
 |---|---|
 | Draft a paper section (intro / methods / limitations) in my voice | [`/draft`](skills/draft/SKILL.md) |
+| Scrub AI-writing tells out of text and rewrite it into my voice | [`/deslop`](skills/deslop/SKILL.md) |
 | Find papers on a topic across arXiv / Semantic Scholar / OpenAlex | [`/litreview`](skills/litreview/SKILL.md) |
 | Add a single paper to my `.bib` from a DOI / arXiv / title | [`/cite`](skills/cite/SKILL.md) |
 | Audit my `.bib` for fabricated / wrong citations before submission | [`/bibcheck`](skills/bibcheck/SKILL.md) |
@@ -74,6 +75,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 | If you say... | It routes to |
 |---|---|
 | "draft an intro", "rewrite in my voice", "write the limitations" | [`/draft`](skills/draft/SKILL.md) |
+| "deslop this", "make this sound less like AI", "remove the AI tells", "humanize this" | [`/deslop`](skills/deslop/SKILL.md) |
 | "respond to referees", "address reviewer comments", "draft the R&R" | [`/referee-response`](skills/referee-response/SKILL.md) |
 | "cite this paper", "add to my bib" (with DOI / arXiv / title) | [`/cite`](skills/cite/SKILL.md) |
 | "audit my bib", "any fake citations", "verify references" | [`/bibcheck`](skills/bibcheck/SKILL.md) |
@@ -111,6 +113,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 **Drafting and writing**
 - [`/draft`](skills/draft/SKILL.md) — paper-section drafts in user voice
 - [`/referee-response`](skills/referee-response/SKILL.md) — R&R response letters with location-pinned changes
+- [`/deslop`](skills/deslop/SKILL.md) — scrub AI-writing tells + rewrite into user voice (mechanical + semantic two-pass)
 
 **Lit review and citations**
 - [`/litreview`](skills/litreview/SKILL.md) — multi-source ranked paper search
@@ -160,7 +163,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 
 Typical multi-skill chains. Each `→` is a hand-off; figure-level skills loop within the chain.
 
-- **Drafting a new paper**: [`/litreview`](skills/litreview/SKILL.md) → [`/cite`](skills/cite/SKILL.md) (top hits) → [`/draft`](skills/draft/SKILL.md) → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) → [`/referee2`](skills/referee2/SKILL.md) → [`/bibcheck`](skills/bibcheck/SKILL.md) → [`/replication-package`](skills/replication-package/SKILL.md)
+- **Drafting a new paper**: [`/litreview`](skills/litreview/SKILL.md) → [`/cite`](skills/cite/SKILL.md) (top hits) → [`/draft`](skills/draft/SKILL.md) → [`/deslop`](skills/deslop/SKILL.md) (scrub any AI cadence) → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) → [`/referee2`](skills/referee2/SKILL.md) → [`/bibcheck`](skills/bibcheck/SKILL.md) → [`/replication-package`](skills/replication-package/SKILL.md)
 - **Pre-execution check on a new idea**: [`/evaluate-idea-marketing`](skills/evaluate-idea-marketing/SKILL.md) or [`/evaluate-idea-science`](skills/evaluate-idea-science/SKILL.md) → [`/preregister`](skills/preregister/SKILL.md) → [`/review-pap`](skills/review-pap/SKILL.md)
 - **Pre-talk prep**: [`/create-lecture`](skills/create-lecture/SKILL.md) → [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) (per figure) → [`/slide-excellence`](skills/slide-excellence/SKILL.md)
 - **R&R cycle**: [`/referee-response`](skills/referee-response/SKILL.md) → [`/blindspot`](skills/blindspot/SKILL.md) (per disputed figure) → [`/audit-reproducibility`](skills/audit-reproducibility/SKILL.md) (changed numbers) → [`/referee2`](skills/referee2/SKILL.md) (full code re-audit)
