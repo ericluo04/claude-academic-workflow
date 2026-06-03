@@ -1,6 +1,6 @@
 # SKILL_INDEX
 
-A one-page lookup for the 33 skills in this repo, indexed four different ways: by task, by trigger phrase, by category, and by composition. For full per-skill descriptions, see [skills/README.md](skills/README.md).
+A one-page lookup for the 34 skills in this repo, indexed four different ways: by task, by trigger phrase, by category, and by composition. For full per-skill descriptions, see [skills/README.md](skills/README.md).
 
 ## Review-skill decision tree
 
@@ -57,6 +57,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 | Draft a preregistration (AsPredicted / OSF / AEA RCT) | [`/preregister`](skills/preregister/SKILL.md) |
 | Bundle a journal-ready replication package | [`/replication-package`](skills/replication-package/SKILL.md) |
 | Iterate a TikZ diagram until it visually checks out | [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) |
+| Compile a `.tex` and get a ranked error report (+ auto-iterate figures) | [`/compile-latex`](skills/compile-latex/SKILL.md) |
 | Build a Beamer-style HTML deck | [`/academic-slides`](skills/academic-slides/SKILL.md) |
 | Build a PowerPoint deck for an academic audience | [`/academic-pptx`](skills/academic-pptx/SKILL.md) |
 | Scaffold a Beamer LaTeX talk or lecture from sources | [`/create-lecture`](skills/create-lecture/SKILL.md) |
@@ -95,6 +96,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 | "draft a preregistration", "AsPredicted form", "OSF prereg" | [`/preregister`](skills/preregister/SKILL.md) |
 | "build a replication package", "pre-submission archive" | [`/replication-package`](skills/replication-package/SKILL.md) |
 | "polish this tikz", "iterate this diagram until it looks right" | [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) |
+| "compile this", "build my paper/deck", "why won't this compile", "what are the latex errors" | [`/compile-latex`](skills/compile-latex/SKILL.md) |
 | "build HTML slides", "Beamer-style deck in the browser" | [`/academic-slides`](skills/academic-slides/SKILL.md) |
 | "make a pptx for my talk", "academic PowerPoint" | [`/academic-pptx`](skills/academic-pptx/SKILL.md) |
 | "create a lecture on X", "scaffold a Beamer deck", "MBA lecture on Y" | [`/create-lecture`](skills/create-lecture/SKILL.md) |
@@ -147,6 +149,7 @@ Ten skills target reviewing. They are not redundant — they sit at different st
 - [`/slide-excellence`](skills/slide-excellence/SKILL.md) — multi-agent Beamer deck review
 - [`/posterskill`](skills/posterskill/SKILL.md) — generate HTML conference poster
 - [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) — compile-render-judge-refine TikZ loop
+- [`/compile-latex`](skills/compile-latex/SKILL.md) — compile `.tex`, ranked error report, diff-vs-last-compile, auto figure-iterate
 
 **Task workflow**
 - [`/daily-brief`](skills/daily-brief/SKILL.md) — score open tasks, push top N to Telegram
@@ -165,7 +168,7 @@ Typical multi-skill chains. Each `→` is a hand-off; figure-level skills loop w
 
 - **Drafting a new paper**: [`/litreview`](skills/litreview/SKILL.md) → [`/cite`](skills/cite/SKILL.md) (top hits) → [`/draft`](skills/draft/SKILL.md) → [`/deslop`](skills/deslop/SKILL.md) (scrub any AI cadence) → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) → [`/referee2`](skills/referee2/SKILL.md) → [`/bibcheck`](skills/bibcheck/SKILL.md) → [`/replication-package`](skills/replication-package/SKILL.md)
 - **Pre-execution check on a new idea**: [`/evaluate-idea-marketing`](skills/evaluate-idea-marketing/SKILL.md) or [`/evaluate-idea-science`](skills/evaluate-idea-science/SKILL.md) → [`/preregister`](skills/preregister/SKILL.md) → [`/review-pap`](skills/review-pap/SKILL.md)
-- **Pre-talk prep**: [`/create-lecture`](skills/create-lecture/SKILL.md) → [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) (per figure) → [`/slide-excellence`](skills/slide-excellence/SKILL.md)
+- **Pre-talk prep**: [`/create-lecture`](skills/create-lecture/SKILL.md) → [`/compile-latex`](skills/compile-latex/SKILL.md) (build + auto-iterate every figure) → [`/slide-excellence`](skills/slide-excellence/SKILL.md). For a single figure outside a full build, [`/tikz-iterate`](skills/tikz-iterate/SKILL.md) directly.
 - **R&R cycle**: [`/referee-response`](skills/referee-response/SKILL.md) → [`/blindspot`](skills/blindspot/SKILL.md) (per disputed figure) → [`/audit-reproducibility`](skills/audit-reproducibility/SKILL.md) (changed numbers) → [`/referee2`](skills/referee2/SKILL.md) (full code re-audit)
 - **Pre-submission gauntlet**: [`/review-paper-light`](skills/review-paper-light/SKILL.md) → [`/review-paper`](skills/review-paper/SKILL.md) → [`/seven-pass-review`](skills/seven-pass-review/SKILL.md) → [`/bibcheck`](skills/bibcheck/SKILL.md) → [`/audit-reproducibility`](skills/audit-reproducibility/SKILL.md)
 - **Grant submission**: [`/council`](skills/council/SKILL.md) (early plan) → [`/review-grant`](skills/review-grant/SKILL.md) (full draft)
