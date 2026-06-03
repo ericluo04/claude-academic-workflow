@@ -2,10 +2,6 @@
 
 Roadmap items that are not yet shipped. Each is on the queue; none are blockers for the core daily-brief / capture / draft loop.
 
-## `/compile-latex`
-
-A wrapper that runs `latexmk` with project-specific defaults, parses the log for errors, surfaces only the relevant lines, and suggests fixes. Inspired by Scott Cunningham's `compiledeck` from [MixtapeTools](https://github.com/scunning1975/MixtapeTools), which does this for Beamer decks specifically. The plan is to generalize to articles too and emit a structured diff of warnings (overfull boxes, missing references) between successive compiles.
-
 ## `/email-triage`
 
 Pull the morning's Gmail threads, classify each as `urgent` / `respond-today` / `respond-this-week` / `archive`, and optionally draft a reply for high-priority items. Inspired by Chris Blattman's `triage-inbox` skill from [claudeblattman](https://github.com/chrisblattman/claudeblattman). Would need the Gmail connector (see [outlook-gmail.md](outlook-gmail.md)) and a per-user calibration pass.
@@ -43,7 +39,7 @@ For when more items are added and triage becomes useful:
 - `prototype` — runs locally but not stable across users.
 - `shipped` — promoted to the main skills directory.
 
-All current items above are `planned` except `/compile-latex` and `/email-triage`, which have rough designs sketched in their upstream sources.
+All current items above are `planned` except `/email-triage`, which has a rough design sketched in its upstream source. (`/compile-latex` and `/deslop` have shipped — see `skills/compile-latex/` and `skills/deslop/`.)
 
 ## Why these are deferred
 

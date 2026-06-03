@@ -1,6 +1,6 @@
 # Skills
 
-33 skills + 4 sub-agents + 3 hooks. Each skill is a self-contained `SKILL.md` file in its own directory.
+34 skills + 4 sub-agents + 3 hooks. Each skill is a self-contained `SKILL.md` file in its own directory.
 
 Most skills are venue-agnostic. The ones that touch Notion, Telegram, or the user's filesystem read placeholders from `~/.claude/state/personal_config.json` at runtime. See [`_config/README.md`](_config/README.md) for setup; an example config lives at [`_config/personal_config.example.json`](_config/personal_config.example.json).
 
@@ -37,6 +37,7 @@ For attribution and source credits, see [`../ATTRIBUTION.md`](../ATTRIBUTION.md)
 - [`create-lecture`](create-lecture/SKILL.md) — scaffold a new Beamer lecture or research talk `.tex` from source papers / notes / prior decks, with notation consistency against the project preamble. Two modes: research-talk and pedagogical-lecture. Optional `--triage` pre-write gate. (adapted from [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow); `--triage` gate from [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools))
 - [`slide-excellence`](slide-excellence/SKILL.md) — multi-agent comprehensive Beamer slide review (visual + pedagogy + proofreading, plus TikZ if present). Spawns `slide-auditor`, `pedagogy-reviewer`, `proofreader`, and conditionally `tikz-reviewer`. (adapted from [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow); pedagogy lenses from [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools))
 - [`tikz-iterate`](tikz-iterate/SKILL.md) — iteratively refine a TikZ diagram: compile, render to PNG, ask the `tikz-reviewer` subagent to judge, apply fixes, repeat until APPROVED or 5 iterations. Cross-platform (MiKTeX / MacTeX / TeX Live). (new — concept inspired by [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools)'s `/tikz`)
+- [`compile-latex`](compile-latex/SKILL.md) — compile any `.tex` with auto engine/bib detection, a ranked error report (BLOCKING errors with file:line + `\usepackage` / package-install fixes, then undefined refs/cites, then threshold-gated overfull/underfull boxes), diff-vs-last-compile, and a Dropbox conflicted-copy guard. After a clean build it auto-iterates every TikZ/pgfplots figure via `/tikz-iterate` and splices the refined bodies back. Cross-platform (MiKTeX / MacTeX). (diff-vs-last-compile idea from [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools)'s `compiledeck`; rest original)
 - [`posterskill`](posterskill/SKILL.md) — generate an HTML conference poster from a paper and project website, printable to PDF. (adapted from [ethanweber/posterskill](https://github.com/ethanweber/posterskill))
 
 ## Empirical and methodological discipline

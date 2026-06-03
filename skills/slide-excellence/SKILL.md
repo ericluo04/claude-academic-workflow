@@ -142,6 +142,6 @@ pedagogy-reviewer / proofreader / tikz-reviewer).
 ## Out of scope
 
 - Quarto, RevealJS, PowerPoint, Markdown slides — Beamer only.
-- Compiling the deck (use `latexmk` directly, or the `/compile-latex` skill if installed).
+- Compiling the deck — use `/compile-latex` (or `latexmk` directly).
 - Substance / domain review of econometric or methodological claims — that's the job of `/review-paper` or `/review-pap`.
 - Editing the file. This skill only produces reports; the user applies the fixes.
