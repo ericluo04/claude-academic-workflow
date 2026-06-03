@@ -1,32 +1,54 @@
 # Voice samples
 
-> **Paste 2–4 representative samples of your own writing here — emails,
-> paragraphs from your papers, an R&R response — to sharpen the tone match.
-> Until this file is populated, the skill falls back to your configured voice
-> reference (see `personal_config.user.voice_style_ref`).**
+The semantic pass (pass 2) rewrites AI-cadence prose into *your* cadence, in the
+register that matches the input. `/deslop` auto-selects ONE of the two registers
+below per the SKILL.md "Voice register" section (or honors `--voice=`), then
+grounds the rewrite in that register's samples. Until a register is populated, it
+falls back to your configured voice reference
+(`personal_config.user.voice_style_ref`).
 
-The semantic pass (pass 2) rewrites AI-cadence prose into *your* cadence. The
-more concrete examples it can see here, the closer the match. Good samples to
-paste:
-
-- A paragraph you wrote and are happy with (any genre — intro, email, memo).
-- A short email you sent that sounds like you.
-- A passage where your hedging / sentence rhythm / vocabulary is characteristic.
-
-Keep this to a few hundred words total — quality over quantity. The skill reads
-this file on every invocation, so updating it is the fastest way to retune the
-voice match.
+Keep each register to a few hundred words — quality over quantity. The skill reads
+this file on every invocation, so updating it is the fastest way to retune.
 
 ---
 
-## Sample 1
+## Register 1 — Correspondence (emails, short messages, cover letters)
+
+> **Paste 2–4 short samples of your writing in this register here** — a couple of
+> emails you sent that sound like you, a cover-letter paragraph, a note or reply.
+> Until populated, this register falls back to
+> `personal_config.user.voice_style_ref`.
+
+Good samples to paste: a short email you're happy with; a passage where your
+greeting / sign-off, hedging, and warmth are characteristic. Optionally note any
+personal punctuation convention (e.g. a spaced hyphen instead of an em-dash) so
+the register-conditional punctuation rule can honor it.
+
+### Sample 1
 
 <!-- paste here -->
 
-## Sample 2
+### Sample 2
 
 <!-- paste here -->
 
-## Sample 3
+---
+
+## Register 2 — Manuscript / grant (papers, sections, abstracts, proposals)
+
+> **Paste 2–4 short samples of your formal academic writing here** — a paragraph
+> from a paper intro / method / discussion, an abstract, a grant paragraph.
+> Until populated, this register falls back to
+> `personal_config.user.voice_style_ref` (the same reference `/draft` uses).
+
+Good samples to paste: a paragraph you wrote and are happy with; a passage where
+your hedging, sentence rhythm, citation style, and emphasis conventions are
+characteristic. Em-/en-dashes in this register follow standard academic usage.
+
+### Sample 1
+
+<!-- paste here -->
+
+### Sample 2
 
 <!-- paste here -->

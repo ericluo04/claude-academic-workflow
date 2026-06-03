@@ -1,7 +1,7 @@
 ---
 name: deslop
-description: Scrubs AI-writing tells (em-dash overuse, the "delve list", not-only-but-also, "it's important to note", vague attributions, rule-of-three, title-case headings, oaicite artifacts) from public-facing text — manuscripts, grant prose, emails, cover letters — and rewrites AI cadence into the user's own voice. Two-pass: mechanical regex scrub + semantic rewrite. Auto-applies (edits files in place; returns cleaned text for pasted input); domain-whitelists econometrics terms (robust SEs, leverage points, significance) so they're not nuked. Trigger phrases: "/deslop", "deslop this", "scrub the AI", "make this sound less like AI", "remove the AI tells", "humanize this", "does this read like AI", "de-slop my email/intro/cover letter". Composes with /draft (which writes in-voice) — /deslop cleans existing text.
-argument-hint: "[path-to-file OR pasted text] [--mechanical-only] [--report] [--domain=marketing|econ|generic]"
+description: Scrubs AI-writing tells (em-dash overuse, the "delve list", not-only-but-also, "it's important to note", vague attributions, rule-of-three, title-case headings, oaicite artifacts) from public-facing text — manuscripts, grant prose, emails, cover letters — and rewrites AI cadence into the user's own voice, matching the right register for the text type (correspondence voice for emails/messages/cover letters; manuscript voice for papers/sections/abstracts/grants). Two-pass: mechanical regex scrub + semantic rewrite. Auto-applies (edits files in place; returns cleaned text for pasted input); domain-whitelists econometrics terms (robust SEs, leverage points, significance) so they're not nuked. Trigger phrases: "/deslop", "deslop this", "scrub the AI", "make this sound less like AI", "remove the AI tells", "humanize this", "does this read like AI", "de-slop my email/intro/cover letter". Composes with /draft (which writes in-voice) — /deslop cleans existing text.
+argument-hint: "[path-to-file OR pasted text] [--voice=correspondence|manuscript] [--mechanical-only] [--report] [--domain=marketing|econ|generic]"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 effort: medium
 ---
@@ -16,8 +16,11 @@ deterministic mechanical scrub, then a semantic rewrite into the user's cadence.
 The detection taxonomy lives in `references/ai-tells.md` (tunable, versionable —
 the delve-list shifts as models change). The econometrics whitelist lives in
 `references/domain-whitelist.md`. The voice target lives in
-`references/voice-samples.md` (falls back to the configured voice reference until
-populated). Read all three on every invocation — do not summarize from memory.
+`references/voice-samples.md`, which holds **two registers** — Correspondence and
+Manuscript/grant — each falling back to the configured voice reference
+(`personal_config.user.voice_style_ref`) until populated. Read all three on every
+invocation — do not summarize from memory. The pass-2 rewrite uses ONE register,
+selected per the "Voice register" section below.
 
 ## When to invoke
 
@@ -38,6 +41,9 @@ The argument is either a **file path** or **pasted text**.
 
 Flags:
 
+- `--voice=correspondence|manuscript` — force the pass-2 voice register, skipping
+  auto-detection. Aliases: `--voice=email` → correspondence; `--voice=paper` and
+  `--voice=grant` → manuscript. See "Voice register" below.
 - `--report` — print the tell-scorecard only; do NOT apply any change. Use when
   the user wants a preview.
 - `--mechanical-only` — run pass 1 (deterministic scrub) and skip the LLM
@@ -45,6 +51,38 @@ Flags:
 - `--domain=marketing|econ|generic` — selects the whitelist strictness
   (`references/domain-whitelist.md`). Default: the user's field. `generic`
   relaxes the econometrics whitelist for non-technical prose (emails, letters).
+
+## Voice register — select before the pass-2 rewrite
+
+The pass-2 rewrite targets ONE of two registers from `references/voice-samples.md`.
+The mechanical pass-1 scrub is **register-independent** (em-dash thinning,
+delve-list, artifact stripping, sentence-case headings, etc. apply to all text) —
+register selection affects only pass 2, plus the one punctuation rule noted below.
+
+Select the register in this order:
+
+1. **`--voice=` flag wins.** `correspondence` / `email` → Correspondence;
+   `manuscript` / `paper` / `grant` → Manuscript.
+2. **Auto-detect from the input:**
+   - A `.tex` file, OR content containing `\citep`, `\section`,
+     `\begin{abstract}`, or `\Cref`, OR the user says
+     "paper / manuscript / section / abstract / grant / proposal / R&R"
+     → **Manuscript register**.
+   - An email, short message, cover letter, OR the user says
+     "email / message / note / reply / cover letter", OR short informal text with
+     a greeting and/or sign-off → **Correspondence register**.
+3. **On ambiguity:** infer the most likely register from content, APPLY it, and do
+   not stop to ask. STATE the choice in the scorecard (one line, e.g.
+   `Register: manuscript`) so the user can re-run with `--voice=` if it was wrong.
+
+**Register-conditional punctuation rule (the one pass-1 exception):**
+
+- **Correspondence:** convert AI em-dashes "—" to a spaced hyphen " - " if that is
+  the user's correspondence convention (see `references/voice-samples.md`); never
+  introduce an em-dash.
+- **Manuscript:** em-dashes / en-dashes follow standard academic LaTeX usage. Do
+  NOT force the spaced hyphen. Still thin em-dash *overuse* by frequency, but a
+  correctly-used em-dash in formal prose is fine.
 
 ## Pass 1 — Mechanical scrub (deterministic)
 
@@ -66,7 +104,9 @@ Detector families (full patterns + thresholds in `references/ai-tells.md`):
    `turn0search`, `grok_card`, stray `utm_source=`. Always strip on any match.
 8. **Punctuation / formatting** — em-dash density, curly→straight quotes,
    `**Bold:** description` lists, Title Case headings → sentence case, emoji in
-   headings, `---` before a heading.
+   headings, `---` before a heading. (Em-dash handling is register-conditional —
+   see "Voice register": user's correspondence convention vs. standard academic
+   usage in Manuscript.)
 9. **Rule of three** — flag triplet density; prune the filler third in pass 2.
 
 Pass 1 fixes are mechanical and safe (artifact removal, formatting, em-dash
@@ -75,8 +115,11 @@ deferred to pass 2.
 
 ## Pass 2 — Semantic rewrite to voice
 
-Skip this pass under `--mechanical-only` or `--report`. Otherwise, rewrite the
-flagged-but-not-mechanically-fixable prose into the user's voice:
+Skip this pass under `--mechanical-only` or `--report`. Otherwise, first select
+the voice register (see "Voice register" above), then rewrite the
+flagged-but-not-mechanically-fixable prose into the user's voice **for that
+register** — the correspondence voice for emails/messages/cover letters, or the
+manuscript voice for papers/sections/abstracts/grants:
 
 - **Promotional / significance puffery → plain fact.** "stands as a vibrant hub"
   → "is a town".
@@ -88,9 +131,12 @@ flagged-but-not-mechanically-fixable prose into the user's voice:
 - **"is"-avoidance verb inflation → plain copula.** "serves as / boasts /
   represents" where it just means "is" → "is".
 
-Ground the voice in `references/voice-samples.md` (and the configured voice
-reference). Preserve every substantive claim, number, quotation, and title
-exactly — adjust phrasing and cadence only.
+Ground the voice in the SELECTED register of `references/voice-samples.md` (each
+register falls back to the configured voice reference when its samples are empty;
+for manuscript input that reference is the same one `/draft` uses). Preserve every
+substantive claim, number, quotation, and title exactly — adjust phrasing and
+cadence only. For `.tex`, respect LaTeX: keep `\emph` over `\textit`, `\Cref`,
+natbib citations; do not mangle math or macros.
 
 ## Domain whitelist
 
@@ -116,6 +162,7 @@ changed, by category, with counts. Not a per-edit diff; a summary:
 
 ```
 deslop scorecard — <file or "pasted text">  [domain=econ]
+  Register: manuscript  (auto-detected; override with --voice=correspondence)
   HARD FAIL artifacts stripped ........ 2  (oaicite, contentReference)
   Delve-list words removed/replaced ... 5  (delve→examine, tapestry→set, …)  [3 suppressed by whitelist]
   Stock phrases rewritten ............. 3
