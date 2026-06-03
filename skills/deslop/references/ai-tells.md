@@ -157,9 +157,9 @@ no information.
   "stands as a vibrant hub of innovation" → "is a town" (or whatever the fact
   actually is). "groundbreaking framework" → "framework".
 - **Hedging filler → direct claim or deletion.** "It's important to note that
-  the effect is positive" → "The effect is positive." (Note: keep Lan's
-  *substantive* hedges — "to the best of our knowledge", "we believe" — those
-  are voice, not slop. Strip only the empty throat-clearing.)
+  the effect is positive" → "The effect is positive." (Note: keep the author's
+  *substantive* hedges — the genuine epistemic qualifiers in their own voice
+  samples — those are voice, not slop. Strip only the empty throat-clearing.)
 - **Vague attribution → named source or cut.** "studies show" → `\citep{...}`
   or remove the claim.
 - **AI cadence → the user's cadence.** Kill forced synonym-swapping / elegant
