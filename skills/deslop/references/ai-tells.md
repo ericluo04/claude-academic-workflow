@@ -46,6 +46,68 @@ Notes:
   whitelisted near a stats anchor — they are legitimate quant-marketing /
   econometrics terms.
 
+### 1b. Extended LLM-frequency vocabulary (PNAS 2026 — flag by density/context)
+
+A PNAS (2026) study — <https://www.pnas.org/doi/10.1073/pnas.2605754123> —
+compiled a large set of words whose frequency rose sharply in academic prose
+after LLMs became widespread. Treat this as an EXTENSION of the delve-list in
+§1, governed by the SAME two rules: flag by **density**, not single presence,
+and **suppress legitimate technical/domain use**. A useful standing rule for this
+list: the default is avoid, but a word that genuinely fits the situation is fine.
+
+Many entries are ordinary academic vocabulary (frameworks, insights, broader,
+primarily, thereby, alongside, interpretable, interpretability, notable, notably,
+crucial, rigor, serves, validates) — do NOT auto-strip these. Flag only when they
+cluster, or when used in the promotional/filler sense (e.g. "unlocks new
+insights", "a seamless framework", "showcases the prowess of", "revolutionizing
+the field", "underscores the pivotal role"). In pass 2, rewrite the filler sense
+to plain fact; keep the technical sense.
+
+```
+achieves, achieving, acknowledges, adaptable, addressing, adept, adeptly,
+adjustments, adjusts, advancements, advancing, advocating, aiding, align,
+aligning, aligns, alongside, amidst, amplifies, avenues, boasting, boasts,
+bolster, bolstering, bolsters, broader, capitalizes, captivating, captures,
+capturing, categorizes, categorizing, commendable, complexities, complicates,
+complicating, compromising, consolidates, contextualize, contextually,
+cornerstone, crucial, culminating, delineates, delve, delved, delves, delving,
+dependencies, diminishes, discernible, downturns, dynamically, elucidates,
+elucidating, emphasising, emphasizes, emphasizing, employs, enabling,
+encapsulates, encompass, encompassed, encompasses, encompassing, endeavors,
+enhance, enhancements, enhances, enhancing, ensures, ensuring, equipping, equips,
+escalate, escalating, exacerbates, exacerbating, exceeding, excelled, excelling,
+excels, exemplifies, exhibits, facilitating, featuring, formidable, fortifying,
+fostering, fosters, foundational, frameworks, garnered, garnering, grappling,
+groundbreaking, harnessing, heighten, heightened, heightening, heightens,
+highlighting, highlights, hinges, imperatives, inadequately, inadvertently,
+incentivizes, incentivizing, incorporates, incorporating, inefficiencies,
+inherently, insights, integrates, integrating, intensifies, intensifying,
+interpretability, interpretable, intricacies, intricacy, intricate, intricately,
+introduces, juncture, leverage, leverages, leveraging, meticulous, meticulously,
+mitigate, mitigates, mitigating, multifaceted, navigates, navigating,
+necessitate, necessitates, necessitating, notable, notably, nuanced, nuances,
+offering, offers, outperforming, overlook, overlooking, overlooks, overreliance,
+overseeing, oversight, oversimplify, paving, pinpointing, pivotal, poised,
+posits, practicality, preserving, primarily, prioritise, prioritize, prioritizes,
+prioritizing, promise, prowess, reaffirming, realm, redefines, refine, refines,
+refining, reflecting, reinforces, reliance, renowned, reshapes, reshaping,
+revolutionize, revolutionizing, rigor, safeguard, safeguarding, safeguards,
+seamless, seamlessly, serves, showcases, showcasing, signifying, situates,
+situating, sourced, strategically, streamline, streamlined, streamlining,
+strengthens, struggle, stylistic, surpasses, surpassing, symbolizing, synthesizes,
+thereby, thoroughness, thoughtfully, thrives, timelines, transcends,
+transitioning, underexplored, undermines, underperform, underperformed, underpins,
+underscore, underscored, underscores, underscoring, unlock, unlocking, utilizes,
+validates, warranting, workflows
+```
+
+Domain note (quant-marketing / econometrics writing): several of these are
+load-bearing and should be KEPT in the technical sense — "interpretable /
+interpretability" (interpretable ML), "frameworks", "insights", "validates /
+validation", "necessitate", "primarily", "thereby", "alongside". The §1 domain
+whitelist still applies on top of this list (robust, leverage-noun, significant,
+etc.). When unsure, prefer flagging in `--report` mode over silently rewriting.
+
 ### 2. Stock phrases (flag on match; near-always rewrite or cut)
 
 ```
