@@ -20,6 +20,8 @@ Several skills (`/draft`, `/posterskill`, `/academic-pptx`) would benefit from f
 
 ## Auto-DST handling for the cron schedule
 
+*Pattern B only.* Moot under the cloud-routine orchestration ([orchestration/README.md](../orchestration/README.md), Pattern A) — routine schedules are handled by the platform, not as raw UTC cron lines. Still relevant if you run the legacy GHA pattern:
+
 The orchestration repo (`lan-daily-brief`) currently uses fixed UTC offsets in its GitHub Actions cron expressions. Twice a year the morning brief lands at the wrong local time for a week until manually fixed. A small workflow that recomputes the cron line based on the current DST state of America/New_York (or whatever timezone the user configures) would eliminate this papercut. Likely a Python script run nightly that opens a PR against `.github/workflows/*.yml` when the offset is about to flip.
 
 ## Other items on the watchlist

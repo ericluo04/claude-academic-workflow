@@ -159,7 +159,7 @@ Overleaf has native Dropbox sync — no custom code needed. Convention: every pa
 
 ## 10. Fork the orchestration repo
 
-The scheduled tasks (morning brief at 6:15am, capture poll every 30 min, Friday recap, Weekly Agenda reconcile, meeting-notes ingest) run as GitHub Actions cron jobs in a separate repo. See [orchestration/README.md](orchestration/README.md) for the high-level layout and pointer to the companion repo.
+The scheduled tasks (morning brief, capture poll every 30 min, Friday recap, Weekly Agenda reconcile, meeting-notes ingest) can run as GitHub Actions cron jobs in a separate repo — this is Pattern B in [orchestration/README.md](orchestration/README.md). The recommended alternative (Pattern A, a Claude Code cloud routine) needs no fork and no Actions secrets; see that README before deciding. The steps below cover Pattern B.
 
 1. Fork `ericluo04/lan-daily-brief` to your GitHub.
 2. Populate GitHub Actions secrets in your fork:

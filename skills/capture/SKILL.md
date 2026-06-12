@@ -5,6 +5,8 @@ description: Poll Telegram for new messages and write parsed task actions into t
 
 # /capture — Telegram → Notion task ingest
 
+> **Status.** The author has migrated orchestration to an hourly Claude Code cloud routine that polls Telegram and writes to Notion directly — see [orchestration/README.md](../../orchestration/README.md) (Pattern A). This skill documents the local / GitHub-Actions-era pattern (Pattern B), which remains fully usable for setups without cloud routines.
+
 ## Personalization
 
 This skill resolves placeholders against `~/.claude/state/personal_config.json`. See `_config/README.md` and `_config/personal_config.example.json` for setup. If the config is missing or a needed field is unset, the skill must surface an error to the user and refuse to proceed rather than guess.

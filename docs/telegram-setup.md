@@ -30,7 +30,11 @@ The bot can't message you until you message it first.
 | `bot_handle` (e.g., `<your-bot-handle>`) | public | same file, `telegram.bot_handle` |
 | `bot_token` (`<numeric>:<blob>`) | **SECRET** | **Never** on disk. Use `gh secret set TELEGRAM_BOT_TOKEN` for the orchestration repo; optionally a local env var for ad-hoc testing |
 
-### Setting the token as a GitHub Actions secret (primary)
+### Pattern A — token in the cloud-routine config
+
+If you run the cloud-routine orchestration ([../orchestration/README.md](../orchestration/README.md), Pattern A), there is no GitHub Actions layer: the routine itself calls the Bot API with `curl`, and the token is pasted into the routine's configuration on claude.ai. It is then visible only inside your own claude.ai account. The same rules apply — never in this repo, never in `personal_config.json` — plus one more: **treat routine exports and screenshots as sensitive**, since the routine body contains the token verbatim. Rotate via BotFather `/revoke` if a routine definition ever leaks.
+
+### Setting the token as a GitHub Actions secret (Pattern B)
 
 The orchestration repo (`lan-daily-brief` or your fork) runs the actual cron. From your fork's working directory:
 
@@ -96,7 +100,7 @@ Treat it as fully compromised — Telegram's `getUpdates` accepts any caller wit
 
 ## 6. Capture flow — where the bot fits
 
-The capture path is owned by the orchestration repo, not by this skill repo. High level:
+The capture path is owned by the orchestration layer, not by this skill repo. Under Pattern A, an hourly cloud routine polls `getUpdates`, parses the capture grammar, and writes to Notion — see [../orchestration/README.md](../orchestration/README.md). The legacy Pattern B flow:
 
 - `lan-daily-brief` GitHub Actions cron runs every 30 minutes during waking hours.
 - It calls Telegram `getUpdates`, parses each reply against the grammar (`<N> done`, `<N> push <day>`, `<N> drop`, `add: <text>`, free-form), and writes results to your Notion Tasks DB.

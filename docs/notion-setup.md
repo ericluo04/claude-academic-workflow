@@ -37,6 +37,21 @@ Create a new database, table view, with these properties:
 | Agenda block | Relation | → Weekly Agenda page (optional) |
 | Meeting block | Relation | → Meeting notes pages (optional) |
 
+### Reminder properties — used by the reminder routine (Pattern A)
+
+Six additional properties consumed by the cloud reminder routine ([../orchestration/README.md](../orchestration/README.md), Pattern A). Skip them if you only run the GHA pattern; nothing else reads them.
+
+| Property | Type | Options | Purpose |
+|---|---|---|---|
+| Reminder class | Select | `Forgettable-deadline`, `Recurring-life`, `Work-task`, `None` | Gates pinging — only the first two classes ever fire; work tasks are never pinged |
+| Remind rule | Select | `Absolute`, `Relative-to-due`, `Recurring`, `Auto`, `Off` | How the next ping time is computed |
+| Remind spec | Text | — | Human-readable rule detail, e.g. `3 weeks before`, `every monday` |
+| Next ping | Date | — | Next scheduled ping; the routine fires when now ≥ this |
+| Last pinged | Date | — | Timestamp of the most recent ping |
+| Ping count | Number | — | Pings fired so far for this row |
+
+The routine also persists its cursor state (Telegram update offset, etc.) in a single sentinel row titled `__REMINDER_CONFIG__` in this same DB. Leave that row alone — deleting it resets the Telegram offset.
+
 ### Weekly Agenda page
 
 A plain page (not a DB) with five columns labelled Monday through Friday and a final paragraph block titled "Ongoing Thoughts". `/daily-brief` and the recurring reconciler read this page; `/notion-log` does not write to it.
