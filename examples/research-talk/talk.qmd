@@ -12,6 +12,7 @@ bibliography: talk-refs.bib
 # theme, exactly as below. To reproduce it: from this directory,
 #   quarto add ../../slide-tooling --no-prompt
 #   cp -R ../../slide-tooling/mathjax .
+#   cp -R ../../slide-tooling/fonts .
 #   quarto render talk.qmd
 # The look is the starter theme's; restyle the theme to your own taste.
 format: starter-revealjs

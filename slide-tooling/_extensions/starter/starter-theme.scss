@@ -39,18 +39,18 @@ $bad:         #9c3b26;
 $appendix-ground:   $paper;
 $references-ground: $appendix-ground;
 
-// Two faces. Headings, dividers, and display numbers use a system serif
-// stack; everything else stays on Source Sans Pro, the face Quarto ships
-// with reveal.js itself, so the text face is self-hosted next to the deck
-// with zero setup, no display-time fetch, and the same metrics on every
-// machine, which is what lets the fit gate's certification transfer. The
-// serif stack is system-resolved (Charter on macOS, Georgia elsewhere);
-// headings are short and centered, so the metric drift across platforms has
-// nowhere to bite. To pin a webfont instead, vendor it and declare @font-face
-// in the format's header-includes, not here, because theme SCSS compiles
-// into <deck>_files/ and a url() there resolves against the wrong base.
-$font-serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
-$font-sans: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+// Two vendored faces. Headings, dividers, and display numbers are Literata, a
+// bookish low-contrast serif; everything else is IBM Plex Sans. Both are
+// self-hosted from slide-tooling/fonts/, so nothing is fetched at display time
+// and the metrics are the same on every machine, which is what lets the fit
+// gate's certification transfer. The system stacks behind each one are only a
+// fallback for a deck that forgot to copy `fonts/` next to itself.
+//
+// The @font-face rules live in the format's header-includes, NOT here: theme
+// SCSS compiles into <deck>_files/ and a url() there resolves against the
+// wrong base. Urls in the header resolve against the rendered page.
+$font-serif: "Literata", Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+$font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 $font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
 $body-bg: $paper;
@@ -59,8 +59,11 @@ $link-color: $accent;
 $link-color-hover: $accent-dark;
 
 $presentation-heading-color: $ink;
-// The serif stack carries 400 and 700 only; 600 would synthesize.
-$presentation-heading-font-weight: 700;
+// The vendored Literata roman is variable over 400-700, so any weight in that
+// range is a real instance and nothing synthesizes. 600 is the display weight
+// throughout: Literata's 700 goes dark and wide at heading sizes, and 600 still
+// holds its stems from the back of a room.
+$presentation-heading-font-weight: 600;
 $presentation-line-height: 1.45;
 
 // LOAD-BEARING SIZES. The 30px root and the reference-entry metrics further
@@ -123,7 +126,7 @@ $presentation-heading-font: $font-serif;
 .reveal .slides section h3 {
   font-family: $font-serif;
   color: $muted-dark;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 // LOAD-BEARING. Pandoc emits a real empty <h2> for a titleless heading such
@@ -474,6 +477,8 @@ html .reveal .slides section > img.stretch + p.caption {
   text-align: center;
   font-family: $font-serif;
   font-size: 54px;
+  // 700 where the headings run 600: an isolated plum numeral carries the extra
+  // weight well and reads as the mark it is.
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -599,7 +604,7 @@ html .reveal .slides section > img.stretch + p.caption {
 .reveal .lemma .label,
 .reveal .theorem .theorem-title {
   font-family: $font-serif;
-  font-weight: 700;
+  font-weight: 600;
   color: $accent-dark;
   margin-right: 0.4em;
 }
@@ -712,7 +717,7 @@ html .reveal .slides section > img.stretch + p.caption {
   font-family: $font-serif;
   color: $ink;
   font-size: 2.1em;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.1;
   margin: 96px 0 30px;
 }

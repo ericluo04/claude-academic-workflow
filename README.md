@@ -39,7 +39,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `slide-review` | Renders a deck, screenshots every slide in a real browser, and reviews the pictures for overflow, contrast, broken figures, and a weak argument. |
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
 
-`agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and Inter; its README documents all of it.
+`agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and two webfont families; its README documents all of it.
 
 ### A note of caution on reviewing
 
@@ -54,7 +54,7 @@ Two live example decks, rendered by these skills and published on GitHub Pages:
 
 Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.
 
-The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, serif display headings, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
+The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, Literata display headings over IBM Plex Sans text, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
 
 What Quarto reveal.js gives you:
 
@@ -64,7 +64,7 @@ What Quarto reveal.js gives you:
 - Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
 - Video embedded with one HTML tag.
 
-An important note: rendering needs a network. Quarto fetches its reveal.js dependencies the first time, and code chunks install what they import. Presenting does not, because `slide-tooling/` vendors MathJax and the fonts ship with reveal, so a finished deck opens from a local file with the wifi off. That last part is this repo's doing rather than Quarto's default, which loads MathJax from a CDN and leaves the equations blank on a podium laptop with no connection.
+An important note: rendering needs a network. Quarto fetches its reveal.js dependencies the first time, and code chunks install what they import. Presenting does not, because `slide-tooling/` vendors MathJax and both typefaces, so a finished deck opens from a local file with the wifi off. That last part is this repo's doing rather than Quarto's default, which loads MathJax from a CDN and leaves the equations blank on a podium laptop with no connection.
 
 Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
 
@@ -163,4 +163,4 @@ Rename a session to what it is actually about (`/rename`), and `/resume` will sh
 
 ## License and credit
 
-MIT, see [LICENSE](LICENSE). The skills adapt ideas from several public workflows (Pedro Sant'Anna, Scott Cunningham, Chris Blattman, Claes Bäckman, and others); [ATTRIBUTION.md](ATTRIBUTION.md) traces each one and covers the vendored Inter (OFL) and MathJax (Apache 2.0) copies.
+MIT, see [LICENSE](LICENSE). The skills adapt ideas from several public workflows (Pedro Sant'Anna, Scott Cunningham, Chris Blattman, Claes Bäckman, and others); [ATTRIBUTION.md](ATTRIBUTION.md) traces each one and covers the vendored Literata and IBM Plex Sans (both OFL) and MathJax (Apache 2.0) copies.

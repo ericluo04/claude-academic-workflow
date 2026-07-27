@@ -1250,13 +1250,16 @@ local refs_gap = 0.46
 -- gives most of the difference back.
 --
 -- The starter bracket, measured the same way on the two example decks in docs/:
--- the longest two-line entry runs 264 characters and the shortest three-line one
--- 277, so the first line sits between 133.7 and 140.3; the preset takes the low
--- end again, 134. Starter fits more characters than the talk preset at the same
--- 18px because its body face is Source Sans Pro, the narrower face the lecture
--- note above describes. At 134 the model predicts all 25 rendered entries across
--- the two decks exactly, 27 lines against 27 on the talk and 25 against 25 on
--- the lecture.
+-- the longest two-line entry runs 246 characters and the shortest three-line one
+-- runs 246 as well, because two entries of the same length can break differently
+-- on their word boundaries. No value separates that pair, so the preset takes
+-- 124, just under the 124.6 both sides of the bracket land on, which rounds the
+-- ambiguous entry up to three lines. Starter holds fewer characters than the talk
+-- preset at the same 18px because its body face is the vendored IBM Plex Sans,
+-- which is wider than the system stack the talk resolves to; the same 25 entries
+-- render 57 lines here against 52 under the Source Sans Pro this theme used
+-- before. At 124 the model is exact on the talk, 30 lines against 30, and
+-- over-predicts the lecture by one, 28 against 27, which is the safe direction.
 --
 -- `hang` is what the hanging indent takes off every line after an entry's first, as
 -- a fraction of the line. The rule is `padding-left: 1.5em; text-indent: -1.5em` on
@@ -1280,7 +1283,7 @@ local refs_gap = 0.46
 local refs_presets = {
   talk    = { lines = 25.7, cpl = 125, hang = 0.026 },
   lecture = { lines = 22.6, cpl = 113, hang = 0.029 },
-  starter = { lines = 25.9, cpl = 134, hang = 0.026 },
+  starter = { lines = 25.9, cpl = 124, hang = 0.026 },
 }
 
 local function refs_budget(meta)

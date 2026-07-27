@@ -19,7 +19,7 @@ cp agents/tikz-reviewer.md ~/.claude/agents/
 mkdir -p ~/.claude/assets && cp -R slide-tooling ~/.claude/assets/quarto-yale
 ```
 
-The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which is why the copy keeps that name. A new deck then starts with `quarto add ~/.claude/assets/quarto-yale --no-prompt` and `cp -R ~/.claude/assets/quarto-yale/mathjax .`, and uses `format: starter-revealjs`.
+The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which is why the copy keeps that name. A new deck then starts with `quarto add ~/.claude/assets/quarto-yale --no-prompt` and `cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} .`, and uses `format: starter-revealjs`.
 
 ## What to adjust
 

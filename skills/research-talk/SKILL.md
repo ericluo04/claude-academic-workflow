@@ -142,7 +142,7 @@ deck directory:
 ```bash
 cd <deck dir>
 quarto add ~/.claude/assets/quarto-yale --no-prompt   # installs _extensions/starter/
-cp -R ~/.claude/assets/quarto-yale/mathjax .
+cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} .
 ```
 
 ```yaml

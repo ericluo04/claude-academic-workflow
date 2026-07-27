@@ -9,6 +9,7 @@ bibliography: lecture-refs.bib
 # this directory,
 #   quarto add ../../slide-tooling --no-prompt
 #   cp -R ../../slide-tooling/mathjax .
+#   cp -R ../../slide-tooling/fonts .
 #   quarto render w03-evaluation.qmd
 # In a real course this deck would render as part of a course website (see the
 # course-site skill), with a theme of your own carried by a format extension.

@@ -32,7 +32,8 @@ says which reference file holds what.
 ## The theme carries a measured palette
 
 The shipped theme is `starter-theme.scss`, a light editorial look (paper
-ground, serif display headings, plum accent) with a named block for each thing
+ground, Literata display headings over IBM Plex Sans text, plum accent) with a
+named block for each thing
 a slide can ask of a student. The look is yours to replace; the discipline to
 keep is that the theme documents its own palette as a measured contrast table,
 each ink with its WCAG 2.1 ratio against the ground, checked with a checker
@@ -98,7 +99,7 @@ directory (or once at the project root):
 ```bash
 cd <deck dir>
 quarto add ~/.claude/assets/quarto-yale --no-prompt   # installs _extensions/starter/
-cp -R ~/.claude/assets/quarto-yale/mathjax .          # the format self-hosts MathJax at a relative url
+cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} .  # the format self-hosts MathJax and both faces at relative urls
 ```
 
 A standalone deck then needs only:
@@ -467,6 +468,7 @@ needs a `mathjax/` copy beside the rendered HTML.
 | Divider numeral is missing | `stage-slide.lua` not running: a deck off the extension with no `filters:` line | use the extension format, or add the filter by absolute path |
 | A figure or a note appears with the heading instead of waiting | the filter is not running, or the heading carries `{.no-stage}` | `stage-check.mjs` names the slide |
 | Math unrendered even with wifi | the format's self-hosted `mathjax/MathJax.js` url resolves to nothing next to the rendered HTML | copy `~/.claude/assets/quarto-yale/mathjax/` beside the deck, or override the url as the course project does |
+| Type looks wider than the fit gate measured | no `fonts/` copy next to the deck, so both faces fell back to the system stacks | copy `~/.claude/assets/quarto-yale/fonts/` beside the deck, or override the four @font-face urls |
 | Appendix divider loses its tinted ground in the handout | reveal's print view builds no background elements at all | nothing to fix; the rule and the lone title carry it |
 | Progress bar is one unbroken line | fewer than two `.section-break` dividers, or the filter is missing | nothing to fix if the deck has one section; otherwise add the filter |
 | Progress bar is not full on the closing slide | the appendix has no `.appendix-break` divider and no `.appendix` slides, so nothing marks where the class ends | add the divider before the first appendix slide |

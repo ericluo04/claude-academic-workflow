@@ -24,7 +24,8 @@ Each source repo above ships under MIT, so redistribution under this repo's MIT 
 
 ## Vendored assets and tooling
 
-- Inter, by Rasmus Andersson ([rsms/inter](https://github.com/rsms/inter)). SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/inter/LICENSE.txt`.
+- Literata, by TypeTogether for Google ([googlefonts/literata](https://github.com/googlefonts/literata)). SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/literata/OFL.txt`.
+- IBM Plex Sans, by Mike Abbink and Bold Monday for IBM ([IBM/plex](https://github.com/IBM/plex)). SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/ibm-plex-sans/OFL.txt`.
 - MathJax 2.7.9 ([mathjax/MathJax](https://github.com/mathjax/MathJax)). Apache License 2.0; the license ships at `slide-tooling/mathjax/LICENSE`.
 - reveal.js, by Hakim El Hattab ([hakimel/reveal.js](https://github.com/hakimel/reveal.js)). MIT. Bundled into the rendered decks by Quarto.
 - Quarto ([quarto-dev/quarto-cli](https://github.com/quarto-dev/quarto-cli)). MIT. The render pipeline everything in `slide-tooling/` extends.

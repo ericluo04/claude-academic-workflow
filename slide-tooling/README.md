@@ -12,9 +12,9 @@ saying so. How sparse a slide should be, what a title should say, how to pace
 a lecture, and which block class means what all live in the skills.
 
 The rendered decks under `docs/` are the example sources rendered with
-`starter-theme.scss`, a light editorial theme (warm paper ground, serif
-display headings, plum accent) that implements every hook the filter and the
-gates expect, with comments marking where taste goes.
+`starter-theme.scss`, a light editorial theme (warm paper ground, Literata
+display headings over IBM Plex Sans text, plum accent) that implements every
+hook the filter and the gates expect, with comments marking where taste goes.
 Where a concrete number helps, this file cites measurements taken on a
 two-theme setup built on the same hooks (a talk theme and a lecture theme).
 Everything below about divider classes, the progress bar, jump buttons,
@@ -31,7 +31,7 @@ citations, and the reference list holds for the starter theme too.
 | `stage-check.mjs` | The staging gate: asserts nothing but the heading is visible before a slide is advanced. |
 | `check-offline.py` | Verifies a rendered deck fetches nothing at display time. For the offline variant only. |
 | `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. |
-| `fonts/inter/` | Inter variable woff2 pair (OFL), for a theme that wants to vendor a face of its own; the starter theme leads with the Source Sans Pro that ships with reveal.js, so nothing rendered here references these files. |
+| `fonts/` | The theme's two faces as woff2 (both OFL 1.1), copied next to each deck the way `mathjax/` is: `literata/` for display, `ibm-plex-sans/` for text. Each family is one variable roman covering 400-700 plus one static italic, 434 KB in total. |
 
 If you run a two-theme setup (say, a talk theme and a lecture theme on the
 same hooks), duplicate the
@@ -41,8 +41,9 @@ theme SCSS from a temp directory, so a relative `@import` cannot resolve.
 ## The recipe
 
 The short form is the extension: `quarto add <this directory> --no-prompt`
-installs `_extensions/starter/`, `cp -R <this directory>/mathjax .` gives the
-deck its math, and the front matter is just `format: starter-revealjs` plus
+installs `_extensions/starter/`, `cp -R <this directory>/{mathjax,fonts} .`
+gives the deck its math and its type, and the front matter is just
+`format: starter-revealjs` plus
 the title block. The manual recipe, for a deck that wires things itself:
 
 ```yaml
@@ -491,11 +492,12 @@ before it rounds one down. The lecture root is 13% larger while its line
 holds only 10% fewer characters, because Source Sans Pro is a narrower face than
 the one the talk led with when the presets were measured. The `starter` bracket
 was taken on the two example decks in `docs/`, which share the one theme: the
-longest two-line entry runs 264 characters and the shortest three-line one 277.
-Starter holds more characters than the talk preset at the same 18px because its
-body face is that same narrower Source Sans Pro, and its h2 leaves the list
-5px more room; at these values the model predicts all 25 rendered entries
-across the two example decks exactly.
+longest two-line entry and the shortest three-line one both run 246 characters,
+because two entries of the same length can break differently, so the preset
+takes 124 and rounds the ambiguous one up. Starter holds fewer characters than
+the talk preset at the same 18px because its body face is the vendored IBM Plex
+Sans, which is wider than the system stack the talk resolves to. At 124 the
+model is exact on the talk and over-predicts the lecture by one line.
 
 `refs-fit: starter | talk | lecture` picks the preset, because the theme cannot
 be read from a filter: Quarto compiles the SCSS into a temp bundle and rewrites
@@ -1099,18 +1101,32 @@ Inline emphasis: [this matters]{.yblue}
 
 ## Fonts
 
-The starter theme leads with Source Sans Pro, which Quarto ships with
-reveal.js itself: the face is self-hosted next to the deck with no vendoring,
-nothing is fetched at display time, and the metrics are the same on every
-machine, so the fit gate's certification transfers.
+The starter theme runs on two vendored families: Literata for headings,
+dividers, and display numbers, and IBM Plex Sans for everything else. Both are
+under the SIL Open Font License 1.1 and both ship in `fonts/`, so nothing is
+fetched at display time and the metrics are the same on every machine, which is
+what lets the fit gate's certification transfer.
 
-To pin a different face, vendor it the way `fonts/inter/` is mastered here
-(a variable woff2 pair, roman plus italic, about 740 KB with the OFL license
-file) and copy it next to the deck, the same pattern as the vendored
-`mathjax/` copy. The @font-face rules then live in the format's
-`header-includes`, because theme SCSS compiles into `<deck>_files/` and a
-`url()` there resolves against the wrong base; urls in the header resolve
-against the rendered page. Eight of the twelve built-in reveal themes
+Each family is mastered as one variable roman covering weights 400 to 700 plus
+one static italic, four woff2 files and two license files, 434 KB in total.
+The variable roman is the smaller half of that trade: Literata's is 147 KB
+against 175 KB for the two static weights it replaces, and Plex's is 125 KB
+against 150 KB, and either one then also covers the weights in between. Both
+were built from the upstream variable TTFs (Literata from
+[googlefonts/literata](https://github.com/googlefonts/literata) by way of the
+Google Fonts release, Plex from [IBM/plex](https://github.com/IBM/plex) the
+same way), with the optical-size and width axes pinned and the weight axis
+clamped to 400-700 before the woff2 conversion.
+
+`fonts/` has to sit next to the rendered deck, the same rule the vendored
+`mathjax/` copy follows, and the @font-face rules live in the format's
+`header-includes` rather than in the theme, because theme SCSS compiles into
+`<deck>_files/` and a `url()` there resolves against the wrong base; urls in
+the header resolve against the rendered page. A deck that renders into a
+subdirectory rewrites those four paths. Nothing warns you when this is wrong:
+a missing `fonts/` copy just falls back to the system stacks behind each
+family, and the deck still renders, a little wider and off its measured fit.
+Eight of the twelve built-in reveal themes
 `@import` Google Fonts, which is a display-time fetch and a different face
 whenever the CDN misbehaves; layering onto `default` avoids that, and it is
 also what keeps the offline variant possible.

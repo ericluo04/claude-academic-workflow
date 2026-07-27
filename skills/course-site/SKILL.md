@@ -49,7 +49,7 @@ tooling. Adopt it once at the project root, and give the site a MathJax copy:
 ```bash
 cd ~/teaching/<course>
 quarto add ~/.claude/assets/quarto-yale --no-prompt      # installs _extensions/starter/
-cp -R ~/.claude/assets/quarto-yale/mathjax assets/
+cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} assets/
 ```
 
 `assets/` holds the site theme plus the mark, and `lectures/_metadata.yml` holds
