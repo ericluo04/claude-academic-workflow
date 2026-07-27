@@ -45,7 +45,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 
 `review-paper` is built for your own manuscripts: a pre-submission check on a draft before you send it out, to be run only on work you wrote. Do not use it, or any generative AI tool, to review other people's submissions. Journals are explicit about this: [Management Science's submission guidelines](https://pubsonline.informs.org/page/mnsc/submission-guidelines) tell the review team directly that they "should not upload any part of a manuscript submitted to *Management Science* into a generative AI tool such that it might compromise confidentiality and/or copyright", and JMR's [submission guidelines](https://journals.sagepub.com/author-instructions/mrj) defer to Sage's [ChatGPT and generative AI policy](https://www.sagepub.com/en-us/nam/chatgpt-and-generative-ai), which reserves the right to take action when a reviewer breaches peer-review confidentiality with GenAI tools. If you referee, check the journal's AI policy before involving any tool at all.
 
-## Quarto for Slides
+## Quarto for slides
 
 Two live example decks, rendered by these skills and published on GitHub Pages:
 
