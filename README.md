@@ -65,6 +65,8 @@ A few of the higher-leverage discoveries from building this, none of them obviou
 
 - Voice input in hold mode (the `voice` block in the settings below) makes long, messy instructions cheap to give: hold the key and think out loud, corrections and all. It pairs well with remote control from a phone, where typing is the slow part. Rough transcription is fine; the agent resolves "that figure with the wrong axis label" from context.
 
+- Overleaf's Dropbox integration makes every Overleaf project a plain folder on your computer. It takes a paid Overleaf plan and one link: in Overleaf, Account Settings > Dropbox > Link, authorize on the Dropbox side, and with the Dropbox desktop app installed each project appears at `Dropbox/Apps/Overleaf/<project name>`. You and your coding agent then edit the manuscript with any editor, and the edits reach Overleaf and your coauthors within seconds, in both directions. This is the setup that lets the LaTeX skills here (`compile-latex`, `bibcheck`, `referee-response`) work on Overleaf manuscripts as ordinary local files; the manuscript glob in SETUP.md already points at this folder. Two caveats from the [Overleaf docs](https://docs.overleaf.com/integrations-and-add-ons/dropbox): sync covers every active project you can edit, owned or shared, with no per-project selection, and linking your own account gives coauthors nothing on their machines (a collaborator who wants the same local folder needs their own paid plan).
+
 - Settings worth turning on in `~/.claude/settings.json`, all defaults the author runs with:
 
   ```json
