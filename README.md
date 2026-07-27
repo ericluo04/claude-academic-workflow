@@ -161,6 +161,10 @@ The prompt takes two families of keys: the readline editing bindings a shell alr
 
 Option+B and Option+F need the Option key sending Meta, which macOS Terminal does not do by default: Terminal > Settings > Profiles > select your profile > Keyboard tab, then check "Use Option as Meta key".
 
+### Side questions with /btw
+
+While Claude is working on something long, `/btw` asks a quick question without interrupting it. The side question runs alongside the main task instead of derailing it, so you can check what a flag does or think out loud while a build or a research pass keeps going, and the main work resumes where it was. It keeps its own history, separate from the thread you interrupted.
+
 ### Running a model on your own machine
 
 Not many people know this one. If you need to work with material that is confidential, unpublished, or covered by an agreement about where data may go, or you need to work with no network at all on a flight or a bus ride, you can run a language model on your own computer. [Ollama](https://ollama.com) is the easiest way in: a free, open-source tool that downloads and runs open-weight models locally, so prompts and documents are processed on your machine and never transmitted to any cloud service or company. It is a separate tool from Claude Code, and the models it serves are open-weight ones from other labs; many of them are now performant enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
