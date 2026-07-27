@@ -11,6 +11,8 @@ Two live example decks, rendered by these skills and published on GitHub Pages:
 
 Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box. The starter theme carries the machinery inside one worked look (paper ground, serif display headings, a plum accent), and the theme file marks every spot where your own taste replaces it.
 
+The decks demonstrate what the pipeline can do; how your slides should look stays your call. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
+
 ## Quickstart
 
 ```bash
