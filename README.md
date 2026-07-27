@@ -135,6 +135,28 @@ Two details of the supporting tooling: `paper.py` disk-caches every response for
 
 When a university mail account cannot integrate with anything, draft in a personal Gmail via the Gmail MCP and copy the draft out of Gmail's web editor into the university client. Terminal copy-paste can sometimes mangle spacing and line breaks, so drafting in Gmail and copying from its editor is the cleaner route. The agent writes and revises the draft; you paste and send.
 
+### Keyboard shortcuts
+
+The prompt takes two families of keys: the readline editing bindings a shell already gives you, and Claude Code's own controls.
+
+| Key | What it does |
+|---|---|
+| `Ctrl+A` / `Ctrl+E` | Move to the start or end of the line |
+| `Ctrl+U` / `Ctrl+K` | Delete backward to the start of the line, or forward to the end |
+| `Ctrl+W` or `Option+Delete` | Delete the previous word |
+| `Option+B` / `Option+F` | Move back or forward one word |
+| `Shift+Tab` | Cycle permission modes, including plan mode |
+| `Esc` | Interrupt Claude mid-turn, or close an open dialog |
+| `Esc` `Esc` | Open the rewind menu on an empty prompt; clear the draft when the input has text |
+| `Ctrl+O` | Toggle the transcript viewer, which shows the full tool output |
+| `Up` | Step back through prompt history, once the cursor reaches the top row |
+| `/` | Run a command or a skill |
+| `@` | Reference a file by path, with autocomplete |
+| `#` | Save what you type as a memory for later sessions |
+| `!` | Run a shell command and drop its output into the session |
+
+Option+B and Option+F need the Option key sending Meta, which macOS Terminal does not do by default: Terminal > Settings > Profiles > select your profile > Keyboard tab, then check "Use Option as Meta key".
+
 ### Name your sessions
 
 Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe. Picking a project back up becomes choosing it from a list rather than reconstructing where you were.
