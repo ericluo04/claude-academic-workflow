@@ -1,238 +1,333 @@
-# Log-parsing reference for `/compile-latex`
+# Log-parsing reference for compile-latex
 
-Companion to `SKILL.md`. Holds the command→package table, the log regexes, the
-file-stack tracker rules, and the box thresholds so the main file stays terse.
+Command and environment tables, log regexes, the file-stack tracker, box
+thresholds, and the state schema. Companion to `SKILL.md`.
 
 ---
 
-## 1. Command → package table (BLOCKING-error fix suggestions)
+## 1. Undefined command and environment tables
 
-When the log shows `Undefined control sequence` and the offending token on the
-next `l.<N>` line matches a known command, suggest the `\usepackage` that
-defines it. Map (extend freely):
+Two distinct error classes get confused often:
+
+```
+! Undefined control sequence.
+l.212 \toprule
+! LaTeX Error: Environment tikzpicture undefined.
+```
+
+The first is a missing macro; the second is a missing environment. Handle them
+separately.
+
+Finding the offending token for `Undefined control sequence`: TeX breaks the
+context line right after the culprit, so the token is the **last** control
+sequence on the `l.<N>` line (not the first, and not on the continuation line
+below it).
 
 | Undefined command | Suggested fix |
 |---|---|
 | `\toprule` `\midrule` `\bottomrule` `\cmidrule` | `\usepackage{booktabs}` |
-| `\Cref` `\cref` `\Crefname` | `\usepackage{cleveref}` (load **after** hyperref) |
+| `\cref` `\Cref` `\crefname` | `\usepackage{cleveref}` (load after hyperref) |
 | `\bm` | `\usepackage{bm}` |
-| `\SI` `\si` `\num` `\ang` | `\usepackage{siunitx}` |
-| `\includegraphics` `\graphicspath` | `\usepackage{graphicx}` |
+| `\SI` `\si` `\num` `\qty` `\ang` | `\usepackage{siunitx}` |
+| `\includegraphics` `\graphicspath` `\resizebox` `\scalebox` | `\usepackage{graphicx}` |
 | `\adjustbox` `\adjincludegraphics` | `\usepackage{adjustbox}` |
-| `\tikz` `\begin{tikzpicture}` | `\usepackage{tikz}` |
-| `\pgfplotsset` `\begin{axis}` `\addplot` | `\usepackage{pgfplots}` (then `\pgfplotsset{compat=1.18}`) |
-| `\begin{groupplot}` | `\usepgfplotslibrary{groupplots}` |
+| `\tikz` `\tikzset` `\node` `\draw` | `\usepackage{tikz}` |
+| `\pgfplotsset` `\addplot` | `\usepackage{pgfplots}` plus `\pgfplotsset{compat=1.18}` |
 | `\multirow` | `\usepackage{multirow}` |
 | `\rowcolor` `\cellcolor` `\columncolor` | `\usepackage[table]{xcolor}` |
-| `\definecolor` `\textcolor` `\color` | `\usepackage{xcolor}` |
-| `\href` `\url` `\hyperref` | `\usepackage{hyperref}` |
-| `\citep` `\citet` `\citealt` | `\usepackage{natbib}` |
-| `\Cite` `\textcite` `\parencite` | `\usepackage[...]{biblatex}` (biblatex API) |
-| `\subcaption` `\subfloat` `\begin{subfigure}` | `\usepackage{subcaption}` |
-| `\FloatBarrier` | `\usepackage{placeins}` |
+| `\definecolor` `\textcolor` `\color` `\colorlet` | `\usepackage{xcolor}` |
+| `\href` `\url` `\hyperref` `\autoref` | `\usepackage{hyperref}` |
+| `\citep` `\citet` `\citealt` `\citeauthor` | `\usepackage{natbib}` |
+| `\textcite` `\parencite` `\autocite` | `\usepackage{biblatex}` |
 | `\mathbb` `\mathfrak` | `\usepackage{amssymb}` |
-| `\text` `\dfrac` `\binom` `\substack` | `\usepackage{amsmath}` |
-| `\bmod` issues / `\overset` | `\usepackage{amsmath}` |
-| `\begin{algorithm}` | `\usepackage{algorithm}` |
-| `\begin{algorithmic}` `\State` `\For` | `\usepackage{algpseudocode}` (algorithmicx) |
+| `\text` `\dfrac` `\binom` `\substack` `\overset` `\DeclareMathOperator` | `\usepackage{amsmath}` |
+| `\State` `\For` `\While` `\Procedure` | `\usepackage{algpseudocode}` |
 | `\SetKwInOut` `\KwData` | `\usepackage[ruled]{algorithm2e}` |
+| `\FloatBarrier` | `\usepackage{placeins}` |
 | `\todo` `\listoftodos` | `\usepackage{todonotes}` |
 | `\enquote` | `\usepackage{csquotes}` |
 | `\xspace` | `\usepackage{xspace}` |
-| `\resizebox` (ok in graphicx) / `\scalebox` | `\usepackage{graphicx}` |
-| `\tabularx` `\begin{tabularx}` | `\usepackage{tabularx}` |
 | `\makecell` | `\usepackage{makecell}` |
-| `\dashedline` / `\Block` (nicematrix) | `\usepackage{nicematrix}` |
-| `\bmqty` / physics macros | `\usepackage{physics}` |
+| `\Block` `\CodeBefore` | `\usepackage{nicematrix}` |
+| `\setmainfont` `\newfontfamily` | `\usepackage{fontspec}` (needs xelatex or lualatex) |
+| `\ThisULCornerWallPaper` etc. | `\usepackage{wallpaper}` |
 
-If the undefined command is a user macro (lowercase, project-specific, e.g.
-`\bphi`, `\indep`), do **not** suggest a package — flag it as a likely missing
-`\newcommand`/`\def` in the preamble or an un-`\input`'d macro file.
+| Undefined environment | Suggested fix |
+|---|---|
+| `tikzpicture` | `\usepackage{tikz}` |
+| `axis` `semilogxaxis` `loglogaxis` | `\usepackage{pgfplots}` |
+| `groupplot` | `\usepgfplotslibrary{groupplots}` |
+| `subfigure` `subtable` | `\usepackage{subcaption}` |
+| `tabularx` | `\usepackage{tabularx}` |
+| `threeparttable` | `\usepackage{threeparttable}` |
+| `longtable` | `\usepackage{longtable}` |
+| `algorithm` | `\usepackage{algorithm}` |
+| `algorithmic` | `\usepackage{algpseudocode}` |
+| `theorem` `lemma` `proof` | `\usepackage{amsthm}` plus a `\newtheorem` |
+| `frame` | document is not Beamer, or `\documentclass{beamer}` is missing |
+| `columns` `column` | Beamer, or `\usepackage{multicol}` for `multicols` |
+
+Cascades. An undefined environment throws a second error at its `\end`:
+
+```
+! LaTeX Error: Environment tikzpicture undefined.
+l.4 \begin{tikzpicture}
+! LaTeX Error: \begin{document} ended by \end{tikzpicture}.
+l.5 \end{tikzpicture}
+```
+
+Report the root cause and suppress the follow-on. The pattern to collapse is a
+`\begin{document} ended by \end{X}` that trails an `Environment X undefined` for
+the same `X`. Same for `Missing \endgroup`, `Extra }`, and `Emergency stop`
+following an earlier hard error in the same file.
+
+If the undefined token looks project-specific (short, lowercase, e.g. `\bphi`,
+`\indep`, `\E`), do not suggest a package. Flag it as a missing `\newcommand` or
+`\def`, or a macro file that is not `\input`'d, and grep the project for a
+definition to confirm.
 
 ---
 
-## 2. Missing-package (file-not-found) errors
+## 2. Missing package (file not found)
 
-These are distinct from undefined control sequences — the package exists but is
-not installed. Log signatures:
+The package exists upstream but is not installed. Signatures:
 
 ```
 ! LaTeX Error: File `adjustbox.sty' not found.
+! I can't find file `foo.tex'.
 ! Package pgfplots Error: ... could not be found
 ```
 
-Extract `<pkg>.sty` and emit a platform-specific install hint:
+Regex: `^! LaTeX Error: File \`([^']+)' not found`
 
-| Platform | Detect | Install command |
-|---|---|---|
-| Windows (MiKTeX) | `os.name == "nt"` / PowerShell | `mpm --install=<pkg>` |
-| macOS (MacTeX / TeX Live) | `uname == Darwin` | `tlmgr install <pkg>` |
-| Linux (TeX Live) | `uname == Linux` | `tlmgr install <pkg>` (or distro pkg) |
+Before reporting, confirm with `kpsewhich <file>` (empty output means genuinely
+absent; a hit means the failure is a path or `TEXINPUTS` problem instead).
 
-`<pkg>` is the `.sty` basename without extension. If MiKTeX auto-install is on,
-the first compile may already have fetched it — note that and suggest re-running.
+macOS only, MacTeX / TeX Live:
+
+```bash
+sudo tlmgr install <name>
+```
+
+`<name>` is the `.sty` basename without extension. That guess is wrong whenever
+the file's CTAN package differs (`algpseudocode.sty` ships in `algorithmicx`,
+`subcaption.sty` in `caption`). If `tlmgr install` reports the package does not
+exist, find the real one:
+
+```bash
+tlmgr search --global --file "/<file>.sty"
+```
+
+The MacTeX tree is root-owned, so `tlmgr install` needs `sudo`. Print the
+command for the user; never run a `sudo` install unprompted. `sudo tlmgr update
+--self` first if tlmgr complains about being out of date.
 
 ---
 
 ## 3. File-stack tracker
 
-`latexmk`/`pdflatex` logs interleave open-paren `(` / close-paren `)` tokens
-that mark `\input`/`\include` boundaries. A line/error is attributed to the
-**innermost currently-open file**, not the master `.tex`.
+pdflatex logs mark `\input` / `\include` boundaries with `(<path>` … `)`. Any
+`file:line` belongs to the innermost open file, not the master.
+
+The pop rule is the part that is easy to get wrong. Ordinary log text contains
+balanced parens that open nothing (`Overfull \hbox (15.83003pt too wide)`,
+`(Font) ...`, `[13] (\end occurred ...)`). If a `)` pops while its `(` pushed
+nothing, every subsequent attribution is off by one file. Push a placeholder for
+non-path parens so the stack stays balanced. On a 170-line log from a trivial
+two-file document, popping without a placeholder underflowed 19 times; with the
+placeholder the stack closed at exactly zero.
 
 Algorithm:
 
-1. Scan the log left-to-right, token by token (the log wraps at ~79 cols — strip
-   hard newlines inside a paren group before tokenizing, or scan char-stream).
-2. On `(<path>` (an open paren immediately followed by a path that ends in a
-   known TeX extension `.tex`/`.sty`/`.cls`/`.def`/`.clo` or a relative
-   `./...`), **push** `<path>` onto the stack.
-3. On a balancing `)`, **pop**.
-4. When an error (`! ...`) or `l.<N>` line appears, the **top of stack** is the
-   file the line number belongs to. Report as `<stack-top>:<N>`.
+1. Unwrap first. pdftex wraps output at `max_print_line` (79 in TeX Live), so a
+   path can be split mid-token. Join line *n+1* onto *n* when *n* is >= 79 chars
+   and *n+1* does not start a new record (does not begin with `!`, `l.`, `[`,
+   `Overfull`, `Underfull`, `LaTeX Warning`, `LaTeX Font Warning`, `Package `,
+   `Class `, `Missing`, `Runaway`).
+2. Scan the joined text as a character stream.
+3. On `(`, read the following run of characters up to the next whitespace,
+   `(`, or `)`. If it looks like a file (starts with `.` or `/`, or ends in
+   `.tex` `.sty` `.cls` `.def` `.clo` `.cfg` `.ldf` `.fd` `.bbl` `.aux` `.toc`
+   `.out` `.bbx` `.cbx` `.lbx`), push that path. Otherwise push a placeholder.
+4. On `)`, pop one entry if the stack is non-empty.
+5. Current file is the nearest real path from the top of the stack; the master
+   if there is none.
 
 Caveats:
-- Parens inside `\message`/token output can desync the stack; if depth goes
-  negative, reset to the master file and mark attribution `~approx`.
-- `pdftex` sometimes prints the path split across lines — re-join continued
-  lines (a line that does not start a new log record) before tokenizing.
-- Fall back to the master file with an `(unresolved \input)` note if the stack
-  is empty when the error fires.
+
+- Depth below zero means the stack desynced. Reset to the master and mark the
+  attribution `~approx` rather than reporting a confidently wrong file.
+- Page markers `[12]` and `[13 <./fig.pdf>]` carry no paren state, but the
+  bracketed paths inside them must not be mistaken for `\input` boundaries.
+- `\include`d files show up as `(./chap1.tex ... )` with the `.aux` opened and
+  closed inside them; that nesting is legitimate and the placeholder rule keeps
+  it balanced.
 
 ---
 
-## 4. Undefined refs / cites
-
-Log signatures (emitted during the run that needed them):
+## 4. Undefined refs and cites
 
 ```
 LaTeX Warning: Reference `fig:foo' on page 3 undefined on input line 88.
 LaTeX Warning: Citation `Smith2020' on page 2 undefined on input line 40.
 LaTeX Warning: There were undefined references.
 Package natbib Warning: Citation `Smith2020' on page 2 undefined
+Package biblatex Warning: Please (re)run Biber on the file: main
 ```
 
-**Transient-vs-real rule.** `latexmk` reruns until labels stabilize. A
-reference that is undefined on pass 1 but defined by the final pass is
-*transient* — do **not** report it. Only report a ref/cite as undefined if the
-**final** pass's log still lists it. Practically: parse only the last
-`Rerun`-free pass, or check that the warning persists in the final
-`<jobname>.log` after latexmk converged. If you only have the final `.log`,
-trust it — latexmk leaves the last pass's log in place.
+Regexes:
 
-Group output as:
-- **UNDEFINED REFERENCES**: `\label` never defined → likely typo or missing
-  `\label`. List `key → input line`.
-- **UNDEFINED CITATIONS**: key absent from `.bib`/`.bbl` → run `/cite` or fix the
-  key. List `key → input line`.
+```
+ref:  Reference \`([^']+)' on page \d+ undefined on input line (\d+)
+cite: Citation \`([^']+)' on page \d+ undefined(?: on input line (\d+))?
+```
+
+Transient rule. latexmk reruns until the `.aux` stabilizes and each pass
+overwrites `<jobname>.log`, so the file on disk is the final pass and its
+warnings are real. The one exception is a build that did not converge: if the
+final log still contains `Rerun to get cross-references right` or `Please
+(re)run Biber`, the refs are transient. Re-run latexmk once and re-parse instead
+of reporting them.
+
+Report as two lists, refs (`\label` never defined, so a typo or a missing
+`\label`) and cites (key absent from the `.bib`), each as `key -> input line`.
 
 ---
 
-## 5. Box warnings (threshold-gated)
-
-Log signatures:
+## 5. Box warnings
 
 ```
 Overfull \hbox (15.83003pt too wide) in paragraph at lines 102--104
-Overfull \vbox (3.2pt too high) has occurred while \output is active
+Overfull \hbox (2.4pt too wide) in alignment at lines 40--52
+Overfull \hbox (7.1pt too wide) detected at line 88
+Overfull \vbox (3.2pt too high) has occurred while \output is active [12]
 Underfull \hbox (badness 10000) in paragraph at lines 55--57
 Underfull \vbox (badness 3000) has occurred while \output is active
 ```
 
-Gates (defaults; `--box-threshold=` overrides the hbox pt gate):
-- **Overfull hbox/vbox**: report only if `too wide`/`too high` value `> 5pt`.
-- **Underfull hbox/vbox**: report only if `badness >= 5000`.
-- Sort by severity (overfull pt descending, then underfull badness descending).
-- Show the worst **10**; append `+K more (suppressed under threshold or beyond
-  top 10)`.
+The location clause has four shapes, so match the amount and the location
+separately rather than with one regex:
 
-Regexes:
 ```
-overfull:  Overfull \\(hbox|vbox) \((\d+(?:\.\d+)?)pt too (?:wide|high)\)(?: in paragraph at lines (\d+)--(\d+))?
-underfull: Underfull \\(hbox|vbox) \(badness (\d+)\)(?: in paragraph at lines (\d+)--(\d+))?
+overfull:   ^Overfull \\(hbox|vbox) \((\d+(?:\.\d+)?)pt too (?:wide|high)\)(.*)$
+underfull:  ^Underfull \\(hbox|vbox) \(badness (\d+)\)(.*)$
+location, applied to the trailing group:
+  (?:in paragraph|in alignment|in hbox) at lines (\d+)--(\d+)
+  detected at line (\d+)
+  has occurred while \\output is active     -> no line; use the last [N] page marker
 ```
-Attribute `lines A--B` to the file-stack top at the point the warning fired.
+
+Gates (defaults; `--box-threshold=` moves the pt gate for overfull hbox and
+vbox alike):
+
+- Overfull: report only above 5pt.
+- Underfull: report only at badness >= 5000. Badness 10000 on a `\raggedright`
+  or `sloppypar` paragraph is expected, so mention it and move on.
+- Sort by severity, overfull pt descending first, then underfull badness.
+- Show the worst 10, then `+K more (below threshold or beyond top 10)`.
+
+Attribute `lines A--B` to the file-stack top at the moment the warning fired.
 
 ---
 
-## 6. Engine / bib detection signatures
+## 6. Engine and bib detection
 
-**Engine magic comment** (honor over auto-detect):
+Magic comment, honored over auto-detection:
+
 ```
-% !TEX program = xelatex      (also: %!TEX TS-program = lualatex)
+% !TEX program = xelatex
+%!TEX TS-program = lualatex
 ```
-Regex: `%\s*!TEX\s+(?:TS-)?program\s*=\s*(pdflatex|xelatex|lualatex)`
 
-**xelatex/lualatex triggers** in preamble (auto-detect when no magic comment):
-- `\usepackage{fontspec}` / `\usepackage{unicode-math}` → xelatex (default for
-  Unicode fonts) or lualatex.
-- `\setmainfont` / `\setsansfont` / `\setmonofont` → xelatex.
-- `\usepackage{xeCJK}` / `\usepackage{ctex}` / CJK chars in source → xelatex.
-- `\directlua{...}` / `\usepackage{luacode}` / `luatextra` → lualatex.
+Regex: `%\s*!TEX\s+(?:TS-)?program\s*=\s*(pdflatex|xelatex|lualatex|latexmk)`
 
-Default when none match: **pdflatex**.
+Auto-detect from the preamble when there is no magic comment:
 
-latexmk engine flags:
+| Signal | Engine |
+|---|---|
+| `fontspec`, `unicode-math`, `\setmainfont`, `\setsansfont`, `\setmonofont` | xelatex |
+| `xeCJK`, `ctex`, CJK characters in the source | xelatex |
+| `\directlua`, `luacode`, `luatextra`, `luaotfload` | lualatex |
+| nothing above | pdflatex |
+
+Both `fontspec` and `\directlua` present means lualatex wins.
+
 | Engine | latexmk flag |
 |---|---|
 | pdflatex | `-pdf` |
-| xelatex | `-pdfxe` (or `-xelatex`) |
-| lualatex | `-pdflua` (or `-lualatex`) |
+| xelatex | `-pdfxe` |
+| lualatex | `-pdflua` |
 
-**Bib backend**:
-- `\usepackage[...]{biblatex}` (or `\addbibresource`) → **biber**.
-- `\usepackage{natbib}` + `\bibliographystyle{...}` + `\bibliography{...}` →
-  **bibtex**.
-- Mismatch warnings: biblatex present but `\bibliographystyle` also present
-  (natbib leftover) → warn; `\addbibresource` with no biblatex → warn.
-latexmk auto-runs the right backend; just **report which ran** by inspecting for
-a `.bcf` (biber) vs `.aux`→`.bbl` via bibtex, and warn on mismatch.
+Bib backend: `\usepackage[...]{biblatex}` or `\addbibresource` means biber;
+`natbib` plus `\bibliographystyle` plus `\bibliography` means bibtex. Mismatches
+worth warning about are biblatex loaded alongside a leftover
+`\bibliographystyle`, and `\addbibresource` with no biblatex. latexmk picks the
+backend itself; confirm which ran by checking for a `.bcf` in the outdir (biber)
+versus a `.blg` naming BibTeX.
 
 ---
 
-## 7. Figure-block detection (Step 6 handoff)
+## 7. Figure blocks (opt-in `--figures` pass)
 
-Grep the source (and any `\input`'d sub-files) for:
+Grep the master and every `\input`'d file for:
+
 - `\begin{tikzpicture}` … `\end{tikzpicture}`
-- `\begin{axis}` / `\begin{groupplot}` (pgfplots) — usually nested in
-  `tikzpicture`; treat the outermost `tikzpicture` as the block.
-- `\documentclass[...]{standalone}` files referenced via `\includestandalone`
-  or compiled separately.
+- pgfplots `\begin{axis}` / `\begin{groupplot}`, normally nested inside a
+  `tikzpicture`; the outermost `tikzpicture` is the block
+- `\includestandalone{...}` and separately compiled `standalone` files
 
-Harvest from the **parent preamble** into the standalone wrapper so colors/macros
-resolve: every `\usepackage{...}` / `\usepackage[...]{...}`,
-`\usetikzlibrary{...}`, `\usepgfplotslibrary{...}`, `\pgfplotsset{...}`,
-`\definecolor{...}`, `\newcommand{...}`, `\renewcommand{...}`, `\def\...`,
-`\tikzset{...}`, `\colorlet{...}`.
+Harvest into the standalone wrapper from the parent preamble so colors and
+macros resolve: `\usepackage` (with options), `\usetikzlibrary`,
+`\usepgfplotslibrary`, `\pgfplotsset`, `\definecolor`, `\colorlet`,
+`\newcommand`, `\renewcommand`, `\def`, `\tikzset`.
 
-Splice-back: replace **only** the inner figure body (between and including the
-`\begin{tikzpicture}`…`\end{tikzpicture}`), preserving the surrounding
-`figure` env, `\caption`, `\label`, `\centering`, and `\resizebox`/`\adjustbox`
-wrappers. Use offset-anchored `Edit` (unique `old_string` from the captured
-original body) so the right block is replaced even if several figures share
-similar code.
+Splice-back safety, in order:
+
+1. At extraction, store the file path, the exact body text (from
+   `\begin{tikzpicture}` through `\end{tikzpicture}` inclusive), and
+   `sha1(body)`.
+2. Before editing, re-`Read` the file and recompute. Splice only if the stored
+   body still occurs exactly once and its hash is unchanged.
+3. Zero occurrences, more than one, or a changed hash means skip, and report
+   `not spliced (source changed)`. Do not fall back to a fuzzy match.
+4. Replace the body only. The surrounding `figure` env, `\caption`, `\label`,
+   `\centering`, and any `\resizebox` / `\adjustbox` wrapper stay untouched.
 
 ---
 
 ## 8. Diff-vs-last-compile state
 
-Persist after each successful compile to:
 ```
-~/.claude/state/compile-latex/<project-hash>/last.json
+~/.claude/state/compile-latex/<hash>/last.json
 ```
-`<project-hash>` = stable hash of the absolute master `.tex` path. Schema:
+
+`<hash>` is `sha1(absolute master path)[:12]`:
+
+```bash
+python3 -c 'import hashlib,sys;print(hashlib.sha1(sys.argv[1].encode()).hexdigest()[:12])' "$ABS"
+```
+
+Schema:
+
 ```json
 {
-  "ts": "2026-06-02T14:03:00Z",
+  "ts": "2026-07-24T14:03:00Z",
+  "master": "/Users/you/Library/CloudStorage/Dropbox-Personal/Apps/Overleaf/Proj/main.tex",
   "engine": "pdflatex",
   "bib_backend": "bibtex",
+  "status": "ok",
   "undefined_refs": ["fig:foo"],
   "undefined_cites": ["Smith2020"],
   "overfull": [{"file": "sections/intro.tex", "lines": "102--104", "pt": 15.83}],
   "underfull": [{"file": "main.tex", "lines": "55--57", "badness": 10000}]
 }
 ```
-On the next compile, diff the new set against `last.json` and report deltas:
-`+2 new overfull boxes, -1 undefined ref since last compile`. Write atomically
-(tmp + rename). If `last.json` is absent, skip the diff and note "first
-compile (no baseline)".
+
+Refs and cites diff by key; boxes diff by `file:lines:kind`, ignoring the pt or
+badness value, so a box shifting by a fraction of a point is not counted as new.
+Report deltas as `+2 overfull, -1 undefined ref since last compile`.
+
+Write atomically (temp file in the same directory, then rename) so an
+interrupted run cannot leave a truncated baseline. Write on every parsed build,
+failed ones included, with `status` recording which. If the file is absent or
+unparseable, report `first compile (no baseline)` and write a fresh one.

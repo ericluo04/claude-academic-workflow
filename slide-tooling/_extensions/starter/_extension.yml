@@ -1,0 +1,45 @@
+title: Starter deck format
+version: 1.0.0
+quarto-required: ">=1.10"
+contributes:
+  formats:
+    revealjs:
+      theme: [default, starter-theme.scss]
+      # stage-slide.lua runs citeproc itself, which is the only way a Lua
+      # filter can see the rendered entries and paginate them: Quarto runs
+      # pandoc's citeproc after its whole filter chain. Leaving
+      # `citeproc: false` out gives a second, unpaginated bibliography on the
+      # last slide, and `deck-check.mjs fit` fails the deck for it.
+      filters:
+        - stage-slide.lua
+      citeproc: false
+      # Which entries-per-slide budget the filter packs the reference list to.
+      # `starter` was measured against this theme's type in headless Chrome;
+      # the derivation sits above `refs_presets` in stage-slide.lua. This line
+      # is the one knob: a restyled theme re-derives the budget and overrides
+      # via `refs-lines` and `refs-chars-per-line`.
+      refs-fit: starter
+      # Self-hosted MathJax 2.7.9, so math has exactly the deck's
+      # availability. The url resolves in the browser relative to the rendered
+      # HTML, so the deck directory needs a `mathjax/` copy (this repo vendors
+      # one in slide-tooling/mathjax/, Apache 2.0). A project whose decks
+      # render into a subdirectory overrides the url with its own relative
+      # path.
+      html-math-method:
+        method: mathjax
+        url: mathjax/MathJax.js
+      # Pin math to MathJax's own TeX webfonts (the woffs in the vendored
+      # copy). Without this, HTML-CSS output silently prefers fonts installed
+      # on the viewing machine and the glyph metrics vary per machine, so the
+      # fit gate's certification does not transfer.
+      header-includes: |
+        <script>window.MathJax = { "HTML-CSS": { availableFonts: [], preferredFont: null, webFont: "TeX" } };</script>
+      highlight-style: a11y
+      slide-number: c/t
+      date-format: long
+      incremental: true
+      fig-align: center
+      auto-animate-duration: 0.4
+      echo: false
+      warning: false
+      message: false

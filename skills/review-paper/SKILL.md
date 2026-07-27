@@ -1,556 +1,357 @@
 ---
 name: review-paper
-description: Run a 6-agent pre-submission referee report for an academic paper targeting a specified journal. Covers spelling/style, internal consistency, unsupported claims, math/notation, tables/figures, and an adversarial top-journal referee evaluation. Supports marketing (MKSCI, JMR, JCR, MS) and economics/finance journals.
+description: Run a full referee review of a manuscript, six agents in parallel (spelling and style, internal consistency, unsupported claims, math and notation, tables and figures, adversarial top-journal referee), findings triaged CRITICAL/MAJOR/MINOR against a named target journal (MKSCI, JMR, JCR, MS, AER, QJE, JPE, Econometrica, REStud, AEJMacro, JME, RED, JF, JFE, RFS, JFQA). Writes a dated pre-submission report on your own draft, or with --referee a submittable referee report for a journal. Includes a buried-contribution desk-reject gate and a --quick pass. TRIGGER on "review my paper", "referee my draft", "is this ready to submit", "what would a referee say", "desk reject risk", "read this like Reviewer 2", "referee this for [journal]", "write my referee report", "I'm reviewing this submission", or any request to critique a full paper or PDF.
 ---
 
-# Review Paper
-
-> **Source.** Base skill adapted from [`claesbackman/AI-research-feedback`](https://github.com/claesbackman/AI-research-feedback). The 6-agent fanout topology and the agent role names (Spelling/Style, Internal Consistency, Unsupported Claims, Math/Notation, Tables/Figures, Adversarial Top-Journal) are Claes Bäckman's; this fork tunes the journal targets to marketing (MKSCI / JMR / JCR / MS) alongside econ/finance. The buried-contribution mechanical gate (word-N abstract check) is adapted from [`aspi6246/Claude-Code-Presentation`](https://github.com/aspi6246/Claude-Code-Presentation).
-
-You are coordinating a rigorous pre-submission review of an academic empirical paper. You will run 6 specialized review agents in parallel and consolidate their findings into a structured report.
-
-## Phase 1: Parse Arguments and Discover the Paper
-
-Parse `$ARGUMENTS` as follows:
-- The recognized journal names are:
-  - **Marketing**: `MKSCI`, `JMR`, `JCR`, `MS` (Management Science is also used in marketing)
-  - **Top-5 economics**: `AER`, `QJE`, `JPE`, `Econometrica`, `REStud`
-  - **Finance**: `JF`, `JFE`, `RFS`, `JFQA`
-  - **Macro**: `AEJMacro`, `JME`, `RED`
-  - (case-insensitive; users can add further journals by editing this list in the skill file)
-- If the first token of `$ARGUMENTS` matches one of these names, treat it as the **target journal** and treat any remaining text as the **file path**.
-- If no token matches a journal name, treat the entire `$ARGUMENTS` as a file path and set the target journal to `top-field` (meaning the review applies high general standards without a specific journal persona).
-- If `$ARGUMENTS` is empty, set both to their defaults: no file path (auto-detect) and target journal `top-field`.
-
-Store the resolved target journal as `TARGET_JOURNAL` for use in Agent 6 and the report header.
-
-If a file path was provided, use it as the main LaTeX file. Otherwise, auto-detect:
-
-1. Use Glob with pattern `**/*.tex` to list all .tex files in the current directory (exclude any `_minted-*` or build output folders).
-2. Identify the **main document**: the .tex file that contains `\documentclass` or `\begin{document}`. Read each candidate briefly if needed.
-3. Read the main file and extract all `\input{}`, `\include{}`, and `\subfile{}` references to build the full file list.
-4. Read all component .tex files to understand the complete paper structure (introduction, data, methodology, results, appendix, etc.).
-5. Use Glob to list figure files: patterns covering common directories and formats:
-   - `**/Figures/**/*.pdf`, `**/figures/**/*.pdf`, `**/Figure/**/*.pdf`, `**/figure/**/*.pdf`
-   - `**/Figures/**/*.png`, `**/figures/**/*.png`, `**/Figure/**/*.png`, `**/figure/**/*.png`
-   - `**/Figures/**/*.eps`, `**/figures/**/*.eps`, `**/Figure/**/*.eps`, `**/figure/**/*.eps`
-   - `**/Figures/**/*.jpg`, `**/figures/**/*.jpg`, `**/Figure/**/*.jpg`, `**/figure/**/*.jpg`
-   - `**/Figures/**/*.jpeg`, `**/figures/**/*.jpeg`, `**/Figure/**/*.jpeg`, `**/figure/**/*.jpeg`
-   - `**/Figures/**/*.svg`, `**/figures/**/*.svg`, `**/Figure/**/*.svg`, `**/figure/**/*.svg`
-   - Root-level: `*.pdf`, `*.png`, `*.eps`, `*.jpg`, `*.jpeg`, `*.svg`
-   - Exclude: `**/_minted-*/**`, `**/build/**`, `**/output/**`, `**/.git/**`
-6. Use Glob to list table files: patterns covering common directories:
-   - `**/Tables/**/*.tex`, `**/tables/**/*.tex`, `**/Table/**/*.tex`, `**/table/**/*.tex`
-   - Root-level: `*table*.tex`, `*Table*.tex`
-   - Exclude: `**/_minted-*/**`, `**/build/**`, `**/output/**`, `**/.git/**`
-
-Record:
-- Full path of each .tex file and its role in the paper
-- List of figure file paths
-- List of table file paths
-- The paper title, authors, and abstract (from the main .tex file)
-
-**If zero figure files are found**, warn the user: "No figure files were found in standard locations. If figures are stored in an `output/` or non-standard directory, re-run with an explicit file path or move files to a `Figures/` folder."
-
-**If zero table files are found**, warn the user: "No table .tex files were found in standard locations. Tables may be stored in an `output/` or non-standard directory. Agent 5 will only be able to check table captions and cross-references from the main .tex files."
-
-## Phase 2: Launch 6 Review Agents in Parallel
-
-In a **single message**, launch all 6 agents using the Agent tool with `subagent_type: "general-purpose"`. Each agent reads the paper independently. Pass the complete list of .tex file paths, figure paths, and table paths to each agent in its prompt. When constructing Agent 6's prompt, add the following line at the top: "The target journal is [resolved value of TARGET_JOURNAL]." Do not substitute the value into the body of the prompt — leave all conditional logic (e.g., "If TARGET_JOURNAL is top-field...") intact so Agent 6 can reason with it.
-
----
-
-### AGENT 1 — Spelling, Grammar & Academic Style
-
-You are a copy editor at a top empirical research journal (marketing, economics, or finance). Read all .tex files in the following list and perform a thorough review. Ignore LaTeX commands (anything starting with `\`) unless they cause formatting issues. Focus on the actual prose.
-
-**What to check:**
-
-1. **Spelling errors**: Identify every misspelled word. Pay special attention to proper nouns (author names, place names), technical terms, and words commonly confused (affect/effect, principal/principle, complement/compliment).
-
-2. **Grammar errors**: Subject-verb agreement, tense consistency (papers are written in present tense for findings, past tense for what was done), article usage (a/an/the), dangling modifiers, comma splices, run-on sentences, sentence fragments.
-
-3. **Awkward or convoluted phrasing**: Sentences that require re-reading. Suggest clearer alternatives.
-
-4. **Style violations** — flag every instance of:
-   - "interestingly", "importantly", "notably", "it is worth noting", "it is important to note", "needless to say", "obviously", "clearly" — delete these; let the finding speak for itself
-   - "very unique", "absolutely essential", "completely eliminate" — tautologies
-   - "significant" used to mean large or important (reserve "significant" for statistical significance)
-   - "This paper contributes to the literature by..." — show, don't tell
-   - Passive voice where active is natural ("it is shown that" → "we show that")
-   - Inconsistent first person ("we find" in some places, "the paper argues" in others)
-
-5. **Typographic consistency**:
-   - Hyphenation: is "long-run" vs "long run" used consistently? Is "high income" vs "high-income" (attributive vs predicative) applied correctly?
-   - Em-dash vs en-dash vs hyphen used correctly
-   - Spacing around punctuation
-
-6. **Number formatting**: Are numbers below 10 spelled out in prose? Are percentages consistent (15% vs 15 percent)?
-
-**Output format:**
-
-Tag every individual issue with `[CRITICAL]`, `[MAJOR]`, or `[MINOR]` at the start of its line. Use `[CRITICAL]` for errors that must be fixed before submission, `[MAJOR]` for issues likely to be raised by a referee, and `[MINOR]` for polish.
-
-```
-## Agent 1: Spelling, Grammar & Style
-
-### Critical Issues (must fix before submission)
-[numbered list: [CRITICAL] Location | "Problematic text" → "Suggested correction" | Reason]
-
-### Minor Issues
-[numbered list: [MINOR] same format]
-
-### Style Patterns to Fix Throughout
-[list recurring style problems with one example each and a global fix instruction — tag each [MAJOR] or [MINOR]]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-
----
-
-### AGENT 2 — Internal Consistency & Cross-Reference Verification
-
-You are a technical reviewer checking whether an empirical paper is internally coherent. Read all .tex files and verify that the paper does not contradict itself and that all cross-references are correct.
-
-**What to check:**
-
-1. **Numerical consistency**: Every time a specific number appears in the text (coefficients, percentages, sample sizes, years), verify it matches the number in the referenced table (read the table .tex file directly). Flag discrepancies such as "text says 1.3% but Table 2 Column 3 shows 1.2%." Note: numbers embedded in figures (e.g., in a binscatter or coefficient plot) cannot be verified from source files — skip those and do not flag them.
-
-2. **Abstract vs. body consistency**: Do numbers, findings, and claims in the abstract exactly match what appears in the main text and tables?
-
-3. **Introduction vs. results consistency**: When the introduction previews results ("we find X"), verify that the results section delivers exactly that.
-
-4. **Terminology consistency**: Identify every key term introduced in the paper and flag any inconsistency in usage or definition. A term defined one way in Section 2 should not mean something different in Section 5. Check, for example, whether the paper uses both "effect" and "impact" interchangeably when one has a specific technical meaning, or whether variable names shift across sections.
-
-5. **Sample description consistency**: Does the stated sample (years, number of observations, filters) remain consistent across abstract, data section, and table notes?
-
-6. **Fixed effects and controls consistency**: Do the fixed effects included in each specification match what the tables show and what the text claims?
-
-7. **Magnitude consistency**: When the same finding is described in multiple places (abstract, introduction, conclusion, results), are the direction (positive/negative/higher/lower) and magnitude (1.3%, 14 cumulative percentage points, etc.) stated consistently?
-
-8. **Literature citations**: For each in-text citation of an external finding (e.g., "Smith (2020) finds X"), verify that (a) the cited author and year appear in the reference list, and (b) the in-text characterization is not suspiciously strong or mismatched with what a paper of that type would plausibly show. Flag any citation where the author-year pair has no matching bibliography entry.
-
-**Output format:**
-
-Tag every individual issue with `[CRITICAL]`, `[MAJOR]`, or `[MINOR]` at the start of its line.
-
-```
-## Agent 2: Internal Consistency & Cross-Reference Verification
-
-### Critical Inconsistencies
-[numbered list: [CRITICAL] [Location 1] ↔ [Location 2] | What conflicts]
-
-### Terminology Drift
-[numbered list: [MAJOR] or [MINOR] Term | How it varies | Recommended standardization]
-
-### Minor Inconsistencies
-[numbered list: [MINOR] same format as Critical]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-Figure files: [LIST FIGURE PATHS]
-Table files: [LIST TABLE PATHS]
-
----
-
-### AGENT 3 — Unsupported Claims & Identification Integrity
-
-You are a skeptical econometrician who enforces "claim discipline" — the principle that claims must never exceed what identification allows. Read all .tex files and identify every place where the paper overstates its evidence.
-
-**What to check:**
-
-1. **Causal language without causal identification**: Flag every specific sentence where causal language ("causes", "leads to", "drives", "determines", "because of", "due to", "results in") is applied to the main findings without genuine causal identification. Quote the exact sentence and explain why the language exceeds what the identification supports. Focus on text-level instances — do not evaluate the overall identification strategy (that is Agent 6's role). Distinguish between: (a) places where causal language is used but only correlation is shown, (b) places where mechanisms are described as established facts when they are hypotheses.
-
-2. **Generalization beyond the sample**: Claims that extend findings beyond the data's scope (e.g., claiming broad managerial or policy implications based on a single platform or country's data without explicit reasoning; claiming current relevance for historical results without caveats about how the context may have changed).
-
-3. **Mechanism claims stated as facts**: When the paper offers an explanation for *why* a result holds, check whether that mechanism is treated as an established fact or appropriately framed as a hypothesis. Flag every instance where a proposed mechanism is asserted rather than argued.
-
-4. **Missing necessary caveats**: Places where a reader would naturally ask "but what about...?" and the paper doesn't address it. Think of the most obvious threats to internal validity for the specific research design used — selection into the sample, reverse causality, measurement error, omitted variables — and flag wherever these are not discussed.
-
-5. **Literature overclaiming**: "No prior study has examined X" or "We are the first to show Y" — these are strong claims that you cannot independently verify. Flag every such claim as an *unverified priority assertion* and note that the authors must confirm it is accurate before submission. Do not attempt to judge whether it is true.
-
-6. **Statistical vs. economic/managerial significance conflation**: Places where statistical significance is reported but economic or managerial significance is not discussed, or where "statistically significant" is used as if it means "economically important."
-
-7. **Hedging failures in both directions**:
-   - **Overconfident**: Claims stated too strongly
-   - **Underconfident**: Results that are strong but the paper hedges excessively
-
-**Output format:**
-
-Tag every individual issue with `[CRITICAL]`, `[MAJOR]`, or `[MINOR]` at the start of its line.
-
-```
-## Agent 3: Unsupported Claims & Identification Integrity
-
-### Causal Overclaiming (must address)
-[numbered list: [CRITICAL] or [MAJOR] [Section/paragraph] | "Exact quoted text" | Why it overclaims | Fix: weaken language OR add evidence]
-
-### Generalization Issues
-[numbered list: [MAJOR] or [MINOR] same format]
-
-### Missing Caveats
-[numbered list: [CRITICAL] or [MAJOR] Topic | Where it should be addressed | Suggested text]
-
-### Minor Language Issues
-[numbered list: [MINOR] same format]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-
----
-
-### AGENT 4 — Mathematics, Equations & Notation
-
-You are a mathematical reviewer scrutinizing the formal content of an empirical paper. Read all .tex files, focusing on equations, mathematical definitions, and formal derivations.
-
-**What to check:**
-
-1. **Mathematical correctness**:
-   - Do derivations follow logically from stated assumptions?
-   - Are there algebraic or arithmetic errors?
-   - In regression specifications written out as equations, do the subscripts, superscripts, and terms match the verbal description?
-
-2. **Notation consistency**:
-   - Is the same symbol used for the same quantity throughout? List all symbols defined in the paper and flag any reuse.
-   - Are subscripts consistent (e.g., is $i$ always an individual, $t$ always time, $g$ always a group)?
-   - Are vectors and matrices distinguished from scalars?
-
-3. **Undefined or ambiguous notation**:
-   - Is every symbol defined at or before first use?
-   - Are any symbols used without definition?
-
-4. **Equation numbering and references**:
-   - Are all equations referenced in the text actually numbered?
-   - Are there numbered equations that are never referenced (consider removing)?
-   - Are equation references correct (e.g., "equation (3)" refers to the right equation)?
-
-5. **Regression specification consistency**:
-   - Does the written regression equation match: (a) the verbal description in the text, (b) the column headers in the results tables, (c) the description of controls/fixed effects in the text?
-   - Are all control variables mentioned in the text included in the equation? Are there variables in the equation not mentioned in the text?
-
-6. **Return/growth rate definitions**:
-   - Are annualization formulas correct? (e.g., $r = (P_1/P_0)^{1/h} - 1$ for holding period $h$)
-   - Are percentage vs. percentage point distinctions maintained?
-   - Are log approximations flagged when used?
-
-7. **Statistical notation**:
-   - Are standard error, t-statistic, and confidence interval formulas correct?
-   - Is clustering notation correct and consistent with how the paper describes inference?
-
-8. **LaTeX math formatting issues**:
-   - Missing `\left` and `\right` for large brackets/parentheses
-   - Improper use of `*` for multiplication (should use `\cdot` or `\times`)
-   - Text in math mode not wrapped in `\text{}`
-   - Alignment issues in multi-line equations
-
-**Output format:**
-
-Tag every individual issue with `[CRITICAL]`, `[MAJOR]`, or `[MINOR]` at the start of its line.
-
-```
-## Agent 4: Mathematics, Equations & Notation
-
-### Mathematical Errors
-[numbered list: [CRITICAL] or [MAJOR] Equation/Location | Error description | Correction]
-
-### Notation Inconsistencies
-[numbered list: [MAJOR] or [MINOR] Symbol | Used for X in [location], used for Y in [location] | Resolution]
-
-### Undefined Notation
-[numbered list: [MAJOR] or [MINOR] Symbol | First used at [location] | Where to add definition]
-
-### Regression Specification Issues
-[numbered list: [CRITICAL] or [MAJOR] Table/Specification | Discrepancy between equation, text, and table]
-
-### LaTeX Math Formatting
-[numbered list: [MINOR] Location | Issue | Fix]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-
----
-
-### AGENT 5 — Tables, Figures & Their Documentation
-
-You are a journal production editor reviewing whether every table and figure in an empirical paper is complete, self-contained, and correctly described. Read all .tex files.
-
-**Important**: Figure files (PDF, PNG, EPS, JPG) cannot be read directly. Base all figure checks on what is available in the LaTeX source: captions, notes, labels, and any descriptive text in the `.tex` files. If a figure's `.tex` source provides insufficient information to assess completeness (e.g., no notes block at all), flag that explicitly rather than skipping it.
-
-**For every table, check:**
-
-1. **Title/caption**: Does it accurately and fully describe what the table contains? Can a reader understand the table without reading the body of the paper?
-
-2. **Column headers**: Are they clear, unambiguous, and complete? Do they state the dependent variable and key specification differences?
-
-3. **Notes completeness** — every table needs notes covering:
-   - Sample definition (what observations are included, time period, any restrictions)
-   - Dependent variable definition and units
-   - What controls are included (or "No controls", "Controls as in Table X")
-   - Which fixed effects are included
-   - How standard errors are computed (clustered? at what level?)
-   - Definition of significance stars (e.g., *** p<0.01, ** p<0.05, * p<0.10)
-   - Whether the table reports standard errors, t-statistics, or something else
-
-4. **Standard errors**: Are they reported in every column? Is it clear they are standard errors (not t-stats or confidence intervals)?
-
-5. **Observations**: Is N reported in every column? If columns use different samples, is this clear?
-
-6. **Cross-referencing**: Is every table referenced at least once in the main text? Are there tables defined but never cited? For every in-text reference ("as shown in Table X", "see Table Y"), verify the referenced table exists and actually shows what is claimed.
-
-7. **Formatting consistency**: Do all tables use consistent notation for fixed effects indicators (e.g., "Yes/No" vs checkmarks vs "✓")?
-
-**For every figure, check:**
-
-1. **Title/caption**: Does it describe what is shown? Is it self-contained?
-
-2. **Axis labels**: Are both axes labeled? Are units included?
-
-3. **Legend**: If multiple series or colors, is there a legend?
-
-4. **Confidence intervals**:
-   - Binscatter plots: are confidence intervals shown?
-   - Coefficient plots: are confidence intervals shown?
-   - Event study plots: are confidence intervals shown?
-
-5. **Notes completeness** — every figure needs notes covering:
-   - Sample used
-   - What is plotted (raw data? residuals after controls?)
-   - For binscatters: number of bins, whether controls are absorbed, what the dots represent
-   - For coefficient plots: what the point estimates and intervals represent
-   - Data source
-
-6. **Cross-referencing**: Is every figure referenced in the main text? Any figures defined but never cited? For every in-text reference ("as shown in Figure X", "see Figure Y"), verify the referenced figure exists and actually shows what is claimed.
-
-**Cross-paper consistency:**
-- Are figure and table styles (fonts, line widths, colors) consistent throughout?
-- Are table formatting conventions (decimal places, significance stars) applied consistently?
-
-**Output format:**
-
-Tag every individual issue with `[CRITICAL]`, `[MAJOR]`, or `[MINOR]` at the start of its line.
-
-```
-## Agent 5: Tables, Figures & Documentation
-
-### Tables with Missing or Incomplete Notes
-[organized by table number: [MAJOR] or [MINOR] Table X | Missing element | Suggested addition]
-
-### Figures with Missing or Incomplete Notes
-[organized by figure number: [MAJOR] or [MINOR] Figure X | Missing element | Suggested addition]
-
-### Cross-Reference Issues
-[list: [CRITICAL] or [MAJOR] Element | Issue (unreferenced? wrong reference? missing?)]
-
-### Formatting Inconsistencies
-[list: [MINOR] Issue | Where it occurs | Standardization recommendation]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-Figure files: [LIST FIGURE PATHS]
-Table files: [LIST TABLE PATHS]
-
----
-
-### AGENT 6 — Contribution Evaluation (Adversarial Top-Journal Referee)
-
-You are a demanding associate editor. Adopt the persona and editorial norms appropriate to `TARGET_JOURNAL`:
-- If it is a specific marketing journal (e.g., MKSCI, JMR, JCR, MS), apply that journal's scope, style preferences, and standards for what constitutes a publishable contribution in quantitative marketing — including its typical methodological bar (structural/reduced-form/experimental), preferred framing (substantive marketing relevance, managerial implications), and audience expectations (marketing academics, applied econometricians).
-- If it is a specific economics or finance journal (e.g., AER, QJE, JPE, Econometrica, REStud, JF, JFE, RFS, JFQA, AEJMacro, JME, RED), apply that journal's scope, style preferences, and standards for what constitutes a publishable contribution — including its typical methodological bar, preferred framing, and audience expectations.
-- If `TARGET_JOURNAL` is `top-field`, apply high general standards for a leading field journal without a specific journal persona.
-
-In all cases: you have read thousands of papers and have extremely high standards. You are deciding whether this paper deserves to be sent to referees, or whether it should be desk rejected. You are not hostile, but you are exacting, specific, and rigorous. You will read the complete paper and produce a structured evaluation.
-
-Read all .tex files completely and thoroughly.
-
-**Your evaluation has 7 parts:**
-
-**Part 1 — The Central Contribution**
-
-State in one sentence what the paper claims to contribute. Then evaluate:
-- Is this finding genuinely new, or is it a replication of known results in a new setting?
-- What is the closest prior paper? What does this paper add beyond that paper?
-- Does the paper answer a question that reasonable researchers in the field disagree about, or that the field needs answered?
-- Does this finding change how researchers think about the paper's central topic?
-- Rate the contribution: [Transformative | Significant | Incremental | Insufficient for target journal]
-- Justify your rating in 2-3 sentences.
-
-**Part 1b — Buried-contribution mechanical check.** Starting from `\begin{document}`, count words (ignore LaTeX commands, comments, and the abstract block) until the first sentence containing one of: "we find", "we show", "we document", "our main result", "the headline", "we report", "in this paper, we", "the contribution", "we contribute". Report the resulting word-count and which trigger phrase matched (or "no trigger found in body"). Triage:
-- count > 2500 words: tag `[MAJOR] — Headline finding buried deep in the body; strong desk-reject risk at MKSCI/JMR/JCR/MS`.
-- 1500 < count <= 2500: tag `[WARN] — Headline finding buried (~3+ double-spaced pages in); common desk-reject signal at top marketing journals`.
-- count <= 1500: tag `[OK]` and move on.
-- False-positive mitigation: if the abstract states the headline finding clearly (one of the trigger phrases above, or an unambiguous "we find X" / "X causes Y" sentence), downgrade `[WARN]` to `[INFO]` and note "abstract already delivers the headline." Do not downgrade `[MAJOR]` — a 2500+ word intro buries the finding regardless of the abstract.
-
-**Part 2 — Identification and Credibility**
-
-Evaluate the overall identification strategy — not individual sentences with causal language (that is Agent 3's role). Focus on the research design as a whole.
-
-- What variation does the paper use to identify its main result?
-- Is this variation plausibly exogenous? What are the main threats?
-- Does the paper adequately address these threats, or does it paper over them?
-- Is the main finding causal, correlational, or descriptive? Does the paper claim the right thing?
-- Specific weaknesses: What would a skeptical econometrician at a seminar say?
-- What would it take to make the identification convincing to a top-journal audience?
-
-**Part 3 — Analyses: Required and Suggested**
-
-**Required analyses** (up to 5 you would require before recommending acceptance — their absence is a blocker; if none are missing, write "None — the paper adequately addresses the main identification concerns"):
-- Robustness checks not performed — including any robustness checks the paper claims to have done but that do not actually appear
-- Alternative explanations not ruled out
-- Placebo or falsification tests that are missing
-For each: state what the analysis is, why its absence undermines the paper's credibility, and what a positive result would do for your view.
-
-**Suggested analyses** (up to 5 that would substantially strengthen the paper but are not hard requirements):
-- Mechanism tests that are missing
-- Subgroup analyses that would enrich the findings
-- Extensions that would broaden the contribution
-For each: describe the analysis precisely, explain why it matters, and assess whether it is feasible given the data sources described in the paper.
-
-**Part 4 — Literature Positioning**
-
-- Does the paper cite the right papers? Are there obvious relevant papers missing?
-- Does the paper adequately distinguish itself from closely related work?
-- Is the paper over-citing minor papers and under-citing major ones?
-- Is the framing in the introduction the most compelling way to position this paper, or is there a better framing?
-
-**Part 5 — Journal Fit and Recommendation**
-
-- If `TARGET_JOURNAL` is a specific journal: Is this paper a strong fit for `TARGET_JOURNAL` given its scope, methods, and level of contribution? Identify any fit risks (wrong audience, wrong methods bar, topic outside scope).
-- If `TARGET_JOURNAL` is `top-field`: Which specific journals are the best realistic targets for this paper, and why?
-- What is your preliminary recommendation: [Send to referees | Revise before sending to referees | Desk reject]
-- What would it take, concretely, to reach the standard required by the target journal?
-- What is the best realistic alternative outlet if the paper is not accepted at the target journal?
-
-**Part 6 — Pointed Questions to the Authors**
-
-Write 4–7 specific, pointed questions that you would send to the authors as a referee. These should be the hard questions — the ones that get at the paper's weakest points. Frame them exactly as a referee would in a report.
-
-**Output format:**
-
-Tag every Required analysis with `[CRITICAL]` and every Suggested analysis with `[MAJOR]`.
-
-```
-## Agent 6: Contribution Evaluation
-
-### Part 1 — Central Contribution
-[assessment + rating]
-
-### Part 2 — Identification and Credibility
-[assessment]
-
-### Part 3 — Analyses: Required and Suggested
-**Required:**
-[numbered list: [CRITICAL] analysis | why absence undermines credibility | what a positive result would do]
-
-**Suggested:**
-[numbered list: [MAJOR] analysis | why it matters | feasibility]
-
-### Part 4 — Literature Positioning
-[assessment]
-
-### Part 5 — Journal Fit and Recommendation
-[recommendation + path to improvement]
-
-### Part 6 — Questions to the Authors
-[numbered list of 4–7 questions, formatted as a referee would write them]
-```
-
-The .tex files to review are: [LIST ALL TEX FILE PATHS HERE]
-
----
-
-## Phase 3: Consolidate and Save
-
-**Before consolidating**, check for agent failures: if any agent returned no output or clearly malformed output, insert a placeholder section in the report (e.g., "## 4. Mathematics, Equations & Notation — Agent did not return output") and include it in the final user-facing summary.
-
-After all available agent results are collected, consolidate them into a single structured report.
-
-**Before saving**, check whether `PRE_SUBMISSION_REVIEW_[YYYY-MM-DD].md` already exists in the current directory. If it does, append `-v2` (or `-v3`, etc.) to avoid overwriting.
-
-Save the report to:
-
-`PRE_SUBMISSION_REVIEW_[YYYY-MM-DD].md`
-
-where `[YYYY-MM-DD]` is today's date.
-
-**Report structure:**
+# review-paper
+
+Six agents read the manuscript in parallel and return severity-tagged findings with quoted
+evidence; the main thread consolidates them into one dated report ranked by what would sink the
+paper. Nothing in the manuscript is edited. Topology and agent roles adapted from
+[`claesbackman/AI-research-feedback`](https://github.com/claesbackman/AI-research-feedback), the
+buried-contribution gate from
+[`aspi6246/Claude-Code-Presentation`](https://github.com/aspi6246/Claude-Code-Presentation).
+
+## Options
+
+| Argument | Default | Meaning |
+|---|---|---|
+| a journal name (first token) | `top-field` | journal persona and bar for agent 6 |
+| a file path | auto-detect | main `.tex`, or a `.pdf` of the compiled draft |
+| `--quick` | off | run only agents 6 and 3, skip the rest |
+| `--referee` | off | journal referee mode: a submittable report, see below |
+
+Recognized journals, case-insensitive. Marketing: `MKSCI`, `JMR`, `JCR`, `MS`. Economics:
+`AER`, `QJE`, `JPE`, `Econometrica`, `REStud`, `AEJMacro`, `JME`, `RED`. Finance: `JF`, `JFE`,
+`RFS`, `JFQA`. Anything unrecognized is treated as a file path, and an absent journal means
+`top-field`: high general standards for a leading field journal, no specific persona. Add
+journals by editing this list. Store the result as `TARGET_JOURNAL`.
+
+## Referee mode
+
+`--referee` switches the skill from a pre-submission check on the user's own draft to a
+submittable report on a paper the user is refereeing for a journal. Enter this mode when the flag
+is passed, when the user says they are refereeing, or when the paper is clearly not theirs. When
+it is ambiguous whose paper it is, ask which hat the user is wearing before doing anything else.
+
+What changes:
+
+- The manuscript must be supplied as a path or a PDF. Phase 1 uses step 1 only; never glob the
+  working directory or the Overleaf projects. If no path was given, ask for one.
+- Agent 6 keeps its full brief, including the buried-contribution gate, but critiques the paper
+  for the editor and drops every piece of advice addressed to the author: no fallback outlets in
+  part 5, no coaching on what would reach the target's bar. Its recommendation becomes one of the
+  journal's conventional decisions: accept, minor revision, major revision, or reject.
+- All six agents still run (two with `--quick`), and the CRITICAL/MAJOR/MINOR triage still
+  happens, as internal analysis. The final report is written from that analysis and never shows
+  the tags.
+
+The output replaces the phase 3 structure. Write `REFEREE_REPORT_<YYYY-MM-DD>.md` to the current
+working directory, or wherever the user says; never into an Overleaf project. Address it to the
+editor and the authors in the conventional register:
+
+1. A summary paragraph restating the paper in the referee's own words: the research question, the
+   design, the data, and the main findings. Specific enough to show the paper was read.
+2. Major comments, numbered. Built from the CRITICAL and MAJOR findings: identification threats,
+   missing analyses, overclaiming, internal contradictions. Each states the issue, points at the
+   exact location, and where possible says what would resolve it.
+3. Minor comments, numbered. Notation, exposition, table and figure documentation, typos worth
+   the authors' time. Compress agent 1's copy edits into a few representative items; a referee
+   report is not a proofreading pass.
+4. Recommendation, with a short justification tied to the major comments.
+
+Report back in chat: the report path, the recommendation, and the counts of major and minor
+comments.
+
+## Phase 1: find the manuscript
+
+1. An explicit path argument wins. The Read tool cannot open a `.pdf` on this machine (it needs
+   `pdftoppm`; this setup assumes no Homebrew and no poppler, so adjust to yours), so route every PDF through the helper:
+   `~/.claude/assets/bin/pdfread.py text paper.pdf` for the text, or
+   `~/.claude/assets/bin/pdfread.py png paper.pdf --pages N --dpi 150 --out /tmp/p` and then Read
+   the PNG when the layout or a figure matters. Never call `pdftotext` or `pdftoppm`.
+2. No path: Glob `**/*.tex` in the working directory.
+3. Still nothing: Glob `~/Library/CloudStorage/Dropbox*/Apps/Overleaf/*/*.tex` (this setup
+   assumes Overleaf projects sync there via Dropbox), show the matching project
+   directories, and ask which one. Do not guess between projects.
+
+In referee mode, step 1 is the only step: skip steps 2 and 3 and ask for the path if none was
+given.
+
+Then build the file set. The main document is the `.tex` containing `\documentclass` or
+`\begin{document}`; follow every `\input`, `\include`, and `\subfile` to get the rest, and read
+all of them. Figures are `**/[Ff]igure*/**/*.pdf` and the same for `png`, `jpg`, `jpeg`, `eps`,
+`svg`, plus root-level images. Tables are `**/[Tt]able*/**/*.tex` plus root-level
+`*[Tt]able*.tex`. Exclude `**/_minted-*/**`, `**/build/**`, `**/output/**`, `**/.git/**`, and
+Dropbox conflicted copies (`*conflicted copy*`), which are stale and produce phantom findings.
+
+Record every file path and its role, the figure and table lists, and the title, authors, and
+abstract. If no figures turn up, tell the user they may live in a non-standard directory and to
+re-run with an explicit path. Same for tables, adding that agent 5 will then be limited to
+captions and cross-references.
+
+## Phase 2: launch the agents
+
+One message, all agents at once, `subagent_type: general-purpose`. Each agent prompt is the
+shared brief below, then that agent's checklist, then its output sections. Subagents inherit
+nothing, so write the shared brief into every prompt in full. Agent 6 additionally gets the line
+"The target journal is `<TARGET_JOURNAL>`" and keeps the conditional logic in its brief intact.
+
+### Shared brief (paste into every agent prompt)
+
+> You are reviewing an academic empirical manuscript. Read every file listed at
+> the end of this prompt, completely, before writing anything. Files are LaTeX source unless
+> noted. The Read tool cannot open a `.pdf` here, so get PDF text with
+> `~/.claude/assets/bin/pdfread.py text <file.pdf>` (add `--pages 1-20` to work through a long
+> document in chunks). `pdftotext` and `pdftoppm` are not installed in this setup; do not call them.
+>
+> Ignore LaTeX markup unless the markup is itself the problem. For every finding, quote the exact
+> text and give a location precise enough to find it without searching: file and section for
+> LaTeX, page and paragraph for a PDF.
+>
+> Tag every individual finding with a severity at the start of its line, one tag per item, never
+> per section:
+> `[CRITICAL]` would trigger a desk rejection or invalidates a claim, and must be fixed before
+> submission. `[MAJOR]` a referee will raise it and it costs a revision round. `[MINOR]` polish.
+>
+> Report only what the files support. If a check is impossible from the sources you were given,
+> say so explicitly instead of skipping it silently, and do not speculate about content you
+> could not read. An empty category is a real finding: write "None found" instead of padding.
+>
+> Files to review: [tex paths] Figures: [figure paths] Tables: [table paths]
+
+### Agent 1, spelling, grammar, and academic style
+
+Copy editor at a top empirical journal. Check misspellings, with attention to proper nouns,
+technical terms, and confusable pairs (affect/effect, principal/principle); grammar, including
+subject-verb agreement, tense discipline (present for findings, past for what was done),
+articles, dangling modifiers, comma splices, fragments; sentences that need re-reading, supplying
+a clearer alternative; typographic consistency (hyphenation such as "long-run" versus "long run",
+attributive versus predicative "high-income", em versus en dash); number formatting (under ten
+spelled out in prose, "15%" versus "15 percent" used consistently).
+
+Flag every instance of: "interestingly", "importantly", "notably", "it is worth noting",
+"obviously", "clearly" (delete, let the finding speak); tautologies ("very unique", "absolutely
+essential"); "significant" used for size or importance when it should mean statistical significance;
+"This paper contributes to the literature by" (show it); passive voice where active is natural;
+inconsistent person ("we find" alongside "the paper argues").
+
+Output sections: Critical, Major, and Minor issues, each a numbered list of
+`[TAG] location | "problem text" -> "correction" | reason`; then Recurring style patterns, one
+example per pattern with a global fix instruction.
+
+### Agent 2, internal consistency and cross-references
+
+Technical reviewer checking whether the paper contradicts itself.
+
+1. Numerical consistency. Every number in the text (coefficients, percentages, sample sizes,
+   years) must match the referenced table, read from the table source directly. Numbers that
+   exist only inside a figure image cannot be verified from source; skip those instead of flagging
+   them.
+2. Abstract against body, and introduction previews ("we find X") against what the results
+   section actually delivers.
+3. Terminology. List the key terms and flag any that shift meaning across sections, including
+   variable names that change and technical terms used interchangeably with loose synonyms.
+4. Sample description: years, observation counts, and filters consistent across abstract, data
+   section, and table notes.
+5. Fixed effects and controls: what each specification claims versus what its table shows.
+6. Magnitude and direction of the same finding wherever it is restated.
+7. Citations. Every author-year cited in text must have a bibliography entry. Flag missing ones.
+   For citations that carry the paper's positioning (closest prior work, "X shows Y" claims that
+   the argument leans on), verify with
+   `~/.claude/skills/reading-papers/scripts/paper.py resolve "<author year title>" --json` and
+   flag any characterization that does not match the cited work. Do not audit the whole
+   bibliography entry by entry; that is the `bibcheck` skill's job. Check the citations the
+   argument leans on.
+
+Output sections: Critical inconsistencies (`[TAG] location A <-> location B | what conflicts`);
+Terminology drift (term, how it varies, recommended standard); Minor inconsistencies.
+
+### Agent 3, unsupported claims and identification integrity
+
+Skeptical econometrician enforcing claim discipline: a claim must never exceed what the
+identification allows. This agent works at the sentence level; the overall research design is
+agent 6's job.
+
+1. Causal language ("causes", "leads to", "drives", "determines", "due to", "results in") applied
+   to findings that are only correlational. Quote the sentence, say why it exceeds the design,
+   and separate two cases: causal words over a correlation, and a mechanism described as an
+   established fact when it is a hypothesis.
+2. Generalization past the sample: managerial or policy implications drawn from one platform,
+   market, or period without an argument for why they travel.
+3. Mechanism claims asserted instead of argued.
+4. Missing caveats. Walk the obvious threats for this design (selection into the sample, reverse
+   causality, measurement error, omitted variables) and flag each one the paper never addresses.
+5. Priority claims ("we are the first to show", "no prior study has examined"). Check with
+   `~/.claude/skills/reading-papers/scripts/paper.py resolve` or `cites`; if a counterexample
+   turns up, that is `[CRITICAL]`. If the search is inconclusive, flag it as an unverified
+   priority assertion the authors must confirm, and do not rule on it yourself.
+6. Statistical versus economic or managerial significance: significance reported with no
+   discussion of magnitude, or "significant" standing in for "important".
+7. Hedging in both directions: claims stated too strongly, and strong results buried under
+   excessive hedging.
+
+Output sections: Causal overclaiming (`[TAG] location | "quote" | why it overclaims | fix: weaken
+the language or add the evidence`); Generalization issues; Missing caveats (topic, where it
+belongs, suggested text); Minor language issues.
+
+### Agent 4, mathematics, equations, and notation
+
+1. Correctness: derivations follow from stated assumptions, no algebraic or arithmetic errors,
+   subscripts and terms in written regressions match the verbal description.
+2. Notation consistency: one symbol per quantity (list every symbol defined and flag reuse),
+   stable subscript conventions ($i$ individual, $t$ time, $g$ group), vectors and matrices
+   distinguishable from scalars.
+3. Undefined notation: every symbol defined at or before first use.
+4. Equation numbering: referenced equations are numbered, numbered equations are referenced, and
+   each in-text reference points at the right equation.
+5. Specification consistency: the written equation against the verbal description, the table
+   column headers, and the stated controls and fixed effects. Variables in the text but not the
+   equation, and vice versa.
+6. Rate definitions: annualization formulas, percent versus percentage point, log approximations
+   flagged where used.
+7. Inference notation: standard error, t-statistic, and confidence interval formulas, and
+   clustering notation consistent with how the paper says inference is done.
+8. LaTeX math problems that change meaning or readability: missing `\left`/`\right` on tall
+   delimiters, `*` for multiplication, unwrapped text in math mode, broken alignment in multi-line
+   equations.
+
+Output sections: Mathematical errors (location, error, correction); Notation inconsistencies
+(symbol, the two conflicting uses, resolution); Undefined notation; Specification issues; LaTeX
+math formatting.
+
+### Agent 5, tables, figures, and their documentation
+
+Journal production editor. The Read tool displays `.png`, `.jpg`, and `.jpeg` figures visually.
+For a figure saved as `.pdf`, rasterize it first with
+`~/.claude/assets/bin/pdfread.py png fig.pdf --dpi 200 --out /tmp/fig` and Read the PNG. Look at
+every figure you can render and judge what is actually plotted. For a `.eps` figure, ghostscript
+(if installed) can rasterize it when needed:
+`gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r200 -o /tmp/fig.png fig.eps`, then Read the PNG.
+`.svg` cannot be viewed; assess it from caption, notes, and label text only, and say that is
+what you did.
+
+For every table: a caption that stands alone; column headers naming the dependent variable and
+the specification difference; notes covering sample definition, dependent variable and units,
+controls, fixed effects, how standard errors are computed and at what clustering level, the
+meaning of the stars, and whether the parenthetical is a standard error or a t-statistic;
+standard errors and N in every column, with differing samples across columns made explicit; every
+table cited in text and every in-text reference pointing at a table that exists and shows what is
+claimed; consistent decimals, stars, and fixed-effect indicators.
+
+For every figure: a self-contained caption; both axes labeled with units; a legend for multiple
+series; confidence intervals on binscatters, coefficient plots, and event studies; notes covering
+the sample, what is plotted (raw data or residuals after controls), bin counts and absorbed
+controls for binscatters, what the intervals represent, and the data source; every figure cited
+in text, with the description matching what the image shows. Where you viewed the image, also
+flag unreadable fonts, overlapping labels, truncated axes, and colors that die in greyscale.
+
+Output sections: Tables with missing or incomplete notes (by table number); Figures with missing
+or incomplete notes (by figure number); Cross-reference issues; Formatting inconsistencies.
+
+### Agent 6, contribution evaluation (adversarial top-journal referee)
+
+Demanding associate editor deciding whether the paper goes to referees or gets desk rejected.
+Exacting and specific, not hostile. Adopt the norms of `TARGET_JOURNAL`: for a named marketing
+journal, its scope, methodological bar, framing expectations around substantive marketing
+relevance and managerial implications, and its audience; for a named economics or finance
+journal, the same; for `top-field`, high general standards with no journal persona.
+
+Part 1, the central contribution. State in one sentence what the paper claims to contribute. Is
+it new or a replication in a new setting? What is the closest prior paper and what does this add
+beyond it? Does it settle something researchers disagree about? Does it change how people think
+about the topic? Rate it Transformative, Significant, Incremental, or Insufficient for the target
+journal, and justify in two or three sentences.
+
+Part 1b, buried-contribution gate. From `\begin{document}`, counting prose only (skip LaTeX
+commands, comments, and the abstract), count words until the first sentence containing "we find",
+"we show", "we document", "our main result", "the headline", "we report", "in this paper, we",
+"the contribution", or "we contribute". Report the count and the phrase that matched, or "no
+trigger found in body". Over 2500 words: `[MAJOR]`, headline finding buried deep, strong
+desk-reject risk at MKSCI, JMR, JCR, and MS. Between 1500 and 2500: `[WARN]`, buried roughly
+three double-spaced pages in, a common desk-reject signal. At or under 1500: `[OK]`. If the
+abstract already delivers the headline unambiguously, downgrade `[WARN]` to `[INFO]` and note
+why. Never downgrade `[MAJOR]`: a 2500-word runway buries the finding whatever the abstract says.
+
+Part 2, identification and credibility, judged at the design level (sentence-level claims are
+agent 3's job).
+What variation identifies the main result, is it plausibly exogenous, and what are the threats?
+Does the paper confront them or paper over them? Is the finding causal, correlational, or
+descriptive, and does the paper claim the right one? What would a skeptical econometrician say in
+a seminar, and what would it take to convince a top-journal audience?
+
+Part 3, analyses. Required (up to 5, absence is a blocker): robustness checks not performed,
+including any the paper claims but does not show; alternative explanations left standing; missing
+placebo or falsification tests. For each, state the analysis, why its absence undermines
+credibility, and what a positive result would do to your view. Write "None" if the paper covers
+its identification concerns. Suggested (up to 5, not blockers): mechanism tests, subgroup
+analyses, extensions, each described precisely with why it matters and whether it is feasible
+given the data the paper describes.
+
+Part 4, literature positioning. Are the right papers cited, and what is obviously missing? Does
+the paper distinguish itself from the closest work? Is it over-citing minor papers and
+under-citing major ones? Is the introduction's framing the most compelling one available?
+
+Part 5, journal fit and recommendation. For a named journal, is this a strong fit on scope,
+methods, and contribution level, and what are the fit risks? For `top-field`, name the best
+realistic targets. Recommend Send to referees, Revise before sending to referees, or Desk reject,
+say concretely what would reach the target's bar, and name the best fallback outlet.
+
+Part 6, four to seven pointed questions aimed at the weakest points, worded as they would appear
+in a referee report.
+
+Tag every Required analysis `[CRITICAL]` and every Suggested analysis `[MAJOR]`. Output sections
+follow parts 1 through 6 in order, with part 1b inside part 1.
+
+## Quick mode
+
+With `--quick`, run agents 6 and 3 only, in parallel, and skip phase 1's figure and table globs.
+This is the cheap gut check: does the paper have a contribution, is it buried, and does the prose
+claim more than the design supports. Emit the report with only those two sections plus the
+priority list, mark the header `Scope: quick (contribution and identification only)`, and tell
+the user that consistency, math, tables and figures, and copy editing were not run.
+
+## Phase 3: consolidate and save
+
+If an agent returns nothing or malformed output, insert a placeholder section ("Agent did not
+return output") and say so in the summary. Do not silently drop it and do not re-run the whole
+fanout for one failure.
+
+In referee mode, consolidate the same way but write the report described in the referee mode
+section instead of the structure below.
+
+Save to `PRE_SUBMISSION_REVIEW_<YYYY-MM-DD>.md` in the main `.tex` file's directory, suffixing
+`-v2`, `-v3` if that name is taken. Structure:
 
 ```markdown
-# Pre-Submission Referee Report
+# Pre-submission referee report
 
-**Paper**: [Title]
-**Authors**: [Authors]
-**Date**: [Today's date]
-**Review Standard**: [TARGET_JOURNAL — if top-field, write "Leading Field Journal"; otherwise write the specific journal name]
+Paper: <title> | Authors: <authors> | Date: <YYYY-MM-DD>
+Review standard: <journal name, or "leading field journal" for top-field>
 
----
+## Overall assessment
+<Three or four sentences: what the paper does, from agent 6 part 1; its principal strength, from
+the contribution rating; the single most critical issue, from the top of the priority list. Do
+not introduce judgments the agents did not make.>
 
-## Overall Assessment
+Preliminary recommendation: <copied verbatim from agent 6 part 5, not paraphrased>
 
-[3–4 sentences synthesized as follows: (1) what the paper does — from Agent 6 Part 1; (2) its principal strength — from Agent 6 Part 1 contribution rating; (3) the single most critical issue — the top CRITICAL item from the Priority Action Items list below. Do not introduce judgments not already present in the agent outputs.]
+## 1. Contribution and referee assessment   <- agent 6
+## 2. Unsupported claims and identification  <- agent 3
+## 3. Internal consistency                   <- agent 2
+## 4. Mathematics and notation               <- agent 4
+## 5. Tables, figures, and documentation     <- agent 5
+## 6. Spelling, grammar, and style           <- agent 1
 
-**Preliminary Recommendation**: [Copy exactly from Agent 6 Part 5 — do not paraphrase]
-
----
-
-## 1. Contribution & Referee Assessment
-
-[Agent 6 output]
-
----
-
-## 2. Unsupported Claims & Identification Integrity
-
-[Agent 3 output]
-
----
-
-## 3. Internal Consistency & Cross-Reference Verification
-
-[Agent 2 output]
-
----
-
-## 4. Mathematics, Equations & Notation
-
-[Agent 4 output]
-
----
-
-## 5. Tables, Figures & Documentation
-
-[Agent 5 output]
-
----
-
-## 6. Spelling, Grammar & Style
-
-[Agent 1 output, preserving its structure]
-
----
-
-## Priority Action Items
-
-Each agent has tagged its findings as `[CRITICAL]`, `[MAJOR]`, or `[MINOR]`. Collect all tagged items across agents and rank them here using the following triage hierarchy: `[CRITICAL]` items from Agent 3 and Agent 6 Part 2 first, then `[CRITICAL]` from Agent 6 Part 3, then remaining `[CRITICAL]` items by agent order, then all `[MAJOR]` items, then `[MINOR]` items.
-
-**CRITICAL** (must fix — these could cause desk rejection or major referee objections):
-1. ...
-2. ...
-3. ...
-
-**MAJOR** (should fix — will likely be raised by referees):
-4. ...
-5. ...
-6. ...
-7. ...
-
-**MINOR** (polish — improves paper quality):
-8. ...
-9. ...
-10. ...
+## Priority action items
 ```
 
-After saving, report to the user:
-1. The path to the saved report
-2. The preliminary recommendation from Agent 6
-3. The top 5 priority action items
-4. How many issues were flagged in each category (counts)
+Build the priority list by collecting every tagged item across agents and ranking:
+`[CRITICAL]` from agent 3 and agent 6 part 2 first, then `[CRITICAL]` from agent 6 part 3, then
+remaining `[CRITICAL]` in agent order, then all `[MAJOR]`, then `[MINOR]`. Keep each item's
+source agent and location so the author can jump to it. A `[WARN]` from agent 6's part 1b enters
+the list as `[MINOR]` unless the reviewer upgrades it; `[OK]` and `[INFO]` stay in the report
+body and never enter the priority list.
+
+Then report back in chat: the report path, agent 6's recommendation, the top five action items,
+and the count of findings in each severity.

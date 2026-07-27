@@ -1,0 +1,186 @@
+---
+title: "Disclosure raises prices where search costs are high"
+subtitle: "Seminar, Department of Economics"
+author: "Your Name"     # the exact form you want on the title slide; see style/house.md
+institute: "Your University"
+date: last-modified
+format: yale-talk-revealjs
+---
+
+## Notation {visibility="hidden"}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+```{r setup}
+#| include: false
+library(ggplot2)
+# load the analysis objects the deck needs
+```
+
+## Mandated disclosure was supposed to lower prices
+
+Forty states passed it in six years. Prices rose in half of them.
+
+::: {.aside-note}
+Source: Author (2024), Table 2.
+:::
+
+::: {.notes}
+The policy rationale, the two states everyone cites, and why the puzzle went
+unnoticed. Say this; do not put it on the slide.
+:::
+
+## {.center}
+
+::: {.r-fit-text}
+The sign flips
+:::
+
+## Where search costs are high, disclosure raises prices instead
+
+::: {.result}
+[Estimate]{.label}
+0.29 log points (s.e. 0.04) in the top search-cost quartile, 0.06 (0.05)
+elsewhere.
+:::
+
+::: {.takeaway}
+The sign of the policy effect flips with market structure.
+:::
+
+## Setting {.section-break}
+
+## The reform hit half the markets in 2018 and none of the others
+
+- 1,240 markets, 2014 to 2022
+- Treatment assigned by a statutory population cutoff
+- Prices from weekly scanner data
+
+## Identification compares high- and low-search-cost markets before and after
+
+$$
+\log p_{it} = \alpha_i + \gamma_t + \beta\,(\text{Post}_t \times \text{High}_i) + \varepsilon_{it}
+$$
+
+::: {.assumption}
+[Assumption 1]{.label}
+Absent the reform, prices in high- and low-search-cost markets would have moved
+in parallel.
+:::
+
+## Prices diverge only after the reform
+
+```{r}
+#| fig-width: 8
+#| fig-height: 4.2
+# event-study plot; annotate the focal coefficient in the figure itself
+```
+
+## The estimate survives every control set
+
+:::: {.columns}
+::: {.column width="58%"}
+```{r}
+#| fig-width: 5.4
+#| fig-height: 4.0
+# coefficient plot across specifications
+```
+:::
+::: {.column width="42%"}
+Point estimate moves by less than one standard error across specifications.
+
+::: {.result}
+[Estimate]{.label}
+0.29 (0.04)
+:::
+
+::: {.aside-note}
+Low-search-cost markets move by 0.06, not distinguishable from zero.
+:::
+
+::: {.with-previous}
+[Sample Windows]{.jump target="ap-window"}
+:::
+:::
+::::
+
+## Search costs explain the reversal; concentration does not
+
+::: {.fragment .fade-in-then-semi-out}
+Effect scales with baseline search cost.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+No gradient in concentration.
+:::
+
+::: {.fragment}
+Both hold within state and within year.
+:::
+
+## Disclosure helps only where consumers can act on it
+
+::: {.result}
+[Estimate]{.label}
+0.29 log points (s.e. 0.04) where search costs are high.
+:::
+
+The claim, restated in the words you want quoted.
+
+## {.thanks-slide .center .no-stage}
+
+::: {.thanks-title}
+Thank You!
+:::
+
+::: {.thanks-invite}
+Comments and questions welcome:
+:::
+
+::: {.thanks-contact}
+[you@example.edu](mailto:you@example.edu)
+
+[your-site.example](https://your-site.example)
+:::
+
+::: {.qr-slot}
+Paper
+:::
+
+## Appendix {.appendix-break background-color="var(--appendix-ground)"}
+
+## Robustness to the sample window {.appendix #ap-window}
+
+| Specification | Estimate | s.e. |
+|---|---:|---:|
+| Baseline | 0.291 | 0.041 |
+| Drop 2020 | 0.284 | 0.044 |
+| Market-specific trends | 0.276 | 0.049 |
+
+: Sensitivity of the main estimate {.spec}
+
+::: {.aside-note}
+Nothing moves the estimate by half a standard error.
+:::
+
+::: {.with-previous}
+[]{.jump-back}
+:::
+
+## Why not an instrument for search costs {.appendix #ap-iv}
+
+Pre-built answer to the question you expect.
+
+::: {.with-previous}
+[]{.jump-back}
+:::
+
+<!-- Only on a deck that cites: add `bibliography: talk-refs.bib` to the front
+matter and the references block from references/citations.md. -->
+
+<!-- On this file as-is, the placeholder chunks draw nothing, so the fit gate
+warns three slides nearly empty and stage-check fails the event-study slide;
+both resolve once real exhibits fill the chunks. The quote slide reports
+HEADING NOT VISIBLE either way; see the traps list in SKILL.md. -->

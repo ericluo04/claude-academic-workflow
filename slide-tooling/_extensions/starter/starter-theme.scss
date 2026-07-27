@@ -1,0 +1,786 @@
+/*-- scss:defaults --*/
+// Starter theme for the slide tooling in this repo.
+//   theme: [default, starter-theme.scss]
+//
+// It exists to demonstrate every hook that stage-slide.lua, deck-check.mjs,
+// and stage-check.mjs expect, so a deck renders correctly out of the box.
+// The look is an editorial one: warm paper ground, charcoal ink, serif
+// display headings centered over a sans text block, and a muted plum accent.
+// All of that is taste and yours to replace; comments mark each spot. Blocks
+// marked LOAD-BEARING make the tooling work and should survive restyling.
+//
+// The example decks under docs/ are this theme, rendered as-is.
+
+// ---- palette (taste: replace wholesale) ----
+// Ratios quoted are against the paper ground; everything used for text holds
+// 4.5:1 or better there and on the panel tint.
+$paper:       #faf7f2;   // warm off-white ground
+$ink:         #33302b;   // warm charcoal, 12.3:1 on paper
+$muted:       #6b6157;   // 5.7:1 on paper
+$muted-dark:  #4f463c;   // 8.6:1 on paper
+$rule:        #ddd6c9;   // hairlines only, never text
+$panel:       #f2ede3;   // block tint, one step off the paper
+$code-bg:     #f8f5ee;   // lighter than $panel so the a11y highlight colours keep 4.5:1
+$accent:      #7d3a5e;   // muted plum, 7.5:1 on paper
+$accent-dark: #54263f;   // 11.4:1 on paper
+$accent-pale: #d9bccb;   // decorative only (hover underlines, dark-ground links)
+$good:        #38684a;
+$warn:        #7d5b12;
+$bad:         #9c3b26;
+
+// The ground for the one slide that opens the appendix, published as
+// --appendix-ground below and reached from a deck as
+//   ## Appendix {.appendix-break background-color="var(--appendix-ground)"}
+// so the hex lives in the theme and not in the deck. This theme keeps both
+// dividers on the page ground and lets the typography mark the boundary; a
+// theme that wants a tinted ground changes only these two values. The
+// references divider gets its own name on purpose: both mean "the argument is
+// over", and a theme can pull them apart later without touching any deck.
+$appendix-ground:   $paper;
+$references-ground: $appendix-ground;
+
+// Two faces. Headings, dividers, and display numbers use a system serif
+// stack; everything else stays on Source Sans Pro, the face Quarto ships
+// with reveal.js itself, so the text face is self-hosted next to the deck
+// with zero setup, no display-time fetch, and the same metrics on every
+// machine, which is what lets the fit gate's certification transfer. The
+// serif stack is system-resolved (Charter on macOS, Georgia elsewhere);
+// headings are short and centered, so the metric drift across platforms has
+// nowhere to bite. To pin a webfont instead, vendor it and declare @font-face
+// in the format's header-includes, not here, because theme SCSS compiles
+// into <deck>_files/ and a url() there resolves against the wrong base.
+$font-serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+$font-sans: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+$body-bg: $paper;
+$body-color: $ink;
+$link-color: $accent;
+$link-color-hover: $accent-dark;
+
+$presentation-heading-color: $ink;
+// The serif stack carries 400 and 700 only; 600 would synthesize.
+$presentation-heading-font-weight: 700;
+$presentation-line-height: 1.45;
+
+// LOAD-BEARING SIZES. The 30px root and the reference-entry metrics further
+// down are what the filter's `refs-fit: starter` packing preset was measured
+// against. Change them and the reference list may overflow or underfill;
+// re-derive the preset (refs-lines / refs-chars-per-line in the front matter,
+// STAGE_REFS_DEBUG=1 prints the packer's arithmetic) before trusting it.
+$presentation-font-size-root: 30px;
+$presentation-h1-font-size: 1.9em;
+$presentation-h2-font-size: 1.28em;
+$presentation-h3-font-size: 1.0em;
+
+$code-block-font-size: 0.62em;
+$code-block-bg: $code-bg;
+$code-block-border-color: $rule;
+$code-color: $accent-dark;
+// Must be unitless: a unit compiles to `0.7remem` and silently breaks
+// `.smaller` and every callout.
+$presentation-font-smaller: 0.75;
+
+// Quarto recolours heading, links, and inline code on any slide given a
+// background attribute (here, the appendix divider) from these variables, and
+// their defaults are foreign to whatever palette you choose. Set them.
+$light-bg-text-color: $ink;
+$light-bg-link-color: $accent;
+$light-bg-code-color: $accent-dark;
+$dark-bg-text-color: #ffffff;
+$dark-bg-link-color: $accent-pale;
+$dark-bg-code-color: $accent-pale;
+
+$presentation-font-family: $font-sans;
+$presentation-heading-font: $font-serif;
+
+/*-- scss:rules --*/
+
+// LOAD-BEARING. Publishes the two divider grounds by name. reveal assigns
+// `data-background-color` straight to the background element's inline style;
+// when the value is a var() it cannot parse, it reads the painted result back
+// off getComputedStyle, so the variable both paints and still gets classified
+// as a light background. Without these, the documented divider recipe leaves
+// the property invalid and the divider falls back to the page ground.
+:root {
+  --appendix-ground: #{$appendix-ground};
+  --references-ground: #{$references-ground};
+}
+
+.reveal { font-family: $font-sans; }
+.reveal pre, .reveal code, .reveal kbd, .reveal samp { font-family: $font-mono; }
+
+// Headings: centered serif over a left-set text block, no rule under them;
+// the face change and the centering are the whole mark. Taste: set them back
+// left, add a mark of your own; if your mark uses ::after, give the divider
+// archetypes `h2::after { content: none }` so it does not compete with the
+// divider.
+.reveal .slides section h2 {
+  margin: 0 0 0.62em;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+.reveal .slides section h3 {
+  font-family: $font-serif;
+  color: $muted-dark;
+  font-weight: 700;
+}
+
+// LOAD-BEARING. Pandoc emits a real empty <h2> for a titleless heading such
+// as `## {.center}` or the closing slide. Without this rule any heading
+// decoration you add paints across the top of a slide that has no title.
+.reveal .slides section > h2:empty { display: none; }
+
+// ---- title slide ----
+// Serif display title, an italic serif subtitle in the quiet register, and
+// the author line in letterspaced caps under a short standing rule, the same
+// mark the dividers carry. Selectors follow Quarto's revealjs title markup
+// (h1.title, p.subtitle, .quarto-title-authors, p.date).
+.reveal #title-slide .subtitle {
+  font-family: $font-serif;
+  font-style: italic;
+  color: $muted-dark;
+  font-size: 0.85em;
+  margin: 0.6em 0 0;
+}
+.reveal #title-slide .quarto-title-authors {
+  position: relative;
+  margin: 64px 0 0;
+  padding-top: 26px;
+}
+.reveal #title-slide .quarto-title-authors::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 44px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: $accent;
+}
+.reveal #title-slide .quarto-title-author-name {
+  font-family: $font-sans;
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $muted-dark;
+}
+.reveal #title-slide p.date {
+  color: $muted;
+  font-size: 0.6em;
+  margin: 14px 0 0;
+}
+
+// Left-aligned, top-aligned content under the centered title. Do NOT add
+// `top: 0 !important` anywhere: it outranks the inline `top` reveal writes to
+// centre the title slide and per-slide `{.center}`, and both die silently.
+.reveal .slides section { text-align: left; }
+.reveal section > p:first-of-type { margin-top: 0; }
+
+// Links: quiet till hover.
+.reveal a { text-decoration: none; border-bottom: 1px solid transparent; }
+.reveal a:hover { color: $link-color-hover; border-bottom-color: $accent-pale; }
+
+.reveal ul, .reveal ol { margin-left: 1em; }
+.reveal li { margin-bottom: 0.35em; }
+.reveal li::marker { color: $accent; }
+
+// Inline colour spans. The example decks use this vocabulary
+// ([term]{.yblue} etc.); the names are historical, so keep them so existing
+// sources render, or rename to your own and update your decks.
+.yblue  { color: $accent-dark; }
+.ymid   { color: $accent; }
+.ypale  { color: $accent; }       // alias kept for decks written against a dark theme
+.ygray  { color: $muted-dark; }
+.ygreen { color: $good; }
+.yamber { color: $warn; }
+.yred   { color: $bad; }
+.dim    { color: $muted; }
+
+// A muted aside for caveats and source notes. The filter treats `.aside-note`
+// as an addendum: it arrives on the beat of the block above it.
+.reveal .aside-note {
+  color: $muted-dark;
+  font-size: 0.72em;
+  line-height: 1.4;
+  border-left: 3px solid $rule;
+  padding-left: 0.8em;
+  margin-top: 0.8em;
+}
+// LOAD-BEARING. The filter moves an addendum that follows a list into the
+// last list item so it shares that item's beat; pull it back to the slide's
+// text rail or it reads as a note on one bullet. Scoped to the block forms:
+// an inline citation span inside a tight list must not be dragged left.
+.reveal li > .aside-note,
+.reveal li > div.citation,
+.reveal li > div.cite { margin-left: -1.39em; }
+
+// Tables: booktabs rules. A heavy rule above the header and at the foot, a
+// light one under the header, nothing between rows.
+.reveal table {
+  border-collapse: collapse;
+  font-size: 0.72em;
+  margin: 0.4em 0;
+  border-top: 2px solid $ink;
+  border-bottom: 2px solid $ink;
+}
+.reveal table th {
+  color: $ink;
+  font-weight: 600;
+  border-bottom: 1px solid $muted-dark;
+  padding: 0.32em 0.7em;
+  text-align: left;
+}
+.reveal table td { border-bottom: none; padding: 0.3em 0.7em; }
+// Numeric columns, marked [.num]{} per cell or column header.
+.reveal table td.num, .reveal table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+// A four-plus-column table reads as an exhibit and stretches to the full text
+// column; two- and three-column tables keep natural width.
+.reveal .slides section table:has(tr > :nth-child(4)) { width: 100%; }
+.reveal .slides section table:has(tr > :nth-child(4)) th { padding: 0.36em 0.9em; }
+.reveal .slides section table:has(tr > :nth-child(4)) td { padding: 0.34em 0.9em; }
+// Wide specification tables, `{.spec}` on the caption line.
+.reveal table.spec { font-size: 0.6em; }
+.reveal table.spec td, .reveal table.spec th { padding: 0.2em 0.5em; }
+.reveal .slides section table.spec:has(tr > :nth-child(4)) th,
+.reveal .slides section table.spec:has(tr > :nth-child(4)) td { padding: 0.24em 0.6em; }
+
+// Math: trim display math slightly against the root size.
+.reveal .math.display, .reveal mjx-container[display="true"] { font-size: 0.92em; }
+.reveal .math.inline { font-size: 0.95em; }
+
+// Code.
+.reveal pre { box-shadow: none; border: 1px solid $rule; border-radius: 0; width: 100%; }
+.reveal pre code { padding: 0.7em 0.9em; }
+.reveal code { color: $accent-dark; }
+
+// Blockquotes: quoted language, set apart in the serif face. reveal ships a
+// centered box with a shadow; this replaces it with a hairline in the margin.
+.reveal blockquote {
+  display: block;
+  width: auto;
+  font-family: $font-serif;
+  font-style: italic;
+  color: $muted-dark;
+  background: transparent;
+  box-shadow: none;
+  border-left: 3px solid $accent-pale;
+  margin: 0.6em 0 0.6em 0.2em;
+  padding: 0.1em 0 0.1em 0.85em;
+}
+.reveal blockquote p { margin: 0.2em 0; }
+
+// Figures and captions.
+.reveal figure { margin: 0.3em auto; }
+// LOAD-BEARING SELECTORS. Quarto ships its own figcaption rules in an inline
+// <style> AFTER the theme, so a plain `.reveal figcaption` rule loses the tie.
+// These win on specificity without !important, and the second pair covers the
+// caption Quarto's auto-stretch leaves as a bare sibling <p class="caption">
+// after hoisting a lone captioned image out of its figure.
+.reveal .slides section figure > figcaption,
+html .reveal .slides section > img.r-stretch + p.caption,
+html .reveal .slides section > img.stretch + p.caption {
+  color: $muted-dark;
+  font-size: 0.6em;
+  line-height: 1.35;
+  margin: 0.35em 0 0;
+}
+// LOAD-BEARING. A caption hoisted next to a staged lone image must hide and
+// show with the image, riding the image's own fragment state; reveal counts
+// only the image as a fragment, so the caption costs no extra keypress.
+.reveal .slides section > img.fragment + p.caption {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+.reveal .slides section > img.fragment.visible + p.caption {
+  opacity: 1;
+  visibility: inherit;
+}
+// LOAD-BEARING. reveal sizes `section > .r-stretch` by zeroing its height and
+// measuring the parent; a height transition makes that read return the old
+// height and the figure oscillates. Never transition height on a stretched
+// image.
+.reveal .slides section > img.r-stretch.fragment { transition-property: opacity; }
+
+// Two-column layout. Quarto lays `.columns` out as inline blocks, where `gap`
+// and `align-items` are inert; flex makes both take, and the authored column
+// widths become flex bases.
+.reveal .columns { display: flex; align-items: flex-start; gap: 1.2em; }
+
+// Footer kept quiet; the slide number is a small folio in the top right
+// corner, out of the way of reveal's bottom furniture (progress bar, menu
+// button). reveal's own stylesheet parks it bottom right on a dark chip, so
+// position and ground both need setting, not just colour.
+.reveal .footer { color: $muted; font-size: 0.5em; }
+.reveal .slide-number {
+  top: 14px;
+  right: 20px;
+  bottom: auto;
+  padding: 0;
+  background-color: transparent;
+  color: $muted;
+  font-size: 0.5em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+.reveal .slide-number a { color: $muted; }
+
+// ---- progress bar ----
+// A plain unsegmented fill. LOAD-BEARING COLOURS: reveal ships `color: #fff`
+// over rgba(0,0,0,0.2), so on a light ground the fill is white on white. Set
+// both explicitly for your ground. The filter still writes --section-cut-1..N
+// and the class `segmented` onto the element; with no rule for them they do
+// nothing, and the filter's re-metering (appendix and references outside the
+// denominator) needs no rule here either.
+.reveal .progress {
+  color: $accent;
+  height: 3px;
+  background-color: rgba($ink, 0.12);
+}
+
+// ---- jump buttons ----
+// stage-slide.lua turns `[phrase]{.jump target="id"}` and `[phrase]{.jump-back}`
+// into an `<a class="jump-btn">`. In this theme the control is not a chip on
+// its own line: the example decks write button sites as prose ("The full
+// measurement rule is in the appendix." with the phrase as the link) and the
+// styling is a standing underline that ordinary links only show on hover, so
+// the live phrase reads as part of the sentence and still announces itself.
+// Styling a link, not a <button>, matters: reveal swallows the keyboard while
+// focus sits on a form control.
+.reveal a.jump-btn {
+  color: $accent;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid $accent-pale;
+  cursor: pointer;
+}
+.reveal a.jump-btn:hover { color: $accent-dark; border-bottom-color: $accent-dark; }
+.reveal a.jump-btn:focus-visible { outline: 2px solid $accent-pale; outline-offset: 2px; }
+// A return site is a short sentence of its own; set the whole line in the
+// quiet register so the wayfinding never competes with the exhibit above it.
+.reveal .slides section p:has(> a.jump-btn.jump-back) {
+  font-size: 0.78em;
+  margin-top: 0.1em;
+}
+// On appendix and references slides the phrase joins the muted scheme.
+.reveal section.appendix a.jump-btn,
+.reveal section.references a.jump-btn { color: $muted-dark; border-bottom-color: $rule; }
+.reveal section.appendix a.jump-btn:hover,
+.reveal section.references a.jump-btn:hover {
+  color: $accent-dark;
+  border-bottom-color: $accent-dark;
+}
+
+// ---- citations ----
+// Two properties only: size and colour. The parentheses come from the CSL
+// (pandoc's default chicago-author-date), never from CSS: a ::before paren
+// would also wrap narrative cites.
+// Both the span and the anchor: Quarto renders `(<a>Author 2020</a>)`, so
+// colouring the span alone leaves a grey parenthesis around link-coloured
+// text.
+.reveal .citation, .reveal .cite { font-size: 0.88em; }
+.reveal .citation, .reveal .citation a,
+.reveal .cite, .reveal .cite a { color: $muted-dark; }
+// LOAD-BEARING SHAPE. The hover hangs off the SPAN, not the anchor: on a
+// narrative cite the anchor covers only the year, so an a:hover rule lights
+// half the citation. Border scoped to `span` because `.citation` is also a
+// block class and a border on the block form adds a rule across the column.
+.reveal span.citation, .reveal span.cite { border-bottom: 1px solid transparent; }
+.reveal .citation:hover, .reveal .citation:hover a,
+.reveal .cite:hover, .reveal .cite:hover a { color: $accent; }
+.reveal span.citation:hover, .reveal span.cite:hover { border-bottom-color: $accent-pale; }
+.reveal .citation:hover a, .reveal .cite:hover a { border-bottom-color: transparent; }
+// LOAD-BEARING. A multi-cite span ([@a; @b]) hovers per segment: the filter
+// wraps each citation's run in span.cite-seg and stamps .cite-multi on the
+// parent, and these rules cancel the whole-span hover and light exactly the
+// segment under the pointer. Keep the specificity: they must beat the
+// whole-span rules above.
+.reveal span.citation.cite-multi:hover,
+.reveal span.citation.cite-multi:hover a { color: $muted-dark; }
+.reveal span.citation.cite-multi:hover { border-bottom-color: transparent; }
+.reveal span.citation.cite-multi .cite-seg { border-bottom: 1px solid transparent; }
+.reveal span.citation.cite-multi .cite-seg:hover,
+.reveal span.citation.cite-multi .cite-seg:hover a { color: $accent; }
+.reveal span.citation.cite-multi .cite-seg:hover { border-bottom-color: $accent-pale; }
+.reveal span.citation.cite-multi .cite-seg:hover a { border-bottom-color: transparent; }
+// font-size in em compounds; inside blocks already in the quiet register the
+// citation takes the block's size.
+.reveal .aside-note .citation, .reveal .aside-note .cite,
+.reveal figcaption .citation, .reveal figcaption .cite,
+.reveal .footer .citation, .reveal .footer .cite { font-size: 1em; }
+
+// ---- reference list ----
+// LOAD-BEARING METRICS. 0.6em size, 1.35 line height, 0.62em entry gap are
+// what the `refs-fit: starter` packing preset was measured against (see the
+// note on the root size above).
+.reveal div.csl-bib-body { margin-top: 0.2em; }
+.reveal div.csl-entry {
+  font-size: 0.6em;
+  line-height: 1.35;
+  margin-bottom: 0.62em;
+}
+// LOAD-BEARING. Pandoc's head styles and Quarto's template both add a hanging
+// indent, and they stack: measured on the example deck, the entry box started
+// 66px right of the text rail. Three classes of specificity replace both with
+// one indent, no !important.
+.reveal .slides div.csl-bib-body { margin-left: 0; text-indent: 0; }
+.reveal .slides div.csl-bib-body div.csl-entry { margin-left: 0; }
+.reveal .slides div.csl-bib-body.hanging-indent div.csl-entry {
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+}
+// A DOI in an entry is not something anyone reads off a wall.
+.reveal div.csl-entry a { color: inherit; }
+// LOAD-BEARING. Quarto's handleRefs stamps `smaller scrollable` on the slide
+// holding #refs; the filter parks the empty #refs marker on the references
+// divider, and both classes are wrong there. Cancel them (the `.references`
+// arms cover a deck with no divider).
+.reveal .slides section.references-break.smaller,
+.reveal .slides section.references.smaller { font-size: inherit; }
+.reveal .slides section.references-break.scrollable,
+.reveal .slides section.references.scrollable { overflow-y: visible; }
+
+// ---- dividers ----
+// Three archetypes, each a heading and nothing else, all on the page ground.
+// A section divider is a display numeral over a short rule over the title,
+// sized to read from the back of a lecture hall; the appendix and references
+// dividers keep the rule and the title and drop the numeral, so back matter
+// arrives as the same architecture, muted. The canvas is 1050x700 and reveal
+// scales it whole, so the composition is anchored in px against the 700px
+// height. stage-slide.lua numbers the .section-break dividers by writing
+// data-section-number; never hand-number them. Restyle ::before at will; keep
+// attr(data-section-number) as the content source.
+//
+// Full canvas height so the anchors measure against the page. Height, not
+// min-height (a child's percentage height needs the parent's height set), and
+// never `display: flex` on the section: reveal writes display inline as it
+// shows and hides slides.
+.reveal .slides section.section-break,
+.reveal .slides section.appendix-break,
+.reveal .slides section.references-break { height: 100%; }
+// The numeral hangs off the SECTION, not the h2: attr() reads only the
+// attributes of the element the pseudo-element belongs to, and the filter
+// writes them at section level. Bottom-anchored (top + translateY(-100%)),
+// so its distance to the rule below holds whatever the numeral's size.
+.reveal .slides section.section-break::before {
+  content: attr(data-section-number);
+  position: absolute;
+  top: 302px;
+  left: 0;
+  width: 100%;
+  transform: translateY(-100%);
+  text-align: center;
+  font-family: $font-serif;
+  font-size: 54px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: $accent;
+}
+// The short standing rule between numeral and title, the same mark the title
+// slide carries.
+.reveal .slides section.section-break::after,
+.reveal .slides section.appendix-break::after,
+.reveal .slides section.references-break::after {
+  content: "";
+  position: absolute;
+  top: 320px;
+  left: 50%;
+  width: 44px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: $accent;
+}
+.reveal .slides section.appendix-break::after,
+.reveal .slides section.references-break::after { background: $muted; }
+// The title starts at a fixed line under the rule and grows downward, so a
+// two-line title cannot climb into the numeral.
+.reveal .slides section.section-break h2,
+.reveal .slides section.appendix-break h2,
+.reveal .slides section.references-break h2 {
+  margin: 0;
+  padding: 344px 0 0;
+  text-align: center;
+  font-size: 1.7em;
+  line-height: 1.2;
+}
+.reveal .slides section.appendix-break h2,
+.reveal .slides section.references-break h2 { color: $muted-dark; }
+// LOAD-BEARING FALLBACK. reveal copies the section's class list onto the
+// .slide-background element it generates, so the divider grounds paint even
+// when a deck forgets the background attribute; the attribute still wins
+// (inline style). Style the background element, never the section: sections
+// are absolutely positioned with auto height, so a ground on the section is a
+// band, not a page.
+.reveal .slide-background.appendix-break { background-color: $appendix-ground; }
+.reveal .slide-background.references-break { background-color: $references-ground; }
+
+// ---- appendix scheme ----
+// Content slides after the appendix divider carry `{.appendix}` and mute
+// themselves, so a slide pulled up during questions says where it is. The
+// filter writes `.references` onto every reference-list slide, so the scheme
+// covers those too. Here the headings go muted and a small standing label
+// names the region above the centered title.
+.reveal section.appendix h2,
+.reveal section.references h2 { color: $muted-dark; }
+.reveal section.appendix h3 { color: $muted; }
+.reveal section.appendix h2::before {
+  content: "Appendix";
+  display: block;
+  width: fit-content;
+  margin: 0 auto 0.4em;
+  font-family: $font-sans;
+  color: $muted;
+  font-size: 0.4em;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.reveal section.appendix table th { color: $muted-dark; border-bottom-color: $muted-dark; }
+.reveal section.appendix table { border-top-color: $muted-dark; border-bottom-color: $muted-dark; }
+.reveal section.appendix .result { border-color: $rule; }
+.reveal section.appendix .result .label { color: $muted-dark; }
+.reveal section.appendix .takeaway { border-top-color: $muted; color: $muted-dark; }
+
+// ---- content blocks (taste: restyle freely) ----
+// The block family shares one treatment: a hairline frame on the panel tint,
+// no coloured edge, with a small-caps label that carries the class's colour.
+// A framed estimate:
+//   ::: {.result}
+//   [Estimate]{.label}
+//   0.29 log points (s.e. 0.04).
+//   :::
+.reveal .result {
+  border: 1px solid $rule;
+  background: $panel;
+  padding: 0.55em 0.9em;
+  margin: 0.6em 0;
+  font-size: 0.92em;
+}
+.reveal .result .label {
+  display: block;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: $accent;
+  margin-bottom: 0.2em;
+}
+// The slide's one claim, under a double rule (4px so the doubling actually
+// paints; at 3px it reads as one thin line). Once per slide at most.
+.reveal .takeaway {
+  border-top: 4px double $accent;
+  margin-top: 0.7em;
+  padding-top: 0.45em;
+  color: $accent-dark;
+  font-weight: 600;
+}
+// Identification assumptions and similar formal statements.
+.reveal .assumption {
+  border: 1px solid $rule;
+  padding: 0.5em 0.9em;
+  margin: 0.55em 0;
+  font-size: 0.92em;
+}
+.reveal .assumption .label { font-weight: 600; color: $muted-dark; }
+// Theorem environments, both the hand-labelled divs (give each a
+// [Proposition 1]{.label} span) and Quarto's numbered `::: {#thm-...}` form,
+// whose title arrives as span.theorem-title. Quarto gives theorem divs no
+// styling in revealjs; a theme must.
+.reveal .theorem, .reveal .proposition, .reveal .lemma {
+  border: 1px solid $rule;
+  padding: 0.5em 0.9em;
+  margin: 0.55em 0;
+}
+.reveal .theorem .label,
+.reveal .proposition .label,
+.reveal .lemma .label,
+.reveal .theorem .theorem-title {
+  font-family: $font-serif;
+  font-weight: 700;
+  color: $accent-dark;
+  margin-right: 0.4em;
+}
+.reveal .proof { font-size: 0.9em; color: $muted-dark; margin: 0.4em 0 0.4em 0.3em; }
+.reveal .proof-title, .reveal .proof-title em { color: $muted-dark; font-weight: 600; }
+// A QED square on the proof's last element; .remark and .solution arrive as
+// .proof too and get none.
+.reveal .proof:not(.remark):not(.solution) > :last-child::after { content: " \25A0"; color: $accent; }
+
+// ---- teaching blocks (taste: restyle freely) ----
+// The lecture vocabulary, one quiet family: hairline frame, panel tint, and a
+// small-caps label whose colour tells the classes apart. A theme built for a
+// semester may want each class more visually distinct than a label colour.
+.reveal .keyidea, .reveal .definition, .reveal .example,
+.reveal .question, .reveal .warning {
+  border: 1px solid $rule;
+  background: $panel;
+  padding: 0.5em 0.9em;
+  margin: 0.55em 0;
+  font-size: 0.95em;
+}
+.reveal .keyidea .label, .reveal .definition .label, .reveal .example .label,
+.reveal .question .label, .reveal .warning .label {
+  display: block;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: $accent;
+  margin-bottom: 0.2em;
+}
+.reveal .warning .label { color: $bad; }
+.reveal .question .label { color: $accent-dark; }
+.reveal .example .label { color: $muted-dark; }
+// A large discussion prompt, one to a slide: serif, centered, between double
+// rules, on the page ground.
+.reveal .prompt {
+  font-family: $font-serif;
+  border-top: 4px double $accent;
+  border-bottom: 4px double $accent;
+  padding: 0.7em 0.6em;
+  text-align: center;
+  font-size: 1.15em;
+  line-height: 1.5;
+}
+// Worked-example steps: `::: {.steps}` around a numbered list, or ol.steps.
+.reveal .steps ol li, .reveal ol.steps li { margin-bottom: 0.5em; }
+// The agenda list, with li.done and li.now marking progress through the
+// session. Pure type treatment: muted for done, accented weight for now.
+.reveal ul.agenda, .reveal .agenda ul { list-style: none; margin-left: 0; }
+.reveal ul.agenda li, .reveal .agenda ul li { margin-bottom: 0.5em; }
+.reveal ul.agenda li.done, .reveal .agenda ul li.done { color: $muted; }
+.reveal ul.agenda li.now, .reveal .agenda ul li.now {
+  color: $accent-dark;
+  font-weight: 600;
+}
+// One big number, in the display face.
+.reveal .hero {
+  font-family: $font-serif;
+  font-size: 3em;
+  font-weight: 700;
+  color: $accent-dark;
+  line-height: 1.1;
+}
+// A small standing tag beside a heading: [demo]{.demo-tag}.
+.reveal .demo-tag {
+  display: inline-block;
+  vertical-align: middle;
+  border: 1px solid $muted;
+  border-radius: 0;
+  padding: 0.08em 0.5em;
+  font-family: $font-sans;
+  font-size: 0.4em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $muted-dark;
+  margin-left: 0.5em;
+}
+// A slide that is one exhibit: keep the image inside the canvas under the
+// heading. Sized to the 700px canvas minus the heading block.
+.reveal .slides section.full-bleed img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 560px;
+  width: auto;
+  height: auto;
+}
+
+// ---- closing slides ----
+// The talk archetype is a titled colophon, left-set like every content slide:
+//   ## Thank you {.thanks-slide .no-stage}
+// a sentence of invitation, then a `.thanks-contact` block under a double
+// rule carrying the addresses as prose lines. Two class names are
+// load-bearing: .thanks-slide names the slide to stage-check.mjs (classified
+// `closing`, skipped), and .no-stage turns the filter off for the slide. The
+// lecture archetype, `{.closing-slide}`, is also read by name by the filter
+// and the gate; it keeps its heading and needs no rule here.
+// Taste: sizes, faces, and the rhythm between the blocks are yours. A
+// titleless variant (a `.thanks-title` div instead of the heading) renders
+// against the same rules.
+.reveal .slides section.thanks-slide { text-align: left; }
+.reveal section.thanks-slide p { margin: 0; line-height: 1.45; }
+// The 96px top margin is the slide's vertical position: reveal sections are
+// absolutely positioned, so the margin stays inside the slide (and unlike
+// padding on the section it does not read as extra height to the fit gate).
+.reveal .slides section.thanks-slide h2,
+.reveal section.thanks-slide .thanks-title {
+  text-align: left;
+  font-family: $font-serif;
+  color: $ink;
+  font-size: 2.1em;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 96px 0 30px;
+}
+.reveal section.thanks-slide > p,
+.reveal section.thanks-slide .thanks-invite {
+  color: $ink;
+  font-size: 1em;
+  max-width: 30em;
+}
+.reveal section.thanks-slide .thanks-contact {
+  margin-top: 52px;
+  padding-top: 26px;
+  border-top: 4px double $accent;
+  font-size: 0.85em;
+  color: $muted-dark;
+}
+.reveal section.thanks-slide .thanks-contact p + p { margin-top: 12px; }
+.reveal section.thanks-slide .thanks-contact a {
+  color: $accent;
+  border-bottom: 1px solid $accent-pale;
+}
+// A deck that wants a QR code adds a `.qr-slot` div: a dashed placeholder
+// square with its label under it, sitting on the left rail, replaced by the
+// real code with nothing else moving. The example talk does not carry one.
+// The square is drawn by the pseudo-element (a border on the div would
+// enclose the label below the box), and :has(img) retires it. Export the
+// code between 640 and 1199px square: deck-check.mjs reads a >=1200px
+// natural width rendering under 600px as a crushed figure and fails the
+// deck.
+$qr-box: 280px;
+.reveal .qr-slot {
+  width: $qr-box;
+  margin: 36px 0 0;
+  text-align: center;
+  color: $muted-dark;
+  font-size: 0.6em;
+  line-height: 1.35;
+}
+.reveal .qr-slot p { margin: 0; }
+.reveal .qr-slot::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: $qr-box;
+  height: $qr-box;
+  margin-bottom: 10px;
+  border-radius: 0;
+  border: 2px dashed $muted;
+}
+.reveal .qr-slot img {
+  display: block;
+  width: $qr-box;
+  height: $qr-box;
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+.reveal .qr-slot:has(img)::before { content: none; }
+
+// A colour-only fragment variant: the term appears already, then takes the
+// accent on cue. Needs opacity/visibility restored, because reveal hides
+// every fragment that is not .custom.
+.reveal .slides section .fragment.highlight-yale,
+.reveal .slides section .fragment.highlight-accent {
+  opacity: 1;
+  visibility: inherit;
+}
+.reveal .slides section .fragment.highlight-yale.visible,
+.reveal .slides section .fragment.highlight-accent.visible {
+  color: $accent-dark;
+  font-weight: 600;
+}

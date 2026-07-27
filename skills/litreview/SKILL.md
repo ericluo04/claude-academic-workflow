@@ -1,157 +1,256 @@
 ---
 name: litreview
-description: Runs a structured multi-source literature search across arXiv, Semantic Scholar, and OpenAlex MCPs (with Crossref as fallback), dedupes by DOI / arXiv-ID / fuzzy title, scores each unique paper 1–5 for relevance to the user's query, and returns a ranked summarized list with takeaways framed for a quantitative marketing audience. Use this skill whenever the user asks to "find papers on X", "do a lit review on Y", "what's the literature on Z", "any recent work on W", "find references for my paper's intro", or pastes a topic with phrases like "since 2022" / "open access only" / "n=30". Optionally hands off the top hits (score >=4) to `/cite` for batch Zotero adds. Distinct from `/draft` (which writes prose) and `/cite` (which adds a single paper).
-argument-hint: <query> [--four-axis]
+description: Find, rank, and synthesize the literature on a TOPIC or research question: paper.py search across Semantic Scholar, OpenAlex, and arXiv, dedupe, relevance-score 1-5, flag what is already in Zotero, read the top hits with parallel subagents, return a ranked list plus synthesis. TRIGGER on "lit review", "find papers on X", "what is the literature on Y", "any recent work on Z", "who has studied W", "find references for my intro", "prior work on", or a topic plus a scope phrase ("since 2022", "Marketing Science only"). Use reading-papers when the user has one specific paper in hand.
+allowed-tools: Read, Write, Bash, Task, Agent, Monitor, mcp__zotero__zotero_search_items, mcp__zotero__zotero_advanced_search, mcp__zotero__zotero_get_item_metadata
 ---
 
-# /litreview — Multi-source literature search and synthesis
+# litreview
 
-The goal is to give the user a high-signal, ranked, deduped paper list with enough takeaway per item that they can decide which to read, which to cite, and which to skip — all in one pass. The output is the **input** to `/draft` (when writing a lit review) and to `/cite` (when batch-adding the best hits to Zotero).
+Turn a topic into a ranked, deduped, honestly-scoped reading list, with a one-paragraph takeaway
+per paper and a synthesis of what the cluster says. The output is what the user reads before
+deciding what to cite.
 
-## Modes
+## Boundary with reading-papers
 
-- **Default** (no flag): single 1–5 relevance score per paper — exactly as documented in step 3 below. This is the canonical mode.
-- **`--four-axis`** (opt-in): replace the single score with four 1–5 sub-scores — **Novelty** (vs. the existing lit on this topic), **Credibility** (venue tier + author rep + sample / data quality), **Relevance** (fit to the specific project context), **Actionability** (cite-as-prior / replicate-method / pivot-target / superseded). **Composite** = arithmetic mean of the four, rounded to one decimal. The breakdown is rendered only when **composite >= 4** (else show only the composite, to keep output tight). All downstream thresholds — ranking, in-Zotero check, the `/cite` handoff — use the composite as a drop-in replacement for the single score, so the **composite >= 4** cutoff matches the default **score >= 4** cutoff exactly. Default behavior is unchanged unless `--four-axis` appears in the invocation.
+This skill starts from a question and ends with a set of papers. The `reading-papers` skill starts
+from one known paper and ends with its text. If the user hands over a DOI, a link, a title, or an
+author name and wants that thing read, stop here and use `reading-papers`.
 
-## When to invoke
+The two share machinery. Discovery here is `paper.py search`, reading here is `paper.py get`, and
+both live in the `reading-papers` skill directory. Read
+`~/.claude/skills/reading-papers/SKILL.md` before the reading phase if you have not
+already; it owns the access ladder and the honesty rules that apply to every summary this skill
+emits.
 
-The user invokes `/litreview <query>` with a topic, paper, or research question. Common shapes:
+## Scope the question first
 
-- `/litreview discrimination in online labor markets using AI-generated profile images`
-- `/litreview sparse autoencoder steering for text generation`
-- `/litreview meta-science applied to social media engagement prediction`
-- `/litreview cite-by-DOI 10.1287/mksc.2023.1234`  (anchor mode — seed paper)
-- `/litreview "moral outrage" Brady PNAS replications`
-- `/litreview generative AI in product design since 2022 open access n=30`
+A one-word topic gives a one-word answer. Before searching, pin down the actual question and the
+year window if the user implied one. Ask if the request is bare ("do a lit review"). Do not guess
+a topic.
 
-Loosely-stated flags inside the query — interpret them, don't require a CLI:
+Scope phrases in the request map onto flags without the user having to type them: "since 2022" is
+`--since 2022`, "Marketing Science only" is `--venue "Marketing Science"`, "top 30" is `-n 30`,
+"recent" with no year is the last five years, and say that you read it that way.
 
-| Phrase | Action |
-|---|---|
-| "since YYYY", "last N years", "post-2022" | year filter |
-| "open access only", "OA only" | filter to OA papers (has `openAccessPdf`) |
-| "n=N", "top N", "give me N" | result cap (default 25) |
-| "add to zotero", "file these", "send to /cite" | hand off step 5 |
-| "in collection X" | propagate to `/cite` |
-| "marketing only", "MKSCI/JMR/JCR/MS only" | venue filter |
-| "exclude preprints" | filter out arXiv-only / unpublished |
+## Step 1: search
 
-## Required MCP tools (verified live names)
-
-Run these in parallel for source coverage. If a server is down, continue with whichever responded.
-
-- `mcp__arxiv__search_papers` — primary for recent ML/CS/preprints.
-- `mcp__arxiv__semantic_search` — embedding-similarity within a local arXiv corpus (if pre-indexed). Useful for "papers similar to <seed arXiv ID>".
-- `mcp__arxiv__get_abstract` — fetch abstract by ID after a hit.
-- `mcp__semantic-scholar__search_papers` — primary for published / peer-reviewed work and citation counts.
-- `mcp__semantic-scholar__get_paper_details` — full metadata + DOI + venue + OA link.
-- `mcp__semantic-scholar__get_paper_references` / `mcp__semantic-scholar__get_paper_citations` — for seed-paper expansion ("papers like X", "papers citing Y").
-- `mcp__semantic-scholar__get_recommendations` — Semantic Scholar's recommendation engine.
-- `mcp__openalex__openalex_search_entities` — broadest interdisciplinary venue coverage, best for social-science / marketing / policy work that Semantic Scholar misses.
-- `mcp__openalex__openalex_analyze_trends` — only when the user asks "how has the literature evolved" or similar trend question.
-
-**Fallback (manual)** when all three MCPs miss something specifically expected: Crossref REST API via `Invoke-WebRequest` (`https://api.crossref.org/works?query=<terms>&rows=20`) — no auth, no MCP needed.
-
-**Out-of-loop tools**: Zotero MCP (`mcp__zotero__zotero_search_items`) only for deduping against the existing library; the Zotero MCP is read-only — adds go through `/cite`, which uses the Zotero Web API directly.
-
-## Workflow
-
-### 1. Plan the queries
-
-Translate the natural-language query into 1–3 targeted search strings per source. Don't echo the exact phrase — strip filler ("can you find", "I'm interested in"), pull out the substantive nouns, expand acronyms (e.g. SAE → "sparse autoencoder"; but don't expand acronyms that are project shorthand for a topic — search the topic, not the acronym).
-
-Tailor per source:
-
-- **arXiv**: short keyword phrase, optional category filter (e.g., `cs.LG`, `econ.EM`, `stat.ME`).
-- **Semantic Scholar**: full query string; use `year>=2020` filter parameter if the user asked for recent work.
-- **OpenAlex**: broader keyword set; include MeSH-like concept terms for biomedical/policy adjacency.
-
-Run all three searches **in parallel** with `limit=20` to `30` each so dedupe has headroom.
-
-### 2. Dedupe
-
-Build a unified candidate list. Dedupe in this order:
-
-1. **DOI** exact match (strip `https://doi.org/`, lowercase).
-2. **arXiv ID** exact match (handle both `2403.12345` and `arXiv:2403.12345v2`).
-3. **Title fuzzy match** — lowercase, strip punctuation, tokenize; >=90% token-set overlap = same paper.
-4. **Author-first + year** as a last-resort tiebreak.
-
-When the same paper appears in multiple sources, merge metadata:
-- Prefer **Semantic Scholar** for citation count, abstract, references.
-- Prefer **OpenAlex** for venue name, concept tags, OA status.
-- Prefer **arXiv** for the preprint version + latest version date.
-
-### 3. Score relevance (1–5)
-
-For each unique paper, score against the query using abstract + venue + year:
-
-- **5** — directly on the question; central reference; would be cited in the intro of a paper on this topic.
-- **4** — closely related; definitely cite; secondary support.
-- **3** — adjacent; worth knowing about; might cite in a robustness or lit-review paragraph.
-- **2** — tangential; mention only if asked.
-- **1** — false positive; filter out before output.
-
-Be honest. If only 8 papers score >=3, return 8 — not 25 padded with score-2 noise. Padding wastes the user's time and credibility.
-
-### 4. Pre-existing-in-Zotero check (cheap dedupe against the library)
-
-Before output, for the score >=4 papers, call `mcp__zotero__zotero_search_items(query="<short title>", qmode="titleCreatorYear", limit=3)` to check if it's already there. Flag as `[in Zotero]` in output — saves the `/cite` step on those.
-
-### 5. Output — ranked summarized list
-
-Order by score (descending), then year (newest within score). Format per paper:
-
-```
-**[1] (score=5, 2024) Athey, Imbens et al. — *Title in italics*. *Marketing Science*. doi:10.xxx
-   Why relevant: <one sentence anchoring to the query>
-   Key finding/contribution: <one short sentence>
-   Method/identification: <one phrase — RDD, RCT, DiD, structural, observational, etc.>
-   arXiv:24xx.xxxxx | OA: yes | citations: 142 | [in Zotero: existing-key | not yet]
+```bash
+~/.claude/skills/reading-papers/scripts/paper.py search "<topic>" -n 25 --json
 ```
 
-After the list, give a **3–5 sentence synthesis** through a quantitative-marketing / causal-inference lens:
-- Which sub-themes dominate.
-- Where the field disagrees (a real edge to position against).
-- What's missing — gaps that could plausibly be filled or that the user's papers already address.
+Flags: `--venue "<journal>"`, `--since YYYY`, `--until YYYY`, `-n N`, `--json`.
 
-If the user asked for "add to zotero" or "send to /cite", proceed to step 6.
-Otherwise stop here and ask: *"Add the score >=4 hits to Zotero via /cite?"*
+One invocation runs one query against Semantic Scholar, OpenAlex, and arXiv, merges the three on
+DOI, then arXiv id, then normalized title, and re-ranks by reciprocal-rank fusion. Use `--json`
+whenever you are going to process the results (it carries abstracts, which is what scoring runs
+on); the plain text form is for showing the user.
 
-### 6. Optional: hand off top hits to /cite
+Write two or three query strings, not one. Strip filler, keep substantive nouns, expand acronyms
+(SAE becomes "sparse autoencoder"), and vary the vocabulary across fields: economists write
+"algorithmic collusion", computer scientists write "multi-agent reinforcement learning pricing".
+Run the variants as parallel Bash calls in a single message.
 
-For each paper with score >=4 (or whatever cap was given), pass DOI or arXiv ID to `/cite` in one batch. `/cite` handles:
-- DOI/arXiv resolution via `mcp__semantic-scholar__get_paper_details`.
-- Duplicate check via `mcp__zotero__zotero_search_items` (read-only MCP).
-- Zotero **write** via Web API — the MCP can't write.
-- Better-BibTeX export via Zotero Web API (`?format=bibtex`).
-- Append to active project's `.bib`.
-- File in the matching `zotero_collection_key` from `personal_config.projects[]`.
+The JSON shape:
 
-Don't re-implement that logic here — invoke `/cite` and surface its summary back.
+```json
+{"query": "...",
+ "sources": {"openalex": {"ok": true, "hits": 25, "note": null},
+             "semanticscholar": {"ok": true, "hits": 25, "note": null},
+             "arxiv": {"ok": false, "hits": 0, "note": "no response (rate limit or network)"}},
+ "unique": 41,
+ "results": [{"title": "...", "authors": [...], "year": 2020, "venue": "...",
+              "doi": "...", "arxiv_id": "...", "abstract": "...",
+              "is_oa": true, "best_url": "...",
+              "cited_by": 579, "cited_by_source": "openalex",
+              "citations": {"openalex": 579, "semanticscholar": 612},
+              "sources": ["openalex", "semanticscholar"], "rrf": 0.03}]}
+```
 
-## Search-quality heuristics
+Read `sources` before reading `results`. A source with `"ok": false` means that slice of the
+literature is missing from this run, and which slice depends on which source dropped: OpenAlex
+carries the marketing and economics journals, Semantic Scholar carries citation counts and CS
+venues, arXiv carries anything from the last few months. Name any failed source in the output so
+the user knows the list is partial.
 
-- **Methodological queries** ("interpretable ML for marketing", "double-machine learning for heterogeneous treatment effects") — Semantic Scholar's citation network is strongest; use `get_paper_references` / `get_paper_citations` once you've identified a seed paper.
-- **Preprints / recent ML** ("sparse autoencoder", "GemmaScope", "SAE steering") — arXiv first; Semantic Scholar lags by 2–6 weeks on indexing.
-- **Marketing / consumer behavior / JMR-JCR territory** — OpenAlex is broadest; supplement with Semantic Scholar.
-- **Author-specific** ("Athey work on conformal prediction", "Imbens recent papers") — OpenAlex `author.id` filter; or Semantic Scholar `search_authors` → `get_author_top_papers`.
-- **Seed-paper expansion** (DOI seed → "find papers like this") — `get_paper_recommendations` first, then `get_paper_citations` for forward, `get_paper_references` for backward.
+`citations` holds every count the sources returned and they disagree, often by a lot. Quote
+`cited_by` with `cited_by_source` next to it and never mix sources down one column.
+
+## Step 2: merge across query variants
+
+Each invocation dedupes its own results only. Merging across variants is your job, on the same
+ladder the script uses: DOI, then arXiv id, then normalized title (lowercase, punctuation to
+spaces, compare token sets). Keep the union of `sources` and the higher `rrf` when a paper appears
+under two queries; that agreement is a signal it is central.
+
+Workshop and journal versions of one paper are near-duplicates that are not duplicates. Keep both,
+cite the version of record, and mark the older one as superseded by the entry number of the newer.
+
+## Step 3: check Zotero before fetching anything
+
+The user's own library is faster than any API and holds their annotations. For each deduped
+candidate, call
+`mcp__zotero__zotero_search_items(query="<short title>", qmode="titleCreatorYear", limit=3)` and
+mark hits `[in Zotero: <key>]`. Prefer their copy over re-fetching, and route the reading subagent
+to the Zotero item when one exists.
+
+Zotero reads only work while the Zotero 7 desktop app is open with the local API enabled. A failed
+call almost always means the app is closed. If it is, skip the check and do not report papers as
+absent from the library: a closed Zotero looks exactly like an empty one.
+
+Say so explicitly at the top of the reply, not in a footnote: Zotero looks closed, open the Zotero
+desktop app and this can be re-run to flag what is already in the library. It is a five-second fix
+and the user would rather be told than get a silently degraded result. Carry on with the search
+either way; nothing else here needs Zotero.
+
+## Step 4: score relevance, 1 to 5
+
+One score per paper, against the user's stated question, from title, abstract, venue, and year.
+This is the only score in this skill. Anything else worth saying about a paper (how good the
+identification is, whether it is superseded, whether the venue is serious) goes in the takeaway as
+prose.
+
+- 5: directly on the question, would be cited in the intro of a paper about it.
+- 4: closely related, will be cited somewhere in the paper.
+- 3: adjacent, worth knowing about, might appear in a robustness or related-work paragraph.
+- 2: tangential, mention only if the user asks for breadth.
+- 1: false positive, drop it before output.
+
+Score honestly and let the count fall where it falls. If six papers clear 3, return six. A padded
+list of 25 costs the user more time than it saves.
+
+Score a paywalled paper from its abstract, mark it `read: abstract only`, and write nothing about
+it that implies you saw the body.
+
+## Step 5: read the top hits in parallel
+
+Reading is where the value is, and the reading-papers skill documents the pattern: one subagent per
+paper, structured summary back. A fan-out of a dozen concurrent readers is safe here because every
+API call retries with backoff, responses are disk-cached for 30 days, and the keys are configured.
+Keep concurrency near four to six when most hits are arXiv preprints, since arXiv politeness is one
+request per three seconds.
+
+Read the papers scoring 4 and 5, capped at twelve by default. Ask before going past that. Hand each
+subagent an identifier, never a title: a DOI or arXiv id costs 1 OpenAlex credit, a title costs 10.
+
+Subagent prompt template:
+
+```
+Read one paper and return a structured summary. Do not read anything else.
+
+Paper: <doi or arXiv id>       Question it is being read against: <the user's question>
+Tool: ~/.claude/skills/reading-papers/scripts/paper.py
+Follow ~/.claude/skills/reading-papers/SKILL.md for the access ladder.
+
+  paper.py get "<id>" --list-sections     # map first, always
+  paper.py get "<id>" --section "<substr>" # then pull only what you need
+
+--list-sections then --section is the context saver on long papers: a 70K-character paper
+becomes a 10K-character section with equations and cross-references intact. Read the abstract
+and introduction, then the sections that bear on the question above. Do not dump full text.
+Section slicing needs an arXiv e-print. When the paper has none, the script says so and hands
+back a PDF path or HTML; read that with the Read tool and skip the section step.
+If it is already in Zotero (<key>, when given), read the user's copy and their annotations.
+
+Return exactly:
+  id:            <doi or arXiv id>
+  version_read:  published | arXiv preprint | NBER working paper | abstract only
+  source_rung:   <the `source:` line paper.py printed>
+  question:      <one sentence: what the paper asks>
+  setting/data:  <one sentence>
+  method:        <short phrase: RCT, DiD, RDD, structural, simulation, observational, theory>
+  finding:       <one or two sentences, with the number that matters>
+  bears_on:      <one or two sentences: how it speaks to the question above>
+  limits:        <one sentence, the honest caveat a referee would raise>
+  quote:         <verbatim, 25 words max, with its section name, or none>
+
+If no free full text is reachable, say so plainly, set version_read to `abstract only`, and
+return what the abstract supports. Never paraphrase an abstract as if you read the paper.
+```
+
+## Step 6: output
+
+Order by score descending, then year descending. Per paper:
+
+```
+[1] score 5 · 2020 · Calvano, Calzolari, Denicolò, Pastorello
+    Artificial Intelligence, Algorithmic Pricing, and Collusion. American Economic Review.
+    doi:10.1257/aer.20190623 · arXiv:none · cited_by 579 (OpenAlex) · found in openalex, semanticscholar
+    Takeaway: Q-learning agents in a repeated Bertrand duopoly converge to supracompetitive
+      prices with no communication and no instruction to collude.
+    Bears on the question: the canonical simulation result that field evidence has to beat.
+    Method: agent-based simulation. Read: published version, arXiv HTML rung.
+    Free copy: https://art.torvergata.it/.../aer.20190623.pdf   [in Zotero: 8KQ2M4TR]
+```
+
+Then a synthesis of four to six sentences covering what the cluster agrees on, where it splits into
+camps (a split is where a new paper can position itself), what is missing, and which two or three
+papers to read first if the user reads nothing else.
+
+Close with a coverage line: which sources answered, which failed, which venues were unreadable, and
+what the user would have to do to close each gap.
+
+Stop there. Ask before adding anything to Zotero; writes need the web key and the user did not ask
+for a library edit unless they said so.
+
+## Coverage limits, and saying so
+
+A lit review that quietly skips a literature is worse than a short one. These venues are
+hard-blocked to plain HTTP (verified July 2026, per the reading-papers skill): INFORMS (Marketing
+Science, Management Science), SSRN, the AEA direct PDF, Elsevier, Wiley, Oxford, Chicago, SAGE,
+and anonymous OpenReview. They are indexed, so they appear in search results with metadata and
+abstracts; only the body is unreachable.
+
+What that means in practice:
+
+- Marketing is the field most exposed, because INFORMS and SAGE own it. The metadata is fine and
+  the accepted manuscript is usually on an institutional repository, which `paper.py` finds and
+  reports as the free copy. Run a `--venue "Marketing Science"` pass (and JMR, JCR, Journal of
+  Marketing, Management Science) alongside the open topic search so the field is represented even
+  when arXiv dominates the unfiltered ranking.
+- Economics is easier: the NBER or CEPR working paper is usually near-identical to the published
+  version, and AEA appendices with the proofs are free even when the article PDF is not.
+- Semantic Scholar elides AEA abstracts by publisher request, and Crossref has no abstracts for
+  JPE or JPSP. OpenAlex covers both, which is another reason an OpenAlex failure matters.
+- arXiv covers CS and parts of economics and statistics. It does not cover consumer behavior. A
+  review of a marketing topic that returns only arXiv hits is a failed search, not a thin field.
+- For a specific paper behind Cloudflare, the Playwright MCP with the user's institutional
+  session is the
+  last rung. One paper at a time, ask first, never in a loop.
+
+## Cost
+
+Each `search` invocation spends one OpenAlex `search` call at 10 credits (an id lookup is 1), plus
+free calls to Semantic Scholar and arXiv. Three query variants is 30 credits against a daily budget
+of 10,000 with the key in `~/.claude/secrets/scholar.env`. Every response is disk-cached for 30
+days, so a rerun of the same query is free and parallel readers share the cache.
+
+The expensive mistake is looping searches over near-identical phrasings. Two or three deliberate
+variants beat ten sprayed ones.
 
 ## Failure modes
 
-- **One source down or rate-limited**: report which one, continue with the others — don't fail the whole search.
-- **All three sources return nothing**: try a relaxed query (drop year filter, broaden terms) once. If still empty, fall back to Crossref. If still empty, surface what was tried.
-- **Query too vague** ("find me papers", "lit review please"): ask for at least one keyword or topic before searching. Don't guess.
-- **Paywalled paper, no abstract available**: include it in the list with `<abstract not accessible>` and lower-bound the score at 3 (don't auto-promote it). Note OA status `no`.
-- **Suspected duplicate that isn't** (same title, different papers — common with workshop vs journal versions): keep both; tag the older version as `[v1 — superseded by entry N]`.
-- **User pastes a fully-formatted citation as the query**: treat that as a seed-paper anchor mode — resolve it first via DOI/title, then return related work plus the seed itself at score 5.
-- **OpenAlex returns 500 candidates for a broad query**: tighten the keyword set rather than truncate — truncation hides relevance.
+Zero results: relax once, in this order, dropping `--venue`, then `--since`, then shortening the
+query to its two strongest nouns. If it is still empty, say what was tried and ask for a seed paper.
+
+One source down: the `sources` block names it. Continue with the others and report the gap.
+
+Every source down: a network or rate-limit problem, not an empty literature. Retry once after a
+pause, then say so.
+
+A seed paper instead of a topic: resolve it first with `paper.py resolve`, then expand with
+`paper.py cites "<doi>"` for forward and backward citations, and run the topic search on its title
+keywords. Include the seed in the output at score 5.
+
+Results dominated by one subfield: the query is inheriting that field's vocabulary. Rewrite it in
+another field's terms and merge.
 
 ## Out of scope
 
-- **Writing prose / lit-review section**: that's `/draft`. This skill returns the input; `/draft` writes the section.
-- **Adding one paper to Zotero**: that's `/cite`. This skill is for batches discovered through search.
-- **Reading PDFs in depth / extracting figures**: this skill works from abstracts + metadata. For deep reads, route specific papers to a manual read or to `review-paper-code` if it's a methods reference.
-- **Comprehensive systematic review** (PRISMA-style): out of scope — this is a fast-turn discovery + ranking tool, not a 6-month SR.
-- **Fabricating citations**: never. If a paper isn't found in any of the three MCPs + Crossref, say so — don't invent author-year-title triples that "sound right".
+Writing the lit review prose. This skill returns the ranked material.
+
+PRISMA-style systematic review with inclusion logs and screening counts. This is fast discovery
+plus a read, and it makes no claim to exhaustiveness.
+
+Adding papers to Zotero unless the user asks.
+
+Inventing a citation. If nothing turns up, the answer is that nothing turned up.

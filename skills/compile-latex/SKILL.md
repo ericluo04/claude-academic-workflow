@@ -1,231 +1,196 @@
 ---
 name: compile-latex
-description: Compiles any .tex with auto engine/bib detection, a ranked error report (BLOCKING errors with file:line + suggested \usepackage / package-install fixes, then undefined refs/cites, then threshold-gated overfull/underfull boxes), diff-vs-last-compile, and a conflicted-copy guard. After a clean build it auto-iterates every detected TikZ/pgfplots figure via /tikz-iterate and splices the refined bodies back into the source. Trigger phrases - "/compile-latex", "compile this", "build my paper", "build my deck", "why won't this compile", "what are the latex errors", "did my edit add warnings". Cross-platform MiKTeX (Windows) / MacTeX (macOS) / TeX Live (Linux). Distinct from /tikz-iterate (single figure) and /slide-excellence (deck content review).
-argument-hint: "[path-to-tex] [--engine=auto|pdflatex|xelatex|lualatex] [--outdir=build] [--box-threshold=5pt] [--clean|--clean-all] [--no-iterate] [--no-bib]"
-allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Task"]
-effort: medium
+description: Compile a .tex with latexmk, auto-detecting the engine (pdflatex/xelatex/lualatex) and bib backend (biber/bibtex), then emit a ranked error report with accurate file:line attribution across \input'd files, plus a diff against the last compile. Guards against Dropbox conflicted-copy files in Overleaf projects. TRIGGER on "compile this", "build my paper", "build the beamer deck", "why won't this compile", "what are the latex errors", "did my edit add warnings", or any request to build or debug a LaTeX document; Quarto .qmd decks belong to research-talk and teaching-lecture. An opt-in --figures pass hands TikZ/pgfplots blocks to the tikz-iterate skill.
 ---
 
-# /compile-latex
+# compile-latex
 
-Compile a `.tex`, parse the log into a ranked, actionable error report, diff it
-against the last compile, then auto-iterate every TikZ/pgfplots figure through
-`/tikz-iterate` and splice the refined bodies back. One command from "compile
-this" to "figures polished and source updated."
+Compile a `.tex`, parse the log into a ranked report with correct `file:line`
+attribution, and diff it against the previous build. The default is
+compile-and-report only; nothing in the source is edited unless `--figures` is
+passed.
 
-The heavy parsing detail (command→package table, log regexes, file-stack rules,
-box thresholds, state schema) lives in [`references/log-patterns.md`](references/log-patterns.md).
-Read it before implementing Steps 3–6.
+Parsing detail (package tables, log regexes, file-stack rules, box thresholds,
+state schema) is in [`references/log-patterns.md`](references/log-patterns.md).
+Read it before steps 3 through 5. Diff-vs-last-compile is adapted from
+`compiledeck` in [scunning1975/MixtapeTools](https://github.com/scunning1975/MixtapeTools).
 
-## Credit
+## Options
 
-The diff-vs-last-compile warning-set idea (persist the warning/box set, report
-deltas between successive builds) is inspired by Scott Cunningham's
-`compiledeck` in [`scunning1975/MixtapeTools`](https://github.com/scunning1975/MixtapeTools).
-The figure-iterate hand-off chains into this repo's [`/tikz-iterate`](../tikz-iterate/SKILL.md).
-
-## When to invoke
-
-Trigger on: `/compile-latex`, "compile this", "build my paper/deck", "why won't
-this compile", "what are the latex errors", "did my edit add warnings".
-
-Do **not** invoke for:
-- Single-figure visual polish with no full-document compile — use `/tikz-iterate`.
-- Deck content / pedagogy review — use `/slide-excellence`.
-- Editing prose or sections — use `/draft`.
-
-## Inputs
-
-This skill resolves paths against `~/.claude/state/personal_config.json` (see
-`_config/personal_config.example.json`). If a `.tex` path is given, use it. If
-only a basename is given, `Glob` for it under `personal_config.paths.overleaf_root`.
-If the config is missing and no absolute path is given, ask the user for the path.
-
-| Argument | Default | Meaning |
+| Option | Default | Meaning |
 |---|---|---|
-| positional `path-to-tex` | required | Master `.tex` to compile. |
-| `--engine=` | `auto` | Force `pdflatex` / `xelatex` / `lualatex`; `auto` detects. |
-| `--outdir=` | `build` | Aux-file directory (latexmk `-outdir`). |
-| `--box-threshold=` | `5pt` | Overfull-hbox reporting gate. |
-| `--clean` | off | `latexmk -c` (intermediate files), then stop. |
-| `--clean-all` | off | `latexmk -C` (incl. PDF), then stop. |
-| `--no-iterate` | off | Skip Step 6 figure loop — fast compile only. |
-| `--no-bib` | off | Skip bib backend (no biber/bibtex run). |
+| positional path | required | Master `.tex`. Absolute path, or a basename to resolve. |
+| `--engine=` | `auto` | Force `pdflatex` / `xelatex` / `lualatex`. |
+| `--outdir=` | `build` | Aux directory (`latexmk -outdir`). |
+| `--box-threshold=` | `5pt` | Overfull reporting gate. |
+| `--figures` | off | Opt-in: polish TikZ/pgfplots figures via `tikz-iterate`, then splice back. |
+| `--no-bib` | off | Skip the bib run (`-bibtex-`). |
+| `--force` | off | Compile even if a conflicted copy is present. |
+| `--clean` / `--clean-all` | off | `latexmk -c` / `-C`, then stop. |
 
-## Step 0 — Pre-flight
+## Resolving the file
 
-1. Resolve the master `.tex` path (above). `Read` it.
-2. **Conflicted-copy guard.** `Glob` the master's directory for Dropbox
-   conflicted siblings: `* (*conflicted copy*).tex` and `*conflicted*.tex`.
-   If any exist, **ABORT** with a warning listing them — do not compile or
-   iterate on a possibly-stale file. The user resolves the conflict first.
-3. If `--clean`/`--clean-all`: run `latexmk -c`/`-C -outdir=<outdir> <file>` and
-   stop (skip everything below).
-4. Verify `latexmk` and (for Step 6) `pdftoppm` are on `PATH`. If `latexmk` is
-   missing, surface `SETUP_MISSING:latexmk` and stop (see `docs/tex-setup.md`).
+No config file. In order: use an absolute or cwd-relative path if given;
+otherwise `Glob` `~/Library/CloudStorage/Dropbox*/Apps/Overleaf/*/**/<name>.tex` and, if a
+project name was mentioned, filter to that project directory; otherwise `Glob`
+`*.tex` in the cwd and pick the one with `\documentclass`. Ask only if that
+leaves zero or several plausible masters.
 
-## Step 1 — Detect engine & bib backend
+## Step 0, pre-flight
 
-Read the preamble (and any `\input`'d preamble file). Per `references/log-patterns.md` §6:
+1. `Read` the master.
+2. Conflicted-copy guard. This setup assumes these projects sync through
+   Dropbox (adjust to your machine), so compiling
+   next to a stale sibling means reporting errors the user already fixed
+   elsewhere. `Glob` the project directory recursively for `*conflicted copy*`
+   (`.tex`, `.bib`, `.sty`, `.cls`). If any exist, stop and list them with
+   mtimes so the user can resolve the conflict. `--force` overrides.
+3. `--clean` / `--clean-all`: run `latexmk -c -outdir=<outdir> <file>` or
+   `latexmk -C -outdir=<outdir> <file>` and stop.
+4. `latexmk` is at `/Library/TeX/texbin/latexmk` on a MacTeX install. If it is
+   missing from `PATH`,
+   prepend `/Library/TeX/texbin` before failing with `SETUP_MISSING:latexmk`.
+   With `--figures`, also check `gs` (e.g. `/usr/local/bin/gs`); if absent, report
+   `SETUP_MISSING:gs` and skip the figure pass, keeping the compile report.
 
-- **Engine.** Honor a `% !TEX program =` magic comment first. Else: `fontspec`
-  / `unicode-math` / `setmainfont` / CJK → `xelatex`; `\directlua` / lua code →
-  `lualatex`; otherwise `pdflatex`. `--engine=` overrides everything.
-- **Bib backend** (unless `--no-bib`): `biblatex`/`\addbibresource` → **biber**;
-  `natbib` + `\bibliographystyle` → **bibtex**. Warn on mismatch (e.g. biblatex
-  + leftover `\bibliographystyle`).
+## Step 1, detect engine and bib backend
 
-Report the detection before compiling:
+Read the preamble plus any `\input`'d preamble file (§6 of the reference).
+A `% !TEX program =` magic comment wins. Otherwise `fontspec` / `unicode-math` /
+`\setmainfont` / `xeCJK` / `ctex` implies xelatex; `\directlua` / `luacode`
+implies lualatex; else pdflatex. `--engine=` overrides both.
+
+Bib backend, unless `--no-bib`: `biblatex` or `\addbibresource` means biber;
+`natbib` plus `\bibliographystyle` means bibtex. Warn on a mismatch (biblatex
+loaded with a leftover `\bibliographystyle`, or `\addbibresource` with no
+biblatex).
+
+Print the detection before compiling:
+
 ```
-File:    <path>
-Engine:  xelatex   (reason: \setmainfont in preamble)
-Bib:     biber     (\addbibresource detected)
-Outdir:  build/
+File:   <path>
+Engine: xelatex  (\setmainfont in preamble)
+Bib:    biber    (\addbibresource)
+Outdir: build/
 ```
 
-## Step 2 — Compile
+## Step 2, compile
 
 ```bash
-latexmk -pdf -interaction=nonstopmode -synctex=1 -outdir=<outdir> <file>
+latexmk -f "$ENGINE_FLAG" -interaction=nonstopmode -synctex=1 -outdir=<outdir> <file>
 ```
-Swap the engine flag: `-pdf` (pdflatex), `-pdfxe` (xelatex), `-pdflua`
-(lualatex). `latexmk` handles multi-pass, the bib run, and ref-rerun
-automatically. Same command on Windows / macOS / Linux. Do **not** pass
-`-halt-on-error` — we want the full log to parse all errors at once.
 
-If `--no-bib`, add `-bibtex-`/skip the bib tool.
+`ENGINE_FLAG` comes from the step-1 detection: `-pdf` (pdflatex), `-pdfxe`
+(xelatex), `-pdflua` (lualatex).
+`-f` matters: without it latexmk stops at the first failing pass, so the log
+holds one error instead of all of them. Never pass `-halt-on-error`. Add
+`-bibtex-` for `--no-bib`. A nonzero exit code is expected on a failed document
+and is not a tooling failure; parse the log regardless.
 
-## Step 3 — Parse the log (file-stack tracker)
+## Step 3, parse the log
 
-Read `<outdir>/<jobname>.log`. Implement the file-stack tracker from
-`references/log-patterns.md` §3 so every `file:line` is attributed to the right
-`\input`'d sub-file (the `(./sections/x.tex … )` open/close-paren stack), not
-the master. Extract: BLOCKING errors (`! ...` + following `l.<N>`), undefined
-refs/cites, and overfull/underfull boxes (§4–5).
+Read `<outdir>/<jobname>.log` and run the file-stack tracker from §3 so every
+`file:line` lands on the right `\input`'d sub-file rather than the master. The
+tracker must push a placeholder for non-path `(` as well, otherwise the parens
+inside ordinary messages (`Overfull \hbox (15.83003pt too wide)`) pop real files
+off the stack and every subsequent attribution is wrong.
 
-## Step 4 — Rank & report
+Extract blocking errors (`! ...` plus the following `l.<N>`), undefined
+refs/cites (§4), and boxes (§5).
 
-Emit in this fixed priority order:
+## Step 4, rank and report
 
-1. **BLOCKING errors** — anything that stopped or corrupted the build. For each:
-   `<file>:<line>` + the `! ...` message. If it is `Undefined control sequence`,
-   look the token up in the command→package table (§1) and suggest the
-   `\usepackage`. If it is a missing `.sty` (file-not-found), emit the
-   **platform-specific install hint** (§2): MiKTeX `mpm --install=<pkg>`,
-   MacTeX/TeX Live `tlmgr install <pkg>` — detect the platform.
-2. **UNDEFINED REFS / CITES** — only those still undefined in the **final** pass
-   (drop transients latexmk's rerun already cleared, §4). Separate refs from
-   cites; for missing cites, suggest `/cite`.
-3. **BOXES** (threshold-gated, §5) — overfull only if `> box-threshold`;
-   underfull only if `badness >= 5000`. Show the worst 10, then `+K more`.
+Lead with one verdict line, `BUILD OK` / `BUILD OK (with warnings)` /
+`BUILD FAILED (N blocking)`, and the PDF path. Then, in this fixed order:
 
-Lead with a one-line verdict: `BUILD OK` / `BUILD OK (with warnings)` /
-`BUILD FAILED (N blocking errors)` and the output PDF path.
+1. Blocking errors. `<file>:<line>` plus the `! ...` message. For
+   `Undefined control sequence`, look the token up in §1 and suggest the
+   `\usepackage`. For `Environment X undefined`, use the environment table in
+   §1. For a missing `.sty`, print the `tlmgr` line from §2 for the user to run
+   (MacTeX's tree is root-owned, so it needs `sudo`; never run it unprompted).
+   Collapse cascades per §1: one undefined environment produces two or three
+   downstream errors that vanish once the root cause is fixed.
+2. Undefined refs and cites, split into two lists, keys with input lines. Only
+   report what survives the final pass (§4).
+3. Boxes, gated: overfull above `--box-threshold`, underfull at badness >= 5000.
+   Worst 10 sorted by severity, then `+K more`.
 
-## Step 5 — Diff vs last compile
+Below-threshold and font/rerun-check noise is dropped silently.
 
-Per §8: load `~/.claude/state/compile-latex/<project-hash>/last.json` (hash of
-the absolute master path). Diff the new warning/box/undef sets against it and
-report deltas, e.g. `+2 new overfull boxes, -1 undefined ref since last compile`.
-Then write the new set atomically (tmp + rename). If no baseline exists, note
-`first compile (no baseline)` and just write.
+## Step 5, diff vs last compile
 
-## Step 6 — Figure detection & auto-handoff to /tikz-iterate
+State lives at `~/.claude/state/compile-latex/<hash>/last.json`, where `<hash>`
+is `sha1(abspath)[:12]`. Load it, diff the new ref/cite/box sets, and report
+deltas (`+2 overfull, -1 undefined ref since last compile`). Box identity is
+`file:lines:kind`, not the pt value, so a reflow of the same box is not counted
+as new. Write the new state atomically (tmp file plus rename); the Write tool
+creates missing parent directories, but a Bash-side write needs a `mkdir -p`
+first, since `~/.claude/state/` may not exist yet. With no baseline,
+note `first compile (no baseline)` and just write. Schema in §8.
 
-Skip entirely if `--no-iterate`, or if the build failed (Step 4 had blocking
-errors), or if no figures are detected.
+## Step 6, figures (opt-in, `--figures` only)
 
-**No asking.** Do not ask which figures to iterate — iterate **all** detected
-ones. Pre-flight already cleared the conflicted-copy guard, so splice in place.
+Runs only under `--figures`, and only when the build was clean and figures
+exist.
 
-1. `Grep` the master and its `\input`'d sub-files for figure blocks (§7):
-   `\begin{tikzpicture}`, `\begin{axis}` / `\begin{groupplot}` (pgfplots),
-   and `standalone` figure files.
-2. For each block: harvest the parent preamble's `\usepackage` /
-   `\usetikzlibrary` / `\usepgfplotslibrary` / `\pgfplotsset` / `\definecolor` /
-   `\colorlet` / `\newcommand` / `\def` / `\tikzset` lines into a standalone
-   wrapper (so named colors and macros resolve), then hand the wrapped figure to
-   `/tikz-iterate` via the `Task` tool (`subagent_type: "tikz-reviewer"` loop,
-   or invoke the `/tikz-iterate` workflow). Pass a `--goal` derived from the
-   figure's caption if present.
-3. On approval, **strip the wrapper** and splice **only the inner figure body**
-   back into the source via offset-anchored `Edit` — preserve the surrounding
-   `figure` env, `\caption`, `\label`, `\centering`, and any
-   `\resizebox`/`\adjustbox` wrapper (§7).
-4. After all figures are spliced, **recompile once** (Step 2) to confirm the
-   document still builds. Report which figure blocks changed (Dropbox version
-   history + git make this recoverable — do not nag with per-figure prompts).
+1. `Grep` the master and its `\input`'d files for `\begin{tikzpicture}` and
+   pgfplots `\begin{axis}` / `\begin{groupplot}` blocks (§7). Treat the
+   outermost `tikzpicture` as the unit.
+2. For each block, record the file, the exact body text, and `sha1(body)`.
+   Harvest the parent preamble's `\usepackage` / `\usetikzlibrary` /
+   `\usepgfplotslibrary` / `\pgfplotsset` / `\definecolor` / `\colorlet` /
+   `\newcommand` / `\def` / `\tikzset` lines into a standalone wrapper so colors
+   and macros resolve.
+3. Hand each wrapped figure to the `tikz-iterate` skill (one subagent per
+   figure, run concurrently), with a goal derived from the caption if there is
+   one. Do not reimplement its refine loop here.
+4. Splice back only on a verified anchor. Re-`Read` the source file, confirm the
+   captured body still appears exactly once and its `sha1` is unchanged, then
+   `Edit` with that body as `old_string`. If it is missing, appears more than
+   once, or the hash moved, skip it and report `not spliced (source changed)`.
+   Strip the wrapper first; keep the surrounding `figure` env, `\caption`,
+   `\label`, `\centering`, and any `\resizebox` / `\adjustbox`.
+5. Recompile once and report which blocks changed.
 
-## Step 7 — Cleanup
+Rasterization belongs to `tikz-iterate`, which uses ghostscript (this setup
+assumes no poppler is installed; adjust to your machine); leave it there. To
+inspect the compiled document's
+text, run `~/.claude/assets/bin/pdfread.py text <outdir>/<jobname>.pdf`. On a
+machine without poppler, the Read
+tool cannot open a PDF (no `pdftoppm`), and `pdftotext` does
+not exist either, so never shell out to those.
 
-Aux files already live in `<outdir>/` (isolated). Mention `--clean` /
-`--clean-all` as the way to wipe them. Leave the PDF in place. `--watch` is
-**deferred** — for a live rebuild loop, tell the user to run
-`latexmk -pvc -outdir=<outdir> <file>` manually.
+## Step 7, cleanup
 
-## Cross-platform notes
-
-`latexmk`, `pdftoppm`, and the SyncTeX flag behave identically on Windows
-(MiKTeX), macOS (MacTeX), and Linux (TeX Live). The **only** platform branch is
-the missing-package install hint: `mpm --install=<pkg>` on Windows vs
-`tlmgr install <pkg>` on macOS/Linux. Detect the platform once and reuse.
+Aux files stay in `<outdir>/`. Mention `--clean` / `--clean-all` as the way to
+wipe them; leave the PDF. For a live rebuild loop tell the user to run
+`latexmk -pvc -outdir=<outdir> <file>` themselves.
 
 ## Failure modes
 
 | Symptom | Cause | Response |
 |---|---|---|
-| Conflicted-copy sibling found | Dropbox sync conflict | ABORT in Step 0; list the files; do not compile. |
-| `latexmk` not on PATH | No TeX install | `SETUP_MISSING:latexmk`, point to `docs/tex-setup.md`. |
-| `! ... .sty not found` | Package not installed | Platform install hint (§2); if MiKTeX auto-install, suggest re-run. |
-| Undefined control sequence | Missing `\usepackage` or user macro | §1 table lookup; if user macro, flag missing `\newcommand`/un-`\input`'d file. |
-| Refs undefined on pass 1 only | latexmk hadn't converged | Drop as transient (§4) — never report. |
-| File-stack desync (depth < 0) | Parens in log output | Reset to master, mark attribution `~approx`. |
-| Figure won't converge in `/tikz-iterate` | Hard diagram | Leave that block unspliced; report it; continue with the rest. |
-| `pdftoppm` missing | Poppler absent | Skip Step 6 figure loop with a note; compile report still stands. |
+| Conflicted-copy sibling | Dropbox sync conflict | Stop in step 0, list files, offer `--force`. |
+| `! ... .sty not found` | Package absent | Check `kpsewhich <file>`, then print the `tlmgr` line (§2). |
+| Undefined control sequence | Missing package or user macro | §1 lookup; if it is a project macro, flag a missing `\newcommand` or an un-`\input`'d macro file. |
+| Refs undefined, log says `Rerun to get cross-references right` | latexmk did not converge | Re-run once; do not report the refs (§4). |
+| Stack depth goes negative | Unbalanced parens in log text | Reset to master, mark the attribution `~approx`. |
+| Empty or absent `.log` | latexmk never started | Report the raw latexmk stderr; do not invent errors. |
+| Figure will not converge | Hard diagram | Leave that block unspliced, report it, continue. |
 
 ## Examples
 
-**Compile a paper, see the errors:**
 ```
-/compile-latex main.tex
-→ Engine: pdflatex | Bib: bibtex
+compile-latex main.tex
 → BUILD FAILED (1 blocking)
   sections/results.tex:212  Undefined control sequence \toprule
     fix: \usepackage{booktabs}
-→ 1 undefined cite: Smith2020  (run /cite)
+→ 1 undefined cite: Smith2020
 → since last compile: +0 boxes
 ```
 
-**Fast compile, no figure loop:**
 ```
-/compile-latex slides.tex --no-iterate
-→ BUILD OK (with warnings) | build/slides.pdf
-→ 3 overfull boxes >5pt (worst: frame 12, 18.4pt) | +1 since last compile
+compile-latex "Algorithmic Pricing Manuscript" --box-threshold=2pt
+→ BUILD OK (with warnings) | build/main.pdf
+→ 3 overfull >2pt (worst: sections/model.tex:88, 18.4pt) | +1 since last compile
 ```
-
-**Full build + figure polish (default):**
-```
-/compile-latex paper.tex
-→ BUILD OK → 4 tikz/pgfplots figures detected → iterating…
-  fig:dag      APPROVED (2 rounds) spliced
-  fig:coefplot APPROVED (3 rounds) spliced
-  …
-→ recompiled: BUILD OK | build/paper.pdf
-```
-
-## Out of scope
-
-- Live `--watch` rebuilds — use `latexmk -pvc` manually (Step 7).
-- Deck pedagogy/content review — `/slide-excellence`.
-- Writing or rewriting prose — `/draft`.
-- Adding citations — `/cite` (this skill only *reports* missing cites).
-- Single isolated figure with no document — `/tikz-iterate` directly.
-
-## Relation to neighbors
-
-- **`/tikz-iterate`** — the per-figure refine loop this skill calls in Step 6.
-  Invoke it directly when you have one figure and no document to compile.
-- **`/slide-excellence`** — reviews deck *content* (visual / pedagogy /
-  proofreading). It defers compilation to this skill. Run `/compile-latex`
-  first to get a clean build, then `/slide-excellence` for the content pass.
-- **`/create-lecture`** — scaffolds a new deck; compile it here afterward.

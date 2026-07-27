@@ -1,0 +1,198 @@
+---
+title: "Prediction is not a decision"
+subtitle: "AI and Economic Decisions, Week 3"
+author: "Your Name"     # the exact form you want on the title slide; see style/house.md
+date: 2026-09-16
+format: yale-lecture-revealjs
+engine: knitr
+---
+
+## Notation {visibility="hidden"}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\D}{\mathcal{D}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+## Where we left off {#recap}
+
+Last week: a classifier, and its held-out accuracy.
+
+::: {.question}
+[So]{.label}
+Accuracy went from 0.91 to 0.94. Should the firm ship the new model?
+:::
+
+::: {.notes}
+Show of hands before anyone speaks. Most rooms say yes. Hold that answer until
+after the hiring screen.
+:::
+
+## Today {#roadmap}
+
+<ul class="agenda">
+<li class="done">Supervised learning and held-out accuracy</li>
+<li class="now">Why accuracy does not answer the question</li>
+<li>The loss function does the work</li>
+<li>Worked example: the hiring screen</li>
+<li>What breaks in deployment</li>
+</ul>
+
+## Two models, same accuracy {#motivation}
+
+:::: {.columns}
+::: {.column width="50%"}
+Model A: misses 60 good hires, flags 40 bad ones.
+:::
+::: {.column width="50%"}
+Model B: misses 40 good hires, flags 60 bad ones.
+:::
+::::
+
+::: {.fragment}
+::: {.keyidea}
+[Key idea]{.label}
+Same accuracy, different consequences. Accuracy cannot tell them apart.
+:::
+:::
+
+## What a decision needs {#definition}
+
+::: {.definition}
+[Definition]{.label}
+A *decision rule* maps a signal $s$ to an action $a = \delta(s)$. A *loss*
+$L(a, y)$ says what it costs to take action $a$ when the truth is $y$.
+:::
+
+::: {.example}
+[Example]{.label}
+Screening applicants: $a \in \{\text{interview}, \text{reject}\}$, and
+$L(\text{reject}, \text{qualified})$ is the cost of missing a good hire.
+:::
+
+## Why prediction is not decision {#build}
+
+- A model gives you a posterior $\hat p(y \mid x)$.
+- A decision needs a loss $L(a, y)$.
+- Only together do they give an action.
+
+::: {.fragment}
+$$a^\star = \argmin_{a \in \mathcal{A}} \E\big[L(a, y) \mid s\big]$$
+:::
+
+::: {.notes}
+The list stages itself; `incremental: true` is set by the format. Pause on the
+second bullet and ask where the loss comes from.
+:::
+
+## Worked example: the hiring screen {#worked}
+
+<ol class="steps">
+<li>Write the decision problem: choose $a$ to minimize expected loss.</li>
+<li>Substitute the posterior: $\E[L(a, y) \mid s]$.</li>
+<li>Minimize over the two actions.</li>
+<li>Read the threshold off the loss ratio: $\tau = 1/(1 + c_{FN}/c_{FP})$.</li>
+</ol>
+
+::: {.aside-note}
+The threshold is a loss ratio and nothing else.
+:::
+
+::: {.with-previous}
+[Threshold Formula]{.jump target="ap-threshold"}
+:::
+
+## The threshold moves {auto-animate="true" #thr1}
+
+::: {.hero}
+$\tau = 0.50$
+:::
+
+Equal costs.
+
+## The threshold moves {auto-animate="true" #thr2}
+
+::: {.hero}
+$\tau = 0.09$
+:::
+
+A missed hire costs ten times a wasted interview.
+
+## Your turn {.center #discussion}
+
+::: {.prompt}
+Your firm's model is 94% accurate. Your competitor's is 91%. Which would you
+rather deploy, and what do you need to know first?
+:::
+
+## What breaks in deployment {.section-break}
+
+## What breaks {#threats}
+
+:::: {.columns}
+::: {.column width="58%"}
+```{r}
+#| fig-width: 5.4
+#| fig-height: 4.0
+# loss ratio assumed at training vs realized next quarter
+```
+:::
+::: {.column width="42%"}
+::: {.warning}
+[Watch out]{.label}
+The loss ratio you assumed at training time is not the one the business faces
+next quarter.
+:::
+:::
+::::
+
+::: {.aside-note}
+We come back to this in Week 8 on distribution shift.
+:::
+
+## Where we got to {#synthesis}
+
+<ul class="agenda">
+<li class="done">Supervised learning and held-out accuracy</li>
+<li class="done">Why accuracy does not answer the question</li>
+<li class="done">The loss function does the work</li>
+<li class="done">Worked example: the hiring screen</li>
+<li class="done">What breaks in deployment</li>
+</ul>
+
+## What to take away {#closing}
+
+::: {.keyidea}
+[Key idea]{.label}
+A predictor is only useful once you say what decision it feeds.
+:::
+
+[Next week: where the labels come from, and who is paid to make them.]{.dim}
+
+## For next time {#next-steps .closing-slide}
+
+:::: {.together}
+::: {.steps}
+1. Read the two pages on threshold choice and bring one sentence.
+2. Problem set 2, due Monday, 6pm.
+3. Write the loss function for one decision your team actually makes.
+:::
+::::
+
+## Appendix {.appendix-break background-color="var(--appendix-ground)"}
+
+## Where the threshold formula comes from {.appendix #ap-threshold}
+
+<ol class="steps">
+<li>Set the two expected losses equal at the indifference point.</li>
+<li>Solve for the posterior probability that makes them equal.</li>
+<li>Read $\tau = 1/(1 + c_{FN}/c_{FP})$ off the result.</li>
+</ol>
+
+::: {.with-previous}
+[]{.jump-back}
+:::
+
+<!-- Only on a deck that cites: add `bibliography: lecture-refs.bib` to the
+front matter and the references block from the README's "Citations and the
+reference list" section. The format already carries `citeproc: false` and
+`refs-fit: lecture`. -->

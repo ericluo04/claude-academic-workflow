@@ -1,0 +1,431 @@
+---
+title: "Algorithmic repricing raises prices only where rivals also automate"
+subtitle: "An example seminar deck, generated end to end with Claude Code"
+author: "Claude Code"
+date: "2026-09-18"
+bibliography: talk-refs.bib
+# Everything else (theme, stage-slide.lua, citeproc: false, refs-fit, self-hosted
+# MathJax, highlight style, staging defaults) lives in the format extension,
+# installed under _extensions/. The deck keeps only what is its own.
+#
+# The live copy under docs/ is this source rendered against the repo's starter
+# theme, exactly as below. To reproduce it: from this directory,
+#   quarto add ../../slide-tooling --no-prompt
+#   cp -R ../../slide-tooling/mathjax .
+#   quarto render talk.qmd
+# The look is the starter theme's; restyle the theme to your own taste.
+format: starter-revealjs
+---
+
+## Notation {visibility="hidden"}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Rival}{\mathrm{RivalShare}}
+\newcommand{\Prob}{\mathrm{Pr}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+```{r setup}
+#| include: false
+library(ggplot2)
+
+# Figure palette, matched to the starter theme's paper ground and plum
+# accent. If you restyle the slide theme, restyle this with it so the figures
+# sit on the same ground as the slides.
+col_main <- "#7d3a5e"
+col_soft <- "#8a8178"
+col_text <- "#4f463c"
+col_bg   <- "#faf7f2"
+
+talk_theme <- function(base_size = 15) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(colour = "#e5ddd0", linewidth = 0.4),
+      axis.title = element_text(colour = col_text),
+      axis.text = element_text(colour = col_text),
+      legend.position = "top",
+      legend.title = element_blank(),
+      legend.margin = margin(0, 0, 0, 0),
+      plot.margin = margin(2, 6, 2, 2),
+      plot.background = element_rect(fill = col_bg, colour = NA)
+    )
+}
+knitr::opts_chunk$set(dev.args = list(bg = "#faf7f2"))
+```
+
+## Most prices on this marketplace are now set by software
+
+- [68%]{.yblue} of active listings change price at least once a week, against 4% in 2015.
+- Repricing is delegated to a handful of third-party tools whose rules are published.
+- Sellers meet the same rivals week after week, so rules respond to rules.
+
+The policy question is usually posed as whether automation is inflationary. That framing
+is incomplete: the answer depends on the composition of the market a seller automates into.
+
+::: {.aside-note}
+Source: PriceScope weekly listing panel, 2015--2023. Own calculations. Online price
+competition on this kind of marketplace has been measured since @chevalier2003Measuring.
+:::
+
+## Automation pulls prices in two directions at once
+
+Delegating price setting cuts the cost of a revision from roughly \$14 of seller
+attention to near zero. Two consequences run in opposite directions.
+
+- Cheap revisions let a seller undercut a slow rival within hours, which pushes prices
+  [down]{.ygreen} toward marginal cost.
+- Cheap revisions also make undercutting visible and matchable within hours, which
+  sustains higher prices when rivals are [equally fast]{.yred}.
+
+Which force dominates is a question about the rival mix $\Rival_{mt}$, the share of a
+market's listings already under automated pricing, not about automation itself.
+
+::: {.aside-note}
+Both forces are old; what is new is that they can now run at machine speed. Undercutting
+is the mechanism @chevalier2003Measuring find between two online booksellers, and the
+variety it is traded against is what @brynjolfsson2003Consumer price [see also
+@chevalier2006Effecta].
+:::
+
+## Automation raises prices only where rivals automate too
+
+::: {.result}
+[Headline estimate]{.label}
+Adoption raises a listing's price by 6.2 log points (s.e. 1.4) in the top quartile of
+rival exposure, and by −0.4 (1.1) in the bottom quartile.
+:::
+
+The two estimates come from the same regression, the same sellers, and the same weeks. The
+sign of the effect of automation is a property of the market, not of the technology.
+
+::: {.takeaway}
+Automation is not inflationary on its own. It is inflationary where it is already common.
+:::
+
+## Setting and identification {.section-break}
+
+## API access arrived in a queue, not by application
+
+- 41,208 listings across 320 narrow product markets, priced weekly, 2015--2023.
+- API access arrived by seller tier between March 2019 and November 2021, with no
+  application and no way to move up the queue.
+- A listing is coded as automated in the first week its price changes on three or more
+  distinct days, [a threshold no manual seller in the pre-period ever crosses]{.ygray}.
+
+Rival exposure $\Rival_{mt}$ is the share of other listings in market $m$ and week $t$
+coded as automated. The full [measurement rule]{.jump target="ap-measure"} is in the
+appendix.
+
+::: {.aside-note}
+A queue rollout is a design used elsewhere: @wiles2025Algorithmic identify the effect
+of algorithmic writing assistance the same way, on hires rather than prices.
+:::
+
+## Adoption tracks the tier queue that granted API access
+
+```{r}
+#| label: fig-adoption-curves
+#| fig-cap: "Adoption of the repricing API, by queue position"
+#| fig-width: 8
+#| fig-height: 4.2
+base <- subset(economics, date >= as.Date("2000-01-01") & date <= as.Date("2008-12-01"))
+n <- nrow(base)
+z <- as.numeric(scale(log(base$pce)))
+
+adoption <- data.frame(
+  date  = rep(seq(as.Date("2015-01-01"), by = "month", length.out = n), 2),
+  share = c(plogis(2.2 * z - 0.8), plogis(2.0 * z - 2.6)),
+  grp   = factor(rep(c("Early queue positions", "Late queue positions"), each = n),
+                 levels = c("Early queue positions", "Late queue positions"))
+)
+
+ggplot(adoption, aes(date, share, colour = grp)) +
+  geom_vline(xintercept = as.Date("2019-03-01"), linetype = "dashed",
+             colour = col_soft, linewidth = 0.5) +
+  geom_line(linewidth = 1.2) +
+  annotate("text", x = as.Date("2019-06-01"), y = 0.97, hjust = 0, size = 4.6,
+           colour = col_text, label = "Repricing API opens") +
+  scale_colour_manual(values = c(col_main, col_soft)) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::label_percent(accuracy = 1)) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  labs(x = NULL, y = "Share of listings automated") +
+  talk_theme(15)
+```
+
+::: {.aside-note}
+Groups are the earliest and latest thirds of the queue, fixed at seller signup. Seller
+behaviour on this marketplace has mostly been studied through reviews rather than prices
+[@he2022Market].
+:::
+
+## Identification compares adopters to not-yet-adopters inside the same market-week
+
+$$
+\begin{aligned}
+\log p_{jmt} = \;& \beta_1 A_{jt} + \beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr) \\[2pt]
+                 & + \gamma_j + \delta_{mt} + \varepsilon_{jmt}
+\end{aligned}
+$$
+
+Here $A_{jt} \in \{0,1\}$ marks automation, $\gamma_j$ absorbs the listing and
+$\delta_{mt}$ the market-week, so $\beta_2$ is identified off variation in $\Rival_{mt}$
+across sellers who adopt in different quarters. Standard errors are clustered by market.
+
+::: {.assumption}
+[Assumption 1 (Parallel trends given exposure)]{.label}
+Given rival exposure, adoption timing carries no information about the untreated price path:
+$$\E\bigl[\Delta \log p_{jmt}(0) \mid A_{jt}, \Rival_{mt}\bigr]
+ = \E\bigl[\Delta \log p_{jmt}(0) \mid \Rival_{mt}\bigr].$$
+:::
+
+## What the estimates say {.section-break}
+
+## The level effect is a wash; the interaction is not
+
+::: {tbl-colwidths="[43,15,24,18]"}
+| Outcome: log price | Pooled | + Market × week FE | Interaction |
+|---|---:|---:|---:|
+| Automated pricing | 0.024 | 0.019 | −0.004 |
+|   | (0.008) | (0.009) | (0.011) |
+| Automation × top-quartile rival exposure |  |  | 0.066 |
+|   |  |  | (0.017) |
+| Market × week fixed effects | No | Yes | Yes |
+| Listings | 41,208 | 41,208 | 41,208 |
+:::
+
+::: {.takeaway}
+Pooling across markets averages a positive and a zero effect into a small positive one.
+:::
+
+## Prices move at adoption, and stay moved
+
+:::: {.columns}
+::: {.column width="58%"}
+```{r}
+#| label: event-study
+#| fig-width: 5.4
+#| fig-height: 4.0
+es <- data.frame(
+  k  = -4:4,
+  b  = c(-0.004, 0.002, -0.006, 0, 0.011, 0.038, 0.052, 0.059, 0.062),
+  se = c( 0.012, 0.011,  0.010, 0, 0.013, 0.014, 0.015, 0.016, 0.018)
+)
+
+ggplot(es, aes(k, b)) +
+  geom_hline(yintercept = 0, colour = col_soft, linewidth = 0.4) +
+  geom_vline(xintercept = -0.5, linetype = "dashed", colour = col_soft, linewidth = 0.4) +
+  geom_pointrange(aes(ymin = b - 1.96 * se, ymax = b + 1.96 * se),
+                  colour = col_main, linewidth = 0.8, size = 0.5) +
+  scale_x_continuous(breaks = -4:4) +
+  scale_y_continuous(limits = c(-0.04, 0.11)) +
+  labs(x = "Quarters relative to adoption", y = "Effect on log price") +
+  talk_theme(14)
+```
+:::
+::: {.column width="42%"}
+High-exposure markets only. Nothing happens in the four quarters before adoption, the jump
+lands in the quarter of adoption, and the level persists for a year.
+
+::: {.result}
+[Estimate]{.label}
+0.062 (0.018) four quarters out
+:::
+
+::: {.aside-note}
+Pre-period coefficients are jointly insignificant, $p = 0.71$.
+:::
+:::
+::::
+
+## The interaction survives every specification we can think of
+
+<table class="spec">
+<thead>
+<tr>
+<th>Outcome: log price</th>
+<th class="num">Baseline</th>
+<th class="num">Seller trends</th>
+<th class="num">Drop 2020</th>
+<th class="num">Balanced</th>
+<th class="num">Continuous exposure</th>
+<th class="num">Winsorized</th>
+<th class="num">PPML</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Automation × exposure</td><td class="num">0.066</td><td class="num">0.061</td><td class="num">0.070</td><td class="num">0.064</td><td class="num">0.058</td><td class="num">0.063</td><td class="num">0.069</td></tr>
+<tr><td>&nbsp;</td><td class="num">(0.017)</td><td class="num">(0.019)</td><td class="num">(0.018)</td><td class="num">(0.020)</td><td class="num">(0.016)</td><td class="num">(0.017)</td><td class="num">(0.021)</td></tr>
+<tr><td>Automation, level</td><td class="num">−0.004</td><td class="num">−0.007</td><td class="num">−0.002</td><td class="num">−0.005</td><td class="num">−0.003</td><td class="num">−0.004</td><td class="num">−0.006</td></tr>
+<tr><td>&nbsp;</td><td class="num">(0.011)</td><td class="num">(0.012)</td><td class="num">(0.011)</td><td class="num">(0.013)</td><td class="num">(0.010)</td><td class="num">(0.011)</td><td class="num">(0.014)</td></tr>
+<tr><td>Market × week FE</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td></tr>
+<tr><td>Listings</td><td class="num">41,208</td><td class="num">41,208</td><td class="num">38,940</td><td class="num">22,517</td><td class="num">41,208</td><td class="num">41,208</td><td class="num">41,208</td></tr>
+</tbody>
+</table>
+
+::: {.aside-note}
+Standard errors clustered by market throughout. The continuous-exposure column reports the
+effect of a one-standard-deviation move in $\Rival_{mt}$. The empirics-first posture, a
+robust fact ahead of a model, is the one @golder2023Learning argue for. Sensitivity to
+the [sample window]{.jump target="ap-window"} is tabulated in the appendix.
+:::
+
+## Why the effect is a complementarity {.section-break}
+
+## Complementarity follows from the slope of the best response
+
+::: {.proposition}
+[Proposition 1]{.label}
+Let $\pi_j(p_j, p_{-j})$ be log-concave in $p_j$ and suppose automation lowers the
+adjustment cost $\kappa_j$. If $\partial^2 \pi_j / \partial p_j \partial p_{-j} > 0$, then
+$p_j^\star = \argmax_p \pi_j(p, p_{-j}) - \kappa_j \mathbf{1}\{p \neq p_{j,t-1}\}$ is
+increasing in $p_{-j}$, and adoption decisions are strategic complements.
+:::
+
+::: {.proof}
+Log-concavity gives a unique interior maximizer, so $p_j^\star$ is characterized by the
+first-order condition. Falling $\kappa_j$ widens the region where the constraint
+$p = p_{j,t-1}$ does not bind, and on that region the cross-partial signs
+$\mathrm{d} p_j^\star / \mathrm{d} p_{-j} > 0$ by Topkis. Adopting therefore raises the
+marginal return to a rival's adoption.
+:::
+
+::: {.takeaway}
+The empirical interaction is the comparative static the model predicts, not a
+specification artifact.
+:::
+
+## Three checks bound the demand-selection threat
+
+Sellers who automate first may be facing rising demand, which would raise prices with or
+without the API. Three pieces of evidence bound this.
+
+- Adoption timing is [uncorrelated]{.yblue} with pre-period price and quantity trends
+  once tier is held fixed ($p = 0.71$ above).
+- Within-tier queue position, which is set by a signup date years earlier, gives the same
+  interaction estimate: 0.059 (0.022).
+- Rival exposure is [not]{.yred} predicted by own-market demand growth, so the interaction
+  is not a demand shock in disguise.
+
+::: {.aside-note}
+The one case we cannot rule out is a market-level shock hitting exposure and prices
+together in the same week. [We treat this as an open question.]{.dim} Demand dynamics on
+platforms of this kind are modelled directly by @yin2024MetaLearning.
+:::
+
+## What this means for policy {.section-break}
+
+## A composition test is what a regulator can actually run
+
+Nothing in the estimate requires a regulator to observe pricing algorithms, which are
+private, or to prove intent, which is unfalsifiable. It requires the share of a market
+already automated, which the platform records. Whether firms adopt in the first place is a
+separate question with its own literature [@dietvorst2018Overcoming; @brynjolfsson2025Generative].
+
+- Below roughly a 40% automated share, permitting automation moves prices by nothing we can
+  distinguish from zero.
+- Above it, the same permission is worth 4 to 7 log points, [rising in the share]{.yblue}.
+
+::: {.aside-note}
+The threshold is where the fitted interaction crosses zero, so it inherits the standard
+error on the interaction and should be read as a range.
+:::
+
+## Automation raises prices where it is already common
+
+::: {.result}
+[Headline estimate]{.label}
+6.2 log points (s.e. 1.4) in the top quartile of rival exposure, −0.4 (1.1) in the bottom
+quartile, from the same regression.
+:::
+
+A rule that permits automated pricing has no single price effect. Its effect is increasing
+in how much automation the market already has, which makes [market composition]{.ymid} the
+object a regulator should be measuring.
+
+::: {.aside-note}
+Paper and replication files: `example.edu/~presenter/repricing`
+:::
+
+## Thank you {.thanks-slide .no-stage}
+
+Comments and objections are equally welcome, in the room or afterwards.
+
+::: {.thanks-contact}
+Write to me at [you@example.edu](mailto:you@example.edu)
+
+The paper and these slides live at [your-site.example](https://your-site.example)
+:::
+
+## Appendix {.appendix-break background-color="var(--appendix-ground)"}
+
+## Robustness to the sample window {.appendix #ap-window}
+
+| Sample or specification | Interaction | s.e. | Level effect | Listings | Markets | Pre-trend $p$ |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline, 2015--2023 | 0.066 | 0.017 | −0.004 | 41,208 | 320 | 0.71 |
+| Post-API weeks only, 2019--2023 | 0.071 | 0.021 | −0.002 | 33,415 | 320 | 0.64 |
+| Drop the 2020 demand spike | 0.070 | 0.018 | −0.002 | 38,940 | 320 | 0.69 |
+| Drop the last adoption cohort | 0.061 | 0.023 | −0.006 | 29,884 | 311 | 0.55 |
+| Market-specific linear trends | 0.058 | 0.026 | −0.005 | 41,208 | 320 | 0.83 |
+
+: Sensitivity of the interaction estimate to the sample window {.spec tbl-colwidths="[32,12,10,12,12,10,12]"}
+
+::: {.aside-note}
+Nothing here moves the estimate by more than half a standard error.
+:::
+
+::: {.with-previous}
+[Back to the talk]{.jump-back}.
+:::
+
+## Why we do not instrument adoption with tier eligibility {.appendix #ap-iv}
+
+Tier eligibility is a valid instrument for own adoption and a [weak]{.yamber} one for the interaction,
+because the first stage for $A_{jt} \times \Rival_{mt}$ requires exogenous variation in
+both arguments at once. The available instrument moves only the first.
+
+The reduced form is reported instead: crossing an eligibility threshold raises price by
+0.031 (0.012) in high-exposure markets and 0.002 (0.010) elsewhere, a ratio close to the
+interaction estimate scaled by the 0.48 first stage.
+
+::: {.aside-note}
+A two-sample approach using a second platform's queue is in progress.
+:::
+
+::: {.with-previous}
+[Back to the talk]{.jump-back}.
+:::
+
+## How automated pricing is measured {.appendix #ap-measure}
+
+The three-distinct-days rule is the middle of three thresholds. Tighter and looser rules
+move the classified share, but not the estimate.
+
+| Classification rule | Share | Changes per week | Interaction | s.e. | Listings |
+|---|---:|---:|---:|---:|---:|
+| Price changes on two or more distinct days | 0.71 | 2.4 | 0.061 | 0.015 | 41,208 |
+| Three or more distinct days (baseline) | 0.54 | 3.6 | 0.066 | 0.017 | 41,208 |
+| Four or more distinct days | 0.39 | 4.5 | 0.072 | 0.020 | 41,208 |
+
+: Classification threshold and the interaction estimate {.spec tbl-colwidths="[38,10,20,14,9,9]"}
+
+::: {.aside-note}
+No listing in the 2015--2018 pre-period crosses the three-day rule for more than two
+consecutive weeks, which is what makes the threshold usable as a proxy. Imputing the level
+a listing would have been assigned under an unobserved rule follows
+@bradlow2004LearningBased; richer platform data would allow the transformer approach of
+@gabel2024Market or the multimedia features surveyed in @grewal2021Marketing, and letting a
+model propose the rule rather than fixing three by hand is the case @ludwig2024Machine make.
+:::
+
+::: {.with-previous}
+[Back to the talk]{.jump-back}.
+:::
+
+## References {.references-break background-color="var(--references-ground)"}
+
+## References {.references}
+
+::: {#refs}
+:::
