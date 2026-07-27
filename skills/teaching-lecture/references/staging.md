@@ -58,7 +58,7 @@ A model gives you a posterior.
 
 The other variants worth using: plain `.fragment` for the answer after a
 question, `.fade-up` for a punchline, `.highlight-yale` (a theme class) to turn
-a term `#63aaff` on cue, `.semi-fade-out` to dim a line you have finished with
+a term to the accent colour on cue, `.semi-fade-out` to dim a line you have finished with
 while keeping it readable. Avoid `.grow` and `.shrink`, which read as a
 rendering bug from the back of a room, and avoid `.highlight-red`, whose
 saturated red is both off-palette and the colour family this theme gives

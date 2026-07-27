@@ -44,12 +44,6 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 
 `agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and Inter; its README documents all of it.
 
-### A note on reviewer confidentiality
-
-`review-paper --referee` writes a referee report on a journal submission, and journal confidentiality policies can forbid the obvious way of running it: sending the manuscript under review to a hosted AI service. [Management Science](https://pubsonline.informs.org/page/mnsc/submission-guidelines) says so directly: members of the review team "should not upload any part of a manuscript submitted to Management Science into a generative AI tool such that it might compromise confidentiality and/or copyright." JMR's [submission guidelines](https://journals.sagepub.com/author-instructions/mrj) defer to Sage's [ChatGPT and generative AI policy](https://www.sagepub.com/en-us/nam/chatgpt-and-generative-ai), which is broader and less specific: it reserves the right to act when a reviewer breaches peer-review confidentiality with GenAI tools, and uploading a submission to a hosted model is the clearest way to do that.
-
-There is an option that satisfies these policies and gets almost no discussion. [Ollama](https://ollama.com) is a free, open-source tool (from the company Ollama) for running open-weight language models on your own computer. Inference runs entirely on your machine: prompts and documents are processed locally, and the manuscript is never transmitted to any cloud service or company, so you can use a capable model while respecting the confidentiality policy. Current open-weight models are strong enough to run the full review checklist agentically, though the bigger ones want capable hardware. Setup instructions are on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has more information. The skills here are written for Claude Code, but the checklist logic transfers to any capable model.
-
 ## Things you may not know
 
 A few of the higher-leverage discoveries from building this, none of them obvious from the docs.
@@ -111,7 +105,7 @@ Two details of the supporting tooling: `paper.py` disk-caches every response for
 
 ### The Gmail drafting trick
 
-Filed under nice to know. When a university mail account cannot integrate with anything, draft in a personal Gmail via the Gmail MCP and copy the draft out of Gmail's web editor into the university client. Gmail-to-client copy-paste preserves formatting, where terminal-to-client copy-paste mangles spacing and line breaks (observed on Windows; other platforms may differ). The agent writes and revises the draft; you paste and send.
+When a university mail account cannot integrate with anything, draft in a personal Gmail via the Gmail MCP and copy the draft out of Gmail's web editor into the university client. Terminal copy-paste can sometimes mangle spacing and line breaks, so drafting in Gmail and copying from its editor is the cleaner route. The agent writes and revises the draft; you paste and send.
 
 ## License and credit
 

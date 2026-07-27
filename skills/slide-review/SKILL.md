@@ -1,6 +1,6 @@
 ---
 name: slide-review
-description: Render a Quarto reveal.js deck, screenshot every slide in a real browser, and review the pictures for overflow, unreadable type, low contrast, broken figures, failed math, and a weak argument, on a light talk deck or a dark lecture deck, and check that an offline-variant deck still works with no network. TRIGGER on "review my slides", "check my deck", "audit my slides", "pre-talk check", "pre-flight my deck", "am I ready to present", "are my slides readable", "will this deck work offline", "does my math render", "is anything cut off", "did my slides overflow", or before a seminar, job talk, conference talk, or lecture. Works on .qmd or an already-rendered .html; handles Yale talk and lecture themes. macOS toolchain: quarto, deck-check.mjs on node 22, Playwright MCP, pdfread.py.
+description: Render a Quarto reveal.js deck, screenshot every slide in a real browser, and review the pictures for overflow, unreadable type, low contrast, broken figures, failed math, and a weak argument, on a light talk deck or a dark lecture deck, and check that an offline-variant deck still works with no network. TRIGGER on "review my slides", "check my deck", "audit my slides", "pre-talk check", "pre-flight my deck", "am I ready to present", "are my slides readable", "will this deck work offline", "does my math render", "is anything cut off", "did my slides overflow", or before a seminar, job talk, conference talk, or lecture. Works on .qmd or an already-rendered .html; handles light and dark themes. macOS toolchain: quarto, deck-check.mjs on node 22, Playwright MCP, pdfread.py.
 argument-hint: "[deck.qmd|deck.html] [--preflight] [--type=talk|lecture] [--slides=1-12] [--goal=\"...\"]"
 ---
 
@@ -84,23 +84,23 @@ directory does not exist, and it does not create it.
 
 ## Stage 0: deck type and ground
 
-Settle this before running anything, because the whole review branches on it. `yale-talk` is dark ink
-on white. `yale-lecture` is a designed dark theme, so the ground every contrast number is taken
-against flips, and ink that is correct in a talk deck is invisible in a lecture deck. Deck type picks
+Settle this before running anything, because the whole review branches on it. Deck type picks
 the lens list (a lecture gets the pedagogy reviewer, a talk does not), the text-density standard
 (deliberately opposite targets per type; `style/house.md`), and the closing-slide expectation
-(stage 3c).
+(stage 3c). The ground branches the contrast arithmetic: the shipped starter theme is dark ink on a
+paper ground, and a deck on a designed dark theme flips the ground every contrast number is taken
+against, so ink that is correct on one is invisible on the other.
 
 Read the theme and the other front matter facts in one pass. In a Quarto website the format block
 usually sits in a `_metadata.yml` beside the `.qmd`, so search both:
 
 ```bash
-grep -nE 'yale-(talk|lecture)\.scss|html-math-method|embed-resources|self-contained-math|highlight-style|stage-slide' \
+grep -nE '^\s*format:|^\s*theme:|html-math-method|embed-resources|self-contained-math|highlight-style|stage-slide' \
   deck.qmd _metadata.yml "$(dirname deck.qmd)/_metadata.yml" 2>/dev/null
 ```
 
-For a rendered `.html` with no source, fingerprint the class names, since the two themes define
-mostly distinct sets:
+For a rendered `.html` with no source, fingerprint the class names, since the two deck types use
+mostly distinct vocabularies:
 
 ```bash
 grep -coE 'class="[^"]*\b(assumption|proposition|lemma|takeaway|result|thanks-slide|ymid)\b' deck.html   # talk
@@ -108,21 +108,24 @@ grep -coE 'class="[^"]*\b(keyidea|definition|question|prompt|agenda|steps|demo-t
 ```
 
 Whichever count is higher wins. A tie, or zero both ways, means ask. The root font size is a
-second signal: 30px is `yale-talk`, 34px is `yale-lecture`. The stage 4 probe reports the root
-size and the deck's ground colour, so confirm the answer there before writing the report. A
-lecture deck reporting a white ground means the theme did not load, which is CRITICAL on its own.
+second signal when the themes in play differ, since a lecture theme typically runs a larger root
+than a talk theme (the starter theme serves both types at 30px). The stage 4 probe reports the root
+size and the deck's ground colour, so confirm the answer there before writing the report. A deck
+reporting pure white when its theme sets a tinted or dark ground means the theme did not load,
+which is CRITICAL on its own.
 
-What each theme's ink should measure, hex by hex, is the first section of
-`references/probe-reading.md`. The class vocabulary both themes define is the README's
-`Theme classes` section; the cheapest single fingerprint is that the talk theme has `.ymid` where
-the lecture theme has `.ypale`.
+What the deck's ink should measure, hex by hex, comes from the theme's own palette table;
+`references/probe-reading.md` opens with the starter theme's. The class vocabulary is the README's
+`Theme classes` section; a cheap single fingerprint is that talk sources use `.ymid` where
+lecture sources use `.ypale` (the starter theme styles both).
 
-`.section-break` is where the two themes diverge, so the old advice about it is theme specific, and
+`.section-break` styling is per theme, so old advice about it goes stale, and
 the README's `Things that will silently break the deck` section has the current rule: no
-`background-color` attribute on either theme. On a lecture divider the attribute is also a defect
+`background-color` attribute on a section divider, whatever the theme. On a dark deck the attribute
+is also a defect
 the probe can see, because reveal's `has-dark-background` then forces that slide's body text to pure
-white (verification in `references/probe-reading.md`, dark defects). Do not carry the old
-`background-color="#00356b"` fix forward from memory.
+white (verification in `references/probe-reading.md`, dark defects). Do not carry an old
+hard-coded `background-color` fix forward from memory.
 
 ## Stage 1: render
 
@@ -182,11 +185,11 @@ the deck` section owns the mechanics of both:
   with no external hosts, no runtime loaders, and no post-processing of any kind.
 - The base theme was swapped off `default` onto one of the eight built-in reveal themes that
   `@import` Google Fonts, which no Quarto setting can make offline-safe; the README names the eight
-  and the four clean ones. CRITICAL, with the fix being a return to `[default, yale-talk.scss]` or
-  `[default, yale-lecture.scss]`.
+  and the four clean ones. CRITICAL, with the fix being a return to `[default, <your-theme>.scss]`
+  (the starter extension layers `starter-theme.scss` on `default`).
 
 Run this grep on every deck, offline variant or not, because a swapped base theme also changes the
-variables the Yale SCSS layers onto, and on a lecture deck it can quietly undo the dark ground the
+variables the deck's own SCSS layers onto, and it can quietly undo the ground the
 rest of this review measures against:
 
 ```bash
@@ -269,7 +272,7 @@ when the user wants a handout, and use it as the capture fallback in stage 5.
 
 ### Stage 3b: jump buttons and the progress bar
 
-Both themes carry two behavioural features no static screenshot can check, and both fail silently.
+The staging filter gives every deck two behavioural features no static screenshot can check, and both fail silently.
 Run this only on a deck that has an appendix or `.jump` spans. It needs its own headless Chrome
 rather than the shared Playwright browser, because it navigates and clicks:
 
@@ -535,8 +538,9 @@ Lead with the fit verdict and the count of blocking issues. If nothing blocks, s
 present in the first line, then list the rest. The offline line still appears, saying either the
 verdict or that the deck did not ask for the check, so nobody reads its absence as a pass.
 
-On a lecture deck the header line reads `Type: teaching lecture (dark, ground #1a1c1e)`, the closing
-line reads `Closing: no thank-you slide (correct for a lecture)`, and the report
+On a lecture deck the header line carries the deck type and the measured ground the same way, the
+closing
+line reads `Closing: no thank-you slide (correct for a lecture)`, and on a dark deck the report
 says which dark checks ran and what each found, including the ones that found nothing. A figure whose
 pixels could not be read is reported as sent for human review, with the slide numbers.
 

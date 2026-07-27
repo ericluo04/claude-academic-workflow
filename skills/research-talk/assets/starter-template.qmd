@@ -4,7 +4,7 @@ subtitle: "Seminar, Department of Economics"
 author: "Your Name"     # the exact form you want on the title slide; see style/house.md
 institute: "Your University"
 date: last-modified
-format: yale-talk-revealjs
+format: starter-revealjs
 ---
 
 ## Notation {visibility="hidden"}

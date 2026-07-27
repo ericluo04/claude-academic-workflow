@@ -3,7 +3,7 @@ title: "Prediction is not a decision"
 subtitle: "AI and Economic Decisions, Week 3"
 author: "Your Name"     # the exact form you want on the title slide; see style/house.md
 date: 2026-09-16
-format: yale-lecture-revealjs
+format: starter-revealjs
 engine: knitr
 ---
 

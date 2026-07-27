@@ -1,6 +1,6 @@
 ---
 name: teaching-lecture
-description: Author Quarto reveal.js lecture decks for a classroom, built for engagement: incremental reveals, animation, discussion prompts, checks for understanding, worked examples. Larger Yale lecture theme, staged reveals, and figures sized for a projector. TRIGGER on "build a lecture", "slides for my class", "teaching deck", "lecture on X", "course slides", "class on AI", "make a lecture for week 3", "MBA lecture", "undergrad lecture", "add a discussion slide". Use research-talk for a conference, seminar, or job talk, slide-review to audit a deck that already exists, and course-site for the landing page, the week table, and publishing.
+description: Author Quarto reveal.js lecture decks for a classroom, built for engagement: incremental reveals, animation, discussion prompts, checks for understanding, worked examples. Teaching blocks, staged reveals, and figures sized for a projector. TRIGGER on "build a lecture", "slides for my class", "teaching deck", "lecture on X", "course slides", "class on AI", "make a lecture for week 3", "MBA lecture", "undergrad lecture", "add a discussion slide". Use research-talk for a conference, seminar, or job talk, slide-review to audit a deck that already exists, and course-site for the landing page, the week table, and publishing.
 ---
 
 # Teaching lecture decks
@@ -23,48 +23,51 @@ Shared theme and tooling live in `~/.claude/assets/quarto-yale/`.
 `README.md` there is the machinery reference: the recipe, the class list, what
 the filter rewrites, what the gates assert, and the settings that silently break
 a deck. Read it for any of that; where it and the source disagree, the source
-wins. The head of `yale-lecture.scss` carries the palette and the theme's own
+wins. The head of `starter-theme.scss` carries the palette and the theme's own
 reasoning about a class. This skill does not restate what `research-talk`
 already covers (`output-location` for code chunks, how `pdfread.py` works);
 read that skill where the two overlap. The pointer map at the end of this file
 says which reference file holds what.
 
-## The lecture theme is dark
+## The theme carries a measured palette
 
-`yale-lecture.scss` is a designed dark theme, not an inverted light one. 34px
-root for a lecture hall, near-black ground, and a named block for each thing a
-slide can ask of a student.
-
-The table gives the example theme's values, so the mechanism is concrete; your
-own theme supplies its own palette and should keep the measured-contrast
-discipline.
+The shipped theme is `starter-theme.scss`, a light editorial look (paper
+ground, serif display headings, plum accent) with a named block for each thing
+a slide can ask of a student. The look is yours to replace; the discipline to
+keep is that the theme documents its own palette as a measured contrast table,
+each ink with its WCAG 2.1 ratio against the ground, checked with a checker
+and written into the head of the scss. The starter theme's table:
 
 | Role | Hex | Notes |
 |---|---|---|
-| Ground | `#1a1c1e` | Every slide, including dividers. Nothing changes it. |
-| Body text | `#e8e6e3` | 13.7:1 on the ground. |
-| Headings | `#ffffff` | 17.1:1, headings only. Body text at pure white halates on a projector. |
-| Links, accents | `#63aaff` | 7.1:1. `.yblue`, list markers, progress bar. |
-| Pale accent | `#a8ceff` | 10.5:1. `.ypale`, `h3`, emphasis, table headers. |
-| Inline code | `#ffa07a` | 8.6:1. `.yred` as well. |
-| Warning | `#f4c95d` | `.yamber`, `.warning` blocks. |
-| Example | `#7ec699` | `.ygreen`, `.example` blocks, `.demo-tag`. |
-| Muted | `#9aa0a6` | 6.5:1. `.ygray`, `.dim`, footer, slide number, appendix headings. |
-| Divider disc | `#286dc0` | 3.3:1, a large solid shape only; white on it is 5.2:1. |
-| Appendix slate | `#6f7a85` | 3.9:1, marks and rules on `.appendix` slides. Never text. |
+| Ground | `#faf7f2` | Every slide, including dividers. Nothing changes it. |
+| Body text | `#33302b` | 12.3:1 on the ground. |
+| Muted | `#6b6157` | 5.7:1. `.dim`, footer, slide number, captions, dates. |
+| Quiet emphasis | `#4f463c` | 8.6:1. `.ygray`, `h3`, blockquotes, appendix headings. |
+| Accent | `#7d3a5e` | 7.5:1. Links, list markers, block labels, progress fill. |
+| Dark accent | `#54263f` | 11.4:1. `.yblue`, inline code, `.takeaway`. |
+| Good | `#38684a` | 6.0:1. `.ygreen`. |
+| Warning | `#7d5b12` | 5.8:1. `.yamber`, the `.warning` label. |
+| Bad | `#9c3b26` | 6.4:1. `.yred`. |
+| Pale accent | `#d9bccb` | 1.6:1. Hover underlines and other decoration. Never text. |
+| Hairline | `#ddd6c9` | 1.4:1. Rules and block frames. Never text. |
+| Panel tint | `#f2ede3` | Block grounds, one step off the paper; every text ink above also holds 4.5:1 here. |
 
-Ratios are WCAG 2.1 against the ground, measured rather than estimated.
+Any hex copied out of an older deck gets checked against the table before it
+ships; the two decoration rows exist so the check is mechanical. Your own
+theme's rationale goes in `style/house.md`.
 
-Yale blue `#00356b` is not ink anywhere in this theme. It measures 1.4 to 1.7
-to 1 against the dark ground, which is invisible rather than merely poor. Do not
-put it back as a text or accent colour, do not use it in a figure, and do not
-use it as a slide background: the ground stays near-black on purpose.
-
-Two consequences to carry into a deck: a figure with a white panel background is
-a lightbox on a dark wall, so figures need dark panels
-(`references/figures-dark.md`), and any hex copied out of an older deck needs
-checking against this table. The palette's reasoning is in `style/house.md` and
-the head of the scss.
+If you build a dark theme for a lecture hall, design it; an inverted light
+theme is how a deck ends up with ink that measures near 1:1. The method: a
+near-black ground, body text just off pure white (running text at pure white
+halates on a projector; headings can take it), every accent re-picked and
+re-measured against the dark ground, since a saturated brand colour that reads
+as authority on white can land under 2:1 on near-black, which is invisible.
+Reserve the 3:1 to 4:1 band for large solid marks and rules, never text, and
+say so in the table. Pair the theme with a dark `highlight-style` (`a11y-dark`)
+so code does not arrive on a white card, and rebuild figures on the deck ground
+(`references/figures-dark.md` has the recipe), because a white-panel figure is
+a lightbox on a dark wall.
 
 ## Before drafting anything
 
@@ -89,18 +92,22 @@ under it carries one claim, and the claims in order are the lecture.
 
 ## The verified front matter
 
-The format is a Quarto extension. Its master copy is
-`~/.claude/assets/quarto-yale/_extensions/yale/yale-lecture/`; adopt
-it by copying that directory to `_extensions/yale-lecture/` beside the deck (or
-at the project root), and give the rendered deck a `mathjax/` copy from
-`~/.claude/assets/quarto-yale/mathjax/` beside the HTML, because the
-format self-hosts MathJax at a relative url. A standalone deck then needs only:
+The format is a Quarto extension, `starter-revealjs`. Adopt it once per deck
+directory (or once at the project root):
+
+```bash
+cd <deck dir>
+quarto add ~/.claude/assets/quarto-yale --no-prompt   # installs _extensions/starter/
+cp -R ~/.claude/assets/quarto-yale/mathjax .          # the format self-hosts MathJax at a relative url
+```
+
+A standalone deck then needs only:
 
 ```yaml
 title: "Prediction is not a decision"
 author: "Your Name"       # exact form; see style/house.md
 date: 2026-09-16
-format: yale-lecture-revealjs
+format: starter-revealjs
 engine: knitr             # only if the deck has R chunks; R is the default here for figures
 bibliography: lecture-refs.bib   # only on a deck that cites
 ```
@@ -108,8 +115,8 @@ bibliography: lecture-refs.bib   # only on a deck that cites
 The format carries, so the deck must not repeat: the theme layered on `default`
 (eight of the twelve built-ins `@import` Google Fonts at display time),
 `stage-slide.lua` in `filters:`, `citeproc: false` (harmless on a deck that does
-not cite), `refs-fit: lecture` (the starter extension shipped in this repo
-carries `refs-fit: starter`), `highlight-style: a11y-dark`,
+not cite), `refs-fit: starter` (the packing preset measured for the starter
+theme), `highlight-style: a11y`,
 `slide-number: c/t`, `incremental: true`, `date-format: long`,
 `fig-align: center`, `auto-animate-duration: 0.4`, `echo/warning/message:
 false`, and self-hosted MathJax (`method: mathjax, url: mathjax/MathJax.js`)
@@ -124,7 +131,7 @@ course this repo's `examples/` lecture comes from:
 
 ```yaml
 format:
-  yale-lecture-revealjs:
+  starter-revealjs:
     # These lectures render to docs/lectures/<name>.html and the site's MathJax
     # copy is at docs/assets/mathjax/ (a `resources` entry in _quarto.yml keeps
     # it there across renders), so the url is the path from the rendered page
@@ -141,20 +148,23 @@ engine: knitr
 its blocks in turn, which `incremental: true` does for list items only; its six
 jobs are in the README under "What stage-slide.lua does", and its header comment
 is the reference before changing how a slide stages. A deck with dividers needs
-it or the discs come out empty.
+it or the divider numerals come out empty.
 
 MathJax handles `\eqref`, `\label`, `\DeclareMathOperator`, `mathtools`, and
 `physics`, none of which KaTeX can do. Do not switch to `mathml` or `plain`; a
 room with no network takes the offline variant, which gives up `\eqref` and
-friends (README, "The offline variant"). `highlight-style: a11y-dark` is the
-companion to this theme: a light style paints a white code card, and a
-misspelled style name fails silently at exit 0.
+friends (README, "The offline variant"). The `highlight-style` is the theme's
+companion: `a11y` on the light starter theme, `a11y-dark` on a dark theme
+(a light style there paints a white code card), and a misspelled style name
+fails silently at exit 0.
 
 The progress bar is on by default and the format sets `slide-number: c/t`.
-Students pace themselves off the bar; on this theme it is segmented per section,
-and both the bar and the number take the appendix and the references out of the
+Students pace themselves off the bar. Both the bar and the number take the
+appendix and the references out of the
 denominator, so the bar reads 100% on the `.closing-slide` and the class body
-counts 1/25 to 25/25 with the tail on its own 1/8 run. Measured details:
+counts 1/25 to 25/25 with the tail on its own 1/8 run; the filter also writes
+per-section cut positions a theme can draw as segments (the starter theme keeps
+one plain fill). Measured details:
 `references/staging.md`; bar mechanics: README "The progress bar".
 
 Leave `chalkboard` off: with `embed-resources: true` it is a hard render error,
@@ -200,13 +210,13 @@ correctly inside a raw `<ol class="steps">` item.
 | `.question` | A check the student answers; the answer goes on the next slide as a `.fragment`. |
 | `.prompt` | Large centered discussion question, sized to fill a slide while students talk. |
 | `.hero` | One number that should land hard. |
-| `.full-bleed` | On a heading whose slide is one image, edge to edge, capped at 78vh. |
+| `.full-bleed` | On a heading whose slide is one image, edge to edge, height-capped under the heading. |
 | `.demo-tag` | Live-coding marker: `## Live demo [demo]{.demo-tag}`. |
 | `.aside-note` | Muted caveat; arrives on the previous block's beat. |
 | `.num` | Right-align a numeric table column. |
 | `.jump`, `[]{.jump-back}` | The appendix jump buttons below. |
-| `ul.agenda` | Roadmap list: `.done` struck-through gray, `.now` blue and bold with a triangle, the rest muted. |
-| `ol.steps` | Filled blue numbered circles; every worked example, four or five steps. |
+| `ul.agenda` | Roadmap list: `.done` muted, `.now` in the accent and bold, the rest plain. |
+| `ol.steps` | Worked-example steps, four or five to a list; the theme spaces them, and can draw numbered discs. |
 | `#thm-` family | Numbered theorem environments: `references/theorems.md`. |
 | `.yblue` `.ypale` `.ygray` `.ygreen` `.yamber` `.yred` `.dim` | Colour spans, hex per the palette table. |
 
@@ -225,13 +235,14 @@ A predictor is only useful once you say what decision it feeds.
 The starter template exercises all five boxes, the agenda, the steps, `.hero`,
 and `.prompt`. Keep the class-to-meaning mapping fixed for the whole semester
 (`references/pedagogy.md` says why). Two blocks per slide is the limit, and it
-is physical as well as pedagogical: three blocks of two lines each fill 94% of
-the canvas at 34px root.
+is physical as well as pedagogical: at a lecture-hall root, three blocks of two
+lines each fill nearly the whole canvas (94% when measured at a 34px root).
 
 ## Dividers, appendix, references, jump buttons
 
-Two divider archetypes, both a circle beside a vertically centred title, the
-same shapes `yale-talk.scss` uses so a talk and a lecture read as one family:
+Two divider archetypes, the same architecture in a talk deck and a lecture deck
+so the two read as one family. On the starter theme each is a display numeral
+over a short standing rule over the centred title:
 
 ```markdown
 ## How much a leaderboard can move {.section-break}
@@ -239,18 +250,21 @@ same shapes `yale-talk.scss` uses so a talk and a lecture read as one family:
 ## Appendix {.appendix-break background-color="var(--appendix-ground)"}
 ```
 
-`.section-break` is a numbered blue disc. The number comes from
+`.section-break` is the numbered divider. The number comes from
 `stage-slide.lua`, so nothing is hand-numbered and the dividers renumber on the
 next render. A divider carries its title and nothing else, no background
-attribute; `.appendix-break` is the one divider that changes the ground, and its
-attribute is copied exactly as written above. The fallbacks, the print-view
+attribute; `.appendix-break` is the one divider that may change the ground, and
+its attribute is copied exactly as written above. The starter theme keeps both
+divider grounds on the page ground, so the attribute changes nothing there until
+a theme pulls the values apart; the hex lives in the theme either way. The
+fallbacks, the print-view
 behaviour, and why a CSS counter is wrong here are in the README under "Things
 that will silently break the deck"; divider title diction is in
 `style/house.md`.
 
-Slides after the appendix divider take `{.appendix}`: slate headings and marks,
-a standing APPENDIX pill above every heading, and the ground, the body text, and
-the five teaching boxes unchanged. The scheme's measured values and reasons are
+Slides after the appendix divider take `{.appendix}`: muted headings and marks,
+a standing APPENDIX label above every heading, and the ground, the body text, and
+the five teaching boxes unchanged. The scheme's reasons are
 in `style/house.md`.
 
 A lecture cites less than a seminar talk, and when it does the citation is a
@@ -269,10 +283,11 @@ paginates itself:
 ```
 
 The format's `citeproc: false` is what lets `stage-slide.lua` run citeproc
-itself and cut the list across slides, and `refs-fit: lecture` is the measured
-34px budget: 22.6 rendered lines at 113 characters per line, packed greedily.
-The starter extension shipped in this repo carries `refs-fit: starter` (25.9
-lines at 134), so the sample lecture packs 10 entries and then 2.
+itself and cut the list across slides, and `refs-fit: starter` is the budget
+measured for the starter theme: 25.9 rendered lines at 134 characters per
+line, packed greedily, which is how the sample lecture packs 10 entries and
+then 2. A restyled theme re-derives its budget and overrides it with
+`refs-lines` and `refs-chars-per-line`.
 `STAGE_REFS_DEBUG=1 quarto render deck.qmd` prints what the packer decided and
 `refs-lines` overrides it. Never put `.scrollable` on a references slide. The
 cite-form table, the hover and tooltip machinery, and the packing model are in
@@ -354,7 +369,7 @@ optional. Run them every time.
 
 ```bash
 cd <deck dir>
-quarto render lecture.qmd --to yale-lecture-revealjs 2>&1 | tee /tmp/render.log
+quarto render lecture.qmd --to starter-revealjs 2>&1 | tee /tmp/render.log
 grep '\[WARNING\]' /tmp/render.log     # unclosed divs and missing images warn here, still exit 0
 
 node ~/.claude/assets/quarto-yale/deck-check.mjs fit lecture.html   # must print DECK-FITS: YES
@@ -383,16 +398,17 @@ in full. The sample lecture measures zero dead steps.
 default MathJax deck it reports the external MathJax reference and fails, which
 is correct and is not a defect (README, "The offline variant").
 
-Overflow matters more here than in a research deck. At the 34px lecture root, a
-heading plus ten single-line bullets fills the canvas exactly, so eight is the
-working limit. Twelve bullets overshoot by 161 px, and lines eleven and twelve
-are simply gone on the projector while the laptop preview looks fine. Fixes, in
+Overflow matters more here than in a research deck. At a lecture-hall root, a
+heading plus roughly ten single-line bullets fills the canvas (measured at a
+34px root: ten fit exactly, twelve overshoot by 161 px, and lines eleven and
+twelve are simply gone on the projector while the laptop preview looks fine),
+so eight is the working limit. Fixes, in
 order: split the slide (almost always right, since a slide that does not fit is
 doing two jobs), move the delivery lines into `::: {.notes}` while the substance
 stays in the body where the handout keeps it, or add `{.smaller}` to the
-heading, kept for a table or a code block because shrinking type defeats a 34px
-root. `panel-tabset` is not a fix (only its first tab prints) and `.scrollable`
-slides always fail the gate; split instead.
+heading, kept for a table or a code block because shrinking type defeats a
+lecture-sized root. `panel-tabset` is not a fix (only its first tab prints) and
+`.scrollable` slides always fail the gate; split instead.
 
 To look at slides rather than measure them, use decktape and `pdfread.py` per
 the README ("Looking at a rendered deck"). The Read tool cannot open a PDF on
@@ -435,8 +451,8 @@ appear in neither PDF, and `panel-tabset` prints only its first tab (README,
 `assets/starter-template.qmd` is the starter deck: recap and agenda, the five
 boxes, a worked example with a jump to its appendix derivation, an
 `auto-animate` pair, a `.prompt`, the synthesis pair, and the closing slide. It
-renders standalone, and passes both gates, with `_extensions/yale-lecture/`
-copied beside it; it needs no `_metadata.yml`. Math at display time additionally
+renders standalone, and passes both gates, with `_extensions/starter/`
+installed beside it; it needs no `_metadata.yml`. Math at display time additionally
 needs a `mathjax/` copy beside the rendered HTML.
 
 ## Traps, all verified on this machine
@@ -447,11 +463,11 @@ needs a `mathjax/` copy beside the rendered HTML.
 | Figure axis labels unreadable, gate says the slide is ok | `auto-stretch` shrank the figure instead of overflowing | read `--json` per-image `w`, move the text into a column |
 | A blank slide in the count and the handout | macro block before the first `##` | `## Notation {visibility="hidden"}` |
 | `\argmin` errors as an unexpected control sequence | macros wrapped in `$$ ... $$` | bare raw LaTeX under the hidden slide |
-| Section divider has an almost invisible navy panel on it | `background-color="#00356b"` copied from the talk theme | drop the attribute; `{.section-break}` alone is right here |
-| Divider disc is an empty circle | `stage-slide.lua` not running: a deck off the extension with no `filters:` line | use the extension format, or add the filter by absolute path |
+| Section divider carries a stray coloured panel | a `background-color` attribute copied from another deck or theme | drop the attribute; `{.section-break}` alone is the contract |
+| Divider numeral is missing | `stage-slide.lua` not running: a deck off the extension with no `filters:` line | use the extension format, or add the filter by absolute path |
 | A figure or a note appears with the heading instead of waiting | the filter is not running, or the heading carries `{.no-stage}` | `stage-check.mjs` names the slide |
 | Math unrendered even with wifi | the format's self-hosted `mathjax/MathJax.js` url resolves to nothing next to the rendered HTML | copy `~/.claude/assets/quarto-yale/mathjax/` beside the deck, or override the url as the course project does |
-| Appendix divider is on the near-black ground in the handout | reveal's print view builds no background elements at all | nothing to fix; the ring and the lone title carry it |
+| Appendix divider loses its tinted ground in the handout | reveal's print view builds no background elements at all | nothing to fix; the rule and the lone title carry it |
 | Progress bar is one unbroken line | fewer than two `.section-break` dividers, or the filter is missing | nothing to fix if the deck has one section; otherwise add the filter |
 | Progress bar is not full on the closing slide | the appendix has no `.appendix-break` divider and no `.appendix` slides, so nothing marks where the class ends | add the divider before the first appendix slide |
 | A jump button navigates but Back does nothing | the deck has `.jump` spans and a stale render, or the filter was dropped | re-render; the filter emits the handler alongside the buttons |
@@ -459,9 +475,9 @@ needs a `mathjax/` copy beside the rendered HTML.
 | Dividers numbered 1, 2, 2, 2 | a CSS counter, which `display: none` slides do not increment | the attribute plus `content: attr(...)`, which the theme already does |
 | A paragraph on a divider slide lands under the title | the divider centres a full-height flex `h2` | put the sentence on the next slide |
 | `pdf` link on the course site 404s after a render | a render prunes `docs/` of anything it did not build | build the handout in a `post-render` hook |
-| Some text or a figure line is invisible on the wall | Yale blue `#00356b` used as ink on the dark ground, 1.4 to 1.7 to 1 | use `#63aaff`, or `#a8ceff` for a pale accent |
-| Code block renders with no highlighting at all | misspelled `highlight-style` (`solarized-dark` and `printing-dark` do not exist) | the format's `a11y-dark` |
-| Figure is a white box in the middle of the slide | ggplot default theme | the dark `lecture_theme()` in `references/figures-dark.md` |
+| Some text or a figure line is invisible on the wall | ink from another palette, measuring near 1:1 against the deck ground | check the hex against the theme's contrast table and swap in one of its inks |
+| Code block renders with no highlighting at all | misspelled `highlight-style` (`solarized-dark` and `printing-dark` do not exist) | the format's `a11y`, or `a11y-dark` on a dark theme |
+| Figure panel clashes with the deck ground | ggplot default theme | the ground-matched `deck_theme()` in `references/figures-dark.md` |
 | Title slide is top-aligned instead of centred | a `top: 0 !important` rule was added to the theme | remove it; it also disables `{.center}` |
 | Figure inside a column or an `.r-stack` renders tiny or overflows | `auto-stretch` only ever sizes a direct child of the section, and `.r-stretch` by hand only removes the size cap | set `fig-width`/`fig-height`, or `width=` on a file image |
 | Handout is missing most of a slide's content | `panel-tabset` prints its first tab only | separate slides |
@@ -487,9 +503,9 @@ needs a `mathjax/` copy beside the rendered HTML.
 |---|---|
 | `references/pedagogy.md` | The density doctrine, prompts and checks for understanding (Mazur), speaker notes, the semantic vocabulary rule, the pattern audit table. |
 | `references/theorems.md` | The numbered theorem family, `#thm-` crossrefs, the `#def-`/`#exm-` guard, proof-in-appendix with jump buttons, the harmless citeproc warning. |
-| `references/figures-dark.md` | Figure geometry at the 34px root, `lecture_theme()`, captioned figures, the silent-shrink trap, plotly, video, `.full-bleed`. |
+| `references/figures-dark.md` | Figure geometry for a lecture deck, the ground-matched `deck_theme()`, captioned figures, the silent-shrink trap, plotly, video, `.full-bleed`. |
 | `references/closing-slide.md` | The closing slide: markup, heading-then-one-beat with `.together`, the rationale, how the gate classifies it. |
 | `references/staging.md` | Fragment variants, `.r-stack`, `fragment-index`, `auto-animate`, the animation budget, progress bar and slide number details, jump-button measurements, layout numbers. |
 | `style/house.md` | Your values, separated from the mechanisms: palette rationale, density calibration, the author line, dates, button diction, closing wording. A stub in the public repo; fill it in. |
-| `assets/starter-template.qmd` | The starter deck, rendering clean under `yale-lecture-revealjs`. |
+| `assets/starter-template.qmd` | The starter deck, rendering clean under `starter-revealjs`. |
 | `~/.claude/assets/quarto-yale/README.md` | The machinery: the filter's six jobs, staging internals, both gates, citations and refs packing, jump buttons, the progress bar, the silent breakers, handouts, fonts. |

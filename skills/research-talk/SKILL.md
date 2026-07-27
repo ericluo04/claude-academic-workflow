@@ -1,6 +1,6 @@
 ---
 name: research-talk
-description: Author a Quarto reveal.js deck for an academic research presentation: conference talk, seminar, job talk, brown bag, workshop. Restrained Yale talk theme, assertion titles, one argument per deck, exhibits from R or Python, deep appendix for questions. TRIGGER on "make slides for my talk", "build a seminar deck", "conference presentation", "job talk", "brown bag", "turn this paper into slides", "slides for my paper", "deck for the referee's question", "add an appendix slide", "export a handout". Use teaching-lecture for classroom material, and slide-review to audit a deck that already exists.
+description: Author a Quarto reveal.js deck for an academic research presentation: conference talk, seminar, job talk, brown bag, workshop. Restrained styling, assertion titles, one argument per deck, exhibits from R or Python, deep appendix for questions. TRIGGER on "make slides for my talk", "build a seminar deck", "conference presentation", "job talk", "brown bag", "turn this paper into slides", "slides for my paper", "deck for the referee's question", "add an appendix slide", "export a handout". Use teaching-lecture for classroom material, and slide-review to audit a deck that already exists.
 ---
 
 # Research talk decks
@@ -19,7 +19,7 @@ Shared theme and tooling live in `~/.claude/assets/quarto-yale/`.
 `README.md` there is the machinery reference: what the filter rewrites, what
 the gates assert, the reference packer, the progress-bar takeover, and the
 settings that silently break a deck. Read it for any of that; where it and the
-source disagree, the source wins. The head of `yale-talk.scss` carries the
+source disagree, the source wins. The head of `starter-theme.scss` carries the
 theme's own reasoning about each class.
 
 Deck architecture and the review-before-the-talk discipline are adapted from
@@ -112,11 +112,11 @@ before methods. End on the conclusion slide, which carries the claim and the
 headline estimate, then the thank-you slide (`references/closing-slide.md`).
 
 Build the appendix as you go: every cut for time and every anticipated
-question is an appendix slide. Mark them `{.appendix}` so they run on the gray
+question is an appendix slide. Mark them `{.appendix}` so they run on the muted
 scheme and you can spot them while scrolling under pressure, and open the run
 with an `{.appendix-break}` divider. A job talk wants ten to twenty of these.
 
-Cite on the slide where the borrowed thing appears, in the small gray style
+Cite on the slide where the borrowed thing appears, in the small muted style
 the theme gives `.aside-note` and `.citation`; do not make the audience wait
 for a references slide to learn whose figure they are looking at. The full
 list still goes at the end, after the appendix (`references/citations.md`).
@@ -136,24 +136,23 @@ appendix past the budget on purpose.
 
 ## Front matter, via the extension
 
-The deck uses the `yale-talk-revealjs` extension format. Adopt it once per
+The deck uses the `starter-revealjs` extension format. Adopt it once per
 deck directory:
 
 ```bash
 cd <deck dir>
-quarto add ~/.claude/assets/quarto-yale --no-prompt
+quarto add ~/.claude/assets/quarto-yale --no-prompt   # installs _extensions/starter/
 cp -R ~/.claude/assets/quarto-yale/mathjax .
-mkdir -p fonts && cp -R ~/.claude/assets/quarto-yale/fonts/inter fonts/
 ```
 
 ```yaml
-format: yale-talk-revealjs
+format: starter-revealjs
 bibliography: talk-refs.bib   # only on a deck that cites
 ```
 
 The format carries the whole verified recipe: the theme layered on `default`,
-`stage-slide.lua`, `citeproc: false` with `refs-fit: talk`, self-hosted
-MathJax 2.7.9 pinned to its own TeX webfonts, the Inter `@font-face` block,
+`stage-slide.lua`, `citeproc: false` with `refs-fit: starter`, self-hosted
+MathJax 2.7.9 pinned to its own TeX webfonts,
 `highlight-style: a11y`, `slide-number: c/t`, `date-format: long`,
 `incremental: true`, `fig-align: center`, `auto-animate-duration: 0.4`, and
 `echo`/`warning`/`message` off. Its `_extension.yml` says why each line is
@@ -161,7 +160,7 @@ there.
 
 The `mathjax/` copy is why math needs no CDN: the format points MathJax at the
 deck's own `mathjax/MathJax.js`, resolved by the browser relative to the
-rendered page, and `fonts/inter/` resolves the same way. Writing
+rendered page. Writing
 `html-math-method: mathjax` as a bare string instead loads pandoc's MathJax 4
 from jsDelivr at display time (README). MathJax is the engine because a formal
 talk needs what KaTeX cannot do: `\eqref` and `\label`,
@@ -189,7 +188,7 @@ everything:
 
 ```yaml
 format:
-  yale-talk-revealjs:
+  starter-revealjs:
     embed-resources: true
     html-math-method: katex      # bare string, never the object form
     self-contained-math: true
@@ -221,7 +220,7 @@ KaTeX. `mathtools` and `physics` commands are available under MathJax.
 
 ## Theme classes
 
-From `yale-talk.scss`. Use Quarto div and span syntax.
+From `starter-theme.scss`. Use Quarto div and span syntax.
 
 | Class | For |
 |---|---|
@@ -230,10 +229,10 @@ From `yale-talk.scss`. Use Quarto div and span syntax.
 | `.assumption` | An identification assumption or formal condition. |
 | `.theorem` `.proposition` `.lemma` | Formal statements, with a `[Proposition 1]{.label}` span. |
 | `.proof` | Gets an automatic QED square on its last element. |
-| `.appendix` | On the slide heading: `## Robustness {.appendix}`. Gray appendix scheme plus a standing APPENDIX pill. |
+| `.appendix` | On the slide heading: `## Robustness {.appendix}`. Muted appendix scheme plus a standing APPENDIX label. |
 | `.thanks-slide` | The closing slide of the main body. See `references/closing-slide.md`. |
 | `.section-break` | Numbered section divider. Number, title, vertical middle. |
-| `.appendix-break` | The same divider with no number, in gray. Goes before the first `.appendix` slide, with `background-color="var(--appendix-ground)"`. |
+| `.appendix-break` | The same divider with no number, muted. Goes before the first `.appendix` slide, with `background-color="var(--appendix-ground)"`. |
 | `.references-break` | That divider again, at the very end, with `background-color="var(--references-ground)"`. |
 | `.references` | On the reference-list heading. The filter copies it onto every continuation page, so you write it once. |
 | `.aside-note` | Muted caveat or scope condition. Arrives with the block above it. |
@@ -244,7 +243,7 @@ From `yale-talk.scss`. Use Quarto div and span syntax.
 | `.no-stage` | On a heading, so the slide arrives whole. |
 | `.spec` | On a wide specification table, so it shrinks instead of clipping. |
 | `.num` | Right-align a numeric table column. |
-| `.highlight-yale` | A fragment variant that turns a term blue on cue. |
+| `.highlight-yale` | A fragment variant that turns a term to the accent colour on cue (`.highlight-accent` is the alias). |
 | `.yblue` `.ymid` `.ygray` `.ygreen` `.yamber` `.yred` `.dim` | Inline color spans. |
 
 Use the theorem environments wherever the talk has formal content. A
@@ -257,8 +256,9 @@ theorem divs zero styling in reveal.js, which is why the theme supplies it.
 
 ### Dividers
 
-Two archetypes, each a heading and nothing else, a circle beside the title at
-the vertical middle, which is what makes them read as a turn in the talk:
+Two archetypes, each a heading and nothing else, composed on the full canvas
+(on the starter theme, a display numeral over a short standing rule over the
+centred title), which is what makes them read as a turn in the talk:
 
 ```markdown
 ## Setting and identification {.section-break}
@@ -269,12 +269,13 @@ the vertical middle, which is what makes them read as a turn in the talk:
 `stage-slide.lua` numbers the `.section-break` dividers, so never hand-number
 them: insert a section and the rest renumber on the next render. Copy the
 appendix attribute exactly as written; forgetting it is no longer silent (the
-theme paints the same warm gray as a fallback), and the references divider
+theme paints the same ground as a fallback), and the references divider
 takes `var(--references-ground)` the same way. Do not add `background-color`
-to a `.section-break`: the ground is white now and a blue field would swallow
-the circle. Appendix content slides stay white on purpose, marked by the gray
-scheme and the pill instead. The print-view behaviour and the contrast
-classification are in the README.
+to a `.section-break`: a coloured field there is noise, and the class alone is
+the contract. Appendix content slides keep the page ground on purpose, marked
+by the muted
+scheme and the standing label instead. The print-view behaviour and the
+contrast classification are in the README.
 
 ### Vertical alignment
 

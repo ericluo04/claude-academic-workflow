@@ -38,7 +38,7 @@ before.
 > This deck's ground is {deck.ground}. {On a dark deck, add:} The dark ground is the theme, so do not
 > report it. Report what fails against it: a figure sitting on a white panel, a code block on a light
 > card, a colour that has gone nearly invisible, and running text at pure white, which blooms on a
-> projector where `#e8e6e3` does not. Headings at pure white are intended.
+> projector where the theme's off-white body ink does not. Headings at pure white are intended.
 >
 > How much text a slide carries is the argument and pedagogy reviewers' call under the density rules
 > in `style/house.md`, so leave that judgment to them. Crowding is yours where it is geometric: items with no

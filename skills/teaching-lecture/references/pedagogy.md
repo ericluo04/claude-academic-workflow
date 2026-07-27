@@ -103,7 +103,7 @@ handing it over. The right column is what to look for when auditing.
 | Progressive complexity: simple, then relative, then distributional, then conditional. | A conditional expectation before an unconditional one. |
 | A `.section-break` every five to eight slides. | A 40-slide deck that reads as one block. |
 | Two slides for a dense result: the statement with color and a forward pointer, then one slide per term with the intuition. | One slide holding a theorem and all its definitions. |
-| Semantic colour fixed for the semester: treated `.yblue` (`#63aaff`), control `.ygray` (`#9aa0a6`), counterfactual dashed `.yred` (`#ffa07a`), the same hex values inside the figures. | A binary contrast shown in one colour, or a figure still carrying the old `#00356b`. |
+| Semantic colour fixed for the semester: treated `.yblue`, control `.ygray`, counterfactual dashed `.yred`, with the same hexes (from the theme's palette table) inside the figures. | A binary contrast shown in one colour, or a figure still carrying ink from another theme's palette. |
 | Box hierarchy honored: right block for the content, two per slide, at most three `.keyidea` in the deck. | Everything is a key idea, so nothing is. |
 | Socratic embedding, two or three genuine questions minimum. | A deck with no questions, which is a lecture the students watched. |
 | Visual first for anything hard: picture, then notation. | Notation introduced before the figure that motivates it. |

@@ -34,7 +34,8 @@ starter theme too.
 | `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. |
 | `fonts/inter/` | Inter variable woff2 pair (OFL), for a theme that wants to vendor a face of its own; the starter theme leads with the Source Sans Pro that ships with reveal.js, so nothing rendered here references these files. |
 
-If you run a two-theme setup the way the example decks do, duplicate the
+If you run a two-theme setup (say, a talk theme and a lecture theme on the
+same hooks), duplicate the
 palette and the shared rules across both files on purpose: Quarto compiles
 theme SCSS from a temp directory, so a relative `@import` cannot resolve.
 
@@ -373,17 +374,17 @@ so the style is where to change them. Do not fake a paren in CSS: a `::before`
 on `span.citation` also wraps a narrative cite, and "Author (2020) shows" comes
 out "(Author (2020)) shows".
 
-Sizes and colours, measured on each of the example themes' grounds (the
-starter theme keeps the talk column's metrics):
+Sizes and colours, as the starter theme sets them; a citation is a size step
+down in a muted ink with a measured ratio, and your theme picks its own values:
 
-| | talk | lecture |
-|---|---|---|
-| root | 30px | 34px |
-| `.citation` | 0.88em = 26.4px | 0.88em = 29.9px |
-| colour | `$yale-gray-dark` #4a4a4a, 8.9:1 on white | `$paper-muted` #9aa0a6, 6.5:1 on #1a1c1e |
-| hover | `$yale-blue-mid` #286dc0, 5.2:1 | `$yale-pale` #a8ceff, 10.6:1 |
-| inside `.aside-note`, `figcaption`, `.footer` | 1em (no compounding) | 1em |
-| `div.csl-entry` | 0.6em = 18px | 0.6em = 20.4px |
+| | starter |
+|---|---|
+| root | 30px |
+| `.citation` | 0.88em = 26.4px |
+| colour | `$muted-dark` #4f463c, 8.6:1 on the paper ground |
+| hover | `$accent` #7d3a5e, 7.5:1 |
+| inside `.aside-note`, `figcaption`, `.footer` | 1em (no compounding) |
+| `div.csl-entry` | 0.6em = 18px |
 
 0.88em is a step the eye reads as subordinate without turning the cite into a
 footnote; pick your own and keep it on both the span and the anchor.
@@ -689,13 +690,13 @@ block with the ones behind you filled. A theme with no rule for the properties
 is unaffected, which is the starter theme's case: it leaves the bar one plain
 fill and only fixes the colours.
 
-Each theme also has to fix reveal's default colours, in opposite directions.
-reveal ships `color: #fff` over an `rgba(0, 0, 0, 0.2)` track, so on the
-near-black lecture ground the track is invisible and only the filled part can be
-seen, and on the white talk ground the fill is white on white and only the track
-can be seen. Both themes set both properties: the talk fill is `$yale-blue-mid`
-at 5.2:1 on white over a warm-gray track at 1.5:1, and the lecture fill is
-`$yale-light` over a paper track at 0.16 alpha.
+Every theme also has to fix reveal's default colours.
+reveal ships `color: #fff` over an `rgba(0, 0, 0, 0.2)` track, so on a
+near-black ground the track is invisible and only the filled part can be
+seen, and on a light ground the fill is white on white and only the track
+can be seen. Set both properties for your ground: the starter theme fills with
+`$accent` over a track of `rgba($ink, 0.12)`, and a dark theme makes the
+opposite move, a pale fill over a lightened track.
 
 ### The appendix, the references, and the closing slide
 
@@ -821,13 +822,13 @@ otherwise paint its mark across the top of a slide with no title. Both themes
 carry `.reveal .slides section > h2:empty { display: none }`, which covers every
 titleless archetype.
 
-`.section-break` must not carry a background attribute. It used to need
-`## Part II {.section-break background-color="#00356b"}`, because reveal paints
+`.section-break` must not carry a background attribute. An early design needed
+one (`## Part II {.section-break background-color="..."}`), because reveal paints
 the real backdrop on a separate `.slide-background` element that theme CSS cannot
-reach, so a blue class alone gave a blue block inside a white border. The talk
-divider is now a numbered blue circle on the white ground and the attribute would
-paint blue over the circle; the lecture divider is a numbered disc on the
-near-black ground, where #00356b is a nearly invisible navy panel. A section
+reach, so a coloured class alone gave a coloured block inside a page-ground
+border. The dividers are now composed on the page ground and an attribute would
+paint over that composition; on a dark theme a dark brand colour there is also a
+nearly invisible panel. A section
 divider also comes round four or five times, so a ground change there is noise.
 The class alone is the whole contract.
 
@@ -838,10 +839,11 @@ happens once and it means the main deck is over:
 ## Appendix {.appendix-break background-color="var(--appendix-ground)"}
 ```
 
-Both themes publish `--appendix-ground` and `--references-ground` on `:root`, a
-warm light gray on the talk (`mix($yale-gray-warm, #ffffff, 35%)`, #dbd7d4) and a
-dark slate on the lecture (`mix($slate, $ink-0, 55%)`, #495057), so the hex lives
-in the theme and the deck asks for it by name. reveal assigns
+The theme publishes `--appendix-ground` and `--references-ground` on `:root`,
+so the hex lives
+in the theme and the deck asks for it by name. The starter theme keeps both on
+the page ground; a theme that wants a tinted back matter (a warm light gray on
+a light theme, a slate on a dark one) changes only those two values. reveal assigns
 `data-background-color` straight to the background element's inline style, and
 when the value is not a colour it can parse it reads the painted result back off
 `getComputedStyle`, so the variable both paints and still gets classified as a

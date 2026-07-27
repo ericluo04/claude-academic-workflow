@@ -1,14 +1,16 @@
-# Figures on the dark lecture theme
+# Figures matched to the deck ground
 
 R is the default. `engine: knitr`, ggplot for static exhibits, `ggplotly` only
 when hovering or zooming genuinely helps the teaching.
 
-## Geometry, measured at the 34px root
+## Geometry
 
 The canvas is 1050x700 and its content box is 945 px wide. knitr renders at
 192 dpi. `auto-stretch` is on by default, so a lone figure gets `.r-stretch` and
 is scaled to the height left under the heading, which makes `fig-height` mostly
-an aspect-ratio control.
+an aspect-ratio control. The rendered sizes below were measured on a
+lecture theme at a 34px root; the mechanics are the same on any theme, so
+re-measure if yours runs a different root.
 
 | Chunk options | Rendered on slide | Use for |
 |---|---|---|
@@ -17,10 +19,10 @@ an aspect-ratio control.
 | `fig-width: 9`, `fig-height: 5`, `base_size = 20` | 920 x 511 | full width, fills the slide |
 | `fig-width: 5.4`, `fig-height: 4.0`, `base_size = 20` in a 58% column | 466 x 346 | figure beside interpretation |
 
-`base_size` runs higher than in a research deck because the body type is 34px
-and a figure whose axis labels are half the size of the prose reads as an
-afterthought. On-screen text is roughly `base_size × 1.4` for a full-width
-figure.
+`base_size` runs higher than in a research deck because a lecture theme runs a
+larger body type, and a figure whose axis labels are half the size of the prose
+reads as an afterthought. On-screen text is roughly `base_size × 1.4` for a
+full-width figure.
 
 ## Captioned figures
 
@@ -29,7 +31,7 @@ has to carry the `fig-` prefix:
 
 ```r
 #| label: fig-board
-#| fig-cap: "Blue marks every system whose interval overlaps the leader's."
+#| fig-cap: "Colour marks every system whose interval overlaps the leader's."
 #| fig-width: 8
 #| fig-height: 4.0
 ```
@@ -38,46 +40,60 @@ With both, Quarto builds the figure as a crossref target, `auto-stretch` hoists
 the image out to be a direct child of the section and drops the caption beside
 it as a `<p class="caption">`, and the theme rides that caption on the image's
 own fragment state, so it arrives with the figure and costs no extra keypress.
-The caption prints as `Figure 1: …` in muted gray at 0.6em and carries into the
-handout. With `fig-cap:` and no `label:`, the caption still renders but the
+The caption prints as `Figure 1: …` in the muted ink at 0.6em and carries into
+the handout. With `fig-cap:` and no `label:`, the caption still renders but the
 figure stays wrapped, `auto-stretch` refuses to touch it, and the image comes
 out at its authored width instead of filling the height under the heading. That
 is the `fig-cap` mistake to know about, and the fit gate does not catch it
 because the smaller figure still fits. The AST mechanics behind this are in the
 README under "Figures and tables".
 
-## Figures have to be built dark
+## Figures take the deck ground
 
-A default ggplot lands a white panel in the middle of a near-black slide, which
-is a lightbox on the wall and the single most visible way a lecture deck looks
-unfinished. Define the theme once in the setup chunk and reuse it:
+A default ggplot lands a pure-white panel that ignores whatever ground the deck
+has. On the starter theme's warm paper it reads as a mismatched card; on a dark
+theme it is a lightbox on the wall, the single most visible way a lecture deck
+looks unfinished. Define a theme once in the setup chunk, keyed to the deck
+theme's documented palette table, and reuse it:
 
 ```r
-lecture_theme <- function(base_size = 18) {
+# Values from your deck theme's palette table; these are the starter theme's.
+# A dark theme swaps in its own ground and inks, and the method is identical.
+deck_ground <- "#faf7f2"   # the slide ground, exactly
+deck_grid   <- "#ddd6c9"   # the theme's hairline
+deck_text   <- "#33302b"   # body ink
+deck_axis   <- "#6b6157"   # muted ink
+
+deck_theme <- function(base_size = 18) {
   theme_minimal(base_size = base_size) +
     theme(
-      plot.background   = element_rect(fill = "#1a1c1e", colour = NA),
-      panel.background  = element_rect(fill = "#1a1c1e", colour = NA),
-      legend.background = element_rect(fill = "#1a1c1e", colour = NA),
-      panel.grid.major  = element_line(colour = "#33373b"),
+      plot.background   = element_rect(fill = deck_ground, colour = NA),
+      panel.background  = element_rect(fill = deck_ground, colour = NA),
+      legend.background = element_rect(fill = deck_ground, colour = NA),
+      panel.grid.major  = element_line(colour = deck_grid),
       panel.grid.minor  = element_blank(),
-      text              = element_text(colour = "#e8e6e3"),
-      axis.text         = element_text(colour = "#9aa0a6"),
+      text              = element_text(colour = deck_text),
+      axis.text         = element_text(colour = deck_axis),
       legend.position   = "top"
     )
 }
 
-scale_colour_manual(values = c(treated = "#63aaff", control = "#9aa0a6"))
+scale_colour_manual(values = c(treated = "#7d3a5e", control = "#6b6157"))
 ```
+
+Series colours come from the same table (here the starter accent against its
+muted ink), so a contrast the deck names in a colour span looks identical
+inside the figure.
 
 Fill with the exact ground hex instead of asking for a transparent PNG. A
 transparent background antialiases the text against nothing and the labels come
 out fringed.
 
-A figure lifted from the paper arrives with a white panel and Yale blue lines,
-both wrong here. Regenerate it with the lecture theme when it is a figure
-students have to read, and keep any that stay white to the `.full-bleed` slides
-where the image is the whole slide, so the deck does not alternate.
+A figure lifted from the paper arrives with a white panel and the paper's own
+colours, neither keyed to the deck. Regenerate it with `deck_theme()` when it
+is a figure students have to read, and keep any that stay white to the
+`.full-bleed` slides where the image is the whole slide, so the deck does not
+alternate.
 
 ## The silent-shrink trap
 
@@ -131,13 +147,14 @@ Live plotly works here and the R path needs no workaround. Built as the offline
 variant it is even a single file making zero network requests at display time,
 verified by reading the browser network log: one request, for the file itself.
 
-Style the widget dark as well, or it arrives as a white rectangle:
+Style the widget to the deck ground as well, or it arrives as a white
+rectangle:
 
 ```r
 ggplotly(p) |>
   plotly::layout(
-    paper_bgcolor = "#1a1c1e", plot_bgcolor = "#1a1c1e",
-    font = list(color = "#e8e6e3")
+    paper_bgcolor = deck_ground, plot_bgcolor = deck_ground,
+    font = list(color = deck_text)
   )
 ```
 
@@ -202,7 +219,8 @@ trim a clip, `uv run --with imageio-ffmpeg python -c "import imageio_ffmpeg as
 f; print(f.get_ffmpeg_exe())"` gives a static binary.
 
 `## Screenshot {.full-bleed}` with a bare `![](shot.png)` gives an edge-to-edge
-image capped at 78vh. `## Title {background-image="shot.png"
+image capped under the heading. `## Title {background-image="shot.png"
 background-size="contain"}` puts the image behind the slide, which is the right
 treatment for a visual you want to talk over; note that a screenshot with a
-white UI reads as a bright panel against this theme's ground, so crop tight.
+white UI reads as a bright panel against a tinted or dark ground, so crop
+tight.

@@ -1267,7 +1267,7 @@ local refs_gap = 0.46
 -- The deck names its preset, because the theme cannot be read from here. Quarto
 -- compiles the SCSS into a temp bundle and rewrites the metadata to its hash before
 -- any user filter runs (measured: `theme = quarto-760b0d5cd483963edc939aa138f6e90a`
--- on a deck whose front matter says `theme: [default, yale-talk.scss]`), so there
+-- on a deck whose front matter says `theme: [default, my-theme.scss]`), so there
 -- is nothing left to sniff. In this repo the wiring is one line in the starter
 -- extension's `_extension.yml`, `refs-fit: starter`, next to the theme it was
 -- measured against; a deck on the starter format needs no refs line of its own,
