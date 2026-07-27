@@ -32,7 +32,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `bibcheck` | Audits a `.bib` file entry by entry against canonical metadata and writes a corrected copy; catches wrong years, mis-cited authors, and hallucinated entries. |
 | `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. |
 | `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how load-bearing they are. |
-| `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. |
+| `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. See the [note of caution](#a-note-of-caution-on-reviewing) below. |
 | `referee-response` | Drafts an R&R response letter where every claimed change is located and read in the manuscript before a location pin is written. |
 | `replication-package` | Assembles a journal-ready replication archive and scans it for secrets, PII, and absolute local paths first. |
 | `compile-latex` | Compiles with latexmk, auto-detects the engine and bib backend, and emits a ranked error report with file:line attribution. |
@@ -43,6 +43,10 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
 
 `agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and Inter; its README documents all of it.
+
+### A note of caution on reviewing
+
+`review-paper` is built for your own manuscripts: a pre-submission check on a draft before you send it out, to be run only on work you wrote. Do not use it, or any generative AI tool, to review other people's submissions. Journals are explicit about this: [Management Science's submission guidelines](https://pubsonline.informs.org/page/mnsc/submission-guidelines) tell the review team directly that they "should not upload any part of a manuscript submitted to *Management Science* into a generative AI tool such that it might compromise confidentiality and/or copyright", and JMR's [submission guidelines](https://journals.sagepub.com/author-instructions/mrj) defer to Sage's [ChatGPT and generative AI policy](https://www.sagepub.com/en-us/nam/chatgpt-and-generative-ai), which reserves the right to take action when a reviewer breaches peer-review confidentiality with GenAI tools. If you referee, check the journal's AI policy before involving any tool at all.
 
 ## Things you may not know
 
