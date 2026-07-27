@@ -196,6 +196,54 @@ of your own, and none of `.r-stack`, `.r-hstack`, `.r-vstack`,
 leaves the indices off and lets DOM order decide. Your own `fragment-index` is
 never touched.
 
+Hand-numbering a slide is all or nothing. Indexed fragments sort ahead of
+unindexed ones, so one indexed block on an otherwise unnumbered slide jumps to
+the front, and if the filter's own wrapper is the unindexed one the first press
+reveals a hidden child and paints nothing. Index every fragment on the slide or
+none of them. Where that is worth doing is a build that DOM order cannot
+express: equal indices fire together, so a container and its first child can
+open on one press, and two blocks in different columns can arrive on the same
+beat. Both example decks use it for exactly that.
+
+### Fragment variants
+
+reveal's variants (`fade-up`/`down`/`left`/`right`, `fade-in-then-out`,
+`fade-in-then-semi-out`, `grow`, `shrink`, `strike`, the `highlight-*` family)
+are available, and the two gates reject some of them for reasons worth knowing
+before you reach for one. Measured on a probe deck against this theme.
+
+A variant that starts visible leaks. `grow`, `shrink`, `strike`, `semi-fade-out`
+and every `highlight-*` are `opacity: 1; visibility: inherit` until they are
+advanced, which is the point of them, so a top-level block carrying one is on
+screen at step 0 and `stage-check.mjs` reports `LEAKS AT STEP 0`. Put them on a
+span or a nested div instead, where the enclosing beat hides them until it
+opens. `fade-in-then-out` and `fade-in-then-semi-out` start hidden and are safe
+as top-level blocks.
+
+A variant that changes only colour is a dead step. The gate's signature is the
+visible elements with their text and their boxes, so reveal's own
+`highlight-red` / `highlight-green` / `highlight-blue` and `strike` (a text
+decoration) advance the deck without changing what the room sees. The theme's
+`.highlight-accent` passes because it also takes the weight to 600, which
+widens the box. `grow` on a plain span is a dead step for a different reason:
+transforms do not apply to a non-replaced inline element, so nothing moves
+until the span carries `style="display: inline-block"`.
+
+`fade-in-then-semi-out` passes both gates and still costs contrast on a light
+ground. The dimmed state is the ink at half opacity, which on this theme's
+paper is 2.9:1, under the 3:1 large-text floor. The contrast audit will not
+catch it, because forcing every fragment visible also makes it
+`.current-fragment`, which is the undimmed state.
+
+`auto-animate` reaches the heading and nothing else. The morph runs on the slide
+change, and on the arriving slide every block under the heading is an unadvanced
+fragment, so the elements being tweened are `visibility: hidden` and none of the
+motion is seen. What the pair does buy is real: reveal drops the slide
+transition between the two, and identical headings hold still instead of
+sliding, so the pair reads as one slide changing state rather than two slides.
+When the morph itself is the point, put the two states in one slide under an
+`.r-stack` and fade the second layer in over the first.
+
 ### Figures and tables
 
 Quarto's `auto-stretch` is a DOM pass in the revealjs writer (`applyStretch`),

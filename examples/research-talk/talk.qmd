@@ -93,14 +93,14 @@ variety it is traded against is what @brynjolfsson2003Consumer price [see also
 
 ::: {.result}
 [Headline estimate]{.label}
-Adoption raises a listing's price by 6.2 log points (s.e. 1.4) in the top quartile of
-rival exposure, and by −0.4 (1.1) in the bottom quartile.
+Adoption raises a listing's price by [6.2 log points]{.fragment .highlight-accent} (s.e. 1.4)
+in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.
 :::
 
 The two estimates come from the same regression, the same sellers, and the same weeks. The
 sign of the effect of automation is a property of the market, not of the technology.
 
-::: {.takeaway}
+::: {.takeaway .fragment .fade-up}
 Automation is not inflationary on its own. It is inflationary where it is already common.
 :::
 
@@ -195,13 +195,13 @@ $$\E\bigl[\Delta \log p_{jmt}(0) \mid A_{jt}, \Rival_{mt}\bigr]
 | Listings | 41,208 | 41,208 | 41,208 |
 :::
 
-::: {.takeaway}
+::: {.takeaway .fragment .fade-up}
 Pooling across markets averages a positive and a zero effect into a small positive one.
 :::
 
 ## Prices move at adoption, and stay moved
 
-:::: {.columns}
+:::: {.columns .fragment fragment-index="1"}
 ::: {.column width="58%"}
 ```{r}
 #| label: event-study
@@ -225,15 +225,17 @@ ggplot(es, aes(k, b)) +
 ```
 :::
 ::: {.column width="42%"}
+::: {.fragment fragment-index="2"}
 High-exposure markets only. Nothing happens in the four quarters before adoption, the jump
 lands in the quarter of adoption, and the level persists for a year.
+:::
 
-::: {.result}
+::: {.result .fragment fragment-index="1"}
 [Estimate]{.label}
 0.062 (0.018) four quarters out
 :::
 
-::: {.aside-note}
+::: {.aside-note .fragment fragment-index="2"}
 Pre-period coefficients are jointly insignificant, $p = 0.71$.
 :::
 :::
@@ -291,7 +293,7 @@ $\mathrm{d} p_j^\star / \mathrm{d} p_{-j} > 0$ by Topkis. Adopting therefore rai
 marginal return to a rival's adoption.
 :::
 
-::: {.takeaway}
+::: {.takeaway .fragment .fade-up}
 The empirical interaction is the comparative static the model predicts, not a
 specification artifact.
 :::
@@ -318,10 +320,17 @@ platforms of this kind are modelled directly by @yin2024MetaLearning.
 
 ## A composition test is what a regulator can actually run
 
-Nothing in the estimate requires a regulator to observe pricing algorithms, which are
-private, or to prove intent, which is unfalsifiable. It requires the share of a market
-already automated, which the platform records. Whether firms adopt in the first place is a
-separate question with its own literature [@dietvorst2018Overcoming; @brynjolfsson2025Generative].
+::: {.r-stack}
+::: {.fragment .fade-in-then-out style="width: 100%"}
+A regulator could be asked to observe the pricing algorithms, which are private, or to
+prove intent, which is unfalsifiable. Neither is available.
+:::
+
+::: {.fragment style="width: 100%"}
+This test asks for the share of a market already automated, which the platform records and
+publishes. That is the whole input.
+:::
+:::
 
 - Below roughly a 40% automated share, permitting automation moves prices by nothing we can
   distinguish from zero.
@@ -329,15 +338,17 @@ separate question with its own literature [@dietvorst2018Overcoming; @brynjolfss
 
 ::: {.aside-note}
 The threshold is where the fitted interaction crosses zero, so it inherits the standard
-error on the interaction and should be read as a range.
+error on the interaction and should be read as a range. Whether firms adopt in the first
+place is a separate question with its own literature [@dietvorst2018Overcoming;
+@brynjolfsson2025Generative].
 :::
 
 ## Automation raises prices where it is already common
 
 ::: {.result}
 [Headline estimate]{.label}
-6.2 log points (s.e. 1.4) in the top quartile of rival exposure, −0.4 (1.1) in the bottom
-quartile, from the same regression.
+[6.2 log points]{.fragment .highlight-accent} (s.e. 1.4) in the top quartile of rival
+exposure, −0.4 (1.1) in the bottom quartile, from the same regression.
 :::
 
 A rule that permits automated pricing has no single price effect. Its effect is increasing
@@ -348,7 +359,7 @@ object a regulator should be measuring.
 Paper and replication files: `example.edu/~presenter/repricing`
 :::
 
-## Thank you {.thanks-slide .no-stage}
+## Thank you {.thanks-slide .no-stage transition="fade"}
 
 Comments and objections are equally welcome, in the room or afterwards.
 

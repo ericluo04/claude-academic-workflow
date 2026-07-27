@@ -230,18 +230,16 @@ Claude Code
 </section>
 <section id="automation-raises-prices-only-where-rivals-automate-too" class="slide level2">
 <h2>Automation raises prices only where rivals automate too</h2>
-<div class="fragment" data-fragment-index="0">
+<div class="fragment">
 <div class="result">
-<p><span class="label">Headline estimate</span> Adoption raises a listing’s price by 6.2 log points (s.e. 1.4) in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.</p>
+<p><span class="label">Headline estimate</span> Adoption raises a listing’s price by <span class="fragment highlight-accent">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.</p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="1">
+<div class="fragment">
 <p>The two estimates come from the same regression, the same sellers, and the same weeks. The sign of the effect of automation is a property of the market, not of the technology.</p>
 </div>
-<div class="fragment" data-fragment-index="2">
-<div class="takeaway">
+<div class="takeaway fragment fade-up">
 <p>Automation is not inflationary on its own. It is inflationary where it is already common.</p>
-</div>
 </div>
 </section>
 <section id="setting-and-identification" class="slide level2 section-break" data-section-number="1" data-section-total="4">
@@ -297,7 +295,7 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 </section>
 <section id="the-level-effect-is-a-wash-the-interaction-is-not" class="slide level2">
 <h2>The level effect is a wash; the interaction is not</h2>
-<div class="fragment" data-fragment-index="0">
+<div class="fragment">
 <div data-tbl-colwidths="[43,15,24,18]">
 <table class="caption-top">
 <colgroup>
@@ -355,16 +353,13 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 </table>
 </div>
 </div>
-<div class="fragment" data-fragment-index="1">
-<div class="takeaway">
+<div class="takeaway fragment fade-up">
 <p>Pooling across markets averages a positive and a zero effect into a small positive one.</p>
-</div>
 </div>
 </section>
 <section id="prices-move-at-adoption-and-stay-moved" class="slide level2">
 <h2>Prices move at adoption, and stay moved</h2>
-<div class="fragment" data-fragment-index="0">
-<div class="columns">
+<div class="columns fragment" data-fragment-index="1">
 <div class="column" style="width:58%;">
 <div class="cell">
 <div class="cell-output-display">
@@ -376,15 +371,16 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 </div>
 </div>
 </div><div class="column" style="width:42%;">
+<div class="fragment" data-fragment-index="2">
 <p>High-exposure markets only. Nothing happens in the four quarters before adoption, the jump lands in the quarter of adoption, and the level persists for a year.</p>
-<div class="result">
+</div>
+<div class="result fragment" data-fragment-index="1">
 <p><span class="label">Estimate</span> 0.062 (0.018) four quarters out</p>
 </div>
-<div class="aside-note">
+<div class="aside-note fragment" data-fragment-index="2">
 <p>Pre-period coefficients are jointly insignificant, <span class="math inline">\(p = 0.71\)</span>.</p>
 </div>
 </div></div>
-</div>
 </section>
 <section id="the-interaction-survives-every-specification-we-can-think-of" class="slide level2">
 <h2>The interaction survives every specification we can think of</h2>
@@ -589,20 +585,18 @@ Listings
 </section>
 <section id="complementarity-follows-from-the-slope-of-the-best-response" class="slide level2">
 <h2>Complementarity follows from the slope of the best response</h2>
-<div class="fragment" data-fragment-index="0">
+<div class="fragment">
 <div class="proposition">
 <p><span class="label">Proposition 1</span> Let <span class="math inline">\(\pi_j(p_j, p_{-j})\)</span> be log-concave in <span class="math inline">\(p_j\)</span> and suppose automation lowers the adjustment cost <span class="math inline">\(\kappa_j\)</span>. If <span class="math inline">\(\partial^2 \pi_j / \partial p_j \partial p_{-j} &gt; 0\)</span>, then <span class="math inline">\(p_j^\star = \mathop{\mathrm{arg\,max}}_p \pi_j(p, p_{-j}) - \kappa_j \mathbf{1}\{p \neq p_{j,t-1}\}\)</span> is increasing in <span class="math inline">\(p_{-j}\)</span>, and adoption decisions are strategic complements.</p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="1">
+<div class="fragment">
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>Log-concavity gives a unique interior maximizer, so <span class="math inline">\(p_j^\star\)</span> is characterized by the first-order condition. Falling <span class="math inline">\(\kappa_j\)</span> widens the region where the constraint <span class="math inline">\(p = p_{j,t-1}\)</span> does not bind, and on that region the cross-partial signs <span class="math inline">\(\mathrm{d} p_j^\star / \mathrm{d} p_{-j} &gt; 0\)</span> by Topkis. Adopting therefore raises the marginal return to a rival’s adoption.</p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="2">
-<div class="takeaway">
+<div class="takeaway fragment fade-up">
 <p>The empirical interaction is the comparative static the model predicts, not a specification artifact.</p>
-</div>
 </div>
 </section>
 <section id="three-checks-bound-the-demand-selection-threat" class="slide level2">
@@ -624,34 +618,37 @@ Listings
 </section>
 <section id="a-composition-test-is-what-a-regulator-can-actually-run" class="slide level2">
 <h2>A composition test is what a regulator can actually run</h2>
-<div class="fragment">
-<p>Nothing in the estimate requires a regulator to observe pricing algorithms, which are private, or to prove intent, which is unfalsifiable. It requires the share of a market already automated, which the platform records. Whether firms adopt in the first place is a separate question with its own literature <span class="citation" data-cites="dietvorst2018Overcoming brynjolfsson2025Generative">(<a href="#/references" role="doc-biblioref" onclick="">Dietvorst et al. 2018</a>; <a href="#/references" role="doc-biblioref" onclick="">Brynjolfsson et al. 2025</a>)</span>.</p>
+<div class="r-stack">
+<div class="fragment fade-in-then-out" style="width: 100%">
+<p>A regulator could be asked to observe the pricing algorithms, which are private, or to prove intent, which is unfalsifiable. Neither is available.</p>
+</div>
+<div class="fragment" style="width: 100%">
+<p>This test asks for the share of a market already automated, which the platform records and publishes. That is the whole input.</p>
+</div>
 </div>
 <ul>
 <li class="fragment">Below roughly a 40% automated share, permitting automation moves prices by nothing we can distinguish from zero.</li>
 <li class="fragment">Above it, the same permission is worth 4 to 7 log points, <span class="yblue">rising in the share</span>.
 <div class="aside-note">
-<p>The threshold is where the fitted interaction crosses zero, so it inherits the standard error on the interaction and should be read as a range.</p>
+<p>The threshold is where the fitted interaction crosses zero, so it inherits the standard error on the interaction and should be read as a range. Whether firms adopt in the first place is a separate question with its own literature <span class="citation" data-cites="dietvorst2018Overcoming brynjolfsson2025Generative">(<a href="#/references" role="doc-biblioref" onclick="">Dietvorst et al. 2018</a>; <a href="#/references" role="doc-biblioref" onclick="">Brynjolfsson et al. 2025</a>)</span>.</p>
 </div></li>
 </ul>
 </section>
 <section id="automation-raises-prices-where-it-is-already-common" class="slide level2">
 <h2>Automation raises prices where it is already common</h2>
-<div class="fragment" data-fragment-index="0">
+<div class="fragment">
 <div class="result">
-<p><span class="label">Headline estimate</span> 6.2 log points (s.e. 1.4) in the top quartile of rival exposure, −0.4 (1.1) in the bottom quartile, from the same regression.</p>
+<p><span class="label">Headline estimate</span> <span class="fragment highlight-accent">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure, −0.4 (1.1) in the bottom quartile, from the same regression.</p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="1">
+<div class="fragment">
 <p>A rule that permits automated pricing has no single price effect. Its effect is increasing in how much automation the market already has, which makes <span class="ymid">market composition</span> the object a regulator should be measuring.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
 <div class="aside-note">
 <p>Paper and replication files: <code>example.edu/~presenter/repricing</code></p>
 </div>
 </div>
 </section>
-<section id="thank-you" class="slide level2 thanks-slide no-stage">
+<section id="thank-you" class="slide level2 thanks-slide no-stage" data-transition="fade">
 <h2>Thank you</h2>
 <p>Comments and objections are equally welcome, in the room or afterwards.</p>
 <div class="thanks-contact">

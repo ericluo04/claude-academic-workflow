@@ -302,15 +302,17 @@ What to ask a vendor instead
 </section>
 <section id="motivation" class="slide level2">
 <h2>Two vendors, one number</h2>
-<div class="fragment">
-<div class="columns">
+<div class="columns fragment" data-fragment-index="1">
 <div class="column" style="width:50%;">
+<div class="fragment fade-right" data-fragment-index="1">
 <p><span class="yblue">Vendor A</span> scores <strong>0.83</strong>. It is strong on arithmetic and weak on anything requiring several steps.</p>
-</div><div class="column" style="width:50%;">
-<p><span class="ygray">Vendor B</span> scores <strong>0.79</strong>. It is even across every task family, with no sharp weakness.</p>
-</div></div>
 </div>
-<div class="fragment">
+</div><div class="column" style="width:50%;">
+<div class="fragment fade-left" data-fragment-index="2">
+<p><span class="ygray">Vendor B</span> scores <strong>0.79</strong>. It is even across every task family, with no sharp weakness.</p>
+</div>
+</div></div>
+<div class="fragment" data-fragment-index="3">
 <div class="keyidea">
 <p><span class="label">Key idea</span> The ranking is 0.04 wide. Your workload is not the benchmark, and the gap between these two systems on <em>your</em> traffic is not 0.04.</p>
 </div>
@@ -352,13 +354,35 @@ What to ask a vendor instead
 </section>
 <section id="exhibit" class="slide level2">
 <h2>The top of the leaderboard is a tie</h2>
-<div class="fragment" data-fragment-index="0">
-<p>Six systems, 900 items each, with the 95% interval every score carries.</p>
+<div class="fragment" data-fragment-index="1">
+<p>Six systems, 900 items each. Read as a ranking, the order looks settled.</p>
 </div>
-
-<img data-src="w03-evaluation_files/figure-revealjs/fig-board-1.png" class="fragment r-stretch quarto-figure-center" data-fragment-index="1" width="768" id="fig-board"><p class="caption">
-Figure&nbsp;1: Plum marks every system whose interval overlaps the leader’s: the top four.
-</p></section>
+<div class="r-stack fragment" data-fragment-index="1">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="w03-evaluation_files/figure-revealjs/board-ranked-1.png" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="fragment" data-fragment-index="2">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="w03-evaluation_files/figure-revealjs/board-intervals-1.png" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment" data-fragment-index="2">
+<p>Plum marks every system whose interval overlaps the leader’s. The top four are a tie.</p>
+</div>
+</section>
 <section id="worked" class="slide level2">
 <h2>Worked example: how wide is that interval?</h2>
 <div class="steps">
@@ -399,15 +423,13 @@ Figure&nbsp;1: Plum marks every system whose interval overlaps the leader’s: t
 </section>
 <section id="paired" class="slide level2">
 <h2>Overlapping intervals are the wrong test</h2>
-<div class="fragment" data-fragment-index="0">
+<div class="fragment">
 <div id="thm-paired" class="theorem">
 <p><span class="theorem-title"><strong>Theorem 1</strong></span> Grade A and B on the <em>same</em> <span class="math inline">\(n\)</span> items from <span class="math inline">\(\mathcal{D}\)</span>. Let <span class="math inline">\(p_{10}\)</span> be the chance A passes where B fails, <span class="math inline">\(p_{01}\)</span> the reverse, and <span class="math inline">\(\Delta = p_{10} - p_{01}\)</span>. Then <span class="math display">\[\operatorname{se}(\widehat{S}_A - \widehat{S}_B) = \sqrt{\frac{p_{10} + p_{01} - \Delta^2}{n}}.\]</span></p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="1">
-<p>Items both systems pass drop out, and so do items both fail. At 0.83 against 0.79 on 900 shared items with 12% disagreement the standard error is 0.011, so the gap runs <span class="yblue">3.5 standard errors</span> wide.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
+<div class="fragment">
+<p>Items both systems pass drop out, and so do items both fail. At 0.83 against 0.79 on 900 shared items with 12% disagreement the standard error is 0.011, so the gap runs <span class="fragment highlight-accent">3.5 standard errors</span> wide.</p>
 <div class="aside-note">
 <p>A leaderboard publishes two marginal scores, so overlap is all you can draw. The <a href="#/ap-paired" class="jump-btn" data-jump="ap-paired">paired standard error</a> is derived in the appendix.</p>
 </div>
@@ -603,7 +625,7 @@ What to ask a vendor instead
 </div>
 </div>
 </section>
-<section id="next-steps" class="slide level2 closing-slide">
+<section id="next-steps" class="slide level2 closing-slide" data-transition="fade">
 <h2>Before next class</h2>
 <div class="fragment" data-fragment-index="0">
 <div class="together">
