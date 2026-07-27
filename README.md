@@ -1,6 +1,6 @@
 # claude-academic-workflow
 
-An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, drafting preregistrations, writing referee reports and R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
+An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, drafting preregistrations, checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
 
 Everything in this repository, including both example decks and their figures, is AI-generated with Claude Code, as a proof of concept for what an agent-built research workflow looks like. Generated content is the responsibility of whoever uses it: verify citations, numbers, and claims before relying on them, the same way you would verify a research assistant's first draft.
 
@@ -32,7 +32,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `bibcheck` | Audits a `.bib` file entry by entry against canonical metadata and writes a corrected copy; catches wrong years, mis-cited authors, and hallucinated entries. |
 | `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. |
 | `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how load-bearing they are. |
-| `review-paper` | Runs a full referee review with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. |
+| `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. |
 | `referee-response` | Drafts an R&R response letter where every claimed change is located and read in the manuscript before a location pin is written. |
 | `replication-package` | Assembles a journal-ready replication archive and scans it for secrets, PII, and absolute local paths first. |
 | `compile-latex` | Compiles with latexmk, auto-detects the engine and bib backend, and emits a ranked error report with file:line attribution. |

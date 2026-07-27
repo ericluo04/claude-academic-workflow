@@ -1,6 +1,6 @@
 ---
 name: review-paper
-description: Run a full referee review of a manuscript, six agents in parallel (spelling and style, internal consistency, unsupported claims, math and notation, tables and figures, adversarial top-journal referee), findings triaged CRITICAL/MAJOR/MINOR against a named target journal (MKSCI, JMR, JCR, MS, AER, QJE, JPE, Econometrica, REStud, AEJMacro, JME, RED, JF, JFE, RFS, JFQA). Writes a dated pre-submission report on your own draft, or with --referee a submittable referee report for a journal. Includes a buried-contribution desk-reject gate and a --quick pass. TRIGGER on "review my paper", "referee my draft", "is this ready to submit", "what would a referee say", "desk reject risk", "read this like Reviewer 2", "referee this for [journal]", "write my referee report", "I'm reviewing this submission", or any request to critique a full paper or PDF.
+description: Run a full referee review of a manuscript, six agents in parallel (spelling and style, internal consistency, unsupported claims, math and notation, tables and figures, adversarial top-journal referee), findings triaged CRITICAL/MAJOR/MINOR against a named target journal (MKSCI, JMR, JCR, MS, AER, QJE, JPE, Econometrica, REStud, AEJMacro, JME, RED, JF, JFE, RFS, JFQA). Writes a dated pre-submission report on your own draft. Includes a buried-contribution desk-reject gate and a --quick pass. TRIGGER on "review my paper", "referee my draft", "is this ready to submit", "what would a referee say", "desk reject risk", "read this like Reviewer 2", or any request to critique a full paper or PDF.
 ---
 
 # review-paper
@@ -19,49 +19,12 @@ buried-contribution gate from
 | a journal name (first token) | `top-field` | journal persona and bar for agent 6 |
 | a file path | auto-detect | main `.tex`, or a `.pdf` of the compiled draft |
 | `--quick` | off | run only agents 6 and 3, skip the rest |
-| `--referee` | off | journal referee mode: a submittable report, see below |
 
 Recognized journals, case-insensitive. Marketing: `MKSCI`, `JMR`, `JCR`, `MS`. Economics:
 `AER`, `QJE`, `JPE`, `Econometrica`, `REStud`, `AEJMacro`, `JME`, `RED`. Finance: `JF`, `JFE`,
 `RFS`, `JFQA`. Anything unrecognized is treated as a file path, and an absent journal means
 `top-field`: high general standards for a leading field journal, no specific persona. Add
 journals by editing this list. Store the result as `TARGET_JOURNAL`.
-
-## Referee mode
-
-`--referee` switches the skill from a pre-submission check on the user's own draft to a
-submittable report on a paper the user is refereeing for a journal. Enter this mode when the flag
-is passed, when the user says they are refereeing, or when the paper is clearly not theirs. When
-it is ambiguous whose paper it is, ask which hat the user is wearing before doing anything else.
-
-What changes:
-
-- The manuscript must be supplied as a path or a PDF. Phase 1 uses step 1 only; never glob the
-  working directory or the Overleaf projects. If no path was given, ask for one.
-- Agent 6 keeps its full brief, including the buried-contribution gate, but critiques the paper
-  for the editor and drops every piece of advice addressed to the author: no fallback outlets in
-  part 5, no coaching on what would reach the target's bar. Its recommendation becomes one of the
-  journal's conventional decisions: accept, minor revision, major revision, or reject.
-- All six agents still run (two with `--quick`), and the CRITICAL/MAJOR/MINOR triage still
-  happens, as internal analysis. The final report is written from that analysis and never shows
-  the tags.
-
-The output replaces the phase 3 structure. Write `REFEREE_REPORT_<YYYY-MM-DD>.md` to the current
-working directory, or wherever the user says; never into an Overleaf project. Address it to the
-editor and the authors in the conventional register:
-
-1. A summary paragraph restating the paper in the referee's own words: the research question, the
-   design, the data, and the main findings. Specific enough to show the paper was read.
-2. Major comments, numbered. Built from the CRITICAL and MAJOR findings: identification threats,
-   missing analyses, overclaiming, internal contradictions. Each states the issue, points at the
-   exact location, and where possible says what would resolve it.
-3. Minor comments, numbered. Notation, exposition, table and figure documentation, typos worth
-   the authors' time. Compress agent 1's copy edits into a few representative items; a referee
-   report is not a proofreading pass.
-4. Recommendation, with a short justification tied to the major comments.
-
-Report back in chat: the report path, the recommendation, and the counts of major and minor
-comments.
 
 ## Phase 1: find the manuscript
 
@@ -74,9 +37,6 @@ comments.
 3. Still nothing: Glob `~/Library/CloudStorage/Dropbox*/Apps/Overleaf/*/*.tex` (this setup
    assumes Overleaf projects sync there via Dropbox), show the matching project
    directories, and ask which one. Do not guess between projects.
-
-In referee mode, step 1 is the only step: skip steps 2 and 3 and ask for the path if none was
-given.
 
 Then build the file set. The main document is the `.tex` containing `\documentclass` or
 `\begin{document}`; follow every `\input`, `\include`, and `\subfile` to get the rest, and read
@@ -316,9 +276,6 @@ the user that consistency, math, tables and figures, and copy editing were not r
 If an agent returns nothing or malformed output, insert a placeholder section ("Agent did not
 return output") and say so in the summary. Do not silently drop it and do not re-run the whole
 fanout for one failure.
-
-In referee mode, consolidate the same way but write the report described in the referee mode
-section instead of the structure below.
 
 Save to `PRE_SUBMISSION_REVIEW_<YYYY-MM-DD>.md` in the main `.tex` file's directory, suffixing
 `-v2`, `-v3` if that name is taken. Structure:
