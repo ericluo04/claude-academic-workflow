@@ -131,6 +131,10 @@ Keys live in one env file outside the repo (`~/.claude/secrets/scholar.env` here
 
 Two details of the supporting tooling: `paper.py` disk-caches every response for 30 days and rate-limits itself politely, so re-running a search does not re-spend the request budget, and the PDF helper runs on uv straight from its shebang, with no environment to build first.
 
+### Name your sessions
+
+Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe. Picking a project back up becomes choosing it from a list rather than reconstructing where you were.
+
 ### The Gmail drafting trick
 
 When a university mail account cannot integrate with anything, draft in a personal Gmail via the Gmail MCP and copy the draft out of Gmail's web editor into the university client. Terminal copy-paste can sometimes mangle spacing and line breaks, so drafting in Gmail and copying from its editor is the cleaner route. The agent writes and revises the draft; you paste and send.
@@ -160,10 +164,6 @@ Option+B and Option+F need the Option key sending Meta, which macOS Terminal doe
 ### Running a model on your own machine
 
 [Ollama](https://ollama.com) is a free, open-source tool for running open-weight language models on your own computer. Inference happens locally: prompts and documents are processed on your machine and never transmitted to any cloud service or company, which matters when the material is confidential, unpublished, or covered by an agreement that says where data may go. It also works with no network at all, so a flight or a bus ride with unreliable wifi still leaves you with a usable model. Current open-weight models are strong enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
-
-### Name your sessions
-
-Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe. Picking a project back up becomes choosing it from a list rather than reconstructing where you were.
 
 ## License and credit
 
