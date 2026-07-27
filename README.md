@@ -63,7 +63,7 @@ Four things Quarto reveal.js gives you:
 - R and Python chunks that execute at render.
 - Video embedded with one HTML tag.
 
-Beamer cannot run code, so a figure in a Beamer deck is a pasted PDF that can quietly stop matching the script that drew it. Choose it when a venue or your coauthors require it, or when the talk already lives there. PowerPoint cannot script transitions or animations, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Choose it when someone downstream needs an editable `.pptx`, or when a university template is mandated.
+Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
 
 ## Things you may not know
 
