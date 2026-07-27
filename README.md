@@ -56,13 +56,13 @@ Both are static pages that make zero network requests at display time; the [inde
 
 The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, serif display headings, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
 
-Four things Quarto reveal.js gives you:
+What Quarto reveal.js gives you:
 
 - Modern web layout, with flexible animation (fragments for reveals, `auto-animate` to carry an element across slides).
 - LaTeX equations, typeset from macros you define in the front matter.
 - R and Python chunks that execute at render.
-- Video embedded with one HTML tag.
 - Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
+- Video embedded with one HTML tag.
 
 Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
 
