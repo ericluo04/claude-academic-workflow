@@ -62,6 +62,7 @@ Four things Quarto reveal.js gives you:
 - LaTeX equations, typeset from macros you define in the front matter.
 - R and Python chunks that execute at render.
 - Video embedded with one HTML tag.
+- Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
 
 Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
 
@@ -131,6 +132,10 @@ Two details of the supporting tooling: `paper.py` disk-caches every response for
 ### The Gmail drafting trick
 
 When a university mail account cannot integrate with anything, draft in a personal Gmail via the Gmail MCP and copy the draft out of Gmail's web editor into the university client. Terminal copy-paste can sometimes mangle spacing and line breaks, so drafting in Gmail and copying from its editor is the cleaner route. The agent writes and revises the draft; you paste and send.
+
+### Name your sessions
+
+Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe: the paper revision, the lecture build, and the referee reading each stay findable as themselves, so picking a project back up is choosing it from a list rather than reconstructing where you were.
 
 ## License and credit
 
