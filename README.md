@@ -163,7 +163,7 @@ Option+B and Option+F need the Option key sending Meta, which macOS Terminal doe
 
 ### Running a model on your own machine
 
-[Ollama](https://ollama.com) is a free, open-source tool for running open-weight language models on your own computer. Inference happens locally: prompts and documents are processed on your machine and never transmitted to any cloud service or company, which matters when the material is confidential, unpublished, or covered by an agreement that says where data may go. It also works with no network at all, so a flight or a bus ride with unreliable wifi still leaves you with a usable model. Current open-weight models are strong enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
+Not many people know this one. If you need to work with material that is confidential, unpublished, or covered by an agreement about where data may go, or you need to work with no network at all on a flight or a bus ride, you can run a language model on your own computer. [Ollama](https://ollama.com) is the easiest way in: a free, open-source tool that downloads and runs open-weight models locally, so prompts and documents are processed on your machine and never transmitted to any cloud service or company. It is a separate tool from Claude Code, and the models it serves are open-weight ones from other labs; many of them are now performant enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
 
 ## License and credit
 
