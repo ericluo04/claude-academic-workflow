@@ -38,3 +38,5 @@ The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which 
 ## Not included
 
 MCP servers and personal configuration are not part of this repo. The skills mention Zotero, Playwright, and a scholarly-search connector where they can use them, and degrade when they are absent; the README's "Things you may not know" section says what each integration adds. Nothing here contains credentials, and no skill requires an MCP server to run.
+
+If you do add Playwright, register it twice: `playwright` running `npx @playwright/mcp@latest` for work behind a login, whose persistent profile keeps you signed in, and a second server named `playwright-isolated` running `npx @playwright/mcp@latest --isolated` for everything else, so two sessions never queue on the same browser profile.
