@@ -78,18 +78,22 @@ incumbent scores 0.79. What have you learned?
 
 ## Two vendors, one number {#motivation}
 
-:::: {.columns}
+:::: {.columns .fragment fragment-index="1"}
 ::: {.column width="50%"}
+::: {.fragment .fade-right fragment-index="1"}
 [Vendor A]{.yblue} scores **0.83**. It is strong on arithmetic and weak on
 anything requiring several steps.
 :::
+:::
 ::: {.column width="50%"}
+::: {.fragment .fade-left fragment-index="2"}
 [Vendor B]{.ygray} scores **0.79**. It is even across every task family, with no
 sharp weakness.
 :::
+:::
 ::::
 
-::: {.fragment}
+::: {.fragment fragment-index="3"}
 ::: {.keyidea}
 [Key idea]{.label}
 The ranking is 0.04 wide. Your workload is not the benchmark, and the gap
@@ -137,13 +141,15 @@ than a single number [@brynjolfsson2025Generative; @wiles2025Algorithmic]. The
 
 ## The top of the leaderboard is a tie {#exhibit}
 
-Six systems, 900 items each, with the 95% interval every score carries.
+::: {.fragment fragment-index="1"}
+Six systems, 900 items each. Read as a ranking, the order looks settled.
+:::
 
+::: {.r-stack .fragment fragment-index="1"}
 ```{r}
-#| label: fig-board
+#| label: board-ranked
 #| fig-width: 8
 #| fig-height: 4.0
-#| fig-cap: "Plum marks every system whose interval overlaps the leader's: the top four."
 n <- 900
 board <- data.frame(
   system = c("Aster", "Borel", "Cedar", "Delta", "Ember", "Fenwick"),
@@ -155,16 +161,36 @@ board$hi <- board$score + 1.96 * board$se
 board$tied <- board$lo < max(board$hi) & board$hi > max(board$lo)
 board$system <- factor(board$system, levels = rev(board$system))
 
-ggplot(board, aes(x = score, y = system, colour = tied)) +
-  geom_vline(xintercept = max(board$lo), linetype = "dashed",
-             colour = col_flag, linewidth = 0.6) +
-  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.28, linewidth = 1.1) +
-  geom_point(size = 4) +
+# Both layers of the r-stack are drawn from one base, so the panel, the axes,
+# and the point positions land on the same pixels and the overlay registers on
+# top of the plain ranking.
+board_base <- ggplot(board, aes(x = score, y = system)) +
   scale_colour_manual(values = c(`TRUE` = col_accent, `FALSE` = col_muted)) +
   scale_x_continuous(limits = c(0.66, 0.88), labels = scales::label_number(accuracy = 0.01)) +
   labs(x = "Benchmark score", y = NULL) +
   theme(legend.position = "none", panel.grid.major.y = element_blank())
+
+board_base + geom_point(size = 4, colour = col_muted)
 ```
+
+::: {.fragment fragment-index="2"}
+```{r}
+#| label: board-intervals
+#| fig-width: 8
+#| fig-height: 4.0
+board_base +
+  geom_vline(xintercept = max(board$lo), linetype = "dashed",
+             colour = col_flag, linewidth = 0.6) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi, colour = tied),
+                 height = 0.28, linewidth = 1.1) +
+  geom_point(aes(colour = tied), size = 4)
+```
+:::
+:::
+
+::: {.fragment fragment-index="2"}
+Plum marks every system whose interval overlaps the leader's. The top four are a tie.
+:::
 
 ## Worked example: how wide is that interval? {#worked}
 
@@ -207,7 +233,7 @@ $$\se(\Sh_A - \Sh_B) = \sqrt{\frac{p_{10} + p_{01} - \Delta^2}{n}}.$$
 
 Items both systems pass drop out, and so do items both fail. At 0.83 against 0.79
 on 900 shared items with 12% disagreement the standard error is 0.011, so the gap
-runs [3.5 standard errors]{.yblue} wide.
+runs [3.5 standard errors]{.fragment .highlight-accent} wide.
 
 ::: {.aside-note}
 A leaderboard publishes two marginal scores, so overlap is all you can draw. The
@@ -364,7 +390,7 @@ and tailoring a system to your own traffic rather than to a benchmark is an acti
 line of work [@yin2024MetaLearning].
 :::
 
-## Before next class {#next-steps .closing-slide}
+## Before next class {#next-steps .closing-slide transition="fade"}
 
 :::: {.together}
 ::: {.steps}

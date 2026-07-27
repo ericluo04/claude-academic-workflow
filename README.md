@@ -49,8 +49,8 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 
 Two live example decks, rendered by these skills and published on GitHub Pages:
 
-- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck, with staged reveals, jump buttons into the appendix, and a paginated reference list.
-- [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a worked example, discussion prompts, and agenda tracking.
+- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck, with staged reveals, a framing withdrawn in place, a headline estimate that takes the accent on cue, jump buttons into the appendix, and a paginated reference list.
+- [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a comparison that arrives from both sides, a leaderboard that gains its error bars in place, a worked example, discussion prompts, and agenda tracking.
 
 Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.
 
@@ -58,7 +58,7 @@ The decks demonstrate what the pipeline can do; how your slides should look stay
 
 What Quarto reveal.js gives you:
 
-- Modern web layout, with flexible animation (fragments for reveals, `auto-animate` to carry an element across slides).
+- Modern web layout, with flexible animation: reveal's fragment variants, `.r-stack` for layering one exhibit over another in place, explicit fragment indices for regrouping a build across columns, and a transition set per slide. `auto-animate` carries an element across a slide boundary too; `slide-tooling/README.md` says what it can and cannot reach once the staging filter is in the chain.
 - LaTeX equations, typeset from macros you define in the front matter.
 - R and Python chunks that execute at render.
 - Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
