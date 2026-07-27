@@ -2,28 +2,7 @@
 
 An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, drafting preregistrations, checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
 
-Everything in this repository, including both example decks and their figures, is AI-generated with Claude Code, as a proof of concept for what an agent-built research workflow looks like. Generated content is the responsibility of whoever uses it: verify citations, numbers, and claims before relying on them, the same way you would verify a research assistant's first draft.
-
-Two live example decks, rendered by these skills and published on GitHub Pages:
-
-- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck, with staged reveals, jump buttons into the appendix, and a paginated reference list.
-- [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a worked example, discussion prompts, and agenda tracking.
-
-Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box. The starter theme carries the machinery inside one worked look (paper ground, serif display headings, a plum accent), and the theme file marks every spot where your own taste replaces it.
-
-The decks demonstrate what the pipeline can do; how your slides should look stays your call. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
-
-## Why Quarto
-
-The slide pipeline here is Quarto reveal.js, because a Quarto deck is a plain-text document that runs code. R and Python chunks execute at render, so the figure on a slide is generated from the source sitting next to it and cannot drift from the analysis; that is how both example decks build their exhibits. Layout is modern web layout, so a two-column slide whose figure fills its half is a class name and not a stack of vertical-space guesses. Staging is native: reveals are fragments, `auto-animate` carries an element (a figure included) from one slide to the next, and embedding video is one HTML tag.
-
-Because the source is text it diffs in git, lives next to your LaTeX files, and takes real LaTeX math: both example decks define `\newcommand` macros in their front matter and typeset multi-line display equations from them. Text is also what makes the give-it-a-paper-get-a-deck workflow possible, which is what `research-talk` and `teaching-lecture` do, and what lets the render-time gates in `slide-tooling/` catch overflow, shrunken figures, and out-of-order reveals mechanically, with contrast checked against the theme's measured ink tables.
-
-Beamer is the alternative to beat, and it holds up on the two things that matter most here: it is plain text, so an agent can write it, and its math is LaTeX. That is how it stayed the academic default for twenty years. What it lacks is execution. A figure in a Beamer deck is a pasted PDF that was correct when you last ran the plot script and can quietly stop matching it. Animation is overlay arithmetic (`\only<2->`, `\pause`) that gets hard to follow past a few steps, video depends on the reader's PDF viewer and often dies in the room, and layout fights you at every step.
-
-PowerPoint is more AI-authorable than most people assume. Anthropic's document skills include a `pptx` skill that writes new decks with a JavaScript library and edits existing ones by unzipping the file and editing its OOXML, covering native charts, speaker notes, template placeholders, and a LibreOffice screenshot pass for visual QA ([anthropics/skills](https://github.com/anthropics/skills/blob/main/skills/pptx/SKILL.md)). The limits are real. Those pre-built document skills [do not ship in Claude Code](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) and run on claude.ai and the API instead; transitions and animations are not scriptable, so decks come out static; the `.pptx` is a finished artifact with no link back to the code that drew its figures; equations arrive as Unicode text or images, since nothing in the chain writes PowerPoint's OMML math format; and editing an existing deck is XML surgery with several documented ways to corrupt the file.
-
-Each alternative wins somewhere. Choose Beamer when a venue or your coauthors require it, or when the talk already lives there and a port buys nothing. Choose PowerPoint when someone downstream needs an editable `.pptx` (coauthors, admin staff), when a corporate or university template is mandated, or when the room's workflow is comments left inside the slides.
+Everything in this repository, including the two example decks and their figures, is AI-generated with Claude Code, as a proof of concept for what an agent-built research workflow looks like. Generated content is the responsibility of whoever uses it: verify citations, numbers, and claims before relying on them, the same way you would verify a research assistant's first draft.
 
 ## Quickstart
 
@@ -55,7 +34,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `replication-package` | Assembles a journal-ready replication archive and scans it for secrets, PII, and absolute local paths first. |
 | `compile-latex` | Compiles with latexmk, auto-detects the engine and bib backend, and emits a ranked error report with file:line attribution. |
 | `tikz-iterate` | Compiles a TikZ figure, rasterizes it, has the `tikz-reviewer` agent actually look at the image, and iterates until approved. |
-| `research-talk` | Authors a Quarto reveal.js deck for a seminar, conference talk, or job talk: assertion titles, staged reveals, a deep appendix for questions. |
+| `research-talk` | Authors a Quarto reveal.js deck for a seminar, conference talk, or job talk: assertion titles, staged reveals, a deep appendix for questions. See the [example decks](#quarto-for-slides) below. |
 | `teaching-lecture` | Authors classroom lecture decks built for engagement: worked examples, discussion prompts, checks for understanding, projector-sized figures. |
 | `slide-review` | Renders a deck, screenshots every slide in a real browser, and reviews the pictures for overflow, contrast, broken figures, and a weak argument. |
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
@@ -65,6 +44,26 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 ### A note of caution on reviewing
 
 `review-paper` is built for your own manuscripts: a pre-submission check on a draft before you send it out, to be run only on work you wrote. Do not use it, or any generative AI tool, to review other people's submissions. Journals are explicit about this: [Management Science's submission guidelines](https://pubsonline.informs.org/page/mnsc/submission-guidelines) tell the review team directly that they "should not upload any part of a manuscript submitted to *Management Science* into a generative AI tool such that it might compromise confidentiality and/or copyright", and JMR's [submission guidelines](https://journals.sagepub.com/author-instructions/mrj) defer to Sage's [ChatGPT and generative AI policy](https://www.sagepub.com/en-us/nam/chatgpt-and-generative-ai), which reserves the right to take action when a reviewer breaches peer-review confidentiality with GenAI tools. If you referee, check the journal's AI policy before involving any tool at all.
+
+## Quarto for Slides
+
+Two live example decks, rendered by these skills and published on GitHub Pages:
+
+- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck, with staged reveals, jump buttons into the appendix, and a paginated reference list.
+- [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a worked example, discussion prompts, and agenda tracking.
+
+Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.
+
+The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, serif display headings, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
+
+Four things Quarto reveal.js gives you:
+
+- Modern web layout, with flexible animation (fragments for reveals, `auto-animate` to carry an element across slides).
+- LaTeX equations, typeset from macros you define in the front matter.
+- R and Python chunks that execute at render.
+- Video embedded with one HTML tag.
+
+Beamer cannot run code, so a figure in a Beamer deck is a pasted PDF that can quietly stop matching the script that drew it. Choose it when a venue or your coauthors require it, or when the talk already lives there. PowerPoint cannot script transitions or animations, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Choose it when someone downstream needs an editable `.pptx`, or when a university template is mandated.
 
 ## Things you may not know
 
