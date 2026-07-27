@@ -157,6 +157,10 @@ The prompt takes two families of keys: the readline editing bindings a shell alr
 
 Option+B and Option+F need the Option key sending Meta, which macOS Terminal does not do by default: Terminal > Settings > Profiles > select your profile > Keyboard tab, then check "Use Option as Meta key".
 
+### Running a model on your own machine
+
+[Ollama](https://ollama.com) is a free, open-source tool for running open-weight language models on your own computer. Inference happens locally: prompts and documents are processed on your machine and never transmitted to any cloud service or company, which matters when the material is confidential, unpublished, or covered by an agreement that says where data may go. It also works with no network at all, so a flight or a bus ride with unreliable wifi still leaves you with a usable model. Current open-weight models are strong enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
+
 ### Name your sessions
 
 Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe. Picking a project back up becomes choosing it from a list rather than reconstructing where you were.
