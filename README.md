@@ -25,6 +25,10 @@ mkdir -p ~/.claude/assets && cp -R slide-tooling ~/.claude/assets/quarto-yale
 
 Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume (the Crossref contact address, the PDF helper, the Overleaf glob) and how to adjust each one. `CLAUDE.md` is the author's working global configuration, shared as an example. The three `style/house.md` files in the slide skills are stubs for your own taste: author line, closing-slide wording, palette rationale, density calibration.
 
+## The global CLAUDE.md
+
+`CLAUDE.md` is what Claude Code loads into every session as standing instructions; this one carries the author's voice rules (how prose should read) and working style (parallel subagents by default, decisions through the option picker, judgment calls raised before acting), which shape every skill's output without being repeated in any of them. If you adapt this repo, add your own standing context here: quants will want a computing-grid section (cluster login, Slurm citizenship rules, where storage lives), plus anything else Claude should know in every session, like data locations or preferred stacks.
+
 ## Skills
 
 | Skill | What it does |

@@ -15,11 +15,10 @@ The rendered decks under `docs/` are the example sources rendered with
 `starter-theme.scss`, a light editorial theme (warm paper ground, serif
 display headings, plum accent) that implements every hook the filter and the
 gates expect, with comments marking where taste goes.
-The author also runs two private themes on the same hooks (a talk theme and a
-lecture theme, not published), and this file cites measurements taken on them
-wherever a concrete number helps. Everything below about divider classes, the
-progress bar, jump buttons, citations, and the reference list holds for the
-starter theme too.
+Where a concrete number helps, this file cites measurements taken on a
+two-theme setup built on the same hooks (a talk theme and a lecture theme).
+Everything below about divider classes, the progress bar, jump buttons,
+citations, and the reference list holds for the starter theme too.
 
 ## Files
 
@@ -191,7 +190,7 @@ So numbering the blocks on a slide that also has a staged list would push its
 bullets to the end of the slide: a slide of paragraph, list, paragraph reveals
 as 0, 2, 3, 1. The filter therefore adds explicit indices only when it can
 account for every fragment on the slide, meaning no staged list, no `.fragment`
-of the author's own, and none of `.r-stack`, `.r-hstack`, `.r-vstack`,
+of your own, and none of `.r-stack`, `.r-hstack`, `.r-vstack`,
 `.quarto-layout-panel`, or a cell with `output-location: fragment`. Otherwise it
 leaves the indices off and lets DOM order decide. Your own `fragment-index` is
 never touched.
