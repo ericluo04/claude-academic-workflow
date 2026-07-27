@@ -64,9 +64,9 @@ What Quarto reveal.js gives you:
 - Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
 - Video embedded with one HTML tag.
 
-An important note: rendering needs a network. Quarto fetches its reveal.js dependencies the first time, and code chunks install what they import. Presenting does not, because `slide-tooling/` vendors MathJax and both typefaces, so a finished deck opens from a local file with the wifi off. That last part is this repo's doing rather than Quarto's default, which loads MathJax from a CDN and leaves the equations blank on a podium laptop with no connection.
-
 Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
+
+An important note: rendering needs a network. Quarto fetches its reveal.js dependencies the first time, and code chunks install what they import. Presenting does not, because `slide-tooling/` vendors MathJax and both typefaces, so a finished deck opens from a local file with the wifi off. That last part is this repo's doing rather than Quarto's default, which loads MathJax from a CDN and leaves the equations blank on a podium laptop with no connection.
 
 ## Things you may not know
 
