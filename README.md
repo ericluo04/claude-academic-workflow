@@ -135,7 +135,7 @@ When a university mail account cannot integrate with anything, draft in a person
 
 ### Name your sessions
 
-Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe: the paper revision, the lecture build, and the referee reading each stay findable as themselves, so picking a project back up is choosing it from a list rather than reconstructing where you were.
+Rename a session to what it is actually about (`/rename`), and `/resume` will show you a list you can read months later instead of a wall of timestamps and first lines. It costs a few seconds and it is what makes closing the terminal safe. Picking a project back up becomes choosing it from a list rather than reconstructing where you were.
 
 ## License and credit
 
