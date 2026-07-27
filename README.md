@@ -105,6 +105,8 @@ A few of the higher-leverage discoveries from building this, none of them obviou
 
   Consumer connectors (travel, tickets, restaurants) exist too, and occasionally earn their keep.
 
+- An AI assistant sitting in your Zoom calls is worth having, and which one matters less than having one: Notion AI's meeting notes, Zoom's own AI Companion, and Otter all do the job. The value shows up weeks later, when you come back to a project after time away and the meeting summaries and extracted to-dos are how you remind yourself what is going on and reorganize. They also make the discussion searchable, so "what did we decide about X" has an answer without re-watching anything.
+
 ### API keys
 
 Keys live in one env file outside the repo (`~/.claude/secrets/scholar.env` here, chmod 600); the skills reference it by path, so nothing sensitive sits in a skill file or a repository. All of them are optional and free; the tools fall back to the public pools without them. The ones worth having:
