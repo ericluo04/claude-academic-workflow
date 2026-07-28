@@ -163,7 +163,7 @@ Option+B and Option+F need the Option key sending Meta, which macOS Terminal doe
 
 ### Read your own usage with /insights
 
-`/insights` reads your session history and writes an HTML report: what you actually work on, which tools you lean on, where sessions went wrong, and concrete suggestions with the evidence behind each one. The useful part is the friction analysis, since it names patterns you cannot see from inside a single session (the questions that turned into twenty diagnostic commands, the sessions that ended mid-build, the standing conventions that got skipped). Treat the suggestions as a starting point rather than a checklist: it does not know which skills you already have, so some of what it proposes you may have built already.
+`/insights` reads your session history and writes an HTML report: what you actually work on, which tools you lean on, where sessions went wrong, and concrete suggestions with the evidence behind each one. The useful part is the friction analysis, since it names patterns you cannot see from inside a single session (the questions that turned into twenty diagnostic commands, the sessions that ended mid-build, the standing conventions that got skipped). The report ends with copy-paste suggestions, and the good way to use them is to hand the whole thing back to Claude Code: point it at the HTML file and ask it to read the suggestions critically, say which are genuinely worth it, and fold those into the skills and `CLAUDE.md` you already have instead of adding new files. A capable model reading its own usage report will tell you that half the proposals duplicate something you built months ago.
 
 ### Side questions with /btw
 
