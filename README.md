@@ -161,6 +161,10 @@ The prompt takes two families of keys: the readline editing bindings a shell alr
 
 Option+B and Option+F need the Option key sending Meta, which macOS Terminal does not do by default: Terminal > Settings > Profiles > select your profile > Keyboard tab, then check "Use Option as Meta key".
 
+### Read your own usage with /insights
+
+`/insights` reads your session history and writes an HTML report: what you actually work on, which tools you lean on, where sessions went wrong, and concrete suggestions with the evidence behind each one. The useful part is the friction analysis, since it names patterns you cannot see from inside a single session (the questions that turned into twenty diagnostic commands, the sessions that ended mid-build, the standing conventions that got skipped). Treat the suggestions as a starting point rather than a checklist: it does not know which skills you already have, so some of what it proposes you may have built already.
+
 ### Side questions with /btw
 
 While Claude is working on something long, `/btw` asks a quick question without interrupting it. The side question runs alongside the main task instead of derailing it, so you can check what a flag does or think out loud while a build or a research pass keeps going, and the main work resumes where it was. It keeps its own history, separate from the thread you interrupted.
