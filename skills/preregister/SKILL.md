@@ -60,6 +60,8 @@ If the description has no directional hypothesis, ask once. Do not invent a dire
 | Observational confirmatory analysis | `osf`, preanalysis-plan variant |
 | Ambiguous | `aspredicted` |
 
+The 1 to 3 DVs cut is a rule of thumb for form length, not a registry rule.
+
 AEA RCT registration is required for field experiments at AEA journals (lab experiments are
 exempt) and accepted by Marketing Science and Management Science; either OSF or AEA works for
 the marketing journals. Clinical trials (ClinicalTrials.gov, ISRCTN) belong in their own
@@ -119,8 +121,9 @@ Do not merge sections across styles. The registries ask for different things.
 
 ### Sample size, power, and stopping rule
 
-A preregistration without a number here is not binding, so this field is MUST in every style.
-Record all of:
+This field is MUST in every style. That elevation is our own requirement, deliberately
+stricter than the registries' forms, kept because a preregistration without a number here
+does not bind anything. Record all of:
 
 - the effect size assumed, and where it comes from: a pilot, a prior study with a citation, or
   the smallest effect size of interest. Do not power off a published point estimate without
@@ -146,8 +149,10 @@ in the underpowering.
 
 ### What would falsify this
 
-MUST in every style, written as its own field even though only OSF has an obvious slot for it.
-For each hypothesis, state the pattern of data that would count against it: the sign, the
+MUST in every style, written as its own field even though only OSF has an obvious slot for
+it. This elevation too is our own requirement, deliberately stricter than the registries'
+forms, kept because a preregistration that nothing could falsify does not constrain
+anything. For each hypothesis, state the pattern of data that would count against it: the sign, the
 confidence interval excluding the region of interest, the manipulation check failing, the
 predicted moderation not appearing. For any hypothesis predicting no effect, give equivalence
 bounds and a TOST test (Lakens 2017), because a non-significant test is not evidence of absence.
@@ -174,8 +179,12 @@ document still gets written but is reported as INCOMPLETE with the count of unre
 - Internal consistency. If randomized, the unit of randomization matches the unit of analysis or
   the analysis plan handles the clustering. If observational, the identification strategy is
   named.
-- Manipulation checks. At least one is named for any experiment, and the plan says whether
-  failing participants are excluded (decided now, not later).
+- Manipulation checks. At least one is named for any lab or survey experiment, where a
+  manipulated construct needs verification, and the plan says whether failing participants
+  are excluded (decided now, not later). Natural field experiments and A/B tests of
+  deployed treatments are exempt: the treatment is the deployed change itself, so there is
+  no manipulated construct to check by design. A field study that does run one still
+  decides the exclusion rule now.
 - Exploratory analyses are in their own section and labeled as exploratory.
 
 ## Phase 5. Verify the citations
