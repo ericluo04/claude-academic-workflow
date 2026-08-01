@@ -1,6 +1,6 @@
 # claude-academic-workflow
 
-An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, drafting preregistrations, checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
+An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, designing and analyzing causal-inference studies (difference-in-differences, regression discontinuity, instrumental variables, synthetic control, randomized experiments), drafting preregistrations, checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
 
 Everything in this repository, including the two example decks and their figures, is AI-generated with Claude Code, as a proof of concept for what an agent-built research workflow looks like. Generated content is the responsibility of whoever uses it: verify citations, numbers, and claims before relying on them, the same way you would verify a research assistant's first draft.
 
@@ -27,6 +27,12 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `reading-papers` | Looks up and reads a specific paper from a link, DOI, title, or vague description, across marketing, economics, psychology, and CS venues. |
 | `litreview` | Finds, ranks, and synthesizes the literature on a topic across Semantic Scholar, OpenAlex, and arXiv, then reads the top hits with parallel subagents. |
 | `bibcheck` | Audits a `.bib` file entry by entry against canonical metadata and writes a corrected copy; catches wrong years, mis-cited authors, and hallucinated entries. |
+| `causal-design` | Triages a causal question to the identification strategy the data can actually support, then hands off to the skill that owns it. Carries the selection-on-observables branch itself: overlap, doubly robust estimation, double machine learning, causal forests, sensitivity analysis. |
+| `did` | Runs a difference-in-differences analysis with the heterogeneity-robust estimators, event-study diagnostics, and honest bounds on pre-trend violations. |
+| `synthetic-control` | Builds and validates synthetic control comparisons, including synthetic difference-in-differences, the augmented and penalized variants, and factor-model alternatives. |
+| `rdd` | Runs a regression discontinuity in both the continuity and local-randomization frameworks, with the design gate and the full falsification battery. |
+| `iv` | Estimates instrumental-variables designs with weak-instrument-robust inference, shift-share and formula instruments, and an explicit exclusion-restriction argument. |
+| `field-experiment` | Designs and analyzes randomized experiments: stratified and clustered assignment, randomization inference, power, attrition bounds, and pre-specified heterogeneity. |
 | `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. |
 | `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how load-bearing they are. |
 | `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. See the [note of caution](#a-note-of-caution-on-reviewing) below. |

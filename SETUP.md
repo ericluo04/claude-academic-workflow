@@ -10,6 +10,7 @@ Everything here was extracted from one researcher's working configuration, so th
 - A TeX distribution (MacTeX or TeX Live) with `latexmk`, for `compile-latex` and `tikz-iterate`; ghostscript for rasterizing.
 - `uv`, for the self-contained Python helpers (`paper.py` and the `pdfread.py` PDF helper run via `uv run` shebangs).
 - R with ggplot2 if you render the example decks (their figures are R chunks).
+- R with the estimation packages, for the causal-inference skills. Their script templates are the reference implementations, and each one loads only what its own design needs, so install per skill rather than all at once. The CRAN side spans `fixest`, `did`, `didimputation`, `staggered`, `bacondecomp`, `TwoWayFEWeights`, `HonestDiD`, `rdrobust`, `rddensity`, `rdlocrand`, `rdpower`, `rdmulti`, `ivreg`, `ivmodel`, `ivDiag`, `ivmte`, `Synth`, `tidysynth`, `scpi`, `SCtools`, `fect`, `CausalImpact`, `grf`, `policytree`, `WeightIt`, `sensemakr`, `estimatr`, `marginaleffects`, `randomizr`, `DeclareDesign`, `ri2`, `qte`, `clubSandwich`, `summclust`, `fwildclusterboot`, `ShiftShareSE`, `bpbounds`, and `zoo`. Six live on GitHub and need `remotes::install_github()`: `ebenmichael/augsynth`, `jonathandroth/pretrends`, `synth-inference/synthdid`, `kylebutts/ssaggregate`, `kwuthrich/scinference`, and `kolesarm/ManyIV`. Each skill's `references/details.md` carries a package index with the version the template was written against and the API quirks worth knowing.
 
 ## Install
 
