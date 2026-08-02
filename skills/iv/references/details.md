@@ -68,7 +68,7 @@ Shares from two conditional means: pi_a = pr(X=1|Z=0), pi_n = pr(X=0|Z=1),
 pi_c = 1 - pi_a - pi_n. The first-stage ITT on treatment equals the complier share, so the
 first-stage table doubles as the compliance table. The assumptions imply four testable
 inequalities of the form pr(Y=1, X=0 | Z=1) <= pr(Y=1, X=0 | Z=0). Worked flu-encouragement
-numbers (Imbens 2014): left side 30/1389 = 0.0216 vs right side 31/72 = 0.0211, a slight
+numbers (Imbens 2014): left side 30/1389 = 0.0216 vs right side 31/1472 = 0.0211, a slight
 statistically insignificant violation, showing the tests have bite. Violation means at least
 one assumption is false; passing proves nothing (no consistent test exists). Manski natural
 bounds from the same 2x2x2 table travel with the LATE when the ATE was the target: flu ATE

@@ -9,9 +9,10 @@ Everything in this repository, including the two example decks and their figures
 ```bash
 git clone https://github.com/ericluo04/claude-academic-workflow
 cd claude-academic-workflow
+mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets
 cp -R skills/* ~/.claude/skills/
 cp agents/tikz-reviewer.md ~/.claude/agents/
-mkdir -p ~/.claude/assets && cp -R slide-tooling ~/.claude/assets/quarto-yale
+cp -R slide-tooling ~/.claude/assets/quarto-yale
 ```
 
 Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume (the Crossref contact address, the PDF helper, the Overleaf glob) and how to adjust each one. `CLAUDE.md` is the author's working global configuration, shared as an example. The three `style/house.md` files in the slide skills are stubs for your own taste: author line, closing-slide wording, palette rationale, density calibration.
@@ -60,7 +61,7 @@ Two live example decks, rendered by these skills and published on GitHub Pages:
 
 Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.
 
-The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, Literata display headings over IBM Plex Sans text, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the doctrine and pacing sections of the `research-talk` and `teaching-lecture` skill files and in the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
+The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, Literata display headings over IBM Plex Sans text, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the content-doctrine section of the `research-talk` skill file, the pacing-and-structure section of the `teaching-lecture` one, and the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
 
 What Quarto reveal.js gives you:
 
@@ -70,7 +71,7 @@ What Quarto reveal.js gives you:
 - Citations straight from a `.bib` file, rendered with a hover preview of the full reference and collected into a paginated list at the end.
 - Video embedded with one HTML tag.
 
-Beamer does the second of those and not the other three; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
+Beamer does the second of those and not the other four; its animation exists but is far less flexible. PowerPoint does none of them well: transitions and animations are not scriptable, and nothing in the AI-authoring chain writes its equation format, so an agent-written deck comes out static with its math as text or images. Either is a reasonable choice when a venue or your coauthors require it, when the talk already lives there, or when you simply prefer it and it fits your workflow better.
 
 An important note: rendering needs a network. Quarto fetches its reveal.js dependencies the first time, and code chunks install what they import. Presenting does not, because `slide-tooling/` vendors MathJax and both typefaces, so a finished deck opens from a local file with the wifi off. That last part is this repo's doing rather than Quarto's default, which loads MathJax from a CDN and leaves the equations blank on a podium laptop with no connection.
 

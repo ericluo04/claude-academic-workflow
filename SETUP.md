@@ -9,22 +9,23 @@ Everything here was extracted from one researcher's working configuration, so th
 - Node 22 or newer, for the two deck gates (`deck-check.mjs`, `stage-check.mjs`; they use node's built-in WebSocket, no npm install).
 - A TeX distribution (MacTeX or TeX Live) with `latexmk`, for `compile-latex` and `tikz-iterate`; ghostscript for rasterizing.
 - `uv`, for the self-contained Python helpers (`paper.py` and the `pdfread.py` PDF helper run via `uv run` shebangs).
-- R with ggplot2 if you render the example decks (their figures are R chunks).
-- R with the estimation packages, for the causal-inference skills. Their script templates are the reference implementations, and each one loads only what its own design needs, so install per skill rather than all at once. The CRAN side spans `fixest`, `did`, `didimputation`, `staggered`, `bacondecomp`, `TwoWayFEWeights`, `HonestDiD`, `rdrobust`, `rddensity`, `rdlocrand`, `rdpower`, `rdmulti`, `ivreg`, `ivmodel`, `ivDiag`, `ivmte`, `Synth`, `tidysynth`, `scpi`, `SCtools`, `fect`, `CausalImpact`, `grf`, `policytree`, `WeightIt`, `sensemakr`, `estimatr`, `marginaleffects`, `randomizr`, `DeclareDesign`, `ri2`, `qte`, `clubSandwich`, `summclust`, `fwildclusterboot`, `ShiftShareSE`, `bpbounds`, and `zoo`. Six live on GitHub and need `remotes::install_github()`: `ebenmichael/augsynth`, `jonathandroth/pretrends`, `synth-inference/synthdid`, `kylebutts/ssaggregate`, `kwuthrich/scinference`, and `kolesarm/ManyIV`. Each skill's `references/details.md` carries a package index with the version the template was written against and the API quirks worth knowing.
+- R 4.1 or newer. The `synthetic-control` script template uses the native pipe (`|>`), which older R does not parse. Add ggplot2 and knitr if you render the example decks (their figures are R chunks run through the knitr engine).
+- R with the estimation packages, for the causal-inference skills. Their script templates are the reference implementations, and each one loads only what its own design needs, so install per skill rather than all at once. The CRAN side spans `fixest`, `did`, `didimputation`, `staggered`, `bacondecomp`, `TwoWayFEWeights`, `HonestDiD`, `rdrobust`, `rddensity`, `rdlocrand`, `rdpower`, `rdmulti`, `ivreg`, `ivmodel`, `ivDiag`, `ivmte`, `Synth`, `tidysynth`, `scpi`, `SCtools`, `fect`, `CausalImpact`, `grf`, `policytree`, `WeightIt`, `sensemakr`, `estimatr`, `marginaleffects`, `randomizr`, `DeclareDesign`, `ri2`, `qte`, `clubSandwich`, `summclust`, `fwildclusterboot`, `ShiftShareSE`, `bpbounds`, `dplyr`, and `zoo`. Six live on GitHub and need `remotes::install_github()`: `ebenmichael/augsynth`, `jonathandroth/pretrends`, `synth-inference/synthdid`, `kylebutts/ssaggregate`, `kwuthrich/scinference`, and `kolesarm/ManyIV`. Each skill's `references/details.md` carries a package index with the version the template was written against and the API quirks worth knowing.
 
 ## Install
 
 ```bash
+mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets
 cp -R skills/* ~/.claude/skills/
 cp agents/tikz-reviewer.md ~/.claude/agents/
-mkdir -p ~/.claude/assets && cp -R slide-tooling ~/.claude/assets/quarto-yale
+cp -R slide-tooling ~/.claude/assets/quarto-yale
 ```
 
 The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which is why the copy keeps that name. A new deck then starts with `quarto add ~/.claude/assets/quarto-yale --no-prompt` and `cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} .`, and uses `format: starter-revealjs`.
 
 ## What to adjust
 
-- The Crossref and OpenAlex contact address. `skills/bibcheck/SKILL.md` and `skills/reading-papers/scripts/paper.py` carry `you@example.edu` placeholders; set a real address (or export `SCHOLAR_MAILTO`). The polite pools these APIs run for real contacts are faster and more reliable.
+- The `you@example.edu` placeholder, in three files. `skills/bibcheck/SKILL.md` and `skills/reading-papers/scripts/paper.py` use it as the Crossref and OpenAlex contact address; set a real one (or export `SCHOLAR_MAILTO`). The polite pools these APIs run for real contacts are faster and more reliable. `skills/research-talk/assets/starter-template.qmd` uses it on the closing contact slide.
 - API keys. `paper.py` and the Zotero launcher source `~/.claude/secrets/scholar.env` if it exists, with `S2_API_KEY`, `OPENALEX_API_KEY`, and optional `ZOTERO_API_KEY`/`ZOTERO_LIBRARY_ID`. All are optional; the tools degrade to the public pools without them.
 - House style. `skills/research-talk/style/house.md`, `skills/teaching-lecture/style/house.md`, and `skills/slide-review/style/house.md` are stubs: your author line, closing-slide wording, palette rationale, and density calibration go there. The slide skills read those files for values.
 - Your theme. `slide-tooling/starter-theme.scss` is deliberately plain and comments mark where taste goes; the example decks under `docs/` are that theme rendered as-is, so what you see is the starting point and the look is yours to build.

@@ -13,8 +13,8 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
 - Stratified: tau-hat = sum_g (N_g/N) tau-hat_g, V-hat = sum_g (N_g/N)^2 V-hat_g; the
   complete-randomization variance is valid but conservative.
 - Paired: use the across-pair variance of pair differences (conservative for the sample ATE,
-  right for the super-population one). Ignoring pairing roughly doubles the SE in the
-  Children's Television Workshop example (4.6 vs 7.8).
+  right for the super-population one). Ignoring pairing raises the SE by about seventy
+  percent in the Children's Television Workshop example (4.6 vs 7.8).
 - Clustered: for the cluster-average estimand, difference in means on cluster means
   (equivalently unit-level WLS with weights 1/N_g); for the unit-average estimand,
   unweighted unit OLS with Liang-Zeger CR (CR2 small-sample correction and Satterthwaite
@@ -167,7 +167,7 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
   assignments (Athey-Eckles-Imbens); no coherent large-network asymptotics, so do not
   substitute clustered SEs for the exact test.
 - Marketing instances: marketplace cannibalization, social-ad spillovers, budget-constrained
-  auctions, referral programs, livestream network effects.
+  auctions, referral programs, two-sided marketplace network effects.
 
 ## Marketing translations
 

@@ -36,6 +36,7 @@ library(marginaleffects) # 0.32.0
 ## is the most common mistake" (Imbens 2024) -- audit the covariate list before running.
 
 X <- as.matrix(df[, c("x1", "x2", "x3")])
+set.seed(94305)
 
 ## ---- 1. Overlap FIRST (violations move the estimand, not just the estimator) ----------
 cf <- causal_forest(X, df$y, df$d,
