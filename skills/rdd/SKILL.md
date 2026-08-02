@@ -100,10 +100,11 @@ The fuzzy estimand is a complier average effect at the cutoff under relevance, e
 monotonicity, so the iv skill's habits transfer:
 
 - Test the first stage inside the bandwidth or window, never on the full sample; the full-sample
-  F overstates strength. The guide's contrast is the anchor: F around 698 in the valid design,
-  F = 1.51 (Fisherian p = 0.32) in the failed one. An in-bandwidth first-stage F that is neither
-  the strong nor the hopeless extreme goes to the iv skill's ladder: read it against the F
-  targets there and report Anderson-Rubin/CLR intervals rather than the 2SLS t.
+  F overstates strength. The guide's contrast is the anchor: F around 698 in the valid design
+  against F = 1.51 in the failed one, where the first-stage effect is 0.15 with a Fisherian
+  p-value of 0.32. An in-bandwidth first-stage F that is neither the strong nor the hopeless
+  extreme goes to the iv skill's ladder: read it against the F targets there and report
+  Anderson-Rubin/CLR intervals rather than the 2SLS t.
 - Argue exclusion qualitatively and concretely: it fails if crossing the cutoff changes behavior
   through anything other than treatment (a low churn score triggering a retention call AND a
   flag another team acts on).

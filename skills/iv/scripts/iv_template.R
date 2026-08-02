@@ -166,8 +166,14 @@ ri_p <- function(b) {
   t_cf  <- apply(perm_z - mu, 2, function(zv) mean(zv * (df$y - b * df$d)))
   mean(abs(t_cf) >= abs(t_obs))
 }
-grid <- seq(-2, 2, by = 0.01)             # widen until both endpoints are excluded
-range(grid[sapply(grid, ri_p) > 0.05])    # the RI 95% interval
+STEP <- 0.01
+grid <- seq(-2, 2, by = STEP)             # widen until both endpoints are excluded
+acc  <- grid[sapply(grid, ri_p) > 0.05]   # nulls not rejected at 5%
+if (!length(acc)) stop("RI: no null survives at 5%. Report failed identification.")
+if (acc[1] == grid[1] || acc[length(acc)] == grid[length(grid)])
+  warning("RI: accepted set touches a grid endpoint. It is unbounded, widen the grid.")
+runs <- split(acc, cumsum(c(1, diff(acc) > 1.5 * STEP)))   # contiguous pieces
+lapply(runs, range)                       # the RI 95% set, a union printed as a union
 # 8c. Placebo outcomes (lagged y as outcome) with the same RI machinery test shock
 # exogeneity itself; the balance test only validates the counterfactual specification.
 

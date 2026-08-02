@@ -15,6 +15,7 @@ x  <- df$score               # running variable
 d  <- df$takeup              # observed treatment (fuzzy designs only)
 Z  <- as.matrix(df[, c("cov1", "cov2")])   # predetermined covariates
 CUT <- 350                   # the cutoff
+set.seed(94305)
 
 library(rdrobust); library(rddensity); library(rdlocrand); library(rdpower)
 

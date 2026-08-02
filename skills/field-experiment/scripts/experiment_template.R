@@ -82,8 +82,8 @@ marginaleffects::avg_comparisons(fit, variables = "z",
                                  comparison = "lnoravg", transform = exp)
 # Guo-Basse per-arm imputation with the design-based MSE interval (their own snippet;
 # swap family = poisson for counts -- 45% shorter intervals than linear on their data):
-mu1 <- glm(y ~ pre_y + x1, family = binomial, data = subset(df, z == 1))
-mu0 <- glm(y ~ pre_y + x1, family = binomial, data = subset(df, z == 0))
+mu1 <- glm(y01 ~ pre_y + x1, family = binomial, data = subset(df, z == 1))
+mu0 <- glm(y01 ~ pre_y + x1, family = binomial, data = subset(df, z == 0))
 tau_gob <- mean(predict(mu1, df, "response") - predict(mu0, df, "response"))
 tau_gob + t.test(residuals(mu1, "response"), residuals(mu0, "response"))$conf.int
 # Pre-trust checks: no fitted values hugging 0/1 (separation); per-arm R2 not both

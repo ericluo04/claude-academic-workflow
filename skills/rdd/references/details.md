@@ -45,7 +45,7 @@ contradiction (ART: 121 vs 2,593 observations).
 ## Fuzzy diagnostics
 
 - First stage inside the bandwidth/window only. Anchors: F about 698 (valid ART design) vs
-  F = 1.51, Fisherian p = 0.32 (failed chemotherapy design).
+  F = 1.51 (failed chemotherapy design, first-stage effect 0.15 with Fisherian p = 0.32).
 - Fuzzy-ratio balance tests: instrument strength amplifies covariate bias.
 - One MSE-optimal bandwidth for the ratio, not separate numerator/denominator bandwidths.
 - Exclusion argued concretely: crossing the cutoff must move the outcome only through

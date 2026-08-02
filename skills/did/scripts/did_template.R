@@ -19,6 +19,7 @@ YNAME <- "y"; TNAME <- "period"; IDNAME <- "unit"; GNAME <- "first_treated"
 CLUSTER <- "cluster"
 XFORMLA <- NULL              # e.g. ~ x1 + x2 for conditional PT; NULL = unconditional
 df <- your_data              # replace
+set.seed(94305)
 
 ## ---- 0. Packages -----------------------------------------------------------
 # CRAN: did (2.5.x), HonestDiD (0.2.8), didimputation (0.5.x), TwoWayFEWeights (2.1.x),
@@ -140,9 +141,9 @@ pt$event_plot_pretest
 
 ## ---- 5. TWFE alongside, and Sun-Abraham cross-check ------------------------
 # Post-treatment indicator for the TWFE, bacon, and twowayfeweights calls. Never-treated
-# units (first_treated == 0) must stay 0: without the != 0 guard, period >= 0 would mark
-# them treated everywhere, the same cohort-recoding trap flagged for sunab below.
-df$treat <- as.integer(df$first_treated != 0 & df$period >= df$first_treated)
+# units (GNAME == 0) must stay 0: without the != 0 guard, TNAME >= 0 would mark them
+# treated everywhere, the same cohort-recoding trap flagged for sunab below.
+df$treat <- as.integer(df[[GNAME]] != 0 & df[[TNAME]] >= df[[GNAME]])
 twfe <- feols(as.formula(paste(YNAME, "~ treat |", IDNAME, "+", TNAME)),
               data = df, cluster = df[[CLUSTER]])
 # sunab treats any cohort value outside the observed periods as never-treated;
@@ -164,9 +165,11 @@ tw <- twowayfeweights(df, YNAME, IDNAME, TNAME, "treat", type = "feTR",
 # Only when you will defend parallel pre-trends over the whole panel.
 # didimputation codes never-treated as 0 or NA (same as did).
 # pretrends = -5:-1 is a placeholder; match your panel.
+# Without cluster_var the call clusters on idname, and the SEs stop being comparable to
+# the other estimators in this file.
 library(didimputation)
 imp <- did_imputation(data = df, yname = YNAME, gname = GNAME,
-                      tname = TNAME, idname = IDNAME,
+                      tname = TNAME, idname = IDNAME, cluster_var = CLUSTER,
                       horizon = TRUE, pretrends = -5:-1)
 
 ## ---- 8. Quasi-random timing (efficient estimator) --------------------------
@@ -211,6 +214,11 @@ plot(sc)
 # (G = 12 gives 4,096), and boottest enumerates them all when B > 2^G. Pick B so
 # alpha * (B + 1) is an integer (9999 or 99999).
 library(fwildclusterboot)
+# boottest has no seed argument. With the default engine = "R" and Rademacher, Webb, or
+# Normal weights, reproducibility comes from dqrng's generator, not base R's, so the
+# set.seed in CONFIG does not cover these two calls. (Use set.seed instead only for
+# engine = "R-lean", Mammen weights, or engine = "WildBootTests.jl".)
+dqrng::dqset.seed(94305)
 wcr <- boottest(twfe, param = "treat", B = 9999, clustid = CLUSTER,
                 type = "rademacher", impose_null = TRUE, bootstrap_type = "fnw11")
 wcr           # p-value and CI to set beside the CV1 and CV3 answers
@@ -226,9 +234,13 @@ wcr33 <- boottest(twfe, param = "treat", B = 9999, clustid = CLUSTER,
 # 10c. CRAN cross-check: CR2 with Satterthwaite dof (clubSandwich 0.7.0). The dof can
 # fall far below G-1; the Imbens-Kolesar variant is inapplicable once cluster FEs are
 # absorbed.
+# clubSandwich has no fixest method, so this block refits the same TWFE spec as a plain
+# lm with factor() fixed effects.
 library(clubSandwich)
-vc2 <- vcovCR(twfe, cluster = df[[CLUSTER]], type = "CR2")
-coef_test(twfe, vcov = vc2, test = "Satterthwaite")
+fml_lm  <- paste0(YNAME, " ~ treat + factor(", IDNAME, ") + factor(", TNAME, ")")
+twfe_lm <- lm(as.formula(fml_lm), data = df)
+vc2 <- vcovCR(twfe_lm, cluster = df[[CLUSTER]], type = "CR2")
+coef_test(twfe_lm, vcov = vc2, test = "Satterthwaite")
 
 # 10d. Few treated (or control) clusters: CV1/CV2 standard errors can be too small by a
 # factor of five or more at G1 = 1; CV3 over-rejects less but still fails when G1 is

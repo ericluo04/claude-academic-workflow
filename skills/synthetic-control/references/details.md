@@ -115,7 +115,7 @@ the two.
 - Regulation: state-level advertising or privacy rules hitting one state (the Prop 99
   template, literally a marketing-regulation outcome).
 - Platform shocks: a policy change hitting one category, region, or creator tier; channel- or
-  streamer-level panels where channels co-move (Twitch-YouTube style data).
+  creator-level panels on a video platform where channels co-move.
 - Anticipation: forward-buying before announced price changes; shift T0 to the
   announcement, not the enactment.
 - Interference: national campaigns contaminate donor markets; drop exposed donors or sign

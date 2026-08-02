@@ -59,7 +59,8 @@ Beyond those two, this family declines.
 - Analyze as randomized: stratified designs get within-stratum differences averaged with
   stratum weights, paired designs the across-pair variance, clustered designs the
   cluster-level machinery or Liang-Zeger with small-sample correction (CR2). Ignoring a
-  paired design roughly doubled the standard error in the canon's worked example.
+  paired design raised the standard error by about seventy percent in the canon's worked
+  example.
 - HC2 is the default variance everywhere (it reproduces the Neyman estimator exactly for a
   binary treatment); with a rare treatment arm Eicker-Huber-White (EHW, i.e. HC0) is
   anti-conservative, so use HC2 with Behrens-Fisher/Satterthwaite degrees of freedom.
@@ -187,8 +188,8 @@ Johari et al. 2022 analyzes the bias of one-sided designs).
    benchmark hides an imbalance at p = 0.002); post-attrition imbalance means the analyzed
    sample is no longer the randomized sample, which routes to the Lee block.
 2. Adjusted vs unadjusted side by side: adjustment should barely move the point estimate and
-   shrink the SE by roughly 1 - R2. A large movement signals compromised randomization,
-   attrition, or specification problems, and is never a precision story.
+   shrink the SE by roughly sqrt(1 - R2). A large movement signals compromised
+   randomization, attrition, or specification problems, and is never a precision story.
 3. Design-consistent variance check: the design-aware variance should be weakly smaller than
    the complete-randomization one; larger means the analysis mis-specifies the design.
 4. Both cluster estimands when cluster sizes vary; the gap between them is itself evidence
