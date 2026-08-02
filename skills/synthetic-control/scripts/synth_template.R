@@ -78,7 +78,9 @@ back |> plot_trends()
 
 ## ---- 5. Leave-one-out on positive-weight donors ------------------------------
 w <- out |> grab_unit_weights()
-# > 0.01 rather than > 0: skip weights that are numerically zero from the optimizer.
+# > 0.01 is a materiality floor, not a numerical-zero guard: it drops donors whose weight is
+# genuinely positive but under 1%. Use > 0 when the donor pool is small or the weights are
+# spread thin, since a 0.5% donor is then still worth leaving out.
 for (dnr in w$unit[w$weight > 0.01]) {
   loo <- df |> dplyr::filter(unit != dnr) |>
     synthetic_control(outcome = y, unit = unit, time = year,
