@@ -138,8 +138,8 @@ Journal of Economic Perspectives 40(3): 213-240. Key: `goldsmithpinkham2026lenie
 version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
 
 - Role: the leniency design (judge, examiner, caseworker, assessor) end to end. Which estimator,
-  which standard errors, and the five checks that make the design credible. The one canon paper
-  here that is about a design rather than about IV in general.
+  which standard errors, and the five checks that make the design credible. Every other canon
+  paper here is about IV in general. This one is about a design.
 - Settles: UJIVE (Kolesár 2013) is the estimator for these designs, because it is the only
   candidate whose bias trace is zero, and leniency designs are exactly the setting with many
   instruments and many controls at once (2SLS carries many-instrument bias scaling in K, JIVE
@@ -171,7 +171,7 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
   content moderators, and platform review queues that route by roster.
 - Scope limits: the clustering argument (Abadie-Athey-Imbens-Wooldridge) is proved for iid
   assignment with a fixed number of examiners, and the extension to many examiners is asserted as
-  natural rather than proved (their words). MST-style extrapolation has not been formalized for
+  natural (their words) and never proved. MST-style extrapolation has not been formalized for
   many decision-makers or controls, so do not carry the extrapolation ladder into a leniency
   design without saying so.
 - Implement: the authors' own R package ManyIV (github.com/kolesarm/ManyIV), row in

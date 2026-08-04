@@ -138,9 +138,10 @@ plot(asyn)
 ## ---- 9. Factor-model / matrix-completion robustness (fect) -------------------
 library(fect)
 # nboots = 200 in both calls is a quick-run value; raise to 2000 or more for publication.
-# r = c(0, 5) is the CV search range for the number of latent factors, min then max, and 5 is
-# fect's own default ceiling rather than a reduced setting. Read fout$r.cv afterwards: if the
-# selected count comes back at 5 the ceiling bound the search, so raise the max and refit.
+# r = c(0, 5) is the CV search range for the number of latent factors, min then max. 5 is
+# fect's own default ceiling, so this is not a reduced quick-run setting. Read fout$r.cv
+# afterwards: if the selected count comes back at 5 the ceiling bound the search, so raise
+# the max and refit.
 fout <- fect(y ~ treated + income, data = df, index = c("unit", "year"),
              method = "ife", CV = TRUE, r = c(0, 5),
              se = TRUE, vartype = "bootstrap", nboots = 200)

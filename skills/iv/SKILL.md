@@ -306,16 +306,23 @@ design is the whole paper.
    hypothesis and turns the OLS-IV gap of item 4 into a formal test; with unrestricted MTRs,
    infeasibility is item 3's Balke-Pearl falsification in general form.
 
-## The live dispute, carried honestly
+## The live disputes, carried honestly
 
 Whether the just-identified 2SLS t-test is rescuable. Angrist-Kolesár 2024 defend it (size is
 approximately fine at realistic endogeneity); Lee et al. 2022 patch it with tF/VtF critical
 values. The canon's position (Keane-Neal) is that both miss the binding problem: power, not
 size. The t-test has near-zero power against effects opposite the OLS bias, which under
 publication bias manufactures spurious literature-wide consensus, and tF inherits the asymmetry.
-Default here: AR/CLR and the F-50 standard. When a referee pushes back with Angrist-Kolesár,
-report both and cite the dispute; the AR test costs one regression, so there is no economy
-argument for the t-test.
+Default in a few-instrument design: AR/CLR and the F-50 standard. When a referee pushes back
+with Angrist-Kolesár, report both and cite the dispute. The AR test costs one regression, so
+there is no economy argument for the t-test.
+
+Two further disputes are scope boundaries this skill draws, not positions either set of authors
+picked. The F-50 bar and the AR default both come out of the few-instrument literature, and
+neither transfers to a leniency design, where strength is read off sqrt(K) times (E[F] - 1) and
+the weak fallback is Yap 2025. Keane-Neal and Goldsmith-Pinkham-Hull-Kolesár do not cite each
+other, so say which regime you are in before quoting either bar. All four disputes are in
+references/canon.md.
 
 ## R implementation
 
