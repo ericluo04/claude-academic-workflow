@@ -46,7 +46,7 @@ whenever you are going to process the results (it carries abstracts, which is wh
 on); the plain text form is for showing the user.
 
 Write two or three query strings, not one. Strip filler, keep substantive nouns, expand acronyms
-(SAE becomes "sparse autoencoder"), and vary the vocabulary across fields: economists write
+(DiD becomes "difference-in-differences"), and vary the vocabulary across fields: economists write
 "algorithmic collusion", computer scientists write "multi-agent reinforcement learning pricing".
 Run the variants as parallel Bash calls in a single message.
 

@@ -28,13 +28,6 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `reading-papers` | Looks up and reads a specific paper from a link, DOI, title, or vague description, across marketing, economics, psychology, and CS venues. |
 | `litreview` | Finds, ranks, and synthesizes the literature on a topic across Semantic Scholar, OpenAlex, and arXiv, then reads the top hits with parallel subagents. |
 | `bibcheck` | Audits a `.bib` file entry by entry against canonical metadata and writes a corrected copy; catches wrong years, mis-cited authors, and hallucinated entries. |
-| `causal-design` | Triages a causal question to the identification strategy the data can actually support, then hands off to the skill that owns it. Carries the selection-on-observables branch itself: overlap, doubly robust estimation, double machine learning, causal forests, sensitivity analysis. |
-| `did` | Runs a difference-in-differences analysis with the heterogeneity-robust estimators, event-study diagnostics, and honest bounds on pre-trend violations. |
-| `synthetic-control` | Builds and validates synthetic control comparisons, including synthetic difference-in-differences, the augmented and penalized variants, and factor-model alternatives. |
-| `rdd` | Runs a regression discontinuity in both the continuity and local-randomization frameworks, with the design gate and the full falsification battery. |
-| `iv` | Estimates instrumental-variables designs with weak-instrument-robust inference, shift-share and formula instruments, and an explicit exclusion-restriction argument. |
-| `field-experiment` | Designs and analyzes randomized experiments: stratified and clustered assignment, randomization inference, power, attrition bounds, and pre-specified heterogeneity. |
-| `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. |
 | `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how load-bearing they are. |
 | `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. See the [note of caution](#a-note-of-caution-on-reviewing) below. |
 | `referee-response` | Drafts an R&R response letter where every claimed change is located and read in the manuscript before a location pin is written. |
@@ -47,6 +40,33 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
 
 `agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and two webfont families; its README documents all of it.
+
+### Causal inference and natural experiments
+
+Seven skills for identification-strategy work. Each one is built on a canon it has actually
+read, so the advice carries the citation that licenses it, and each keeps a
+`references/canon.md` recording what every source settles, which disputes stay open, and where
+the skill departs from the paper. The last column is that canon.
+
+| Skill | What it does | Built on |
+|---|---|---|
+| `causal-design` | Triages a causal question to the identification strategy the data can actually support, then hands off to the skill that owns it. Carries the selection-on-observables branch itself: overlap, doubly robust estimation, double machine learning, causal forests, sensitivity analysis. | [Imbens (2024)](https://doi.org/10.1146/annurev-statistics-033121-114601); [Li et al. (2024)](https://www.ama.org/marketing-news/causal-inference-with-quasi-experimental-data/) |
+| `did` | Runs a difference-in-differences analysis with the heterogeneity-robust estimators, event-study diagnostics, and honest bounds on pre-trend violations. | [Roth et al. (2023)](https://arxiv.org/abs/2201.01194); [Baker et al. (2026)](https://arxiv.org/abs/2503.13323); [Arkhangelsky and Imbens (2024)](https://doi.org/10.1093/ectj/utae014); [Abadie et al. (2025)](https://www.nber.org/papers/w34550); [MacKinnon et al. (2023)](https://doi.org/10.1016/j.jeconom.2022.04.001) |
+| `synthetic-control` | Builds and validates synthetic control comparisons, including synthetic difference-in-differences, the augmented and penalized variants, and factor-model alternatives. | [Abadie (2021)](https://doi.org/10.1257/jel.20191450); [Arkhangelsky and Imbens (2024)](https://doi.org/10.1093/ectj/utae014) |
+| `rdd` | Runs a regression discontinuity in both the continuity and local-randomization frameworks, with the design gate and the full falsification battery. | [Cattaneo and Titiunik (2022)](https://doi.org/10.1146/annurev-economics-051520-021409); [Cattaneo et al. (2023)](https://arxiv.org/abs/2302.07413) |
+| `iv` | Estimates instrumental-variables designs with weak-instrument-robust inference, shift-share and formula instruments, leniency (judge and examiner) designs estimated by UJIVE, and an explicit exclusion-restriction argument. | [Imbens (2014)](https://doi.org/10.1214/14-STS480); [Keane and Neal (2024)](https://doi.org/10.1146/annurev-economics-092123-111021); [Borusyak et al. (2025)](https://doi.org/10.1257/jep.20231370); [Borusyak and Hull (2023)](https://www.nber.org/papers/w27845); [Mogstad et al. (2018)](https://www.nber.org/papers/w23568); [Goldsmith-Pinkham et al. (2026)](https://doi.org/10.1257/jep.20251480) |
+| `field-experiment` | Designs and analyzes randomized experiments: stratified and clustered assignment, randomization inference, power, attrition bounds, and pre-specified heterogeneity. | [Athey and Imbens (2017)](https://arxiv.org/abs/1607.00698); [Freedman (2008)](https://doi.org/10.1214/08-STS262); [Lin (2013)](https://doi.org/10.1214/12-AOAS583); [Guo and Basse (2023)](https://arxiv.org/abs/2004.11615); [Lee (2009)](https://www.nber.org/papers/w11721) |
+| `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. | [Gelman and Carlin (2014)](https://doi.org/10.1177/1745691614551642); [Simonsohn (2014)](https://datacolada.org/17); [Lakens (2017)](https://doi.org/10.1177/1948550617697177); [Abadie et al. (2023)](https://doi.org/10.1093/qje/qjac038) |
+
+Links point at the publisher when the article is free there and at the working paper or
+preprint otherwise, so nothing in that column sits behind a paywall. `preregister` is the one
+exception to the canon convention: it has no `references/canon.md`, and the papers listed are
+the ones it cites inline.
+
+These skills are opinionated. They pick defaults (which estimator, which standard errors, what
+bar an instrument has to clear) and say so, and where the literature genuinely disagrees they
+name both sides instead of quietly picking one. Read the skill's `references/canon.md` before
+adopting a default you would have to defend to a referee.
 
 ### A note of caution on reviewing
 
