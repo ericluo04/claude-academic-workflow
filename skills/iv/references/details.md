@@ -1,6 +1,6 @@
 # IV lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-08-04.
 
 ## The F ladder (Keane-Neal Table 1)
 
@@ -123,6 +123,67 @@ elasticity -1.08 (0.46); TSLS with the trivalued instrument -1.014 (0.384), LIML
 (0.384). OLS understates the demand elasticity by half. A supply shifter identifies demand and
 a demand shifter identifies supply; without one side's shifter, that side stays unidentified.
 
+## Leniency designs: the trace algebra and the worked numbers (GHK 2026)
+
+Goldsmith-Pinkham, Hull, and Kolesár 2026 (`goldsmith2026leniency`); their own software is the
+ManyIV row in the package index below.
+
+Every estimator built on a relative leniency measure Gx, i.e. betahat_G = y'Gx / x'Gx with
+Gx = ltilde + G nu, has approximate bias under homoskedastic errors
+
+    E[betahat_G] - beta ~= tr(G) / (K(E[F] - 1) + tr(G)) * cov(eps_i, nu_i) / var(nu_i),
+
+using the identity sum_i ltilde_i^2 / var(nu_i) = K(E[F] - 1) = n R^2 / (1 - R^2). The trace
+carries the whole comparison, with H the projection on the residualized instruments, M the
+covariate annihilator, L the number of controls, and K the number of decision-makers:
+
+| Estimator | G | tr(G) | Approximate bias |
+|---|---|---|---|
+| OLS | M | n - L | (1 - R^2) cov/var |
+| 2SLS | H | K | (1/E[F]) cov/var, i.e. 1/((1 - R^2) E[F]) of the OLS bias |
+| JIVE1 | M(I - D_Q)^-1 (H_Q - D_Q) | -L | -L/(K(E[F] - 1) - L) cov/var, the 2SLS bias times -E[F]/(K(E[F] - 1)/L - 1) |
+| IJIVE | M(I - diag(H))^-1 (H - diag(H))M | sum_i H_ii(1 - M_ii)/(1 - H_ii) | small in practice, so IJIVE tracks UJIVE |
+| UJIVE | H - diag(H_ii/(M_ii - H_ii))(M - H) | 0 | 0 |
+
+JIVE's residualized leniency subtracts the cell's overall grant rate, which itself depends on
+i's own treatment, so own-observation bias returns with the opposite sign to 2SLS. The JIVE
+bias is negligible when L is far below K, and UJIVE and JIVE coincide when there are no
+controls beyond a constant. The formula also gives the one-step implementation: UJIVE needs only the
+two projection diagonals, the fitted values Hx, and the residuals (M - H)x, all obtained from
+regressing x on the residualized instruments and on (z, w) separately.
+
+Delta-method standard errors survive weak instruments more often than the textbook worry
+suggests. Angrist-Kolesár (2024) show that delta-method inference turns overly optimistic only
+when the correlation between the numerator and the denominator of the estimator,
+
+    rho = (Sigma_12 - Sigma_22 beta*) / sqrt(Sigma_22(Sigma_11 - 2 beta* Sigma_12 + beta*^2 Sigma_22)),
+
+is high. As long as |rho| < 0.76, rejection rates for nominal 5 percent tests stay below 10
+percent at any instrument strength. GHK extend this to UJIVE with many instruments and
+controls, where rho no longer maps to the endogeneity parameter (Sigma picks up extra terms),
+but Sigma is consistently estimable, so rho can be plugged in for any particular null.
+
+Reanalysis of Farre-Mensa, Hegde, and Ljungqvist (2020) on patent examiners and startup
+outcomes: 32,514 first-time applications, art unit by year fixed effects, approval rate 0.649.
+Standard errors in parentheses. Column 2 uses their constructed approval-rate leniency
+measure, column 3 the full examiner dummy set.
+
+| Outcome | UJIVE | 2SLS, FMHL leniency | 2SLS, examiner dummies | OLS |
+|---|---|---|---|---|
+| any subsequent application | 0.173 (0.055) | 0.265 (0.023) | 0.232 (0.016) | 0.234 (0.006) |
+| log(1 + subsequent applications) | 0.323 (0.100) | 0.456 (0.037) | 0.374 (0.027) | 0.357 (0.009) |
+| any citation to subsequent patents | 0.183 (0.049) | 0.210 (0.020) | 0.173 (0.014) | 0.164 (0.005) |
+
+The many-dummy 2SLS standard errors are 3 to 4 times smaller than UJIVE's (0.055/0.016 = 3.4,
+0.100/0.027 = 3.7, 0.049/0.014 = 3.5), which the paper calls "statistical pathology rather than
+efficiency gains": overfitting pulls the 2SLS estimate toward OLS and shrinks its standard
+error at the same time, so the estimator mimics OLS in both. The examiner-dummy 2SLS estimates
+sit between OLS and UJIVE, the predicted signature. The 2SLS estimates on the constructed
+leniency measure run larger than UJIVE, which GHK read as many-covariate bias because that
+construction resembles JIVE. Balance coefficients in their Table 2 run about 10 times smaller
+than the treatment effects (venture capital funding: -0.024 with a standard error of 0.035),
+which is the magnitude comparison that makes a balance table informative.
+
 ## Shift-share checklists (BHJ 2025, worked examples attached)
 
 Shift path (worked on Autor-Dorn-Hanson 2013):
@@ -218,7 +279,8 @@ check aimed at that assumption.
 - Distance instruments (store, warehouse, delivery coverage): condition on generic distance,
   instrument with the specific version (the McClellan-Newhouse trick).
 
-## Package index (verified against package docs 2026-07-28; the ivmte row on 2026-07-29)
+## Package index (verified against package docs 2026-07-28; the ivmte row on 2026-07-29;
+the ManyIV row against the cloned source and a live run on its `fhl` data on 2026-08-04)
 
 | Package | Version | Role | Traps |
 |---|---|---|---|
@@ -229,7 +291,7 @@ check aimed at that assumption.
 | ShiftShareSE | 1.1.0 (CRAN, Kolesar) | reg_ss / ivreg_ss with method = "akm" / "akm0" (AKM0 = null-imposed, better small-K coverage); sector_cvar clusters shocks | X is the aggregated shift-share vector, shares go in W, the instrument never appears in the formula; the akm0 "se" is a normalized CI length, never a t-stat input |
 | ssaggregate | GitHub kylebutts/ssaggregate (0.0.0.9000, pushed 2025-11) | BHJ shock-level aggregation for the equivalent shift-level regression and the exposure-robust F | dev version, no CRAN release or visible tests; n/s/l/t are strings while vars/controls are formulas; template keeps a hand-coded fallback |
 | bpbounds | 0.1.8 (CRAN) | Balke-Pearl inequality checks and ACE bounds (binary Y, X; Z with 2-3 categories) | xtabs order is positional treatment-outcome-instrument with margin = 3 on the instrument |
-| ManyIV | GitHub kolesarm/ManyIV (0.0.2.9000) | many-instrument SEs (Kolesár 2018 minimum distance, JoE 204(1):86-100, distinct from Kolesár-Rothe 2018 on discrete running variables in the rdd skill), JIVE/UJIVE, Sargan + modified Cragg-Donald overid | rough dev API (man pages carry TODOs); for single-endogenous LIML/Fuller use ivmodel instead |
+| ManyIV | GitHub kolesarm/ManyIV (0.0.2.9000, HEAD 0b82852 dated 2025-06-17; source read and run 2026-08-04) | the leniency-design workhorse and the package `goldsmith2026leniency` uses for its own checklist: `ujive(formula, data, subset, na.action, tol = 1e-8, dropleverage = TRUE)` with formula `y ~ d + controls \| instruments`, returning class `IVResults` whose `$estimate` is a data frame with rows ols / tsls / ujive / "old ujive" / ijive1 / jive1 and columns `estimate`, `se_text` (textbook robust), `se_hte` (heteroskedasticity- and treatment-effect-heterogeneity-robust, the column the paper's tables report, and it absorbs the Bekker many-instrument term), plus `$IVData$F` (homoskedastic first-stage F), `$IVData$k` (instruments after collinear drops), `$IVData$l` (controls), `$IVData$n`, `$drop_obs`. Also `IVreg(..., inference = "standard"/"md")` for Kolesár 2018 minimum-distance many-instrument SEs (JoE 204(1):86-100, distinct from Kolesár-Rothe 2018 on discrete running variables in the rdd skill) and `IVoverid()` for Sargan + modified Cragg-Donald | the endogenous variable must be the FIRST right-hand term (put it second and another regressor is silently treated as endogenous, verified by running both orders); NO cluster argument, so the leave-own-cluster-out UJIVE that clustered assignment requires has to be hand-coded; no null-imposed SE, so the Yap (2025) weak-IV test is hand-coded too; `dropleverage = TRUE` silently drops leverage-one and singleton-dummy rows, `FALSE` returns NaN for UJIVE with a warning; no weights argument; rough dev API (man pages still carry TODOs); for single-endogenous LIML/Fuller use ivmodel |
 | AER | 1.2-17 (CRAN) | legacy ivreg (two-part formula only), kept for compatibility notes | superseded by the ivreg package |
 | ivmte | 1.4.0 (CRAN, 2021-09-17; GitHub jkcshea/ivmte slightly ahead, last commit 2024-08-27) | MST bounds and extrapolation, single entry point ivmte(): target 'ate'/'att'/'atu'/'late'/'genlate' with genlate.lb/.ub the u-interval (the alpha dial) or custom target.weight0/1; MTR space via m0/m1 formulas with uSpline(degree, knots, intercept); ivlike list of regression formulas as the estimands; shape flags m0/m1/mte .lb/.ub/.inc/.dec enforced on the audit grid (initgrid.nx/.nu, audit.nx/.nu); bootstraps for inference; cite `shea2023ivmte` | needs one of gurobi/cplexapi/rmosek/lpsolveapi; the only fully free solver (lpSolveAPI) is roughly an order of magnitude slower and cannot run the regression-based direct criterion (QCQP, Gurobi or MOSEK only), so with it always supply ivlike moments; point = TRUE forces GMM and silently ignores every shape constraint; the unobservable in m0/m1 must match uname (default u); m0/m1 bounds default to the observed outcome range, which is the bounded-outcome assumption |
 

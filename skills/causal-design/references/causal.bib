@@ -538,8 +538,11 @@
 }
 
 % ---- iv ----
-% Canon (from reading notes) + primary papers, resolver-verified 2026-07-28.
-% One PREPRINT (jaeger2018shift); everything else VoR.
+% Canon (from reading notes) + primary papers, resolver-verified 2026-07-28; leniency-design
+% additions verified 2026-08-04. Two PREPRINTs (jaeger2018shift, yap2025inference) and one
+% never-published working paper (kolesar2013estimation, the UJIVE origin, no DOI exists).
+% Two entries are advance-online with no volume or issue yet (blandhol2026tsls,
+% frandsen2025cluster); everything else VoR.
 
 % Crossref and OpenAlex omit the page range; 323--358 restored from Project Euclid.
 @article{imbens2014instrumental,
@@ -584,6 +587,19 @@
   number  = {6},
   pages   = {2155--2185},
   doi     = {10.3982/ECTA19367}
+}
+
+% Crossref-verified 2026-08-04 (DOI, volume, issue, pages, print date 2026-08-01).
+% Open version: arXiv 2511.03572; also NBER w34473.
+@article{goldsmithpinkham2026leniency,
+  author  = {Goldsmith-Pinkham, Paul and Hull, Peter and Koles{\'a}r, Michal},
+  title   = {Leniency Designs: An Operator's Manual},
+  journal = {Journal of Economic Perspectives},
+  year    = {2026},
+  volume  = {40},
+  number  = {3},
+  pages   = {213--240},
+  doi     = {10.1257/jep.20251480}
 }
 
 % ---- IV primary papers, alphabetical by key ----
@@ -711,6 +727,20 @@
   doi     = {10.2307/2951662}
 }
 
+% Added 2026-08-04 for the leniency-design material. Crossref-verified (title, all four
+% authors, journal). No longer a working paper: the Review of Economic Studies published it
+% online 2026-05-14 and assigns no volume, issue, or pages yet, so the advance-online
+% convention applies and the NBER w29709 deposit is superseded. Cite it as 2026; the
+% leniency paper's own reference list still has the 2025 working-paper form.
+@article{blandhol2026tsls,
+  author  = {Blandhol, Christine and Bonney, John and Mogstad, Magne and Torgovitsky, Alexander},
+  title   = {When is {TSLS} Actually {LATE}?},
+  journal = {Review of Economic Studies},
+  year    = {2026},
+  note    = {Advance online publication},
+  doi     = {10.1093/restud/rdag029}
+}
+
 % Print year 2022 (online-first 2021, which resolvers stamp).
 @article{borusyak2022quasi,
   author  = {Borusyak, Kirill and Hull, Peter and Jaravel, Xavier},
@@ -747,6 +777,19 @@
   doi     = {10.1257/aer.99.2.1}
 }
 
+% Added 2026-08-04 for the leniency-design material. Crossref-verified 2026-08-04 (DOI,
+% authors, volume, issue, pages, print date 2025-06-01).
+@article{chyn2025examiner,
+  author  = {Chyn, Eric and Frandsen, Brigham and Leslie, Emily},
+  title   = {Examiner and Judge Designs in Economics: A Practitioner's Guide},
+  journal = {Journal of Economic Literature},
+  year    = {2025},
+  volume  = {63},
+  number  = {2},
+  pages   = {401--439},
+  doi     = {10.1257/jel.20241719}
+}
+
 % Crossref stores initials only; full names from the published byline and the NBER deposit (w5052).
 @article{currie1996health,
   author  = {Currie, Janet and Gruber, Jonathan},
@@ -769,6 +812,33 @@
   number  = {6},
   pages   = {1365--1388},
   doi     = {10.2307/2171740}
+}
+
+% Added 2026-08-04 for the leniency-design material. Crossref-verified 2026-08-04 (DOI,
+% authors, volume, issue, pages, print date 2023-01-01).
+@article{frandsen2023judging,
+  author  = {Frandsen, Brigham and Lefgren, Lars and Leslie, Emily},
+  title   = {Judging Judge Fixed Effects},
+  journal = {American Economic Review},
+  year    = {2023},
+  volume  = {113},
+  number  = {1},
+  pages   = {253--277},
+  doi     = {10.1257/aer.20201860}
+}
+
+% Added 2026-08-04 for the leniency-design material. Crossref-verified 2026-08-04 (DOI,
+% authors, title, journal). Cited as "Forthcoming" in Goldsmith-Pinkham, Hull, and
+% Koles{\'a}r (2026); it is in fact already online (2025-05-19) with no volume or issue
+% assigned, so the advance-online convention applies. Crossref's 1--19 page range is the
+% advance-online pagination and is omitted here. Re-check for the print issue.
+@article{frandsen2025cluster,
+  author  = {Frandsen, Brigham and Leslie, Emily and McIntyre, Samuel},
+  title   = {Cluster Jackknife Instrumental Variables Estimation},
+  journal = {Review of Economics and Statistics},
+  year    = {2025},
+  note    = {Advance online publication},
+  doi     = {10.1162/rest.a.263}
 }
 
 @article{goldsmithpinkham2020bartik,
@@ -851,6 +921,20 @@
   doi     = {10.1111/j.1468-0262.2005.00610.x}
 }
 
+% Added 2026-08-04 for the leniency-design material. The paper that introduced UJIVE, cited
+% as its origin in Goldsmith-Pinkham, Hull, and Koles{\'a}r (2026). Never published: no
+% Crossref, OpenAlex, or arXiv record, so no DOI. Fields reproduced from the leniency paper's
+% own bibliography; the URL returns HTTP 200 as of 2026-08-04.
+@techreport{kolesar2013estimation,
+  author      = {Koles{\'a}r, Michal},
+  title       = {Estimation in an Instrumental Variables Model With Treatment Effect Heterogeneity},
+  institution = {Princeton University},
+  type        = {Working paper},
+  year        = {2013},
+  month       = {11},
+  url         = {https://www.princeton.edu/~mkolesar/papers/late_estimation.pdf}
+}
+
 @article{kolesar2015identification,
   author  = {Koles{\'a}r, Michal and Chetty, Raj and Friedman, John and Glaeser, Edward and Imbens, Guido W.},
   title   = {Identification and Inference With Many Invalid Instruments},
@@ -930,6 +1014,19 @@
   doi     = {10.1016/j.jeconom.2019.04.038}
 }
 
+% Added 2026-08-04 for the leniency-design material. Crossref-verified 2026-08-04 (DOI,
+% author, volume, issue, pages, print date 2026-01-01).
+@article{sigstad2026monotonicity,
+  author  = {Sigstad, Henrik},
+  title   = {Monotonicity among Judges: Evidence from Judicial Panels and Consequences for Judge {IV} Designs},
+  journal = {American Economic Review},
+  year    = {2026},
+  volume  = {116},
+  number  = {1},
+  pages   = {189--208},
+  doi     = {10.1257/aer.20231104}
+}
+
 % JSTOR deposit gives only the first page; range from RePEc.
 @article{staiger1997instrumental,
   author  = {Staiger, Douglas and Stock, James H.},
@@ -940,6 +1037,20 @@
   number  = {3},
   pages   = {557--586},
   doi     = {10.2307/2171753}
+}
+
+% Added 2026-08-04 for the leniency-design material. PREPRINT. v3 April 2025; no journal
+% version as of 2026-08-04 (Crossref and OpenAlex show only the arXiv deposit). Title,
+% author, and year verified against the arXiv API and the DataCite record for the arXiv DOI.
+@misc{yap2025inference,
+  author        = {Yap, Luther},
+  title         = {Inference with Many Weak Instruments and Heterogeneity},
+  year          = {2025},
+  note          = {arXiv:2408.11193; v1 August 2024, latest version April 2025},
+  eprint        = {2408.11193},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  doi           = {10.48550/arXiv.2408.11193}
 }
 
 % Article 104112; no issue number.

@@ -1,8 +1,11 @@
 # IV canon
 
-Current as of 2026-07-29. These sources are hand-picked; nothing enters this file without
-explicit human approval. BibTeX keys point into ../../causal-design/references/causal.bib.
-Refresh: litreview on the method since the date above, results proposed as flagged addenda.
+Current as of 2026-08-04. These sources are hand-picked; nothing enters this file without
+explicit human approval. Goldsmith-Pinkham, Hull, and Kolesár is an approved addendum
+(2026-08-04) covering the leniency design, which the other five sources reach only in
+passing. BibTeX keys point into
+../../causal-design/references/causal.bib. Refresh: litreview on the method since the date
+above, results proposed as flagged addenda.
 
 ## Imbens (2014)
 
@@ -129,6 +132,56 @@ Econometrica 86(5): 1589-1619. Key: `mogstad2018using`.
   package (Shea-Torgovitsky 2023, `shea2023ivmte`), package row and solver traps in
   references/details.md, optional template block in scripts/iv_template.R.
 
+## Goldsmith-Pinkham, Hull, and Kolesár (2026)
+
+Journal of Economic Perspectives 40(3): 213-240. Key: `goldsmithpinkham2026leniency`. Open
+version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
+
+- Role: the leniency design (judge, examiner, caseworker, assessor) end to end. Which estimator,
+  which standard errors, and the five checks that make the design credible. The one canon paper
+  here that is about a design rather than about IV in general.
+- Settles: UJIVE (Kolesár 2013) is the estimator for these designs, because it is the only
+  candidate whose bias trace is zero, and leniency designs are exactly the setting with many
+  instruments and many controls at once (2SLS carries many-instrument bias scaling in K, JIVE
+  carries many-covariate bias scaling in the number of controls L and with the opposite sign,
+  bias-corrected 2SLS has trace zero but only under homoskedasticity, IJIVE is close in
+  practice); UJIVE instruments with leave-one-out fitted relative leniency, the examiner dummies
+  residualized on the controls first; manual leniency IV (build an external leniency measure,
+  plug it into a just-identified IV) is out, because construction details drive the bias and the
+  second-stage standard errors are wrong; the variance of a constructed leniency measure is not
+  a reading of design strength, since estimation noise inflates it; balance is tested by running
+  the same UJIVE specification with the covariate as the outcome, which puts any imbalance in
+  treatment-effect units and is immune to the mechanical correlation a constructed-leniency
+  balance regression manufactures; the joint F on the examiner dummies is invalid with many
+  examiners; the same machinery on a post-assignment variable tests exclusion; average
+  monotonicity (Frandsen-Lefgren-Leslie 2023) is the operative condition, weaker than
+  Imbens-Angrist uniform monotonicity and necessary and sufficient for nonnegative weights, but
+  it is not invariant to first-stage misspecification; average monotonicity is testable, by
+  running UJIVE on v_i times treatment for a pre-assignment binary v_i and checking the estimate
+  lands in [0, 1]; the same trick with non-binary v_i characterizes compliers and probes external
+  validity; the first-stage F is the wrong strength diagnostic for UJIVE, which stays
+  approximately unbiased as E[F] goes to one provided sqrt(K) times (E[F] - 1) is large; the
+  heterogeneity-robust plug-in variance also absorbs the Bekker many-instrument term; under
+  independent assignment plain robust standard errors suffice and clustering by examiner is never
+  justified; clustered assignment changes the estimator as well as the standard error, requiring
+  leave-own-cluster-out UJIVE.
+- Binds when: any design where cases are assigned to decision-makers who differ in strictness and
+  the assignment is as good as random within a stratum. Judges, patent examiners, disability
+  assessors, loan officers, child-protection investigators, radiologists, immigration officers,
+  content moderators, and platform review queues that route by roster.
+- Scope limits: the clustering argument (Abadie-Athey-Imbens-Wooldridge) is proved for iid
+  assignment with a fixed number of examiners, and the extension to many examiners is asserted as
+  natural rather than proved (their words). MST-style extrapolation has not been formalized for
+  many decision-makers or controls, so do not carry the extrapolation ladder into a leniency
+  design without saying so.
+- Implement: the authors' own R package ManyIV (github.com/kolesarm/ManyIV), row in
+  references/details.md, template block in scripts/iv_template.R. Chyn-Frandsen-Leslie 2025
+  (JEL 63(2): 401-439) is the companion practitioner's guide the paper positions itself against.
+- Quote: "small first-stage F statistics need not worry a researcher using UJIVE"; on clustering,
+  "this line of reasoning would never justify clustering on examiners (as is sometimes done in
+  practice)"; on the many-dummy 2SLS standard errors in their reanalysis, "a difference that
+  reflects statistical pathology rather than efficiency gains."
+
 ## Named disputes the skill carries
 
 1. Just-identified t-test: Keane-Neal (abandon it; power asymmetry is the binding problem) vs
@@ -138,6 +191,18 @@ Econometrica 86(5): 1589-1619. Key: `mogstad2018using`.
 2. Overid rejections: invalidity vs heterogeneity (both canon papers, plus
    Mogstad-Torgovitsky-Walters 2021). Not a dispute between authors but a fork in
    interpretation the skill refuses to collapse.
+3. Instrument-strength standard: Keane-Neal's robust-F-about-50 bar governs 2SLS bias in
+   few-instrument designs, while Goldsmith-Pinkham-Hull-Kolesár 2026 hold that F is the wrong
+   statistic for UJIVE in a many-examiner design, where the quantity that matters is sqrt(K)
+   times (E[F] - 1) and UJIVE stays approximately unbiased as E[F] approaches one. The two
+   papers do not cite each other, so this is a scope boundary the skill draws, not an argument
+   either set of authors picked. Default: the F-50 bar everywhere outside a leniency design,
+   the sqrt(K)(E[F] - 1) reading inside one, and name the estimator either way, since the bar
+   is a statement about 2SLS and not about IV in general.
+4. Weak-instrument fallback in leniency designs: the skill's general default is AR/CLR, but
+   Goldsmith-Pinkham-Hull-Kolesár flag that the many-instrument AR of Mikusheva-Sun 2022 and
+   Matsushita-Otsu 2024 are not robust to treatment-effect heterogeneity, which a leniency
+   design has by construction. Inside a leniency design the fallback is Yap 2025 instead.
 
 ## Primary papers cited through the canon
 
@@ -156,3 +221,12 @@ Goldsmith-Pinkham-Sorkin-Swift 2020 (the three shift-share pillars); Mogstad-Tor
 Walters 2021 (heterogeneity and multiple instruments); Autor-Dorn-Hanson 2013, Card 2009,
 Bartik 1991, Currie-Gruber 1996, Angrist-Krueger 1991 (worked designs);
 Jaeger-Ruist-Stuhler 2018 (dynamic shift-share caveat).
+
+Added with the leniency addendum (2026-08-04): Kolesár 2013 (UJIVE's origin);
+Frandsen-Lefgren-Leslie 2023 (average monotonicity, and their own test of the stronger
+condition); Sigstad 2026 (monotonicity is often violated in judicial panels, and the
+disagreements are too small to bias the estimates much); Chyn-Frandsen-Leslie 2025 (the
+companion examiner-design practitioner's guide in JEL); Blandhol et al. 2026 (linearity of
+E[z|w] in the covariates as a necessary condition); Yap 2025 (many-weak-instrument inference
+that survives treatment-effect heterogeneity); Frandsen-Leslie-McIntyre 2025 (cluster jackknife
+IV, the leave-own-cluster-out route under clustered assignment).

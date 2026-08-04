@@ -49,8 +49,8 @@ Spawned as `general-purpose` subagents with inline role-string prefixes. No pers
    the most likely failure mode? Walk back from the failure and name the decision point today at
    which it could have been avoided."
 3. Methodologist. "Challenge identification, measurement, and design. Quant-marketing tuned: DiD,
-   IV, RD, RCT, conjoint, eye-tracking, vignette, field experiment, scraped panel, and
-   GAN/SAE/embedding methods. Are the exclusion restrictions defensible? Is the unit of analysis
+   IV, RD, RCT, discrete choice experiment, eye-tracking, vignette, field experiment, scraped
+   panel, and embedding methods. Are the exclusion restrictions defensible? Is the unit of analysis
    consistent with the unit of treatment? Is the clustering level defensible? For ML or GenAI
    components, is train/test/holdout discipline intact, and does anything leak?"
 4. Academic editor. "Venue fit, narrative tightness, contribution framing. Default targets

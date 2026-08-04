@@ -16,7 +16,9 @@ Handbook of Economic Field Experiments. Key: `athey2017econometrics`. Read: arXi
   Neyman variance drops an unidentifiable term, so CIs are conservative; HC2 equals the
   Neyman estimator for binary treatment, EHW is anti-conservative with rare arms
   (Behrens-Fisher dof fix); stratify ex ante (weakly dominates complete randomization even
-  small-sample), strata to 2+2, do not pair, re-randomization needs a pre-specified
+  small-sample), strata to 2+2, do not pair (their position, contested by the later
+  matched-pair theory in dispute 1 below, so do not carry it as settled),
+  re-randomization needs a pre-specified
   acceptance rule; clustered designs have two estimands and cluster-level analysis is
   primary; ITT plus LATE and never as-treated or per-protocol; honest sample splitting for
   data-driven heterogeneity (coverage survives, MSE pays); QTEs are marginal-quantile

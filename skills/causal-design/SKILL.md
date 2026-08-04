@@ -44,6 +44,10 @@ references/canon.md as flagged addenda.
      It identifies the LATE for compliers only; the ATE needs substantially stronger
      assumptions, and the complier population is the focus because it is the only one
      identifiable (Imbens).
+   - Cases are routed to decision-makers who differ in strictness (judges, patent examiners,
+     assessors, loan officers, reviewers) and the routing is as good as random within a
+     stratum: iv, which owns the leniency design. The decision-maker identity is the
+     instrument, 2SLS on it is biased, and the estimator is UJIVE.
    - Treatment switches at a threshold on a running variable: rdd (fuzzy RD is IV at the
      cutoff).
    - Treatment switches on over time for some units with untreated comparisons: the panel
@@ -179,6 +183,7 @@ Every claim traces to references/canon.md; keys live in references/causal.bib.
 - synthetic-control: few treated units, long pre-periods; SDID; factor models and matrix
   completion; the augmented/forward DiD and HCW conditions stated above.
 - rdd: thresholds on running variables; the design gate and falsification battery.
-- iv: instruments, shift-share, formula instruments; weak-instrument inference.
+- iv: instruments, shift-share, formula instruments, leniency and examiner designs;
+  weak-instrument inference.
 - preregister: pre-analysis plans once the design is chosen (experiment-first skill;
   quasi-experimental and measurement PAPs adapt its structure).
