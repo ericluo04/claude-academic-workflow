@@ -195,6 +195,10 @@ Poisson, or an extensive/intensive margin split.
 
 Cluster at the level at which treatment is independently assigned (state policies: state). This
 is the design-based rule (Rambachan-Roth, the DiD instance of Abadie-Athey-Imbens-Wooldridge),
+and group fixed effects do not get you out of it: adding them "allows for group-specific linear
+trends in the underlying potential outcomes series but does not change the answer to the
+question whether one needs to adjust for clustering" (AAIW, on the common-timing case, which
+reduces to a cross-sectional regression of the change in unit-level average outcomes),
 and it also answers "what is the superpopulation" when the sample is the population. With few
 treated clusters, no method is assumption-free: the map in references/details.md lists each
 option with the homogeneity assumption it needs, which is the selection criterion (Roth et al.

@@ -154,9 +154,11 @@ and the bounds themselves are compromised; there is no within-model fix.
 ## Heterogeneity and multiple testing
 
 - Pre-specified subgroups: stratified analysis plus a multiple-testing correction that
-  exploits correlation across tests (List-Shaikh-Xu bootstrap; Romano-Wolf stepdown), not
-  Bonferroni. Multiple outcomes: omnibus statistic or corrected p-values; uncorrected
-  per-outcome stars are the failure mode.
+  exploits correlation across tests (List-Shaikh-Xu bootstrap; Romano-Wolf stepdown), never
+  Bonferroni, which Holm dominates at zero cost. Multiple outcomes: omnibus statistic or
+  corrected p-values; uncorrected per-outcome stars are the failure mode. The staged policy
+  this instantiates (screen with FDR, confirm with a resampling FWER method, gate across
+  stages) is in causal-design's shared rules.
 - Data-driven heterogeneity requires honesty: any CI you will report needs sample splitting
   (one sample picks the partition, an independent one estimates). Coverage survives high
   dimension; MSE does not. Honest trees for interpretable subgroups, causal forests for the

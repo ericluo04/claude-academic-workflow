@@ -1,6 +1,6 @@
 ---
 name: causal-design
-description: Triage any causal question to the identification strategy the data can support, then hand off to the owning method skill; owns the selection-on-observables branch (overlap, doubly robust estimation, double ML, causal forests, policy learning, sensitivity analysis) and the inference rules shared across designs. Produces the design recommendation with the assumption that licenses it, the estimand and its subpopulation, R estimation code for the observables branch, and a drafted taxonomy paragraph. TRIGGER on "causal inference", "identification strategy", "which method", "research design", "endogeneity", "quasi-experiment", "natural experiment", "observational study", "selection on observables", "unconfoundedness", "conditional ignorability", "matching", "propensity score", "doubly robust", "AIPW", "double machine learning", "DML", "causal forest", "CATE", "policy learning", "targeting", "sensitivity analysis", "omitted variable bias", "Oster bounds", "coefficient stability", "overlap", "trimming", "marketplace experiment", "surrogate index", "mediation", "mediation analysis", "indirect effect", or any "how do I estimate the effect of X on Y" question with no design chosen yet. Once a design is chosen, the method skills own it: field-experiment, did, synthetic-control, rdd, iv.
+description: Triage any causal question to the identification strategy the data can support, then hand off to the owning method skill; owns the selection-on-observables branch (overlap, doubly robust estimation, double ML, causal forests, policy learning, sensitivity analysis) and the inference rules shared across designs. Produces the design recommendation with the assumption that licenses it, the estimand and its subpopulation, R estimation code for the observables branch, and a drafted taxonomy paragraph. TRIGGER on "causal inference", "identification strategy", "which method", "research design", "endogeneity", "quasi-experiment", "natural experiment", "observational study", "selection on observables", "unconfoundedness", "conditional ignorability", "matching", "propensity score", "doubly robust", "AIPW", "double machine learning", "DML", "causal forest", "CATE", "policy learning", "targeting", "sensitivity analysis", "omitted variable bias", "Oster bounds", "coefficient stability", "overlap", "trimming", "marketplace experiment", "surrogate index", "mediation", "mediation analysis", "indirect effect", "conjoint", "AMCE", or any "how do I estimate the effect of X on Y" question with no design chosen yet. Once a design is chosen, the method skills own it: field-experiment, did, synthetic-control, rdd, iv, conjoint.
 ---
 
 # Causal design triage
@@ -25,7 +25,10 @@ references/canon.md as flagged addenda.
 1. Was assignment randomized, or as good as (lottery, randomized rollout)? Yes:
    field-experiment. Two cautions at this gate: naive sample means from adaptive/bandit
    experiments are biased (the arm that looked worse early is truncated; Imbens), and
-   suspected interference changes the DESIGN, not just the analysis (routing below).
+   suspected interference changes the DESIGN, not just the analysis (routing below). One
+   sub-route: profile experiments randomizing multiple attributes within alternatives
+   (conjoint, fully randomized factorial vignettes) go to conjoint, which owns the
+   per-component estimand family and its correction layers.
 2. If observational: is unconfoundedness defensible with PRETREATMENT covariates only? The
    conditioning set may contain only non-descendants of treatment and outcome, normally
    justified by temporal precedence. Verbatim, because it is the highest-frequency error
@@ -129,10 +132,53 @@ taxonomy (data type, frame shape, assignment mechanism; did skill):
 - Estimand first, subpopulation named: IV and fuzzy RDD identify complier effects; DiD and
   SC identify the ATT of the treated units; overlap weighting identifies the overlap
   population. The methods template forces the clause.
-- Clustering is a design property, not a data property (Abadie, Athey, Imbens, and
-  Wooldridge 2023): cluster standard errors at the level at which treatment was assigned
-  or the sample was drawn, and be able to say which; do not cluster by habit at whatever
-  level makes the panel.
+- Clustering is a design property, not a data property (Abadie, Athey, Imbens, and Wooldridge
+  2023): cluster standard errors at the level at which treatment was assigned or the sample was
+  drawn, and be able to say which; do not cluster by habit at whatever level makes the panel.
+  The decision "depends on the nature of the sampling and the assignment processes only, and
+  not on the presence of within-cluster error components in the outcome variable," so
+  within-cluster outcome correlation is not a reason to cluster and the size of the change in
+  your standard error is not evidence you needed it. Both errors are live and they are not
+  symmetric. Robust standard errors can be ANTI-conservative, severely so when clusters explain
+  much of the heterogeneity in treatment effects or potential outcomes. Clustered standard
+  errors are always conservative and never anti-conservative, but the conservativeness scales
+  with average sampled cluster size, so clustering "just in case" is not free. Under random
+  sampling with unit-level random assignment, do not cluster at all; under clustered
+  assignment, cluster at the assignment level; when the sampled clusters are a small fraction
+  of the population, or few units are sampled per cluster, the choice stops mattering.
+  One half of this decision is untestable and the skill states it rather than estimating it:
+  the sample "is not informative" about what fraction of clusters was sampled, so "information
+  about the need to adjust for clustered sampling must come from outside the sample," while the
+  sample IS informative about clustered assignment. Say which of the two you are invoking.
+  Two further facts to carry. Robust standard errors are conservative rather than exact when
+  the sample is a large share of the population and effects are heterogeneous (the Neyman
+  finite-sample correction; `abadie2020sampling` buys the precision back if unit attributes
+  predict the treatment effect). And for partially clustered assignment with large clusters,
+  their CCV and TSCB estimators sit between robust and clustered and can be considerably
+  smaller than conventional cluster standard errors; neither applies under perfectly clustered
+  assignment, and this family ships no implementation of either. Scope: linear estimators only
+  (least squares and fixed effects). Once the level is chosen, few-cluster inference is a
+  separate problem with its own answer (MacKinnon, Nielsen, and Webb 2023; the map is in did).
+- Multiplicity, staged by what a false positive costs. One correction applied at every stage is
+  wrong in both directions at once, so match the procedure to what the output is. SCREENING,
+  where the output is a candidate list something downstream will re-test: FDR, at q = .10 and
+  not .05, since a false positive costs one wasted follow-up. Benjamini-Hochberg is the
+  default and holds under positive regression dependence; the Benjamini-Krieger-Yekutieli
+  two-stage sharpened q-values that Anderson (2008) made the applied convention recover power
+  by estimating the null proportion instead of fixing it at 1, at the price of an
+  independence-flavoured guarantee and less stability. So BKY suits a screen over
+  machine-generated candidates and BH suits estimates that share respondents; the choice is
+  design-dependent, and say which you took and why. CONFIRMATORY, where each hypothesis is
+  named and defended: FWER by a resampling method that bootstraps the actual dependence among
+  the test statistics (Romano-Wolf stepdown, Westfall-Young maxT), uniformly at least as
+  powerful as Holm and equal to it only under independence. Where resampling is impractical,
+  Holm. Never plain Bonferroni: Holm step-down dominates it at zero cost under no extra
+  assumptions, so Bonferroni is never the right answer to a question Holm also answers. ACROSS
+  STAGES of a staged design: fixed-sequence gatekeeping. Preregister the order, test each
+  stage's primary hypothesis at full alpha, stop at the first failure. It costs no alpha, and
+  the price accepted in advance is that nothing downstream of a failed gate is confirmatory.
+  Worked instantiations: field-experiment (subgroups and multiple outcomes), conjoint (AMCE
+  families).
 - Interference routing, by structure (designs, estimators, and diagnostics live in
   field-experiment): clustered interference routes to two-stage randomization (Hudgens
   and Halloran 2008, Crepon et al. 2013); network interference to exposure mappings
@@ -183,6 +229,8 @@ Every claim traces to references/canon.md; keys live in references/causal.bib.
 - synthetic-control: few treated units, long pre-periods; SDID; factor models and matrix
   completion; the augmented/forward DiD and HCW conditions stated above.
 - rdd: thresholds on running variables; the design gate and falsification battery.
+- conjoint: profile experiments with multiple randomized attributes (AMCEs, marginal means,
+  measurement-error and multiple-testing corrections, HB partworths and WTP).
 - iv: instruments, shift-share, formula instruments, leniency and examiner designs;
   weak-instrument inference.
 - preregister: pre-analysis plans once the design is chosen (experiment-first skill;

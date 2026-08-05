@@ -219,11 +219,18 @@ The five checks, in their order:
 4. Test monotonicity (below).
 5. Characterize compliers (below).
 
-Inference. Under independent assignment, plain robust standard errors are right, and clustering
-on the examiner is never justified. This reverses the usual reflex, so state it explicitly when
-a referee expects examiner clusters. The argument (Abadie-Athey-Imbens-Wooldridge) is that what
-governs the standard error is the correlation of the product of instrument and residual, and
-under random assignment that product is uncorrelated across units whatever the residuals do.
+Inference. Under independent assignment, plain robust standard errors are valid, and clustering
+on the examiner is never justified. Abadie-Athey-Imbens-Wooldridge say so by name: "in a
+judge-leniency design, where defendants are randomly assigned to judges, standard errors should
+not be clustered at the level of the judge." This reverses the usual reflex, so state it
+explicitly when a referee expects examiner clusters. Their argument is DESIGN-based, and give
+it that way rather than as a claim about what the residuals do: the sampling variance depends
+on the sampling and assignment processes only, so within-examiner correlation in outcomes is
+irrelevant by construction and not by cancellation. Two refinements. "Valid" means conservative
+rather than exact when your sample is a large share of the population and effects are
+heterogeneous, which is the Neyman finite-sample correction. And the half of the clustering
+question that concerns SAMPLING (did you draw a subset of courts, hospitals, or offices?) is
+untestable from the data by their own argument, so assert it from how the data were collected.
 Clustering "just in case" buys conservative intervals, and whether it moves the magnitude is no
 evidence it was needed. Cluster only when ASSIGNMENT is clustered (one doctor covers a whole
 shift, one lottery routes a whole filing date), at that level. Clustering also changes the
@@ -418,7 +425,5 @@ Every claim traces to references/canon.md; keys live in causal-design/references
 - field-experiment: randomized encouragement designs end to end (including the ITT/LATE
   analysis) and randomization inference on a simple physically randomized instrument;
   recentered and formula instruments keep their RI machinery here.
-- causal-unstructured: the perceived-treatment design (actual feature instruments the perceived
-  feature) arrives here; the exclusion and weak-instrument discipline apply unchanged.
 - preregister: pre-specifying the instrument, specification, and weak-IV fallback before
   outcomes are seen (experiment-first skill; adapt its structure for quasi-experimental PAPs).
