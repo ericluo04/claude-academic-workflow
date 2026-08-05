@@ -1,13 +1,12 @@
 # Router canon
 
-Current as of 2026-07-28. These two sources are the only canon of the causal-design skill,
+Current as of 2026-08-05. These three sources are the only canon of the causal-design skill,
 hand-picked, and nothing enters this file without explicit human approval. BibTeX keys
 point into ./causal.bib, which is the one shared bib for the whole skill family. The
 router also leans on `arkhangelsky2024causal` (the three-axis panel taxonomy), a
-cross-reference owned by the did canon, and on `abadie2023clustering` (clustering as a
-design property): the family-wide clustering statement is owned by this skill's own
-SKILL.md, whose frontmatter claims the shared inference rules, while method skills carry
-design-specific instances. Refresh: run litreview on the moving corner (panel estimators)
+cross-reference owned by the did canon. The family-wide clustering statement is owned by this
+skill's own SKILL.md, whose frontmatter claims the shared inference rules, while method skills
+carry design-specific instances. Refresh: run litreview on the moving corner (panel estimators)
 since the canon date. Any addendum needs explicit human approval.
 
 ## Imbens (2024)
@@ -77,6 +76,56 @@ Key: `li2024quasiexperimental`.
   2026-07-28. The figure is coarser than the article text (it lumps augmented DiD under
   too-few-pre-periods where the text gives it the convex-hull condition; HCW and matrix
   completion appear only in the text); where they differ, this skill follows the text.
+
+## Abadie, Athey, Imbens, and Wooldridge (2023)
+
+QJE 138(1): 1-35. Key: `abadie2023clustering`. Read: the latest arXiv e-print (1710.02926),
+which cites Rambachan-Roth 2022 and so postdates the 2017 posting; the QJE PDF is
+Cloudflare-blocked and the NBER copy is the 2017 vintage, so the version of record is
+unverified in detail. Appendix regularity conditions and proofs not read. Promoted from a header cross-reference because several skills lean on it.
+
+- Role: the family-wide clustering rule, and the reason it is a design question. Replaces "are
+  my errors correlated within clusters" with "how were the data sampled and how was treatment
+  assigned."
+- Settles: the decision "depends on the nature of the sampling and the assignment processes
+  only, and not on the presence of within-cluster error components in the outcome variable";
+  two knobs run the whole taxonomy (sampling, clusters drawn with probability q then units with
+  probability p; assignment, cluster-specific treatment probabilities with variance sigma^2,
+  where sigma^2 = 0 is random assignment and sigma^2 = mu(1-mu) is perfectly clustered
+  assignment); random sampling plus unit-level random assignment means do NOT cluster, and
+  "clustering is not appropriate even if there is within-cluster correlation in outcomes
+  (however those clusters are defined), and thus even if clustering makes a substantial
+  difference in the magnitude of the standard errors"; robust standard errors can be
+  ANTI-conservative, since the gap can take either sign and "the robust variance formula can
+  severely underestimate the variance" when clusters explain much of the heterogeneity;
+  clustered standard errors are always conservative and never anti-conservative, with the
+  conservativeness equal to (p n / m) q times the cluster-size-weighted variance of cluster
+  ATEs, so it scales with average sampled cluster size and can be extreme; when p is small all
+  three coincide; under random sampling and random assignment the correction to the robust term
+  is the familiar Neyman finite-sample correction, which vanishes with homogeneous effects or a
+  small sampling fraction, so robust standard errors are conservative rather than exact when
+  the sample is a large share of the population; the judge-leniency case by name, "standard
+  errors should not be clustered at the level of the judge"; and for common-timing DiD, "adding
+  group-level fixed effects ... does not change the answer to the question whether one needs to
+  adjust for clustering."
+- The untestability result, which is the most useful thing in the paper and the easiest to
+  miss: the sample "is not informative about the value of q," so "information about the need to
+  adjust for clustered sampling must come from outside the sample," while "the sample is
+  potentially informative about the need to account for clustered assignment." One half of the
+  clustering decision is an assertion about data collection, the other half is estimable.
+- Binds when: any standard-error decision in any design in this family.
+- Implement: names no software. It proposes CCV and TSCB for partially clustered assignment
+  with large clusters, which can be considerably smaller than conventional cluster standard
+  errors and are inapplicable (TSCB) or useless (CCV) under perfectly clustered assignment. No
+  implementation anywhere in this family, and no package check has been done.
+- Scope limits, from their own conclusion: LINEAR estimators only, least squares and fixed
+  effects, with Xu (2019) named for the nonlinear extension; and the particular sampling and
+  assignment processes modelled here, with `rambachan2025design` named as the extension to
+  other designs. The framework is asymptotic in the number of clusters and treats growing
+  cluster sizes explicitly, so it is a many-clusters result.
+- Pairs with `mackinnon2023cluster` (read in full, noted under did/), which answers HOW to do
+  cluster-robust inference once you have decided to cluster. Cite the two together: this paper
+  settles whether and at what level, MacKinnon-Nielsen-Webb settles few-cluster inference.
 
 ## Primary papers cited through the canon
 
