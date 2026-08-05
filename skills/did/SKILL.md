@@ -194,7 +194,8 @@ Poisson, or an extensive/intensive margin split.
 ## Inference
 
 Cluster at the level at which treatment is independently assigned (state policies: state). This
-is the design-based rule (Rambachan-Roth, the DiD instance of Abadie-Athey-Imbens-Wooldridge),
+is the design-based rule (`rambachan2025design`, the DiD instance of
+`abadie2023clustering`),
 and group fixed effects do not get you out of it: adding them "allows for group-specific linear
 trends in the underlying potential outcomes series but does not change the answer to the
 question whether one needs to adjust for clustering" (AAIW, on the common-timing case, which
