@@ -47,7 +47,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 
 ### Causal inference and natural experiments
 
-Seven skills for identification-strategy work. Each one is built on a canon it has actually
+Eight skills for identification-strategy work. Each one is built on a canon it has actually
 read, so the advice carries the citation that licenses it, and each keeps a
 `references/canon.md` recording what every source settles, which disputes stay open, and where
 the skill departs from the paper. The last column is that canon.
