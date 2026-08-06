@@ -1,7 +1,8 @@
 # Conjoint template: the randomized-experiment pipeline plus the HB and WTP blocks.
 # Every call verified against package documentation on 2026-07-31 (projoint 1.1.2,
 # factorEx 1.1.0, cjoint 2.1.3, ashr 2.2-63, CRTConjoint 0.1.0, logitr 1.2.0,
-# estimatr 1.0.6, bayesm 3.1-7). Adapt CONFIG and run section by section.
+# estimatr 1.0.6, bayesm 3.1-7; FindIt 1.3.0 added 2026-08-05). Adapt CONFIG and run
+# section by section.
 #
 # API traps verified against docs/source:
 #   - projoint: EVERY argument is dot-prefixed (.data, .irr, .estimand). Subgroup trap:
@@ -20,6 +21,9 @@
 #     pass the FULL Prior explicitly (see section 8).
 #   - logitr: WTP space is switched by scalePar = "price" (modelSpace/price/randPrice
 #     are the deprecated pre-0.7.0 interface; do not use them).
+#   - FindIt::CausalANOVA: vcov and CI.table come back ONLY when screen and collapse are
+#     both FALSE; with either TRUE the intervals must come from test.CausalANOVA on a
+#     held-out half. AME/AMIE2 are baselined at the GRAND MEAN, not a level.
 
 library(estimatr)   # 1.0.6
 library(projoint)   # 1.1.2
@@ -134,6 +138,40 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # Design-based route (target enters the randomization): design_pAMCE(..., target_type =
 # "partial_joint", partial_joint_name = list(c("A1","A2"), "A3")). Run the ESS check
 # before fielding (references/details.md).
+
+## ---- 7b. Causal interaction: AMEs and AMIEs (FindIt) -----------------------------------
+# The estimand behind section 7's gap. Do NOT read a dummy-coded interaction coefficient as
+# the causal interaction: its relative magnitude depends on the baseline level, and any
+# interaction involving a baseline level is mechanically zero.
+# library(FindIt)   # 1.3.0
+# Declare level order FIRST; it decides which merges the collapse step may make.
+# df_choice$A1 <- factor(df_choice$A1, ordered = TRUE, levels = c("low","mid","high"))
+# df_choice$A2 <- factor(df_choice$A2, ordered = FALSE, levels = c("x","y"))
+#
+# No regularization: full-sample AMEs and two-way AMIEs with ordinary intervals.
+# fit_i <- CausalANOVA(y ~ A1 + A2 + A3, int2.formula = ~ A1:A2, data = df_choice,
+#                      nway = 2, diff = TRUE, pair.id = df_choice$pair_id,
+#                      cluster = df_choice$id, screen = FALSE, collapse = FALSE)
+# summary(fit_i)                                   # vcov + CI.table only in this mode
+# ConditionalEffect(fit_i, treat.fac = "A1", cond.fac = "A2")   # = AME + AMIE
+#
+# Regularized, when the design is large (>~6 factors to screen, >~6 levels to collapse).
+# Post-collapsing inference is unsolved, so SPLIT: regularize on half, estimate on the rest.
+# tr <- sample(unique(df_choice$id), length(unique(df_choice$id)) %/% 2)
+# d_tr <- df_choice[df_choice$id %in% tr, ]; d_te <- df_choice[!df_choice$id %in% tr, ]
+# fit_r <- CausalANOVA(y ~ A1 + A2 + A3, data = d_tr, nway = 2, diff = TRUE,
+#                      pair.id = d_tr$pair_id, cluster = d_tr$id,
+#                      screen = TRUE, collapse = TRUE)
+# fit_t <- test.CausalANOVA(fit_r, newdata = d_te, diff = TRUE,
+#                           pair.id = d_te$pair_id, cluster = d_te$id)
+# summary(fit_t); plot(fit_t, type = "ConditionalEffect", fac.name = c("A1","A2"))
+# Without a split, report selection probabilities instead of intervals and say FWER is not
+# controlled: select.prob = TRUE, boot = 5000 (docs disagree on the default, pass it).
+# Traps: AME/AMIE2 are reported against the GRAND MEAN, so they will not match section 1's
+# dummy coefficients; nway = 3 requires every pair inside a three-way term to appear in
+# int2.formula (strong hierarchy); screen = TRUE delegates to glinternet, which regularizes
+# coefficients rather than their differences, so the baseline-invariance argument covers the
+# collapse and estimation stages only.
 
 ## ---- 8. The HB block (preference-measurement track; bayesm 3.1-7) ----------------------
 # lgtdata: list of per-respondent lists; y in 1..p; X of (n_i * p) x nvar rows via

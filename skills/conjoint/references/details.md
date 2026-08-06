@@ -92,6 +92,64 @@ pAMCE across them as sensitivity; attributes with no defensible distribution may
 uniform inside an otherwise-target design, disclosed. Software: factorEx (CRAN 1.1.0,
 2025-11-28, Egami/de la Cuesta/Imai, depends genlasso).
 
+## Causal interaction: the AMIE (Egami and Imai 2019)
+
+Estimands. ACE = E{Y(a_l, b_m) - Y(a_0, b_0)}, the combination effect. AME = the same
+averaged over the distribution of the other factor. AMIE = ACE minus both AMEs,
+pi(a_l, b_m; a_0, b_0) = tau - psi_A - psi_B. The conventional AIE, which is what a
+dummy-coded regression interaction coefficient estimates, is instead
+E{Y(a_l,b_m) - Y(a_0,b_m) - Y(a_l,b_0) + Y(a_0,b_0)}, the two effects taken at the other
+factor's baseline. Both are identified by randomization alone and are linear functions of
+one another, so all AMIEs are zero iff all AIEs are zero.
+
+Why the AIE fails here. Interval invariance: differences between AMIEs do not move when the
+baseline moves, and such a difference is itself an AMIE. The AIE has that property iff every
+AIE is zero. The corollary that bites in practice: any AIE involving a baseline level is
+identically zero (xi(a_0, b_m; a_0, b_0) = xi(a_l, b_0; a_0, b_0) = 0), so a whole row and
+column of the interaction table are structurally blank, chosen by an arbitrary coding
+decision. The AMIE can be nonzero there.
+
+What it buys. Decomposition (their Eq. 10): the K-way ACE is the sum of AMIEs of every order
+over every subset, main effects included, with no residual. Their worked case: an ACE of
+-2.4 points splits into AMEs of +5.3 and -4.7 plus an AMIE of -3.0. Conditional effects
+(Eq. 8): the effect of A at level b_0 of B is AME + AMIE, so adopting the AMIE loses nothing
+if the conditional reading is what you want. At K > 2 the AIE degenerates into a conditional
+effect of a conditional effect, which the AMIE avoids by construction.
+
+Estimation. Difference in means straight from the definition, or equivalently ANOVA with
+weighted zero-sum constraints (Scheffe), weights = the marginal assignment distribution;
+differences in fitted coefficients are unbiased for the AME and AMIE. Neither estimator
+assumes away higher-order interactions. Fully nonparametric estimation needs all interaction
+terms up to J-way, so applications cap the order by sample size (theirs assumes no three-way
+interactions at n = 544 respondents). Choice-based data go through a preference-differential
+linear probability model with intercept 0.5 when within-pair position does not matter, IIA
+assumed.
+
+Regularization. GASH-ANOVA (`post2013factor`) penalizes DIFFERENCES in coefficients, which
+are the AMEs and AMIEs themselves, so it collapses levels and selects factors jointly on
+main and interaction effects. Two properties worth stating to a user: it can retain a factor
+with small main effects and large interactions, and it collapses levels consistently across
+the interactions they appear in. Group-lasso relatives including glinternet
+(`lim2015learning`) penalize coefficients, not differences, so their output depends on the
+coding. Ordered factors get penalties on adjacent-level differences only, unordered factors
+on all pairwise differences, so the ordering declaration is a substantive choice about which
+merges are admissible.
+
+Inference after selection. Not established for level-collapsing methods. Their stand-in:
+selection probability = 1 minus the share of bootstrap replicates (they use 5,000) in which
+every coefficient for that factor or interaction is zero, cutoff 90%, with an explicit
+statement that FWER is not controlled. The alternative, implemented in FindIt but not
+reported in the paper, is sample splitting: regularize on train, estimate and build
+intervals on test. Unregularized runs return ordinary variance-covariance output and need
+neither.
+
+Scope. Positivity is required for ALL combinations, which rules out fractional factorial
+designs and, read literally, hard attribute restrictions; the repairs are HHY footnote 18's
+small nonzero probabilities or restricting to a subset of the data and estimands.
+Treatment-by-pretreatment-covariate interaction is explicitly future work, so respondent
+subgroups stay with Leeper's conditional marginal means. Whether the tau correction composes
+with AMIE estimation is unstudied (our judgment, not either paper's claim).
+
 ## Restricted randomization: the eq. 9 estimator
 
 Under conditionally independent randomization (restrictions), regress on the focal
@@ -144,7 +202,10 @@ estimates (smaller MSE, the only method improving magnitudes). Matched default: 
 prior knowledge is weak (preregister the mixture family; insensitive at social-science
 test counts); BH at FDR .05 exploratory; BC confirmatory with the preregistered family m
 (count attribute-level comparisons minus constraint-excluded combinations, plus subgroup,
-balance, and quality tests). Family discipline: realism-only attributes excluded from the
+balance, and quality tests). BC here is Liu-Shiraito's own recommendation, and the skill
+substitutes Holm at the same alpha and the same family: Holm rejects everything BC rejects
+under the same assumptions, so every BC simulation number above is a bound on Holm's (the
+~30% miss rate is a ceiling, not an estimate). Family discipline: realism-only attributes excluded from the
 family are excluded from reported findings. Always report corrected and uncorrected side
 by side and discuss status changes. Reanalysis anchor: Ash removed the
 construction-worker bonus in Hainmueller-Hopkins-Yamamoto 2014, and BC and Ash removed
@@ -248,6 +309,7 @@ fielded no-buy option, equalization prices do not.
 |---|---|---|---|
 | projoint | 1.1.2 (CRAN 2026-07-15) | choice-level MMs/AMCEs, IRR estimation (repeated-task + extrapolation), tau correction, corrected SEs, plots | the maintained code path for the correction; methodology = clayton2026correcting; binary forced choice only |
 | factorEx | 1.1.0 (CRAN 2025-11-28) | design-based and model-based pAMCE | depends genlasso; target distributions supplied as per-factor marginals or joints |
+| FindIt | 1.3.0 (CRAN 2025-09-23, verified 2026-08-05) | CausalANOVA for AMEs and AMIEs; test.CausalANOVA, ConditionalEffect, cv.CausalANOVA | maintained by Egami, well past the paper's 1.1.x; screen=TRUE delegates to glinternet, so the invariance claim covers collapse and estimation, not screening (our reading); vcov and CI.table are returned ONLY when screen and collapse are both FALSE; AME/AMIE2 are reported against the GRAND MEAN, so they do not match dummy-regression coefficients; docs disagree on boot (Usage and the code say 100, the argument text says 50), pass it explicitly |
 | cjoint | 2.1.3 (CRAN 2026-05-19) | AMCE reference implementation (HHY lineage) | AMCE-centered, not MM-centered |
 | cregg | 0.3.7 (ARCHIVED off CRAN 2024-09-05; GitHub dormant since 2020) | mm, mm_diffs, cj_anova, amce_by_reference API as the method reference | cite, do not depend; hand-roll MMs instead |
 | estimatr | 1.0.6 | lm_robust with clusters= for AMCEs/MMs by hand | the family's experiment workhorse; shared pin with field-experiment/causal-design |

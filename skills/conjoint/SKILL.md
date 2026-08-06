@@ -1,6 +1,6 @@
 ---
 name: conjoint
-description: Design, analyze, and write up conjoint experiments in both traditions, as randomized experiments identifying average marginal component effects (design-based, no behavioral model) and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. Produces advice with citations, R estimation code, and a drafted methods paragraph. TRIGGER on "conjoint", "conjoint analysis", "conjoint experiment", "AMCE", "marginal component effect", "marginal means", "choice-based conjoint", "CBC", "profile experiment", "paired profiles", "candidate experiment", "attribute randomization", "partworth", "part-worth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "Sawtooth", "MaxDiff", "best-worst scaling", "forced choice profiles", "vignette experiment" (fully randomized factorial vignettes; single composite-treatment vignettes stay in field-experiment), "intra-respondent reliability", "IRR correction", "projoint", "cjoint", "factorEx", "bayesm", "market simulator", "choice share simulation". Randomization mechanics, power, and attrition belong to field-experiment; design triage across methods to causal-design.
+description: Design, analyze, and write up conjoint experiments in both traditions, as randomized experiments identifying average marginal component effects (design-based, no behavioral model) and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. Produces advice with citations, R estimation code, and a drafted methods paragraph. TRIGGER on "conjoint", "conjoint analysis", "conjoint experiment", "AMCE", "marginal component effect", "marginal means", "AMIE", "causal interaction", "attribute interactions", "choice-based conjoint", "CBC", "profile experiment", "paired profiles", "candidate experiment", "attribute randomization", "partworth", "part-worth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "Sawtooth", "MaxDiff", "best-worst scaling", "forced choice profiles", "vignette experiment" (fully randomized factorial vignettes; single composite-treatment vignettes stay in field-experiment), "intra-respondent reliability", "IRR correction", "projoint", "cjoint", "factorEx", "FindIt", "bayesm", "market simulator", "choice share simulation". Randomization mechanics, power, and attrition belong to field-experiment; design triage across methods to causal-design.
 ---
 
 # Conjoint experiments
@@ -51,8 +51,8 @@ Never mix the interpretations silently.
   attributes do not interact, which is when a conjoint was unnecessary (de la Cuesta,
   Egami, and Imai 2022). Uniform is not a safe harbor: it is a claim carrying a testable
   burden. Accept it when the analyst shows no meaningful interactions (the model-based
-  check in references/details.md) or argues a theoretically uniform target; otherwise
-  route to the pAMCE machinery.
+  check in references/details.md, or the global F-test below) or argues a theoretically
+  uniform target; otherwise route to the pAMCE machinery.
 - Marginal means are the primitive: in forced choice the MM of a level is the choice
   probability of profiles carrying it, and the AMCE is the difference between the MM at
   a level and the MM at the reference category (Leeper, Hobolt, and Tilley 2020). MMs
@@ -63,10 +63,28 @@ Never mix the interpretations silently.
   marketing-ratings inheritance that creates the correlation problem it then corrects
   (Clayton et al. 2026). Three attribute types (independent, dependent across the pair,
   pair-level) organize what can be asked; profile-level analysis handles only the first.
+- Interactions BETWEEN attributes get their own estimand, the AMIE (Egami and Imai 2019).
+  A regression interaction coefficient estimates the conventional interaction effect,
+  whose relative magnitude depends on which level was named the baseline, and conjoint
+  attributes (gender, religion, occupation) rarely have a natural one. The mechanical
+  consequence is sharper than the interpretive one: any conventional interaction involving
+  a baseline level is identically zero, so an arbitrary coding decision blanks out a row
+  and a column of the interaction table. The AMIE subtracts the two AMEs instead of
+  conditioning at baseline, which makes relative magnitudes baseline-invariant, decomposes
+  any treatment-combination effect into main effects plus interactions of every order with
+  no residual, and returns the conditional effect of one attribute at a level of another as
+  AME plus AMIE. It marginalizes, so it carries the same averaging-distribution discipline
+  as the AMCE. This is the quantity inside the uAMCE-pAMCE gap above: when that gap is what
+  routes you to the pAMCE, the AMIE is what says which interactions and how large. Testing
+  whether ANY interaction exists is baseline-free either way, since all AMIEs are zero
+  exactly when all conventional interactions are, so the global F-test can use either.
 - Conditional AMCEs are legitimate heterogeneous-effect estimates when the moderator is
   measured PRE-exposure. A difference in conditional AMCEs is never a causal effect of
   the moderator, and for preference description it is not even the right contrast (see
-  the subgroup rule below).
+  the subgroup rule below). The moderator's identity splits the two tools: respondent
+  characteristics route to conditional marginal means, other randomized attributes route
+  to the AMIE. Egami and Imai leave treatment-by-covariate interaction as future work, so
+  the seam is theirs, not our patch.
 
 ## Design defaults
 
@@ -161,6 +179,13 @@ Never mix the interpretations silently.
   respondent-linked, is the case that flips it. Composing the tau correction with the
   multiple-testing correction is mechanically fine (ash consumes any estimate-SE pairs)
   but unstudied; label the combination as our own judgment.
+- Interaction search is a worse multiplicity problem than the AMCE forest (every level pair
+  across every factor pair), and it takes a different instrument. Regularize the estimates
+  and report bootstrap selection probabilities instead of corrected p-values (Egami and Imai
+  2019, who decline family-wise error control explicitly and use a 90% selection cutoff).
+  Valid inference after level collapsing is unsolved, so a confirmatory interaction claim
+  needs a held-out half: collapse and select on one, estimate and build intervals on the
+  other. Screening this way is exploratory by construction, and the write-up says so.
 - Subgroups, the danger zone twice over. For preference description: differences in
   conditional AMCEs conflate preferences with feelings about the arbitrary reference
   category, so their sign, size, and significance are artifacts (Leeper, Hobolt, and
@@ -315,7 +340,9 @@ references/details.md.
 
 Package index with versions, verified traps, and the hand-rolled fallbacks lives in
 references/details.md. Headlines: projoint (CRAN, maintained) is the code path for
-choice-level MMs/AMCEs with the IRR correction; factorEx for pAMCE estimation;
+choice-level MMs/AMCEs with the IRR correction; factorEx for pAMCE estimation; FindIt
+(1.3.0, CRAN 2025-09-23, verified 2026-08-05) for AMEs and AMIEs, with the choice-based
+mode, level collapsing, and the held-out-sample inference path;
 cjoint is the AMCE reference implementation; cregg is ARCHIVED off CRAN (cite it as the
 method reference, do not depend on it; MMs hand-roll in three lines on estimatr with
 respondent clustering); ashr for adaptive shrinkage; CRTConjoint (0.1.0, verified
@@ -341,7 +368,11 @@ estimated IRR = [x] (tau = [y]), and report corrected estimates via projoint
 simultaneous tests, we report [adaptive-shrinkage / BH / Holm]-corrected
 estimates alongside uncorrected ones (Liu and Shiraito 2023). Subgroup preferences are
 described by conditional marginal means with nested-model F-tests (Leeper, Hobolt, and
-Tilley 2020). [HB track: We estimate individual partworths by hierarchical Bayes
+Tilley 2020). [Interactions: We estimate average marginal interaction effects (Egami and
+Imai 2019), which are invariant to the choice of baseline level, by ANOVA under weighted
+zero-sum constraints[, collapsing levels within factors and reporting selection
+probabilities from [b] bootstrap replicates / with regularization on a held-out half and
+intervals estimated on the remainder].] [HB track: We estimate individual partworths by hierarchical Bayes
 multinomial logit with a mixture-of-normals heterogeneity distribution (Rossi, Allenby,
 and Misra 2024; bayesm 3.1-7, priors reported in the appendix)[, parameterized in WTP
 space with the heterogeneity prior on WTP directly (Sonnier, Ainslie, and Otter 2007)],

@@ -1,9 +1,9 @@
 # Conjoint canon
 
-Current as of 2026-07-31. Fourteen hand-picked sources; nothing enters this file without
-explicit approval. BibTeX keys point into ../../causal-design/references/causal.bib, the
-family's shared bib. Refresh: litreview on conjoint methodology since the canon date; addenda
-need approval.
+Current as of 2026-08-05. Fourteen hand-picked sources plus `egami2019causal`, approved
+2026-08-05; nothing enters this file without explicit approval. BibTeX keys point into
+../../causal-design/references/causal.bib, the family's shared bib. Refresh: litreview on
+conjoint methodology since the canon date; addenda need approval.
 
 ## The randomized-experiment track
 
@@ -91,6 +91,42 @@ Political Analysis 28(2): 207-221. Key: `leeper2020measuring`.
 - Binds when: any subgroup or cross-sample comparison; descriptive preference reporting.
 - Caveats: cregg, its software, is archived off CRAN (hand-roll or projoint); MMs inherit
   the AKM intensity critique wholesale (the firewall applies to them too).
+
+### Egami and Imai (2019)
+
+JASA 114(526): 529-540. Key: `egami2019causal`. Added 2026-08-05, promoted from the
+flagged-unread list below.
+
+- Role: the interaction estimand. HHY gave the design a main effect; this gives it an
+  interaction effect that survives the absence of a natural baseline.
+- Settles: the AMIE (average marginal interaction effect), the combination effect minus both
+  AMEs, against the conventional AIE, which is what a dummy-coded regression interaction
+  coefficient estimates; the AMIE is interval invariant to the baseline choice and the AIE is
+  invariant if and only if every AIE is zero (Theorem 2); the mechanical-zero corollary, that
+  any AIE involving a baseline level is identically zero, so an arbitrary coding decision
+  blanks out a row and a column of the interaction table; the two are linear functions of one
+  another, so all AMIEs are zero iff all AIEs are (Theorem 1) and the global no-interaction
+  F-test can use either; the decomposition of any K-way combination effect into AMIEs of every
+  order with no residual, which the AIE has no analogue for; conditional effects recovered as
+  AME plus AMIE; the K-way AIE degenerating into a conditional effect of a conditional effect
+  for K > 2; nonparametric estimation by difference in means or, equivalently, ANOVA with
+  weighted zero-sum constraints (Theorem 3), neither of which assumes away higher-order
+  interactions; regularization by GASH-ANOVA (`post2013factor`) penalizing DIFFERENCES in
+  coefficients, which is what preserves the invariance, against group-lasso relatives
+  (`lim2015learning`) that penalize coefficients and do not; that valid inference after
+  level-collapsing is unsolved, with bootstrap selection probabilities at a 90% cutoff and an
+  explicit refusal to claim FWER control as their stand-in, and sample splitting as the
+  alternative.
+- Binds when: any attribute-by-attribute interaction claim; any high-dimensional interaction
+  search; whenever the pAMCE machinery says interactions are what drives the uAMCE gap and the
+  user asks which ones.
+- Caveats: positivity is required for ALL combinations, so restricted randomization needs
+  HHY's footnote-18 repair or a restricted estimand; treatment-by-pretreatment-covariate
+  interaction is explicitly future work, so respondent subgroups stay with Leeper's marginal
+  means; the application is small (544 respondents) and assumes away three-way interactions;
+  composition with the tau correction is unstudied (the skill's own judgment). FindIt's
+  `screen` option delegates to glinternet, so the invariance claim covers the collapse and
+  estimation stages, not the screening stage (our reading, not the paper's claim).
 
 ### de la Cuesta, Egami, and Imai (2022)
 
@@ -264,14 +300,17 @@ QME 5(3): 313-331. Key: `sonnier2007heterogeneity`.
 
 Already in the shared bib and load-bearing here: `hainmueller2014causal`,
 `hainmueller2015validating`, `bansak2021conjoint`, `bansak2018number`, `bansak2021beyond`,
-`leeper2020measuring`, `delacuesta2022improving`, `abramson2022what`, `bansak2023using`,
-`clayton2026correcting`, `liu2023multiple`, `netzer2008beyond`,
+`leeper2020measuring`, `egami2019causal`, `delacuesta2022improving`, `abramson2022what`,
+`bansak2023using`, `clayton2026correcting`, `liu2023multiple`, `netzer2008beyond`,
 `agarwal2015interdisciplinary`, `rossi2024bayesian`, `rossi2025bayesm`,
 `sonnier2007heterogeneity`.
 
+New to the bib with the Egami-Imai addendum, cited through it and NOT read: `post2013factor`
+(GASH-ANOVA, the level-collapsing regularizer) and `lim2015learning` (glinternet, behind
+FindIt's screening option and named in the paper as a method that lacks the invariance).
+
 Flagged-unread neighbors (NOT canon; addendum candidates needing user approval before any
-load-bearing citation): Egami-Imai 2019 JASA (interaction estimands and the level-collapsing
-regularizer both de la Cuesta and deep ACIE analysis lean on); Ganter 2023 (direct-preference
+load-bearing citation): Ganter 2023 (direct-preference
 estimand); Ham-Imai-Janson 2022 (the CRT carryover test's own paper); Dafoe-Zhang-Caughey
 2018 (information equivalence / masking formalized); Horiuchi-Markovich-Yamamoto (social
 desirability); Goplerud-Imai-Pashley 2022 (heterogeneity); Train-Weeks 2005 (econ-side WTP
