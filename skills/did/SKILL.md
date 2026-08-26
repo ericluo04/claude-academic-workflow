@@ -1,12 +1,12 @@
 ---
 name: did
-description: Design, estimate, validate, and write up a difference-in-differences analysis of a natural experiment, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "difference-in-differences", "diff-in-diff", "DiD", "TWFE", "two-way fixed effects", "event study", "staggered adoption", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "HonestDiD", "triple differences", or any panel/repeated-cross-section setting where some units become treated over time (policy rollout, staggered feature launch, state law changes). For a single treated unit or when pre-trends visibly fail, see the synthetic-control handoff inside. Design triage across methods belongs to causal-design.
+description: Design, estimate, validate, and write up a difference-in-differences analysis of a natural experiment, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "difference-in-differences", "diff-in-diff", "DiD", "TWFE", "two-way fixed effects", "event study", "staggered adoption", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "HonestDiD", "triple differences", "PPML", "Poisson DiD", "heavy-tailed outcome", "log outcome", "nonlinear DiD", "binary outcome", or any panel/repeated-cross-section setting where some units become treated over time (policy rollout, staggered feature launch, state law changes). For a single treated unit or when pre-trends visibly fail, see the synthetic-control handoff inside. Design triage across methods belongs to causal-design.
 ---
 
 # Difference-in-differences
 
 An opinionated DiD workflow grounded in a read canon (references/canon.md, current as of
-2026-07-29). The deliverable is threefold: the specification decision with the citation that
+2026-08-26). The deliverable is threefold: the specification decision with the citation that
 justifies it, the estimation and diagnostics code in R (Stata on request), and a methods
 paragraph with citations placed and the limitation stated in first person at the point of the
 choice. Where the literature is unsettled the skill names a default and the condition that moves
@@ -24,8 +24,9 @@ literature:
 1. **Is everyone treated at the same time?** Yes: TWFE is fine, static or dynamic; nothing new
    is needed. No (staggered): default to a heterogeneity-robust estimator; TWFE only if you will
    defend effect homogeneity.
-2. **Are you sure about parallel trends?** Justify levels vs logs (PT is functional-form
-   dependent and generally cannot hold in both). If PT is plausible only conditional on
+2. **Are you sure about parallel trends, and on which scale?** Justify levels vs logs (PT is
+   functional-form dependent and generally cannot hold in both) and name the estimand the
+   scale targets (Functional form below). If PT is plausible only conditional on
    covariates, use regression adjustment, IPW, or doubly robust, never bare TWFE-with-controls.
    Always pair the event study with a Rambachan-Roth sensitivity analysis, a universal mandate
    this skill family hardens beyond the canon's best-practice advice because the analysis is
@@ -60,6 +61,20 @@ question and, if you report both, report them as different estimands.
 
 Write the target in potential-outcomes notation before touching code: which ATT(g,t) cells, and
 which aggregation (event-time, calendar-time, overall; cohort-share or population weights).
+
+Functional form and weights are estimand choices too (Winkler, Hotz-Behofsits, Wlömert, Papies,
+and Liaukonytė 2026). Three parameters get reported as if they were one: the typical-unit
+proportional effect ΔΔE[log Y] (log OLS), the population-total proportional effect ΔΔ log E[Y]
+(PPML), and the level effect ΔΔE[Y] (levels OLS). Under heavy-tailed outcomes they differ in
+magnitude and can differ in sign with no staggered-timing problem anywhere: in the UMG-TikTok
+withdrawal, a clean two-group single-date design with 53,753 matched song pairs, unweighted log
+OLS gives +0.0063 and PPML gives -0.0310 on the same panel, and reweighting the log OLS toward
+the head gives -0.0286 without touching the transformation. Pick the estimand from the question
+("did per-user usage rise 5%?" is typical-unit, "did total revenue rise 5%?" is
+population-total, "did this add $2M?" is level), then the estimator. Levels-vs-logs is never a
+robustness check: an appendix that reports both without naming the estimand each targets is
+reporting two parameters as one. The heterogeneity-robust estimator question and the
+estimand-scale question are orthogonal, and both get answered.
 
 ## The parallel-trends menu and the estimator it implies
 
@@ -179,17 +194,75 @@ disagree, the bracketing result bounds the truth: under unconfoundedness with tr
 pre-treatment dominance, TWFE underestimates and lagged-outcome adjustment overestimates
 (Arkhangelsky-Imbens 2024). Report both and say which selection story you believe.
 
-## Functional form
+## Functional form and nonlinear outcomes
 
 Parallel trends in logs precludes parallel trends in levels. Choose the transformation on
 substantive grounds and own it: "DD identification strategies are inherently
-transformation-dependent" (AAFP 2025). Run the Roth-Sant'Anna falsification test of
-insensitivity to functional form when the choice is contestable. Apparent
-transformation-robustness achieved through rich time-varying controls usually means the controls,
-not the fixed effects, are identifying the effect, which is regression conditioning rather than
-DiD, and some such controls are bad controls. For revenue, spend, and engagement outcomes the
-zeros problem is endemic; log(1+y) conclusions are unit-dependent (Chen-Roth), so prefer levels,
-Poisson, or an extensive/intensive margin split.
+transformation-dependent" (AAFP 2025), and "the data cannot tell you which holds" (Winkler et
+al. 2026, after Roth-Sant'Anna). State PT on a named scale: additive in E[Y] for levels OLS,
+multiplicative in the geometric mean for log OLS, multiplicative in the arithmetic mean (the
+log-link index) for PPML. Do shocks add a fixed amount or scale with baseline size? Under heavy
+tails the answer is typically scale (Winkler et al. 2026, whose argument for streams is that
+recommendation and playlist boosts multiply a song's existing reach). Carrying that to sales,
+views, and engagement counts is this skill's judgment, so state it as yours in the paper. Run the
+Roth-Sant'Anna falsification test of insensitivity to functional form when the choice is
+contestable, and plot pre-trends on both scales. Apparent transformation-robustness achieved
+through rich time-varying controls usually means the controls, not the fixed effects, are
+identifying the effect, which is regression conditioning, and some such controls are bad
+controls.
+
+Before choosing, diagnose concentration: Lorenz curve, Gini, or top-decile share of Y (in the
+TikTok data the top 10% of songs carry 76% of streams). Under heavy tails the estimator's
+implicit weighting often matters more than the transformation: log OLS weights observations equally
+so the long tail decides, levels OLS and PPML weight by size so the head decides. Explicit
+weights are a separate estimand choice and must be predetermined and tied to the target
+(Solon-Haider-Wooldridge).
+
+Default for heavy-tailed nonnegative outcomes when the question is population-total: PPML with a
+log link (`fixest::fepois`, Stata `ppmlhdfe`). It is consistent for any nonnegative Y, count or
+continuous, under a correct conditional mean. Equidispersion matters only for efficiency
+(Wooldridge 1997, Santos Silva-Tenreyro 2006), so pair it with cluster-robust SEs. It handles zeros
+natively. Log OLS fails twice. First, zeros: log(1+y) and asinh conclusions are unit-dependent
+(Chen-Roth), and with many zeros the typical-unit estimand is gone, so PPML is the practical choice
+even though it targets population-total. Second, variance shifts: E[log Y] = log E[Y] - Var(log
+Y)/2 - higher cumulants, so treatment that compresses Var(log Y) pushes the mean-log DiD up by
+-ΔΔVar(log Y)/2, and log OLS returns a positive significant coefficient under a true null on the
+mean even with no zeros anywhere (Winkler et al. 2026, calibrated simulation). Diagnose it with the
+Ciani-Fisher regression of squared log-OLS residuals on treat x post with the fixed effects. A
+significant coefficient rules out log OLS for the population-total estimand. Weighted log OLS with
+predetermined pre-period share weights is the transparency check on PPML when Y > 0 and log
+variance is stable.
+
+Levels OLS is sign-unstable when untreated outcomes grow proportionally and treated and control
+baselines differ: the bias grows in the baseline gap and the growth rate and flips sign in a
+calibrated grid (Winkler et al. 2026). Matching on baseline levels closes the gap, which is why
+levels, logs, and PPML agree in matched samples. That agreement is a special case the design
+created, evidence about the design and never proof the specifications are interchangeable. The
+matching defense does not transport to synthetic DiD, which balances pre-period outcomes but allows
+an intercept shift, so a levels SDID inherits the same baseline-gap sensitivity.
+
+Binary and count outcomes (and fractional ones, Wooldridge 2023) get the Wooldridge nonlinear
+recipe (2023 for panels, 2026 for repeated cross sections): one pooled QMLE in the linear
+exponential family with the canonical link (Bernoulli-logit, Poisson-log; normal-identity is the
+linear special case), cohort dummies, time dummies, covariates centered within cohort-period cells
+and interacted with cohort, time, and treatment, and treatment dummies by cohort and period. PT is
+imposed on the index G^{-1}(E[Y_t(0) | D, X]), the log odds or the log mean, and Wooldridge is
+explicit that Callaway-Sant'Anna, BJS, and DNWZ state PT in levels. Index PT holds in levels only
+under no selection (cohort effects and their covariate interactions all zero) or a stationarity
+restriction, so the linear and nonlinear answers rest on different assumptions. Wooldridge
+recommends fitting both and comparing them, with a divergence read as evidence about the PT scale.
+Only the conditional mean has to be right. The estimator is robust to distributional
+misspecification, and with a canonical link pooled QMLE equals imputation without the two-step
+standard-error problem. ATT(g,t) are average partial effects of the treatment dummy on the response
+scale, aggregated by exposure time with cell-size weights. The event study used to diagnose PT is
+aggregated on the index scale (log odds, log mean), where the assumption lives. Report both the
+lags-only and the leads-and-lags versions: they have different sensitivities to PT violations and
+cannot be ranked on bias or efficiency. Cohort-specific linear trends are a contamination-free
+pre-trend test when covariates enter flexibly, at a precision cost. When a cohort cell is thin,
+collapse the cohort-by-period dummies to exposure-time dummies, or in the limit a single treatment
+indicator, and compare with the flexible aggregate. R: etwfe (`family = "poisson"` or `"logit"`,
+which makes it drop unit fixed effects and enter cohort and period as explicit dummies, then `emfx`
+for the APEs). Stata: jwdid with `method(poisson)` or `method(logit)`.
 
 ## Inference
 
@@ -219,8 +292,15 @@ random.
   squared-exposure interaction when heterogeneity is plausible and report both (AAFP 2025).
 - Triple differences: not simply the difference of two DiDs once covariates or staggered NYT
   comparisons enter (Ortiz-Villavicencio and Sant'Anna, via Baker et al.).
-- Repeated cross-sections (brand trackers, surveys): fine without covariates; with covariates,
-  test compositional stability (Sant'Anna-Xu Hausman-type check) before pooling.
+- Repeated cross-sections (brand trackers, surveys, transaction data with one row per unit):
+  fine without covariates; with covariates, test compositional stability (Sant'Anna-Xu
+  Hausman-type check) before pooling. Unit fixed effects are unavailable, so the Wooldridge
+  (2026) design puts cohort dummies in their place with covariates centered within
+  cohort-period cells; it covers staggered adoption and nonlinear outcomes in one pooled QMLE,
+  weights ATT(g,t) by the cell sizes N_gt when aggregating, and clusters at the assignment
+  level (census tract, DMA) even under independent sampling (AAIW). Cell sizes govern whether
+  the SEs are believable, so collapse thin cohorts to exposure-time effects. You cannot verify
+  that covariates are time-invariant when each unit is seen once. Say so.
 
 ## Diagnostics battery
 
@@ -240,7 +320,10 @@ Report with every DiD analysis, in roughly this order:
    (bacondecomp) and dCDH negative-weight diagnostics (TwoWayFEWeights) to show why.
 8. Building-block heterogeneity scan by cohort, gap, and time since adoption.
 9. Composition checks: balanced event time, fixed cohort set.
-10. Functional-form check when the transformation is contestable.
+10. Outcome concentration (Lorenz, Gini, top-decile share) and the estimand each reported
+    specification targets; the Ciani-Fisher variance-shift regression whenever a log outcome
+    is reported; the Roth-Sant'Anna functional-form check when the transformation is
+    contestable; for nonlinear models, the event study on the index scale.
 
 ## R implementation
 
@@ -268,9 +351,37 @@ cohort variable silently misclassifies units; aggte's default type is "group", s
 need type = "dynamic"; pretrends installs from GitHub only. Package links live in
 references/details.md.
 
-Stata equivalents on request: csdid, did_imputation, eventstudyinteract, jwdid, honestdid,
-boottest for wild bootstrap. The Baker et al. AEA replication package
-(aeaweb.org/articles/materials/25430, 25431) is a full R and Stata template.
+Nonlinear outcomes and repeated cross sections (template section 11; etwfe 0.6.2, signatures
+verified against the reference pages and source on 2026-08-26):
+
+```r
+library(etwfe)
+nl <- etwfe(fml = y ~ 0, tvar = period, gvar = first_treated, data = df,
+            cgroup = "notyet", family = "poisson",   # or "logit"; lags-only version
+            vcov = ~cluster)                   # no ivar: a nonlinear family forces ivar = NULL,
+                                               # cohort and period enter as explicit dummies, and
+                                               # nothing unit-level is used, so repeated cross
+                                               # sections run unchanged
+emfx(nl, type = "event")                       # ATT by exposure time, response scale (APEs)
+ll <- etwfe(fml = y ~ 0, tvar = period, gvar = first_treated, data = df,
+            cgroup = "never", family = "poisson", vcov = ~cluster)
+emfx(ll, type = "event", predict = "link")     # leads and lags on the index scale
+```
+
+etwfe takes as never-treated any cohort value above max(period), else below min(period), so
+the did-style 0 works when periods start at 1. With `cgroup = "never"` an in-range value
+errors. Leads exist only under `cgroup = "never"` (`"notyet"` sets them to zero mechanically,
+and `post_only` is read only for `"notyet"` fits). etwfe demeans controls by cohort, the
+Wooldridge 2023 panel form; the 2026 cohort-period centering changes only the raw index
+coefficients, never the ATTs. Above 500,000 rows emfx compresses to cohort-period cells
+(`compress = "auto"`), exact for `y ~ 0` and an approximation once controls enter, so set
+`compress = FALSE` then.
+
+Stata equivalents on request: csdid, did_imputation, eventstudyinteract, jwdid, honestdid, boottest
+for wild bootstrap, ppmlhdfe for PPML, and jwdid with `method(poisson|logit)` for the nonlinear
+recipe (no `ivar` means repeated cross-section; covariates are demeaned by default). The Baker et
+al. AEA replication package (aeaweb.org/articles/materials/25430, 25431) is a full R and Stata
+template.
 
 ## Methods paragraph template
 
@@ -280,9 +391,14 @@ Adapt, keeping the first-person limitation at the point of the choice:
 > fixed effects estimands can place negative weights on some group-time effects (Roth,
 > Sant'Anna, Bilinski, and Poe 2023; Goodman-Bacon 2021). Following the forward-engineering
 > approach of Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna (2026), I define the
-> target as [unit/person-weighted] group-time ATTs and their event-study aggregation, impose
-> parallel trends with respect to [not-yet-treated] units [conditional on X], and estimate with
-> the doubly robust procedure of Callaway and Sant'Anna (2021), reporting uniform confidence
+> target as [unit/person-weighted] group-time ATTs and their event-study aggregation on the
+> [level / log-mean / mean-log] scale, which is the [level / population-total proportional /
+> typical-unit proportional] effect the research question asks for (Winkler, Hotz-Behofsits,
+> Wlömert, Papies, and Liaukonytė 2026) [or, for a binary outcome, on the log-odds index
+> (Wooldridge 2023, 2026)], impose parallel trends with respect to [not-yet-treated] units
+> [conditional on X] on that scale, and estimate with [the doubly robust procedure of
+> Callaway and Sant'Anna (2021) / pooled Poisson or logit quasi-maximum likelihood with
+> cohort-by-period treatment effects (Wooldridge 2023, 2026)], reporting uniform confidence
 > bands. I assess sensitivity to parallel-trends violations following Rambachan and Roth (2023):
 > bounding post-treatment violations by the largest pre-treatment trend difference ([value])
 > gives an identified set of [set] and a robust confidence interval of [CI]; the conclusion
@@ -300,7 +416,9 @@ paper cited beyond the canon with bibcheck before submission.
 - causal-design: design triage before this skill; shared inference material.
 - synthetic-control: few treated units, long pre-period, selection on lagged outcomes, failed
   pretests ("sidesteps collinearity concerns while allowing for divergent nonlinear trends",
-  AAFP citing Abadie 2021). Synthetic DiD is that skill's bridge topic, not this one's.
+  AAFP citing Abadie 2021). Synthetic DiD is that skill's bridge topic, not this one's. A
+  levels SDID inherits the baseline-gap sensitivity of levels DiD (Winkler et al. 2026), so the
+  scale question travels with the handoff.
 - field-experiment: when rollout timing was actually randomized, randomization-based tools
   apply; the staggered estimator itself is documented here (R package staggered, Roth-Sant'Anna).
 - iv: share-balance pre-trend scrutiny for shift-share exposure designs lands here; the
