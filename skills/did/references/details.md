@@ -1,6 +1,6 @@
 # DiD lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-29.
+Heavy reference content the SKILL.md points into. Current as of 2026-08-26.
 
 ## Package index (verified 2026-07-28)
 
@@ -15,7 +15,9 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-29.
 | staggered | CRAN; github.com/jonathandroth/staggered | 1.2.2 | efficient random-timing estimators |
 | TwoWayFEWeights | CRAN; github.com/Credible-Answers/twowayfeweights | 2.1.0 | dCDH negative-weight diagnostics |
 | bacondecomp | CRAN; github.com/evanjflack/bacondecomp | 0.1.1 | Goodman-Bacon decomposition |
-| etwfe | CRAN | | Wooldridge extended TWFE |
+| etwfe | CRAN; grantmcdermott.com/etwfe | 0.6.2 | Wooldridge extended TWFE, linear and nonlinear (family = "poisson", "logit", "negbin" through fixest::feglm); a nonlinear family forces ivar = NULL and enters cohort and period as explicit dummies (emfx cannot compute SEs with absorbed FEs in nonlinear models); controls on the RHS of fml are demeaned by cohort and the xvar moderator by cohort-by-period cell (source, not docs); nothing unit-level is used, so repeated cross sections run unchanged (run on simulated repeated-cross-section data 2026-08-26, pilot only); emfx returns APEs (predict = "response") or index-scale effects (predict = "link") and compresses to cohort-period cells above 500,000 rows unless compress = FALSE; verified 2026-08-26 |
+| jwdid (Stata) | SSC; github.com/friosavila/stpackages | 2.0 (2024-05-04) | Wooldridge ETWFE; no ivar means repeated cross-section; method(poisson), method(logit), method(ppmlhdfe); covariates demeaned and interacted by default (xasis to disable); verified 2026-08-26 |
+| ppmlhdfe (Stata) | SSC | | PPML with high-dimensional FEs (Correia-Guimarães-Zylkin 2020); R equivalent fixest::fepois |
 | DIDmultiplegt / did_multiplegt_dyn | CRAN/SSC; github.com/Credible-Answers | | dCDH intertemporal, on/off treatments |
 | summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
 | fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
@@ -24,7 +26,12 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-29.
 
 Never-treated coding by package: did and didimputation use 0 (didimputation also accepts NA);
 staggered uses Inf; sunab treats any cohort value outside the observed periods as never-treated
-(the fixest example data uses 10000). Recode per package; never recycle blindly.
+(the fixest example data uses 10000). etwfe takes as reference any cohort value above
+max(tvar), else any below min(tvar), else (only with cgroup = "notyet") the largest cohort; so
+the did-style 0 works when periods start at 1, reads as a real cohort if a period is numbered
+0, and with cgroup = "never" an in-range value errors. Leads are estimated only under
+cgroup = "never" (every cohort-period cell except g-1 gets a dummy); "notyet" sets them to zero
+mechanically. Recode per package; never recycle blindly.
 
 Cluster-inference rows verified 2026-07-29. Install the archived pair with
 install.packages(c("summclust", "fwildclusterboot"), repos = "https://s3alfisc.r-universe.dev").
@@ -148,6 +155,10 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
 - did::att_gt(control_group="notyettreated") imposes PT-GT-NYT (Baker et al.'s preference).
 - etwfe / jwdid, did2s, didimputation, and any pre-period-averaging estimator impose PT-GT-all
   (parallel pre-trends become a testable overidentifying restriction, and are baked in).
+- etwfe / jwdid with a nonlinear family impose PT-GT-all on the index scale (log odds under
+  logit, log mean under Poisson), which in general does not hold in levels (Wooldridge 2026;
+  the exceptions are no selection and stationarity). Wooldridge recommends fitting the linear
+  and the nonlinear model and comparing them, as a comparison of assumptions.
 - fixest::sunab equals CS-never numerically on balanced panels; on unbalanced panels the
   equivalence fails (see above).
 - lpdid (local projections DiD) is equivalent to the CS-NYT plug-in (Dube-Girardi-Jorda-Taylor).
@@ -155,3 +166,95 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
   Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter); its
   implicit variance weights are a known problem (Baker et al.), so prefer Callaway-Sant'Anna
   or Sun-Abraham unless the stack weights are examined and reported.
+
+## Estimand and estimator under heavy tails (Winkler et al. 2026, companion Steps 1-4)
+
+Source: `winkler2026tiktok`, pp. 26-27. Estimand first ("dictated by the research question, not
+by the data"), concentration diagnostic second (Lorenz curve, Gini, top-decile share of Y),
+estimator third.
+
+| Estimator | Estimand | Implicit weighting | Use when |
+|---|---|---|---|
+| Levels OLS | ΔΔE[Y] | squared-residual objective; large outcomes drive the fit | additive PT in levels; treated and control similar in baseline scale (or matched) |
+| Log OLS | ΔΔE[log Y] | equal weight per observation; many low-volume units can dominate | Y > 0, Var(log Y) stable across treatment x time, typical-unit interpretation wanted |
+| Weighted log OLS | weighted ΔΔE[log Y] | explicit pre-period outcome shares; the head dominates | Y > 0; close to PPML when log-scale variance is stable; sensitivity check |
+| PPML, log link (default) | ΔΔ log E[Y] | score equations weight by E[Y given X]; large units dominate | population-total % under heavy tails; robust to variance misspecification; handles Y = 0 natively |
+
+Decision nodes. Proportional estimand: (1) many zeros in Y? yes, PPML (log(1+Y) and asinh
+coefficients are unit-dependent, Chen-Roth); no, continue. (2) Does treatment shift Var(log Y)?
+Regress squared log-OLS residuals on treat x post with the fixed effects (Ciani-Fisher 2019,
+eq. 5 in the paper, θ̂ = -0.0016, SE 0.0002 in the TikTok data); significant, PPML for
+population-total; not significant, log OLS for typical-unit, weighted log OLS or PPML for
+population-total. Level estimand: PT in levels or logs is a substantive choice (do shocks add a
+fixed amount or scale with baseline size? under heavy tails, scale); levels, levels OLS; logs,
+PPML and translate the proportional effect to levels.
+
+The cumulant argument (fn. 18): log E[exp Z] = E[Z] + Var(Z)/2 + higher cumulants for
+Z = log Y, so ΔΔE[log Y] ≈ ΔΔ log E[Y] - ΔΔVar(log Y)/2 - ΔΔ(higher cumulants). A compression
+of log variance among treated post makes the second term positive and pushes log OLS up. In
+the calibrated simulation (N = 10,000, T = 20, true effect -0.0556 in the top virality decile
+and exactly zero in deciles 1-9, σ_mult = 0.94) log OLS returns +0.0008 with p < 0.001 on the
+zero-effect deciles, PPML -0.0001 (n.s.).
+
+Levels bias under proportional growth: with Y_it = m_it U_it and log m_it = q_i + g(t-1) +
+τ_it, relative bias of the levels TWFE coefficient grows in the treated-control baseline gap
+and in g, with a sign-flip region (Figs. 10-11); log TWFE and PPML are flat at zero across the
+grid. At zero gap the bias vanishes, which is why baseline matching rescues levels in the
+matched sample, and why that rescue is a special case. Baseline-scaling test: unit-level DiD
+contrast Δ_i regressed on the unit's pre-period mean; a nonzero slope (b̂ = -0.1172, SE 0.0010)
+rejects constant-absolute incidence.
+
+Reporting: all candidate specifications in one table with the estimand each targets; the
+levels coefficient scaled by the pre-period mean (-4,661 streams on 142,545 = -3.27%); log
+points with exp(δ̂) - 1 stated; the implicit weighting named; the concentration numbers (top
+10% of songs = 76% of streams, 96% of TikTok creations); effects split by pre-treatment
+intensity decile with model-free within-decile series; a mechanism-absent placebo group.
+
+## Nonlinear DiD with repeated cross sections (Wooldridge 2026)
+
+Source: `wooldridge2026nonlinear`, pp. 75-79; the panel version is `wooldridge2023simple`.
+
+Model, eq. (6): E[Y | D, X] = G(α + Σ_g β_g D_g + Xκ + Σ_g (D_g · Ẋ_g) η_g + Σ_s γ_s f_s +
+Σ_s (f_s · X) π_s + Σ_g Σ_{s>=g} δ_gs (W · D_g · f_s) + Σ_g Σ_{s>=g} (W · D_g · f_s · Ẋ_g) ξ_gs),
+with D_g cohort dummies, f_s period dummies, W the post-adoption indicator, and Ẋ_g short for
+Ẋ_tg = X_t - E(X_t | D_g = 1), the covariates centered about cohort-period means (p. 76). Line one is selection (cohort main
+effects and their covariate interactions), line two secular and heterogeneous trends, line
+three the treatment effects with moderators. A never-treated cohort is assumed; no exit.
+
+Assumptions: conditional no anticipation (eq. 3) and conditional PT on the index (eq. 4),
+G^{-1}(E[Y_t(∞) | D, X_t]) linear in the terms above. Index PT holds in levels only if
+β_g = η_g = 0 for all g (no selection) or covariates and γ_t, π_t are time-constant.
+
+Procedure 1: (i) pooled QMLE of (6) on all observations with the canonical LEF pair
+(normal-identity, Bernoulli-logit, Poisson-exponential); (ii) τ̂_gt as the average partial
+effect of the binary W over the (g,t) cells. δ̂_gs are ATTs on the log odds (logit) or
+proportionate ATTs (exponential), equal to τ̂_gs only in the linear case. Under canonical
+links pooled QMLE equals imputation, without the two-step SE problem.
+
+Leads-and-lags (eq. 7): add D_g · f_s and D_g · f_s · Ẋ_g for s = 1, ..., g-2, with g-1 the
+reference; the coefficients on D_g · f_s are average pre-trends by cohort and period. LO and
+L&L cannot be ranked on efficiency or on bias under CPT violation; report both.
+
+Aggregation: weights vary by g and t through the cell sizes N_gt; averaging the APEs over the
+observed rows in the chosen subsample does this automatically (exposure-time aggregation
+averages over rows with s - g = 0, 1, 2, ...). Aggregated pre-trends: multiply the eq. (7)
+terms by NW = 1 - W and take the APE with respect to NW. The event-study plot for diagnosing
+PT aggregates the δ̂_gs on the index scale.
+
+Inference: QMLE-robust (sandwich) SEs under independent sampling; cluster at the sampling
+cluster under cluster sampling, and at the assignment level (census tract, PUMA) whenever
+assignment is clustered (AAIW), with sampling weights under stratification. Cell sizes N_gt
+have to be large enough for the SEs to mean anything even without clustering; with small
+treated cohorts collapse D_g · f_s to exposure-time dummies (s - g), or to the single W, and
+compare with the flexible aggregate.
+
+Cohort-specific trends: with two or more pre-periods per cohort add D_g · t (and
+D_g · t · Ẋ_g); their coefficients test pre-trends without contamination bias when covariates
+enter flexibly, at a precision cost from collinearity with the treatment dummies; pretesting
+to decide whether to keep them is as problematic as in L&L.
+
+Software: only Stata's APE facilities are named. The etwfe and jwdid rows in the package index
+implement the panel form (Wooldridge 2023), which coincides with the 2026 estimator once unit
+FEs are dropped. etwfe centers controls by cohort, the 2023 form; that changes only the raw
+δ̂ coefficients, since centering does not affect the ATTs (p. 76).
+

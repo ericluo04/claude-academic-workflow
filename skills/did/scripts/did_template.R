@@ -258,8 +258,91 @@ coef_test(twfe_lm, vcov = vc2, test = "Satterthwaite")
 # Under cluster-size heterogeneity RI-t degrades less than RI-beta, so RI-t is the
 # default.
 
+## ---- 11. Functional form and nonlinear outcomes ----------------------------
+# Signatures verified 2026-08-26 against fixest 0.14.2 and the etwfe 0.6.2 reference pages
+# and R/etwfe.R source. Two jobs live here: 11a-11c pick the estimand for a heavy-tailed
+# nonnegative outcome (Winkler et al. 2026); 11d is the Wooldridge (2023, 2026) nonlinear
+# recipe for binary, fractional, and count outcomes, which also runs on repeated cross
+# sections because it needs no unit fixed effects.
+
+# 11a. Concentration diagnostic before anything: top-decile share of pre-period Y (report
+# the Lorenz curve or Gini as well). Heavy tails mean the estimator's implicit weighting
+# picks the estimand.
+first_g <- min(df[[GNAME]][df[[GNAME]] != 0])
+pre  <- df[df[[TNAME]] < first_g, ]
+ybar <- tapply(pre[[YNAME]], pre[[IDNAME]], mean)
+top10_share <- sum(sort(ybar, decreasing = TRUE)[seq_len(ceiling(0.1 * length(ybar)))]) /
+  sum(ybar)
+
+# 11b. PPML for the population-total proportional estimand (delta-delta log E[Y]).
+# Consistent for any nonnegative Y under a correct conditional mean; equidispersion is an
+# efficiency condition only, so the clustered sandwich SEs are the whole inference story.
+# Zeros are handled natively. exp(coef) - 1 is the proportional change in E[Y].
+# Stata: ppmlhdfe (Correia-Guimaraes-Zylkin 2020); see help ppmlhdfe for absorb() and vce().
+ppml <- fepois(as.formula(paste(YNAME, "~ treat |", IDNAME, "+", TNAME)),
+               data = df, cluster = df[[CLUSTER]])
+exp(coef(ppml)["treat"]) - 1
+# Levels OLS (twfe, section 5) targets delta-delta E[Y]; scale it by the pre-period mean to
+# compare. Unweighted log OLS targets the typical-unit estimand delta-delta E[log Y];
+# weighted log OLS with pre-period share weights is the transparency check on PPML when
+# Y > 0. Report the estimators in one table with the estimand each targets, never as a
+# robustness check of one another.
+
+# 11c. Ciani-Fisher variance-shift diagnostic, before any log-OLS number is read as a
+# proportional mean effect (Y > 0 rows only). A significant treat coefficient means
+# treatment moves Var(log Y), and the mean-log DiD sits off the log-mean DiD by
+# -delta-delta Var(log Y) / 2: log OLS then answers a different question from PPML.
+df_pos <- df[df[[YNAME]] > 0, ]
+logols <- feols(as.formula(paste("log(", YNAME, ") ~ treat |", IDNAME, "+", TNAME)),
+                data = df_pos, cluster = df_pos[[CLUSTER]])
+df_pos$e2 <- NA_real_
+df_pos$e2[obs(logols)] <- resid(logols)^2   # obs(): feols drops singleton and all-zero FE rows
+vshift <- feols(as.formula(paste("e2 ~ treat |", IDNAME, "+", TNAME)),
+                data = df_pos, cluster = df_pos[[CLUSTER]])
+
+# 11d. Wooldridge nonlinear ETWFE (binary -> "logit"; counts and nonnegative -> "poisson").
+# PT is imposed on the index (log odds, log mean), whereas sections 1-8 impose it in levels,
+# so this is a different assumption; Wooldridge recommends fitting both and comparing them.
+# A nonlinear family makes etwfe drop unit FEs itself (ivar is forced to NULL) and enter
+# cohort and period as explicit dummies, since emfx cannot compute SEs with absorbed FEs in
+# nonlinear models. Nothing unit-level is used, which is why the same call runs on repeated
+# cross sections (Wooldridge 2026; run on simulated repeated-cross-section data 2026-08-26). Controls go on the RHS
+# of fml (y ~ 0 for none); etwfe demeans them by cohort (the Wooldridge 2023 panel form; the
+# 2026 paper centers by cohort-period cell, which changes only the raw index coefficients,
+# never the ATTs) and interacts them with cohort, period, and treatment.
+# Never-treated coding: etwfe takes any gvar value above max(period), else any below
+# min(period), as the reference, so the did-style 0 works when periods start at 1 and reads
+# as a real cohort if a period is numbered 0; with cgroup = "never" an in-range value errors.
+library(etwfe)
+nl <- etwfe(fml = as.formula(paste(YNAME, "~ 0")), tvar = TNAME, gvar = GNAME,
+            data = df, cgroup = "notyet", family = "poisson",
+            vcov = as.formula(paste0("~", CLUSTER)))
+es_nl <- emfx(nl, type = "event")     # lags-only ATT by exposure time, response scale
+                                      # (APEs of the treatment dummy, N_gt-weighted)
+# Above 500,000 rows emfx compresses to cohort-period cells (compress = "auto"): exact for
+# y ~ 0, an approximation once controls enter (covariates averaged within cell). Pass
+# compress = FALSE in that case and accept the run time.
+emfx(nl, type = "simple")             # one overall ATT
+# Leads-and-lags version for the pretest and the index-scale event study. cgroup = "never"
+# gives every cohort-period cell except g-1 a dummy, so leads exist, and emfx keeps every
+# treated-cohort row for type = "event" (post_only is read only for "notyet" fits, where
+# the leads are mechanically zero). Plot predict = "link": PT
+# lives on the index, and that is the scale on which a violation shows (Wooldridge 2026).
+# Report both versions; they have different sensitivities to PT violations and cannot be
+# ranked on bias or efficiency.
+ll <- etwfe(fml = as.formula(paste(YNAME, "~ 0")), tvar = TNAME, gvar = GNAME,
+            data = df, cgroup = "never", family = "poisson",
+            vcov = as.formula(paste0("~", CLUSTER)))
+es_idx <- emfx(ll, type = "event", predict = "link")
+# Thin cohort cells: impose constant effects by exposure time (or one W dummy) and compare
+# with es_nl; the flexible model's SEs are unreliable when N_gt is small. With repeated
+# cross sections, cluster at the assignment level even under independent sampling.
+# Stata: jwdid with method(poisson) or method(logit); omit ivar for repeated cross
+# sections (see help jwdid for the option names; verified only that ivar is optional and
+# that method() takes poisson, logit, ppmlhdfe).
+
 ## ---- Session ---------------------------------------------------------------
-# Pin versions in the replication package: did >= 2.5, HonestDiD 0.2.8. did 2.5
+# Pin versions in the replication package: did >= 2.5, HonestDiD 0.2.8, etwfe 0.6.2. did 2.5
 # defaults faster_mode = TRUE and aggte's default type is "group", both changed
 # from the 2.1.x tutorials. summclust 0.7.0 and fwildclusterboot 0.14.3 come from
 # r-universe, not CRAN; record the repo in the replication package.
