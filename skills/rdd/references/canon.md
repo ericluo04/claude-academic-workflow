@@ -63,6 +63,35 @@ elections); Gelman-Imbens 2019 (against global polynomials); Calonico-Cattaneo-F
 (CE-optimal bandwidths); Calonico-Cattaneo-Farrell-Titiunik 2019 (covariates);
 Cattaneo-Titiunik-Vazquez-Bare 2017 (inference comparison, binomial test) and 2019 (power);
 Card-Lee-Pei-Weber 2015 (kink); Imbens-Wager 2019 and Armstrong-Kolesar (honest school);
-Kolesar-Rothe 2018 (discrete scores); Pei-Lee-Card-Weber (polynomial order);
+Kolesar-Rothe 2018 (discrete scores, and the prohibition on clustering standard errors by the
+running variable, which binds for continuous scores too); Pei-Lee-Card-Weber (polynomial order);
 Cattaneo-Idrobo-Titiunik Foundations and Extensions volumes; Ludwig-Miller 2007 (placebo-outcome
 exemplar); Calonico-Cattaneo-Titiunik 2015 (RD plots); Hartman (equivalence testing).
+
+Added 2026-08-26 from the Mixtape ch. 6 pass. BibTeX is Crossref-verified and merged into causal.bib: Imbens-Kalyanaraman 2012 (`imbens2012optimal`,
+the origin of the data-driven MSE-optimal bandwidth rule this skill enforces); Lee-Card 2008
+(`lee2008specification`, specification error with a discrete running variable, and the origin of
+the clustering-on-the-score practice Kolesar-Rothe overturned); Calonico-Cattaneo-Farrell-Titiunik
+2017 (`calonico2017rdrobust`, the rdrobust software paper a methods section cites for the
+implementation).
+
+## Exemplar rows
+
+The recognition table's canonical cases, Crossref-verified and merged into causal.bib 2026-08-26. One line each, with the design shape the case is the precedent for.
+
+- Card, Dobkin, and Maestas 2008 (`card2008impact`), the age or tenure eligibility rule, and the
+  compound-treatment discipline that goes with it.
+- Hansen 2015 (`hansen2015punishment`), the agency-measured sharp score, breathalyzer BAC at 0.08.
+- Almond, Doyle, Kowalski, and Williams 2010 (`almond2010estimating`), the heaped or rounded score
+  at the 1500-gram very-low-birth-weight cutoff, where the density test passes and heaping biases
+  the estimate anyway.
+- Barreca, Guldi, Lindo, and Waddell 2011 (`barreca2011saving`), the donut-hole re-estimate at that
+  same cutoff, which is where the halved one-year mortality effect comes from.
+- Barreca, Lindo, and Waddell 2016 (`barreca2016heaping`), the heaping methodology behind the donut,
+  and the general case against reading a passing density test as clearance.
+- Lee, Moretti, and Butler 2004 (`lee2004voters`), a share crossing a fixed bar, and the
+  covariate-balance exhibit as bin means panel by panel.
+- Hoekstra 2009 (`hoekstra2009effect`), the admission cutoff with a fuzzy first stage, and the
+  take-up plot shown before any outcome.
+- Black 1999 (`black1999schools`), the boundary or geographic RD, and the precedent behind the
+  DMA-border translation.

@@ -28,8 +28,12 @@ set.seed(94305)
 library(did); library(HonestDiD); library(fixest)
 
 ## ---- 1. Group-time ATTs (Callaway-Sant'Anna) -------------------------------
-# base_period = "universal" is REQUIRED for the honest_did sensitivity chain below
-# (the helper hard-errors otherwise). control_group states the PT variant you impose:
+# base_period = "universal" gives long differences: every event-study coefficient is measured
+# against a fixed t = -1, which is what OLS event studies do and what readers expect. The
+# alternative, a rolling baseline, produces short gaps, a different quantity (Roth 2026).
+# Stata equivalents: csdid needs long2, csdid2 already defaults to long differences.
+# The honest_did chain below also requires it (the helper hard-errors otherwise).
+# control_group states the PT variant you impose:
 # "notyettreated" = PT-NYT (default here), "nevertreated" = PT-Nev.
 atts <- att_gt(
   yname = YNAME, tname = TNAME, idname = IDNAME, gname = GNAME,
@@ -47,6 +51,10 @@ summary(atts)
 # +/-15 is AAFP's window for a 41-period panel; set min_e/max_e from your own q and m.
 es  <- aggte(atts, type = "dynamic", min_e = -15, max_e = 15, cband = TRUE)
 att <- aggte(atts, type = "group")
+# Calendar-time aggregation, ATT(t): the target when the question is about a specific period
+# (a season, a platform change, a macro shock). Simple, group, calendar, and dynamic are four
+# different parameters built from the same ATT(g,t), never robustness checks for one another.
+cal <- aggte(atts, type = "calendar", cband = TRUE)
 ggdid(es)
 # Composition check: balanced-in-event-time aggregation (units observed over the window)
 # balance_e = 5 is a placeholder; set it to the horizon you report.
@@ -148,12 +156,23 @@ twfe <- feols(as.formula(paste(YNAME, "~ treat |", IDNAME, "+", TNAME)),
               data = df, cluster = df[[CLUSTER]])
 # sunab treats any cohort value outside the observed periods as never-treated;
 # recode 0 -> 10000 (do NOT feed the did-style 0, it would read as an early cohort).
+# Read the cross-check for what it is: Sun-Abraham's cohort 2x2s use the last-treated cohort or
+# never-treated, never the not-yet-treated, so against the CS-NYT fit in section 1 this compares
+# two assumptions on one dataset. Neither agreement nor divergence is a robustness result.
 df$first_treated_sunab <- ifelse(df[[GNAME]] == 0, 10000, df[[GNAME]])
 sa <- feols(as.formula(paste(YNAME, "~ sunab(first_treated_sunab,", TNAME, ") |",
                              IDNAME, "+", TNAME)),
             data = df, cluster = df[[CLUSTER]])
 
 ## ---- 6. Divergence diagnostics (run when TWFE and CS disagree) -------------
+# These two report opposite-looking things and both are right. bacon's weights sit on 2x2
+# comparisons and are always positive; they combine a sample share with the treatment-timing
+# variance Dbar(1 - Dbar), which peaks at 0.25 for a cohort treated at the panel midpoint, so
+# TWFE upweights mid-panel cohorts and panel length moves the estimate through the weights
+# alone. twowayfeweights' weights sit on unit-level treatment effects and can be negative.
+# All-positive bacon weights therefore do not license TWFE: under constant effects TWFE is
+# unbiased for the variance-weighted ATT, not the simple ATT. Run this to explain a divergence,
+# not as a standing robustness table.
 library(bacondecomp)
 bd <- bacon(as.formula(paste(YNAME, "~ treat")), data = df,
             id_var = IDNAME, time_var = TNAME)   # weights on each 2x2, incl. forbidden

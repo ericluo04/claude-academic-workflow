@@ -111,18 +111,42 @@ Designs, estimators, and diagnostics live in field-experiment.
   outcomes) and no hidden treatment versions; justified by "logical argumentation based on
   institutional knowledge."
 
-## Package index (verified against docs/source 2026-07-28; the observables branch only, method skills carry their own)
+## Text-role warnings (Feder; detail behind the fourth triage question)
+
+- Confounder: conditional ignorability becomes "the NLP model measured all confounding
+  aspects of the text," untestable, argued from domain expertise. Positivity audit: if the
+  representation predicts treatment nearly perfectly, overlap has failed; narrow the
+  estimand or re-specify. The family's revision: the banned part of Feder's recommended
+  Veitch-style fine-tuning is the treatment-prediction loss (GPI's own deconfounder trains
+  on the outcome loss); the dispute, the replacement, and the TI-estimator carve-out live
+  in causal-unstructured.
+- Outcome: consistency fails when the measurement model was trained on all the data (each
+  unit's inferred outcome then depends on other units' treatments); split-sample
+  measurement is the fix (egami2022make; this is Feder's consistency framing of the rule
+  whose authoritative statement, the FPCILV, lives in causal-unstructured). Randomizing
+  treatment fixes ignorability and positivity here, not consistency.
+- Treatment: treatment discovery vs prespecified latent aspects; disentangle the aspect
+  from correlated aspects of the same text; random assignment of texts leaves reader-side
+  confounding.
+- No real-world ground-truth causal benchmarks exist for text; semi-synthetic benchmark
+  wins never validate a real estimate.
+- Deployment shift tests (invariance: perturb what should not matter, predictions must not
+  move; sensitivity: minimal label-flipping edits, predictions must move) now live in
+  causal-unstructured's diagnostics battery; this line is a pointer.
+
+## Package index (verified against docs/source 2026-07-28, CRAN versions re-checked 2026-08-26; the observables and plain-FE branches only, method skills carry their own)
 
 | Tool | Version | Role | Traps |
 |---|---|---|---|
 | grf | 2.6.1 | causal_forest + average_treatment_effect (AIPW default, TMLE binary-only option); best_linear_projection (HC3); rank_average_treatment_effect; policy scores | treatment argument is W; clusters= at FIT time is what makes ATE SEs cluster-robust; target.sample="overlap" = Li-Morgan-Zaslavsky ATO, the documented poor-overlap fallback; RATE priorities need a held-out forest; hist(cf$W.hat) is the documented overlap check (pinned also in field-experiment's details; update the two pins together on refresh) |
-| policytree | 1.2.4 | double_robust_scores(forest) -> policy_tree(X, Gamma, depth = 2) | Gamma columns = actions in order (1 control, 2 treated); predict returns the column index, not 0/1; exact search exponential in depth |
+| policytree | 1.2.5 | double_robust_scores(forest) -> policy_tree(X, Gamma, depth = 2) | Gamma columns = actions in order (1 control, 2 treated); predict returns the column index, not 0/1; exact search exponential in depth |
 | sensemakr | 0.1.6 | Cinelli-Hazlett sensitivity: robustness values, benchmark bounds, ovb_minimal_reporting (latex/html) | treatment looked up by coefficient name, so factor treatments FAIL (undocumented, in source): code treatment numeric 0/1; kd defaults to 1, pass kd = 1:3 for the standard table; lm objects (fixest method on GitHub) |
-| WeightIt | 1.7.0 | balancing weights, estimand = "ATO" for overlap weights (method = "glm") | ATO not available for every method (check ?method_<name>); downstream is lm_weightit/glm_weightit + marginaleffects::avg_comparisons (M-estimation SEs account for estimated weights); plain lm + vcovCL treats weights as fixed; keep.mparts=TRUE default enables the M-estimation SEs |
+| WeightIt | 2.0.0 | balancing weights, estimand = "ATO" for overlap weights (method = "glm") | ATO not available for every method (check ?method_<name>); downstream is lm_weightit/glm_weightit + marginaleffects::avg_comparisons (M-estimation SEs account for estimated weights); plain lm + vcovCL treats weights as fixed; keep.mparts=TRUE default enables the M-estimation SEs |
 | marginaleffects | 0.32.0 | g-computation/contrasts on weightit fits (native support) | no grf support; use grf's own estimators for forests (pinned also in field-experiment's details; update the two pins together on refresh) |
 | DoubleML | 1.0.2 | explicit double/debiased ML when nuisance-learner control is wanted (mlr3) | heavier setup; the grf route covers the default DR case |
 | MatchIt | 4.7.2 | matching as preprocessing when a matched design is wanted | same author ecosystem as WeightIt; matching never fully efficient (Imbens), prefer DR estimation after |
-| estimatr | 1.0.6 | lm_robust with HC/CR SEs (shared with field-experiment) | design-based defaults; already the family's experiment workhorse (pinned also in field-experiment's details; update the two pins together on refresh) |
+| estimatr | 1.0.6 | lm_robust with HC/CR SEs (shared with field-experiment); lm_robust(y ~ d, fixed_effects = ~unit, clusters = unit, se_type = "stata") is the within fit with Stata's FE standard errors, the Mixtape's own route | design-based defaults; already the family's experiment workhorse (pinned also in field-experiment's details; update the two pins together on refresh); the argument is fixed_effectS, and the Mixtape's `fixed_effect = ~id` runs only because lm_robust has no dots and R partial-matches the name; clusters takes a BARE unquoted name while fixed_effects takes a right-sided formula; se_type = "stata" means HC1 when clusters is absent and Stata's cluster-robust variant when it is present, so it matches xtreg, fe only with clusters supplied (the default is HC2 without clusters and CR2 with) |
+| fixest | 0.14.2 | feols for the within estimator on a time-varying treatment: feols(y ~ d \| unit, cluster = ~unit); etable() prints pooled OLS and within side by side (the plain-panel-fixed-effects section of SKILL.md) | the bar separates fixed effects from regressors, so the treatment stays to its left; cluster takes a formula (~unit), unlike estimatr's bare name; units with no within variation in d are absorbed and dropped without a message, which is why that section runs the zero-variance count first |
 
 Docs: grf-labs.github.io/grf, grf-labs.github.io/policytree, carloscinelli.com/sensemakr,
 ngreifer.github.io/WeightIt, marginaleffects.com.

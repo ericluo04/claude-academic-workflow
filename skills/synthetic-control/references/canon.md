@@ -73,3 +73,27 @@ CausalImpact); Firpo-Possebom 2018 (sensitivity, confidence sets); Heckman-Hotz 
 (preprogram test); Amjad-Shah-Shen 2018 (robust SC denoising); Athey-Imbens 2017 (the
 "most important innovation" framing); Klossner et al. 2018 (V non-uniqueness); Liu-Wang-Xu
 2024 (counterfactual estimators guide, fect).
+
+Added 2026-08-26 from the Mixtape's synthetic-control chapter (Cunningham, Causal Inference:
+The Remix), Crossref-verified, keys merged into causal.bib: Ferman-Pinto-Possebom
+2020 (`ferman2020cherry`, JPAM 39(2): 510-532; specification search over pre-treatment lag
+choices raises the false-positive rate, and the recommendation is to present results across
+multiple specifications); Porreca 2022 (`porreca2022synthetic`, Economics Letters 220: 110874;
+SDID with staggered treatment timing, code at
+github.com/zachporreca/staggered_adoption_synthdid); Clarke-Pailanir-Athey-Imbens 2024
+(`clarke2024synthetic`, Stata Journal 24(4): 557-598; the Stata `sdid` implementation, with
+the staggered-timing discussion in section 2.3). Author order on the last one: Crossref and
+the published article put Clarke first, while the Mixtape's reference list gives it as "Athey,
+Clarke, Imbens, and Pailanir"; cite the published order.
+
+## Exemplar rows
+
+The recognition table's worked precedents. The three Abadie rows (Basque terrorism, California
+Prop 99, German reunification) are already in the primary-papers paragraph above as
+`abadie2003economic`, `abadie2010synthetic`, and `abadie2015comparative`, and the Texas prison row
+is the Mixtape's own data exercise with no paper behind it. The two remaining rows were Crossref-verified and merged into causal.bib 2026-08-26.
+
+- Card 1990 (`card1990impact`), comparison units picked by hand and defended in a footnote, the
+  Mariel Boatlift design that motivated the method because no test exists on the hand-picked four.
+- Peri and Yasenov 2019 (`peri2019labor`), the synthetic-control redo of that same design, which is
+  the precedent for replacing a hand-picked holdout with a weighted donor pool.

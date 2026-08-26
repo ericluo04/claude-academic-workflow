@@ -15,6 +15,19 @@ methods paragraph with the limitation stated in first person at the point of the
 Refresh path: run the litreview skill on the method since the canon date and fold results into
 references/canon.md as flagged addenda.
 
+## Design shapes and the case that anchors each
+
+Each canonical case is a precedent a methods section can cite; details.md says what each teaches.
+
+| Design shape | Canonical case | Marketing analogue | What kills it |
+|---|---|---|---|
+| Age or tenure eligibility rule | Card, Dobkin, Maestas 2008 | trial expiry, anniversary status rolloff | something else switches at the same threshold |
+| Agency-measured score, sharp | Hansen 2015 | churn-score retention offers | reps or managers override the rule off-cutoff |
+| Heaped or rounded score | Almond et al. 2010; Barreca et al. 2011, 2016 | spend thresholds recorded in whole dollars | excess mass at round values that the density test misses |
+| Share crossing a fixed bar | Lee, Moretti, Butler 2004 | seller badge above an on-time-delivery rate | predetermined covariates already jump in the smallest window |
+| Admission cutoff, fuzzy first stage | Hoekstra 2009 | lead-score outreach with rep discretion | a first stage too weak to carry the ratio |
+| Boundary or geographic RD | Black 1999 | DMA advertising borders | the border sorts households, or ads spill across it |
+
 ## The design gate: is this an RD at all?
 
 An RD requires a score, a known cutoff, and a treatment rule that existed ex ante and is
@@ -24,6 +37,12 @@ most important threat. Lab-measured or third-party-computed scores resist it; se
 scores (customer spend near a tier threshold, follower counts near a monetization bar) invite
 exactly the sorting the density test detects, so the falsification battery carries more weight
 in marketing settings than in the medical originals.
+
+One more gate question, and the one sharp designs skip: list every rule, benefit, message, and
+flag that changes at this exact threshold, and say which of them is the treatment. Medicare
+starts at 65 and so does retirement, so Card, Dobkin, and Maestas (2008) went to a third dataset
+on the same running variable (the March CPS 1996-2004) and showed employment does not jump. When
+the confounder is not in your data, find a dataset on the same score where it is.
 
 Two red flags, the first disqualifying on its own (from the failed Oncotype-DX application in
 Cattaneo-Keele-Titiunik 2023):
@@ -71,16 +90,36 @@ Local linear regression, triangular kernel, MSE-optimal bandwidth, robust bias-c
 confidence intervals (Calonico-Cattaneo-Titiunik). Report both the conventional and the robust
 interval. The one-line justification: conventional 95 percent intervals at the MSE-optimal
 bandwidth cover only about 80 percent, and bias correction with the matching variance adjustment
-restores coverage at the same bandwidth.
+restores coverage at the same bandwidth. Two things get called robust: the Mixtape (Cunningham,
+Causal Inference: The Remix, ch. 6) moves between heteroskedasticity-robust OLS standard errors
+and rdrobust's Robust row without flagging the difference, and this skill keeps them apart
+because HC-robust errors leave the point estimate alone while rdrobust's Robust row recenters on
+the bias-corrected estimate and widens the interval by the variance of the bias estimate.
 
 Hard rules from the review, stated as prohibitions because that is how it states them:
 
 - Bandwidths must be data-driven and criterion-optimal; choosing one by hand "is discouraged."
   MSE-optimal for the point estimate, CE-optimal when the interval is the object. Distinct
-  left/right bandwidths are available when curvature differs by side.
+  left/right bandwidths are available when curvature differs by side. The Mixtape (ch. 6)
+  replicates Hansen 2015 with hand-picked bandwidths and a rectangular kernel, which is how RD
+  was done before 2014; this skill refuses that as a primary specification and keeps it only
+  for reproducing a paper that predates the criterion-optimal machinery.
+- Never cluster standard errors on the running variable. The Mixtape (ch. 6) reports the practice
+  as history, recommended by Lee 2008 and Lee and Card 2008 and then discouraged; this skill
+  states it as a prohibition because Kolesar and Rothe 2018 show it inflates Type I error. Use
+  heteroskedasticity-robust variance, honest intervals for a discrete score, and cluster only on
+  a real assignment unit that is not the score. Replicating or refereeing an older RD, expect to
+  find this and fix it.
 - Global polynomial fits are visualization only, never estimation (Gelman-Imbens): boundary
   behavior, counterintuitive weighting, overfitting.
-- Polynomial order: p = 1 default, p = 2 as the robustness check, never high order.
+- Polynomial order: p = 1 default, p = 2 as the robustness check, never high order. Underfitting
+  biases in the other direction, and the Mixtape's cubic simulation with a true zero effect makes
+  it vivid: -176,368.30 from a linear fit and 61,866.33 from a quadratic against 1.14 from the
+  cubic. Curvature is handled by narrowing the window, since the MSE-optimal bandwidth shrinks as
+  curvature rises. h_MSE also grows with p, so the p = 2 check runs on a wider window and a
+  different effective sample. In the Mixtape's Table 6.8 the left bandwidth goes 0.020, 0.033,
+  0.038 and the effective N 13,794, 16,774, 17,545 as the fit goes from no polynomial term to BAC
+  to BAC and BAC-squared. When p = 2 moves the estimate, check the window.
 - Covariates are for precision only; they cannot restore identification of the canonical RD
   parameter, and adjusting an invalid design changes the parameter rather than rescuing it. The
   point estimate should barely move when covariates enter; a large move signals imbalance.
@@ -118,7 +157,7 @@ monotonicity, so the iv skill's habits transfer:
 
 ## Falsification battery
 
-In the order the guide applies them, with each check's bandwidth convention:
+Run them in this order, with each check's bandwidth convention:
 
 1. Qualitative manipulation account (who computes the score, who knows the cutoff).
 2. Density continuity test (rddensity, robust bias-corrected) plus the exact binomial count
@@ -126,17 +165,27 @@ In the order the guide applies them, with each check's bandwidth convention:
    enough that a constant assignment probability is sensible). A discontinuous density is
    neither necessary nor sufficient for invalidity, but it demands an explanation; sorting can
    be administrative rather than strategic.
-3. Covariate and placebo-outcome balance: the full RD machinery with each predetermined
+3. Heaping: plot the raw histogram of the score at its finest granularity before any test. Excess
+   mass at round values (hundreds, integers, instrument ticks) comes from rounding or a coarse
+   measuring technology, a separate threat from strategic sorting, and the density test can pass
+   while heaping biases the estimate. Almond et al. 2010 found no sorting at the 1500-gram
+   very-low-birth-weight cutoff, and the donut in Barreca et al. 2011 (with Barreca, Lindo, and
+   Waddell 2016 on the heaping mechanics) still cut the one-year mortality effect by about half
+   on a 2 percent sample reduction. Run the donut
+   whatever the density test says.
+4. Covariate and placebo-outcome balance: the full RD machinery with each predetermined
    covariate as the outcome, a fresh MSE-optimal bandwidth per covariate, robust p-values. A
    failure on a covariate that plausibly drives the outcome invalidates the design. The
    equivalence-test formulation (null of imbalance) is the more honest variant when you want to
    claim balance affirmatively.
-4. Placebo cutoffs: re-run at artificial cutoffs, one side of the true cutoff at a time so
+5. Placebo cutoffs: re-run at artificial cutoffs, one side of the true cutoff at a time so
    treatment effects do not contaminate the placebo.
-5. Donut hole: drop the observations at and immediately adjacent to the cutoff, keep the
+6. Donut hole: drop the observations at and immediately adjacent to the cutoff, keep the
    original bandwidth, re-estimate. Binds hardest where agents can time their crossing (spend
-   thresholds). Large swings mean the effect rides on the most manipulable observations.
-6. Bandwidth and window sensitivity: instability at or below the chosen bandwidth is the
+   thresholds). Large swings mean the effect rides on the most manipulable observations. The
+   donut estimate is a different parameter, local to a wider neighborhood, and the write-up
+   should describe it as one.
+7. Bandwidth and window sensitivity: instability at or below the chosen bandwidth is the
    warning sign; failure far above it is expected by construction and not damning.
 
 Ex-post power calculations from observed effects are unreliable; when a null matters, report
@@ -179,6 +228,12 @@ summary(rddensity(x, c = cutoff))             # manipulation
 w <- rdwinselect(x, Z, c = cutoff)            # local-randomization window
 rdrandinf(y, x, cutoff = cutoff, wl = w$w_left, wr = w$w_right)
 ```
+
+Four figures carry a credible RD: the density of the score, take-up against the score, covariate
+balance, and the outcome in bin means. If you cannot see the effect in the bin means you are
+underpowered or it is not there. Report the estimate against the mean of the dependent variable,
+so a small coefficient on a large base reads as a precise null (0.6 points on an 84.6 percent
+base, in the Mixtape's balance table).
 
 Package index with versions and links in references/details.md. Stata and Python mirrors of the
 whole suite live at rdpackages.github.io; the guide ships full replication code in all three.

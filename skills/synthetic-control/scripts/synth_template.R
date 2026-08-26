@@ -114,12 +114,28 @@ setup <- panel.matrices(panel, unit = "unit", time = "year",
                         outcome = "y", treatment = "treated")   # names, not positions
 tau_sdid <- synthdid_estimate(setup$Y, setup$N0, setup$T0)
 sqrt(vcov(tau_sdid, method = "placebo"))    # single treated unit: placebo is the ONLY option
-plot(tau_sdid); synthdid_units_plot(tau_sdid)
+# Reporting discipline: two weight figures, not one. synthdid_plot() draws the time
+# weights lambda as a ribbon under the trajectories (lambda.plot.scale sets their
+# height, default 3), so readers see which pre-years carry the counterfactual;
+# synthdid_units_plot() shows which donors do. plot(tau_sdid) dispatches to
+# synthdid_plot(). Both default to se.method = "jackknife", invalid with one treated
+# unit, so pass "placebo". Signatures read off the synthdid GitHub source (master),
+# NOT the pinned 0.0.9 build: not API-verified.
+synthdid_plot(tau_sdid, lambda.plot.scale = 3, se.method = "placebo")
+synthdid_units_plot(tau_sdid, se.method = "placebo")
+# The SDID intercept means the treated and synthetic series will NOT overlay, so the
+# visual pre-fit check canonical SC leans on is weaker here, with no accepted
+# substitute yet. overlay = 1 subtracts the DiD-style level adjustment so parallelness
+# is readable; it is a plotting aid, not the missing test.
+synthdid_plot(tau_sdid, overlay = 1)
 # The SC-DID-SDID trio on one panel is itself a diagnostic (divergence = the
 # additive or convex restriction is doing work):
 tau_sc  <- sc_estimate(setup$Y, setup$N0, setup$T0)
 tau_did <- did_estimate(setup$Y, setup$N0, setup$T0)
-# Requires block adoption on a balanced panel; staggered adoption -> multisynth/fect.
+# Requires block adoption on a balanced panel; staggered adoption -> multisynth/fect,
+# or staggered SDID (Arkhangelsky et al. 2021 appendix; Clarke, Pailanir, Athey, and
+# Imbens 2024 sec 2.3; Porreca 2022), which has no CRAN package: Porreca's code is at
+# github.com/zachporreca/staggered_adoption_synthdid.
 
 ## ---- 8. Augmented SC (imperfect fit that must stay in) -----------------------
 # devtools::install_github("ebenmichael/augsynth")       # not on CRAN
@@ -128,6 +144,12 @@ asyn <- augsynth(y ~ treated, unit = unit, time = year, data = df,
                  progfunc = "ridge", scm = TRUE)   # t_int inferred; pass by name if set
 summary(asyn)                                      # conformal inference by default
 plot(asyn)
+# plot() takes inf_type to switch inference: "conformal" (default), "jackknife+",
+# "jackknife", "permutation", "permutation_rstat", "None". plot_type = "cv" draws the
+# cross-validation MSE over the ridge lambda; the older cv = TRUE spelling just forces
+# plot_type = "cv" and is kept for backwards compatibility.
+plot(asyn, inf_type = "jackknife+")
+plot(asyn, plot_type = "cv")
 # Report raw SC and augmented side by side; a large augmentation term means the
 # convex weights alone could not match, which is information, not decoration.
 # Staggered many-treated: multisynth(y ~ treated, unit = unit, time = year,

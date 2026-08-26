@@ -18,26 +18,55 @@ a methods paragraph with the limitation stated in first person at the point of t
 Refresh path: run the litreview skill on the method since the canon date and fold results into
 references/canon.md as flagged addenda.
 
-## When IV, and the four assumptions kept separate
+## Six designs to recognize
+
+Find your design here before reading about estimators. Fuller rows, with what each canonical
+case teaches, are in references/details.md.
+
+| Design | Canonical case | Marketing analogue | What kills it |
+|---|---|---|---|
+| Randomized encouragement with noncompliance | Oregon Medicaid lottery (Finkelstein et al. 2012) | ghost ads, PSA holdouts, invite-only betas | the offer itself moves the outcome, because the invitation signals |
+| Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | moderation queues, credit underwriting, support-ticket routing | units re-enter the queue after seeing their assignment; monotonicity across case types |
+| Shift-share exposure | Bartik 1991; Autor-Dorn-Hanson 2013 | category demand growth from national demographic shifts weighted by sales shares | generic shares, which proxy exposure to any shock |
+| Formula or network exposure | Borusyak-Hull 2023, China high-speed rail | fraction of friends treated in seeding and referral programs | no recentering; connected users are mechanically more exposed |
+| Cost shifter for price | Wright 1928; Graddy's Fulton fish market | input costs, freight, Hausman other-market prices | the instrument-induced elasticity is not the one you face when you set price yourself |
+| Access or distance | the McClellan-Newhouse differential-distance trick | store, warehouse, or delivery-coverage proximity | distance correlates with everything; condition on generic distance |
+
+## When IV, and the five assumptions kept separate
 
 IV is the tool when unconfoundedness fails because treatment is chosen: agents select on
 anticipated gains (program participation, adoption, self-selected exposure), or the treatment is
 an equilibrium object like a price, where OLS mixes supply and demand slopes (the Fulton fish
 market numbers in references/details.md are the two-line demonstration). An instrument is an
 incentive or cost shifter: it changes the attractiveness of taking treatment without entering the
-potential outcomes.
+potential outcomes. A price elasticity estimated this way is the elasticity of the compliers the
+instrument moved, and need not be the elasticity a firm faces when it sets price itself: "when
+the firm lowers its price, it won't do so using storms" (Angrist, Graddy, and Imbens 2000). Route
+a pricing question to the PRTE ladder below, naming the policy that will move the price.
 
-Four assumptions, argued separately because they have different characters (Imbens 2014):
+Before you estimate, establish that the mechanism exists. An instrument is a treatment assignment
+mechanism, and the design's credibility comes from that mechanism operating in the world, not
+from the estimator. Interview whoever runs the assignment, the queue owner or the pricing
+manager, and ask who ended up treated and why. Do not ask them to name an instrument, which is
+not a question anyone outside this literature can answer. The best instruments come from
+institutional knowledge of a program and rarely from a new dataset (Angrist and Krueger 2001).
 
-1. Unconfounded assignment of the instrument. Can hold by design (randomized encouragement) or
+Five assumptions, argued separately because they have different characters (Imbens 2014):
+
+1. SUTVA, at the level of the instrument and not only the treatment: unit i's potential treatment
+   and potential outcomes depend on i's own instrument alone. The violation to name is
+   instrument-level spillover, a seeded user's friends changing behavior because of the seed
+   itself. The LATE framework does not accommodate it, being built on unit-level potential
+   treatment mappings, so the route is a partial-interference or network model (field-experiment).
+2. Unconfounded assignment of the instrument. Can hold by design (randomized encouragement) or
    conditionally on covariates. On its own it justifies the reduced-form ITT effects ONLY, never
    the IV ratio.
-2. Exclusion. Substantive in essentially every application; Imbens' line is that it holds by
+3. Exclusion. Substantive in essentially every application; Imbens' line is that it holds by
    design only in double-blind placebo trials. Argue it separately by compliance type: the
    instrument can push always-takers and never-takers toward outcome-relevant side actions even
    though it cannot change their treatment (draft-lottery never-takers stayed in school; a
    retention-offer trigger that also flags the account for priority support).
-3. Monotonicity (no defiers). Safe when the instrument is a one-directional incentive (letter,
+4. Monotonicity (no defiers). Safe when the instrument is a one-directional incentive (letter,
    subsidy, default). Strong in examiner and judge designs: by Vytlacil's theorem it is
    equivalent to every examiner ranking the cases identically and differing only in where the
    cutoff falls, which fails whenever examiners weight criteria differently or differ in skill
@@ -48,10 +77,12 @@ Four assumptions, argued separately because they have different characters (Imbe
    the weakening and the test; do not price a leniency design against the uniform condition.
    One-sided noncompliance buys the uniform version for free and turns the LATE into an effect
    on treated compliers.
-4. Relevance, tested with the discipline in the next section, never with a full-sample afterthought.
+5. Relevance, tested with the discipline in the next section, never with a full-sample afterthought.
 
-The estimand under all four is the complier average effect (LATE). Compliers are the focus
-because theirs is the only point-identified average, an honest second best. Report the compliance
+The estimand under all five is the complier average effect (LATE). Compliers are the focus
+because theirs is the only point-identified average, an honest second best. When the first stage
+varies across units, the LATE weights units by their first-stage responsiveness, so the compliers
+are defined by responsiveness and not by membership alone (Huntington-Klein 2020). Report the compliance
 shares (always-takers, never-takers, compliers, three lines of code) and, when the ATE was the
 stated target, Manski bounds alongside the LATE. When the stated question is a rollout or an
 incentive change (a bigger subsidy, wider eligibility, "what if we gave it to everyone"), name
@@ -74,13 +105,21 @@ The binding constraint in modern IV practice is inference, and the canon's posit
 - Confidence intervals only by inverting AR/CLR, never from the 2SLS standard error. Valid
   intervals cannot be symmetric in finite samples, and an unbounded AR interval is an honest
   statement that identification is not established, never something to suppress by switching
-  back to t-intervals.
+  back to t-intervals. The Mixtape (Cunningham, Causal Inference: The Remix, ch. 7) reports AR
+  intervals "for robustness"; this skill makes them the only interval, because the two disagree
+  in the chapter's own fish example: at an effective F of 22.929 the 2SLS estimate is -1.119 with
+  a robust standard error of 0.431, so the t-interval is about [-1.96, -0.27] against a printed
+  AR interval of [-2.186, -0.394]. Both ends move, and the AR interval is asymmetric.
 - Hold instruments to a robust first-stage F of about 50 (about 50/K^(3/4) with K instruments),
   not 10. F of 10 only controls two-tailed t size; below roughly 50, 2SLS is quite likely
   farther from the truth than OLS unless endogeneity is severe. The sample-F-to-certified-
   population-F ladder, and when a severe-endogeneity relaxation of this bar is credible, are
   in references/details.md. This bar prices 2SLS bias, so it moves with the estimator: it does
   not transfer to a jackknife estimator in a many-instrument design (see the leniency section).
+  The Mixtape calls an F of 17.6 "strong enough for identification" and the fish instrument
+  "strong (F > 22)", both inside the band this ladder distrusts (a sample F of 23.1 certifies a
+  population F of 10), so a reader who copies that language into a current submission will draw
+  the objection.
 - Below F = 3.84 do not run IV at all; the AR interval will be unbounded and rightly so.
 - The reason the t-test dies even at strong F is power asymmetry, a mechanism worth knowing when
   refereeing: the 2SLS standard error is spuriously small exactly when the estimate lands near
@@ -193,6 +232,11 @@ controls and points the opposite way; UJIVE has trace zero. Bias-corrected 2SLS 
 zero, but only under homoskedasticity. IJIVE does not fully clear the bias, though in practice
 it lands close. The trace algebra is in references/details.md.
 
+The Mixtape (ch. 7) demonstrates JIVE in its bail exercise, calling that treatment "somewhat
+backwards looking", and flags UJIVE itself as the more robust version. This skill runs UJIVE: by
+the trace argument above, many examiners and many controls at once leave JIVE's many-covariate
+bias live and pointing opposite to 2SLS's. Report JIVE beside UJIVE as a diagnostic.
+
 The five checks, in their order:
 
 1. Name the controls that buy as-good-as-random assignment, and let the assignment mechanism
@@ -202,7 +246,12 @@ The five checks, in their order:
    application these widened the intervals, because the first-stage noise the extra controls
    introduce outweighed the gain in the outcome equation). E[z|w] has to be linear in the
    covariates, which is automatic when w is fixed effects and otherwise needs interactions or
-   higher-order terms (sufficient in Kolesár 2013, necessary in Blandhol et al. 2026).
+   higher-order terms (sufficient in Kolesár 2013, necessary in Blandhol et al. 2026). Assignment
+   can be random and the design still broken if units act on the realization: Gaudet, Harris, and
+   St. John (1933) recorded defendants changing their plea to draw a different judge. Where the
+   data record it, instrument with the initial assignment instead of the final one, and ask the
+   administrators how often re-routing happens, since check 2 misses sorting on unobservables.
+   The platform analogue is the appealed moderation decision or the re-submitted ticket.
 2. Balance, run as the same UJIVE specification with the covariate as the outcome. This is the
    step that gets done wrong. Do not regress observables on a constructed leniency measure,
    which manufactures mechanical correlation and carries errors-in-variables bias even when the
@@ -211,7 +260,8 @@ The five checks, in their order:
    the same units as the treatment effect, so the two are directly comparable: in their patent
    reanalysis the balance coefficients came in about ten times smaller than the effects. The
    same machinery on a post-assignment variable tests exclusion (their instance is months under
-   review).
+   review). The Mixtape (ch. 7) calls balance "an absolute must" and says nothing about how, and
+   the two implementations a reader reaches for first are the two ruled out here.
 3. Estimate by UJIVE and report the alternatives beside it. 2SLS on the examiner dummies landing
    between OLS and UJIVE is the signature of many-instrument bias pulling toward OLS, and 2SLS
    standard errors 3 to 4 times tighter than UJIVE's are that same pathology showing up in the
@@ -295,14 +345,22 @@ design is the whole paper.
    assumptions; a violation means the design is internally inconsistent, and passing proves
    nothing. Worked flu-data numbers in references/details.md.
 4. OLS next to IV, always, and the OLS-proximity audit: t-significant IV near OLS with moderate
-   F is the configuration to distrust.
+   F is the configuration to distrust. When IV lands above OLS, name which explanation you are
+   claiming, measurement error in the endogenous regressor or higher complier returns, and why.
 5. Overid J (with CUE) where applicable, interpreted under the heterogeneity rule above.
 6. Balance of the instrument on predetermined covariates, with the design's controls and the
    design's standard errors (exposure-robust on the shift path; RI for recentered instruments).
    On the share path this is a pre-trends exercise and did-style scrutiny applies.
-7. TSLS-LIML divergence in overidentified designs as a cheap weak/many-instrument alarm.
+7. TSLS-LIML divergence in overidentified designs as a cheap weak/many-instrument alarm. Also
+   re-estimate with random draws in place of the instruments: the second stage typically still
+   looks reasonable while the first-stage F sits near one (Bound, Jaeger, and Baker 1995).
 8. Placebo outcomes: lagged outcomes as the dependent variable, RI-based for recentered
    designs (sharp null sidesteps the RI-with-heterogeneity complication).
+8b. Placebo first stage, bounded by the mechanism: name the margin the mechanism can reach and
+   show the instrument does not move treatment past it. Quarter of birth moves high-school
+   completion and not college completion, because compulsory schooling binds only through high
+   school (Angrist-Krueger 1991). A cost shifter should move price and not assortment, a
+   delivery-radius instrument purchase and not browsing.
 9b. Leniency designs run the battery in their own section instead: UJIVE balance regressions on
    the covariates and on a post-assignment variable, the [0, 1] monotonicity test, and the
    complier table. Item 7 is replaced there by reporting UJIVE next to OLS, 2SLS, and JIVE,
@@ -312,6 +370,17 @@ design is the whole paper.
    and re-solve, then to zero selection on gains. Infeasibility rejects that behavioral
    hypothesis and turns the OLS-IV gap of item 4 into a formal test; with unrestricted MTRs,
    infeasibility is item 3's Balke-Pearl falsification in general form.
+
+## Exhibits: three figures and one table
+
+Three figures carry an IV paper: the instrument's own variation, the first stage, and the reduced
+form (Angrist-Krueger 1991 for the pair, Cunningham-Finlay 2012 for the three-figure structure).
+Never plot the outcome against fitted treatment, a processed quantity that reads as opaque. Where
+a placebo series exists (an untreated market, an unaffected product category), plot it on the
+same axes so the reader can see the shock hit one thing. The table carries OLS beside IV, the
+first-stage coefficient on the instrument, the strength statistic (effective F, or sqrt(K) times
+(E[F] - 1) in a leniency design), N, and the AR interval in brackets under the point estimate,
+which puts the valid interval where a reader looks for it.
 
 ## The live disputes, carried honestly
 
@@ -425,5 +494,7 @@ Every claim traces to references/canon.md; keys live in causal-design/references
 - field-experiment: randomized encouragement designs end to end (including the ITT/LATE
   analysis) and randomization inference on a simple physically randomized instrument;
   recentered and formula instruments keep their RI machinery here.
+- causal-unstructured: the perceived-treatment design (actual feature instruments the perceived
+  feature) arrives here; the exclusion and weak-instrument discipline apply unchanged.
 - preregister: pre-specifying the instrument, specification, and weak-IV fallback before
   outcomes are seen (experiment-first skill; adapt its structure for quasi-experimental PAPs).

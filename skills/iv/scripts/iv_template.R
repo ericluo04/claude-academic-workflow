@@ -70,6 +70,14 @@ g$tF       # Lee et al. (2022) tF on the effective F, for the referee who asks
 # prior = c(0, 0.05) is an illustrative placeholder: set the prior on the direct effect
 # from your setting's plausible violation size.
 
+## ---- 3b. Exhibits: what to plot, and what the table carries -----------------
+# Three figures: the instrument's own variation, the first stage (d on z), and the reduced form
+# (y on z). Never plot y against fitted d, which is processed and reads as opaque. Where a
+# placebo series exists (an untreated market, an unaffected category), draw it on the same axes.
+# The table: OLS beside IV, the first-stage coefficient on z, the strength statistic (effective
+# F from g$F_stat, or sqrt(K) * (E[F] - 1) in section 6), N, and the AR interval in brackets
+# under the point estimate. ivDiag::plot_coef(g) draws the estimator comparison, not these three.
+
 ## ---- 4. Compliance shares, Balke-Pearl checks, Manski bounds (binary d, z) ---
 pi_a <- mean(df$d[df$z == 0])              # always-takers
 pi_n <- mean(1 - df$d[df$z == 1])          # never-takers

@@ -169,9 +169,12 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
   the assignment is as good as random within a stratum. Judges, patent examiners, disability
   assessors, loan officers, child-protection investigators, radiologists, immigration officers,
   content moderators, and platform review queues that route by roster.
-- Scope limits: the clustering argument (Abadie-Athey-Imbens-Wooldridge) is proved for iid
-  assignment with a fixed number of examiners, and the extension to many examiners is asserted as
-  natural (their words) and never proved. MST-style extrapolation has not been formalized for
+- Scope limits: the fixed-number-of-examiners caveat recorded here is NOT a description of
+  Abadie-Athey-Imbens-Wooldridge, whose framework is asymptotic in the number of clusters and
+  treats growing cluster sizes explicitly (verified against the paper 2026-08-05; note in
+  notes/router/). It belongs to `frandsen2025cluster` or to Goldsmith-Pinkham-Hull-Kolesar's
+  reading of it, neither of which has been re-read; reattribute before quoting. What AAIW does
+  scope: linear estimators only, and only the sampling and assignment processes they model. MST-style extrapolation has not been formalized for
   many decision-makers or controls, so do not carry the extrapolation ladder into a leniency
   design without saying so.
 - Implement: the authors' own R package ManyIV (github.com/kolesarm/ManyIV), row in
@@ -230,3 +233,35 @@ companion examiner-design practitioner's guide in JEL); Blandhol et al. 2026 (li
 E[z|w] in the covariates as a necessary condition); Yap 2025 (many-weak-instrument inference
 that survives treatment-effect heterogeneity); Frandsen-Leslie-McIntyre 2025 (cluster jackknife
 IV, the leave-own-cluster-out route under clustered assignment).
+
+Added with the Mixtape chapter 7 pass (2026-08-26): Angrist-Graddy-Imbens 2000, REStud 67(3):
+499-527 (an IV demand elasticity is the compliers' elasticity, specific to the instrument that
+moved price, and not the elasticity a firm faces when it sets price itself); Angrist-Krueger
+2001, JEP 15(4): 69-85 (the best instruments come from institutional knowledge of a program and
+rarely from a new dataset, which is what the "before you estimate" paragraph in SKILL.md rests
+on). Both verified against Crossref 2026-08-26; BibTeX drafted as `angrist2000interpretation` and
+`angrist2001instrumental`, merged into causal.bib.
+
+## Exemplar rows
+
+The recognition table's canonical cases. New keys were Crossref-verified and merged into causal.bib 2026-08-26. One line each, with the design the case is the precedent for.
+
+- Finkelstein et al. 2012 (`finkelstein2012oregon`), randomized encouragement with noncompliance,
+  the Oregon Medicaid lottery with the ITT and the LATE reported side by side.
+- Baicker et al. 2013 (`baicker2013oregon`), the clinical-outcome companion to the same lottery,
+  and the paper the chapter points at for the lottery-as-instrument design.
+- Stevenson 2018 (`stevenson2018distortion`), leniency routing, Philadelphia bail magistrates,
+  where OLS finds nothing and IV carries the paper.
+- Bartik 1991 (`bartik1991who`) and Autor, Dorn, and Hanson 2013 (`autor2013china`), shift-share
+  exposure, the shares claim and the shifts claim as two separate identification arguments. Both
+  keys already resolve in causal.bib.
+- Borusyak and Hull 2023 (`borusyak2023nonrandom`), formula or network exposure, and the
+  recentering that a nonrandom exposure map requires. Key already resolves in causal.bib, and the
+  paper has its own canon section above.
+- Wright 1928 (`wright1928tariff`), the cost shifter for price, and the origin of the
+  simultaneity problem the design solves.
+- Graddy 2006 (`graddy2006fulton`), the Fulton fish market data behind the worked price-elasticity
+  example, read alongside `angrist2000interpretation` for what the recovered elasticity is.
+- McClellan, McNeil, and Newhouse 1994 (`mcclellan1994intensive`), the access or distance design,
+  and the differential-distance trick of conditioning on generic distance and instrumenting with
+  the specific version. The SKILL.md row names no year; this is the paper it points at.
