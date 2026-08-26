@@ -15,10 +15,11 @@ Everything here was extracted from one researcher's working configuration, so th
 ## Install
 
 ```bash
-mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets
+mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets ~/.claude/output-styles
 cp -R skills/* ~/.claude/skills/
 cp agents/tikz-reviewer.md ~/.claude/agents/
 cp -R slide-tooling ~/.claude/assets/quarto-yale
+cp output-styles/concise-research.md ~/.claude/output-styles/
 ```
 
 The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which is why the copy keeps that name. A new deck then starts with `quarto add ~/.claude/assets/quarto-yale --no-prompt` and `cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} .`, and uses `format: starter-revealjs`.
@@ -28,6 +29,7 @@ The skills refer to the slide tooling at `~/.claude/assets/quarto-yale/`, which 
 - The `you@example.edu` placeholder, in three files. `skills/bibcheck/SKILL.md` and `skills/reading-papers/scripts/paper.py` use it as the Crossref and OpenAlex contact address; set a real one (or export `SCHOLAR_MAILTO`). The polite pools these APIs run for real contacts are faster and more reliable. `skills/research-talk/assets/starter-template.qmd` uses it on the closing contact slide.
 - API keys. `paper.py` and the Zotero launcher source `~/.claude/secrets/scholar.env` if it exists, with `S2_API_KEY`, `OPENALEX_API_KEY`, and optional `ZOTERO_API_KEY`/`ZOTERO_LIBRARY_ID`. All are optional; the tools degrade to the public pools without them.
 - House style. `skills/research-talk/style/house.md`, `skills/teaching-lecture/style/house.md`, and `skills/slide-review/style/house.md` are stubs: your author line, closing-slide wording, palette rationale, and density calibration go there. The slide skills read those files for values.
+- The output style. Copying `output-styles/concise-research.md` installs it, and nothing selects it until you set `"outputStyle": "concise-research"` in `~/.claude/settings.json` and start a new session. The README says what belongs in a style rather than in `CLAUDE.md`.
 - Your theme. `slide-tooling/starter-theme.scss` is deliberately plain and comments mark where taste goes; the example decks under `docs/` are that theme rendered as-is, so what you see is the starting point and the look is yours to build.
 
 ## Machine assumptions to know about
