@@ -9,17 +9,18 @@ Everything in this repository, including the two example decks and their figures
 ```bash
 git clone https://github.com/ericluo04/claude-academic-workflow
 cd claude-academic-workflow
-mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets
+mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets ~/.claude/output-styles
 cp -R skills/* ~/.claude/skills/
 cp agents/tikz-reviewer.md ~/.claude/agents/
 cp -R slide-tooling ~/.claude/assets/quarto-yale
+cp output-styles/concise-research.md ~/.claude/output-styles/
 ```
 
 Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume (the Crossref contact address, the PDF helper, the Overleaf glob) and how to adjust each one. `CLAUDE.md` is the author's working global configuration, shared as an example. The three `style/house.md` files in the slide skills are stubs for your own taste: author line, closing-slide wording, palette rationale, density calibration.
 
 ## The global CLAUDE.md
 
-`CLAUDE.md` is what Claude Code loads into every session as standing instructions; this one carries the author's voice rules (how prose should read) and working style (parallel subagents by default, decisions through the option picker, judgment calls raised before acting), which shape every skill's output without being repeated in any of them. If you adapt this repo, add your own standing context here: quants will want a computing-grid section (cluster login, Slurm citizenship rules, where storage lives), plus anything else Claude should know in every session, like data locations or preferred stacks.
+`CLAUDE.md` is what Claude Code loads into every session as standing instructions; this one carries the author's voice rules (how prose should read) and working style (parallel subagents by default, decisions through the option picker, judgment calls raised before acting), which shape every skill's output without being repeated in any of them. If you adapt this repo, add your own standing context here: quants will want a computing-grid section (cluster login, Slurm citizenship rules, where storage lives), plus anything else Claude should know in every session, like data locations or preferred stacks. What belongs there rather than in an output style is [further down](#claudemd-versus-output-styles).
 
 ## Skills
 
@@ -148,6 +149,16 @@ A few of the higher-leverage discoveries from building this, none of them obviou
   Consumer connectors (travel, tickets, restaurants) exist too, and occasionally earn their keep.
 
 - An AI assistant sitting in your Zoom calls is worth having, and which one matters less than having one: Notion AI's meeting notes, Zoom's own AI Companion, and Otter all do the job. The value shows up weeks later, when you come back to a project after time away and the meeting summaries and extracted to-dos are how you remind yourself what is going on and reorganize. They also make the discussion searchable, so "what did we decide about X" has an answer without re-watching anything.
+
+### CLAUDE.md versus output styles
+
+`CLAUDE.md` and an output style reach the model differently, and that decides which rules belong where. `CLAUDE.md` arrives [as a user message after the system prompt, not as part of the system prompt itself](https://code.claude.com/docs/en/memory#claude-isn-t-following-my-claude-md), with "no guarantee of strict compliance". It survives compaction by being [re-read from disk and re-injected](https://code.claude.com/docs/en/memory#instructions-seem-lost-after-compact), and it reaches [every subagent except the built-in Explore and Plan agents](https://code.claude.com/docs/en/sub-agents#what-loads-at-startup). An output style is appended to the end of the system prompt, passes through compaction ["unchanged; not part of message history"](https://code.claude.com/docs/en/context-window#what-survives-compaction), and ["all output styles trigger reminders for Claude to adhere to the output style instructions during the conversation"](https://code.claude.com/docs/en/output-styles#how-output-styles-work). It governs the main conversation only, because subagents run their own system prompt.
+
+So rules about how Claude talks to you (answer first, response length, when to ask, how to report) go in the style, where placement and reminders are strongest. Rules about how the work gets done (research conventions, tooling, project facts) go in `CLAUDE.md`, which subagents also see. Voice and prose rules that have to govern subagent-written documents stay in `CLAUDE.md` for the same reason. A style never reaches a subagent.
+
+Custom styles live in `~/.claude/output-styles/` or a project's `.claude/output-styles/`, with [frontmatter](https://code.claude.com/docs/en/output-styles#frontmatter) `name`, `description`, and `keep-coding-instructions`. That last key defaults to false and silently drops Claude Code's built-in software engineering instructions, so set it true when you are changing how Claude talks but still want it to write code. Select a style with [`"outputStyle": "<name>"`](https://code.claude.com/docs/en/settings-reference#outputstyle) in `settings.json`. `/config` sets it too, but writes to project-local `.claude/settings.local.json`, which overrides the global key for that project. `/output-style` was removed in v2.1.91, and a change applies only after `/clear` or in a new session.
+
+The built-in styles are Default, Concise, Explanatory, Learning, and Proactive. Concise "leads with the result, skips preamble and narration, and keeps responses short by default", and needs v2.1.237 or newer. Alongside it, `"spinnerTipsEnabled": false` and `"awaySummaryEnabled": false` quiet the terminal further ([settings reference](https://code.claude.com/docs/en/settings-reference)), and `verbose` already defaults to false. `output-styles/concise-research.md` here is a starting point for research work.
 
 ### API keys
 
