@@ -1,6 +1,6 @@
 ---
 name: synthetic-control
-description: Design, estimate, validate, and write up a synthetic control analysis, including synthetic difference-in-differences, augmented/penalized variants, and factor-model/matrix-completion relatives for panel counterfactuals. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "synthetic control", "synthetic DiD", "SDID", "donor pool", "comparative case study", "weighted counterfactual", "geo holdout", "CausalImpact", "matrix completion", "interactive fixed effects", "gsynth", "generalized synthetic control", or any setting where one or a few aggregate units (a state, market, DMA, category, platform region) got treated and untreated units must form the counterfactual. Staggered-adoption panels with many treated units belong to did; design triage across methods belongs to causal-design. Prospective geo experiments (choosing treatment markets by design) belong to field-experiment.
+description: Design, estimate, validate, and write up a synthetic control analysis, including synthetic difference-in-differences, augmented/penalized variants, and factor-model/matrix-completion relatives for panel counterfactuals. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "synthetic control", "synthetic DiD", "SDID", "staggered SDID", "donor pool", "comparative case study", "weighted counterfactual", "geo holdout", "CausalImpact", "matrix completion", "interactive fixed effects", "gsynth", "generalized synthetic control", or any setting where one or a few aggregate units (a state, market, DMA, category, platform region) got treated and untreated units must form the counterfactual. Staggered-adoption panels with many treated units belong to did; design triage across methods belongs to causal-design. Prospective geo experiments (choosing treatment markets by design) belong to field-experiment.
 ---
 
 # Synthetic control
@@ -15,6 +15,18 @@ with the limitation stated in first person at the point of the choice.
 Refresh path: run the litreview skill on the method since the canon date and fold results into
 references/canon.md as flagged addenda.
 
+## Which precedent your design looks like
+
+| Design shape | Canonical case | Marketing analogue | What kills it |
+|---|---|---|---|
+| One treated region, outcome co-moves across regions | Basque terrorism (Abadie and Gardeazabal 2003) | a single-market launch | donors whose outcome does not co-move with the treated region |
+| One treated unit, a regulation, other units running their own versions of it | California Prop 99 (Abadie, Diamond, and Hainmueller 2010) | a regulation hitting one state's category sales | already-treated donors left in the pool |
+| One treated unit, pool restricted to genuine peers | German reunification (Abadie, Diamond, and Hainmueller 2015) | a platform policy change in one country | a pool wide enough that fit gets bought from dissimilar donors |
+| Mid-pack treated unit, smooth series, long pre-period | Texas prison construction (the Mixtape's data exercise) | a geo rollout in one DMA | a treated unit at the top or the bottom of the donor range |
+| Comparison units picked by hand and defended in a footnote | Mariel Boatlift (Card 1990; Peri and Yasenov 2019) | a hand-picked matched-market holdout | no test exists on the hand-picked choice. Synthetic control replaces it |
+
+references/details.md carries what each case is the precedent for.
+
 ## The feasibility gate: is SC usable here at all?
 
 The method's originator is explicit that mechanical applications are risky and that there are
@@ -25,6 +37,9 @@ situations where the honest answer is to walk away. Check before estimating:
 - A long pre-period. But a long T0 cannot repair a bad fit: the bias bound is derived under
   (near-)perfect predictor fit, and when pre-period fit is poor the recommendation is to not
   use synthetic control, full stop.
+- Enough post-intervention periods. Abadie, Diamond, and Hainmueller (2015) also require a
+  sizable number of them when the effect emerges gradually after the intervention or changes
+  over time, so a long pre-period with two post-periods does not pass this gate.
 - The converse trap: good pre-period fit with a short T0 or a noisy outcome can be spurious
   overfitting on transitory shocks, and a larger donor pool makes overfitting easier, so a
   bigger J is not automatically better.
@@ -70,7 +85,13 @@ regression weights in the reunification example).
 The degrees of freedom, each with a discipline:
 
 - Predictors: pre-intervention outcomes PLUS substantive covariates. Pre-outcomes alone push
-  excluded covariates into the unobserved loadings and raise the bias bound.
+  excluded covariates into the unobserved loadings and raise the bias bound. The Mixtape
+  (Cunningham, Causal Inference: The Remix, synthetic-control chapter) reports that
+  researchers increasingly rely solely on lagged outcomes as covariates (Ben-Michael, Feller,
+  and Rothstein 2021); this skill rejects the drift because the excluded covariates are what
+  inflate Abadie's bias bound. The exception is an outcome series known to be driven by
+  strongly co-moving common factors, which is why one pre-period average sufficed for
+  reunification.
 - V: inverse-variance as the simple default; better, minimize pre-period MSPE or pick V by a
   training/validation split of the pre-period. Cross-validated V is not always unique, so show
   the estimate is stable across reasonable V choices.
@@ -83,7 +104,9 @@ The degrees of freedom, each with a discipline:
 One continuous decision path, not competing methods:
 
 - DiD is the special case of the SC factor model with constant factor loadings. If the treated
-  unit's pre-trend parallels a plausible comparison average, use did.
+  unit's pre-trend parallels a plausible comparison average, use did. Long pre-periods are
+  load-bearing for SC identification. DiD needs one pre-period to identify the ATT and more
+  only for credibility, so the SC pre-period gate does not transfer to a DiD routing decision.
 - When the pre-period plot shows the donor average diverging from the treated unit before
   treatment, parallel trends has already failed and SC is the tool. The sharpest known
   routing result: under selection on lagged outcomes with autocorrelated errors, DiD is
@@ -95,9 +118,17 @@ One continuous decision path, not competing methods:
   out. The price is a stable-bias assumption on that gap. In simulations calibrated to real
   panels, SDID typically outperforms DiD, SC, and matrix completion. Practical default: run
   canonical SC when the gate passes cleanly; when level fit is the sticking point, move to
-  SDID and say why.
+  SDID and say why. Reporting discipline: plot the time weights beside the trajectory figure
+  so readers see which pre-years carry the counterfactual, and plot the unit weights so they
+  see which donors do. The intercept means the treated and synthetic series will not overlay,
+  so the visual pre-fit check canonical SC leans on is weaker here. No accepted substitute
+  exists yet. The four assumptions SDID actually makes are in references/details.md.
 - Staggered adoption with many treated units forecloses the standard SC estimator; that is
-  did territory (or multisynth / the factor-model estimators, below).
+  did territory (or multisynth / the factor-model estimators, below). Staggered SDID is the
+  exception: the appendix of Arkhangelsky et al. (2021), section 2.3 of the
+  Stata Journal SDID article (Clarke, Pailanir, Athey, and Imbens 2024), and Porreca (2022).
+  No CRAN package covers it. Porreca ships code at
+  github.com/zachporreca/staggered_adoption_synthdid.
 
 ## Inference
 
@@ -122,7 +153,8 @@ The primary mode is design-based permutation, honest about its limits:
 1. Pre-period fit, the entry gate: table the treated unit's predictor values against the
    synthetic unit's and plot both trajectories over the whole pre-period. Visible gaps in
    either mean do not proceed (tighten the pool, change predictors or transformation,
-   bias-correct, move to SDID, or abandon).
+   bias-correct, move to SDID, or abandon). The balance table has one value per variable per
+   group, so it is a display, not a test.
 2. Backdating (in-time placebo, the Heckman-Hotz preprogram test): move the intervention date
    back, re-estimate on pre-data only. Pass has two parts: no effect opens during the fake
    post-period, and the gap still opens at the true date with the same sign and shape. A
@@ -136,7 +168,9 @@ The primary mode is design-based permutation, honest about its limits:
    not hinge on one donor. When it does, check whether that donor had its own intervention or
    shock.
 5. Robustness across predictor sets, V choices, and tightened donor pools; drift as the pool
-   tightens signals interpolation bias from dissimilar donors.
+   tightens signals interpolation bias from dissimilar donors. Searching over pre-treatment
+   lag choices raises the false-positive rate (Ferman, Pinto, and Possebom 2020), so
+   pre-commit the predictor set or report every specification tried.
 6. Outcome-transformation check when levels are hard to match (levels vs differences vs
    growth rates vs pre-mean deviations), remembering the noise-amplification tradeoff and
    that matching changes alone is not credible when the level itself drives dynamics.

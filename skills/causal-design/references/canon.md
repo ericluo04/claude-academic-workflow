@@ -1,13 +1,15 @@
 # Router canon
 
-Current as of 2026-08-05. These three sources are the only canon of the causal-design skill,
-hand-picked, and nothing enters this file without explicit human approval. BibTeX keys
-point into ./causal.bib, which is the one shared bib for the whole skill family. The
-router also leans on `arkhangelsky2024causal` (the three-axis panel taxonomy), a
-cross-reference owned by the did canon. The family-wide clustering statement is owned by this
-skill's own SKILL.md, whose frontmatter claims the shared inference rules, while method skills
-carry design-specific instances. Refresh: run litreview on the moving corner (panel estimators)
-since the canon date. Any addendum needs explicit human approval.
+Current as of 2026-08-05. Four sources: three hand-picked and a fourth,
+`abadie2023clustering`, approved on 2026-08-05, which was promoted from a cross-reference to
+a full entry because five skills lean on it. Nothing enters this file without explicit human
+approval. BibTeX keys point into ./causal.bib, which is the
+one shared bib for the whole skill family. The router also leans on `arkhangelsky2024causal`
+(the three-axis panel taxonomy), a cross-reference owned by the did canon. The family-wide
+clustering statement is owned by this skill's own SKILL.md, whose frontmatter claims the shared
+inference rules, while method skills carry design-specific instances. Refresh:
+run litreview on the moving corners (panel estimators, text-causal) since the canon date;
+any addendum needs explicit human approval.
 
 ## Imbens (2024)
 
@@ -33,7 +35,7 @@ Annual Review of Statistics and Its Application 11:123-152. Key: `imbens2024caus
 - Binds when: every triage; the selection-on-observables branch end to end; any
   sensitivity-analysis request.
 - Scope limits: names no software at all; explicitly excludes dynamic treatment regimes
-  (Robins tradition).
+  (Robins tradition); no treatment of text or unstructured data.
 - Quote (verbatim in SKILL.md): "In practice, using variables causally affected by the
   treatment or outcome is the most common mistake in choosing variables to condition on in
   estimating average treatment effects using unconfoundedness approaches."
@@ -54,17 +56,17 @@ Key: `li2024quasiexperimental`.
   SC-family best practices, stated as a gate ("only using the methods that satisfy both
   best practices"): pretreatment-fit plot and backdating (the family's adjudication adds a
   strict-exogeneity caveat to backdating and hands the final verdict to synthetic-control's
-  fuller feasibility gate; SKILL.md carries it); the data-shape fan-out within the panel
-  branch: convex-hull failure -> augmented DiD (Li-Van den Bulte), outcome in range but
-  too few pre-periods -> forward DiD (Li), controls far fewer than pre-periods -> HCW OLS
-  (Hsiao-Ching-Wan), many treated units or short panels -> generalized synthetic control /
-  matrix completion, unit and time reweighting both wanted -> SDID with inference
-  procedure chosen by data shape; PSM "called into question," replaced by AIPW, double ML,
-  causal forests; unconfoundedness often defensible in marketing because targeting rules
-  are known and observable; the Li-Sonnier result that the gsynth parametric bootstrap
-  yields biased CIs ("false precision or false imprecision... lead to incorrect business
-  decisions"); the field vocabulary (design rigor vs statistical rigor, ATT-first, clean
-  controls).
+  fuller feasibility gate; SKILL.md carries it); the data-shape fan-out within
+  the panel branch: convex-hull failure -> augmented DiD (Li-Van den Bulte), outcome in
+  range but too few pre-periods -> forward DiD (Li), controls far fewer than pre-periods
+  -> HCW OLS (Hsiao-Ching-Wan), many treated units or short panels -> generalized
+  synthetic control / matrix completion, unit and time reweighting both wanted -> SDID
+  with inference procedure chosen by data shape; PSM "called into question," replaced by
+  AIPW, double ML, causal forests; unconfoundedness often defensible in marketing because
+  targeting rules are known and observable; the Li-Sonnier result that the gsynth
+  parametric bootstrap yields biased CIs ("false precision or false imprecision... lead to
+  incorrect business decisions"); the field vocabulary (design rigor vs statistical rigor,
+  ATT-first, clean controls).
 - Binds when: routing within the panel branch; arguing a method is accepted marketing
   practice; writing for marketing reviewers.
 - Caveats: read via WebFetch extraction, so re-verify any quotation against the live page
@@ -73,16 +75,42 @@ Key: `li2024quasiexperimental`.
   methods independently; silent on RDD and nearly silent on IV, so it never covers the
   confounded-observational branch beyond panel methods. Figure 1 ("Overview of Design
   Choices in Quasi-Experimental Settings") was read against the article text on
-  2026-07-28. The figure is coarser than the article text (it lumps augmented DiD under
-  too-few-pre-periods where the text gives it the convex-hull condition; HCW and matrix
-  completion appear only in the text); where they differ, this skill follows the text.
+  2026-07-28. The figure is coarser than the article text (it lumps augmented DiD
+  under too-few-pre-periods where the text gives it the convex-hull condition; HCW and
+  matrix completion appear only in the text); where they differ, this skill follows the
+  text.
+
+## Feder et al. (2022)
+
+Transactions of the Association for Computational Linguistics 10:1138-1158. Key:
+`feder2022causal`.
+
+- Role: the text-role triage question. Any causal analysis where unstructured data appears
+  gets asked: which role does it play (confounder, outcome, treatment)? Each role has its
+  own assumption failures; the router states the question and the warnings, then hands off
+  to causal-unstructured.
+- Settles: ignorability over text aspects is untestable and must be argued from domain
+  knowledge; positivity is generically fragile in high dimensions (a representation that
+  nearly encodes the treatment leaves no conceivable counterfactual); consistency fails
+  through the measurement model when it was trained on the estimation data, and the fix is
+  split-sample measurement (via Egami et al.); invariance and sensitivity test batteries
+  for any NLP measure feeding a causal pipeline; there are no real-world ground-truth
+  causal text benchmarks, so semi-synthetic wins are never validation of a real estimate.
+- Binds when: any unstructured data in the causal graph; the router's role question.
+- REVISED WITHIN THE FAMILY: Feder's supervised text-as-confounder route (fine-tuned
+  causally sufficient embeddings, Veitch et al. 2020) is superseded by the GPI results, on
+  GPI's own simulation evidence; causal-unstructured carries the dispute and the
+  replacement route. The router cites Feder for the role triage and the assumption
+  failures, never for the Veitch route.
+- Version note: read as the arXiv accepted version; cite with TACL pagination (1138-1158).
 
 ## Abadie, Athey, Imbens, and Wooldridge (2023)
 
 QJE 138(1): 1-35. Key: `abadie2023clustering`. Read: the latest arXiv e-print (1710.02926),
 which cites Rambachan-Roth 2022 and so postdates the 2017 posting; the QJE PDF is
 Cloudflare-blocked and the NBER copy is the 2017 vintage, so the version of record is
-unverified in detail. Appendix regularity conditions and proofs not read. Promoted from a header cross-reference because several skills lean on it.
+unverified in detail. Appendix regularity conditions and proofs not read. Promoted from a
+header cross-reference on 2026-08-05 because five skills lean on it.
 
 - Role: the family-wide clustering rule, and the reason it is a design question. Replaces "are
   my errors correlated within clusters" with "how were the data sampled and how was treatment
@@ -137,9 +165,18 @@ published REStud July 2026, no longer the NBER WP), the sensitivity ladder
 (`manski1990nonparametric`, `rosenbaum1983assessing`, `imbens2003sensitivity`,
 `oster2019unobservable`, `cinelli2020making`, `rosenbaum2002observational`), and the AMA
 panel family (`hsiao2012panel`, `li2020inference`, `li2023augmented`, `li2024forward`,
-`li2023statistical` for Li-Sonnier). Already in the bib from method skills and reused
-here: `crump2009dealing`, `wager2018estimation`, `chernozhukov2018double`,
-`xu2017generalized`, `athey2021matrix`, `crepon2013labor`, `hudgens2008toward`,
-`athey2018exact`, the did/rdd/synth canons. New with the mediation decline:
-`imai2010general` and `pieters2017meaningful`, decline pointers only, NOT canon (the
-router declines mediation and points to them; no skill carries the route).
+`li2023statistical` for Li-Sonnier). Already in the bib from
+method skills and reused here: `crump2009dealing`, `wager2018estimation`,
+`chernozhukov2018double`, `xu2017generalized`, `athey2021matrix`, `crepon2013labor`,
+`hudgens2008toward`, `athey2018exact`, `egami2022make`, the did/rdd/synth canons. New with
+the mediation decline: `imai2010general` and `pieters2017meaningful`, decline pointers
+only, NOT canon (the router declines mediation and points to them; no skill carries the
+route).
+
+Reference shelf, not canon: `wooldridge2010econometric` (Econometric Analysis of Cross
+Section and Panel Data, 2nd ed., MIT Press), the citation for the unobserved-effects model
+and strict exogeneity in SKILL.md's plain-panel-fixed-effects section, and the pointer for
+the panel methods that section leaves out, random effects among them. Added 2026-08-26 from
+the reference list of Cunningham's "Causal Inference: The Remix" panel-data chapter, whose
+footnote 1 names it for the same purpose. A textbook, so it carries no reading notes and
+does not sit alongside the four read sources above.

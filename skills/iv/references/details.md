@@ -1,6 +1,6 @@
 # IV lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-08-04.
+Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
 
 ## The F ladder (Keane-Neal Table 1)
 
@@ -122,6 +122,16 @@ mix of supply and demand slopes with ambiguous sign. Stormy-weather supply-shift
 elasticity -1.08 (0.46); TSLS with the trivalued instrument -1.014 (0.384), LIML -1.016
 (0.384). OLS understates the demand elasticity by half. A supply shifter identifies demand and
 a demand shifter identifies supply; without one side's shifter, that side stays unidentified.
+
+What the number is. The IV elasticity belongs to the compliers whose purchases the instrument
+moved, so a storm-instrumented elasticity describes buyers who responded to storm-driven price
+increases (Angrist, Graddy, and Imbens 2000). It need not be the elasticity a firm faces when it
+sets price itself, because when the firm lowers its price it will not do so using storms. The
+Mixtape (Cunningham, Causal Inference: The Remix, ch. 7) runs the same data with a binary Stormy
+instrument and day-of-week dummies and reports 2SLS -1.119 (0.431) against OLS -0.563 (0.152) at
+N = 111, so the two-line demonstration above is robust to the specification. Hand a pricing team
+that number only with the complier population named, and take a planned price change to the PRTE
+ladder instead.
 
 ## Leniency designs: the trace algebra and the worked numbers (GHK 2026)
 
@@ -255,6 +265,20 @@ Caveat the paper itself flags: passing the RI balance tests supports the counter
 specification, and does not directly certify shock exogeneity; the placebo-outcome test is the
 check aimed at that assumption.
 
+## The six designs, and what each canonical case teaches
+
+The recognition table in SKILL.md indexes designs by what kills them. This is the longer form,
+with the lesson each canonical case carries.
+
+| Design | Canonical case | What it teaches |
+|---|---|---|
+| Randomized encouragement with noncompliance | Oregon Medicaid lottery (Finkelstein et al. 2012; Baicker et al. 2013) | lottery IV under voluntary take-up, with the ITT and the LATE reported side by side across financial, utilization, and health outcomes; winning the lottery raised Medicaid enrollment by about 26 points |
+| Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | the design end to end at 331,971 cases and eight judges, where OLS finds nothing (-0.001) and IV finds 15 to 21 percent on guilty pleas, so the estimator choice carries the paper |
+| Shift-share exposure | Bartik 1991; Autor-Dorn-Hanson 2013 | shares and shifts are two different identification claims, each with its own estimator, balance test, and disqualifier |
+| Formula or network exposure | Borusyak-Hull 2023, China high-speed rail | a formula-built instrument inherits endogeneity from its nonrandom exposure weights: 0.23 collapses to 0.08 after recentering |
+| Cost shifter for price | Wright 1928; Graddy's Fulton fish market (Graddy 2006) | simultaneity: observed price-quantity pairs are equilibria, a supply shifter identifies demand, and the elasticity recovered belongs to the instrument's compliers |
+| Access or distance | the McClellan-Newhouse differential-distance trick | condition on generic distance and instrument with the specific version, because raw distance proxies everything |
+
 ## Marketing translations
 
 - Price endogeneity: cost shifters and Hausman-style other-market prices routinely land F in
@@ -280,19 +304,23 @@ check aimed at that assumption.
   instrument with the specific version (the McClellan-Newhouse trick).
 
 ## Package index (verified against package docs 2026-07-28; the ivmte row on 2026-07-29;
-the ManyIV row against the cloned source and a live run on its `fhl` data on 2026-08-04)
+the ManyIV row against the cloned source and a live run on its `fhl` data on 2026-08-04;
+versions and publication dates re-checked against crandb and the GitHub HEADs on 2026-08-26,
+with no package ahead of the version recorded here, so the traps below stand as written)
 
 | Package | Version | Role | Traps |
 |---|---|---|---|
-| fixest | 0.14.2 (CRAN) | 2SLS with FE and clustered SEs; first stage via summary(est, stage = 1); fitstat(~ ivf1 + ivwald1 + sargan + wh) | IV part must be the LAST formula element, after fixed effects; fitstat keywords lowercase (pinned also in did's details; update the two pins together on refresh) |
-| ivreg | 0.6-8 (CRAN) | TSLS with diagnostics rows (weak instruments, Wu-Hausman, Sargan); successor to AER::ivreg | three-part form is y ~ exogenous \| endogenous \| instruments; in the two-part form, controls not repeated after the pipe silently become instruments; vcov. must be a function when diagnostics = TRUE |
-| ivmodel | 1.9.1 (CRAN) | AR.test and CLR with inversion CIs (matrix of interval rows; unions and unbounded sets happen), KClass/LIML/Fuller, heteroSE and clusterID options | KClass has a capital K; single endogenous regressor; takes data vectors, not formulas |
-| ivDiag | 1.0.6 (CRAN; yiqingxu.org/packages/ivDiag) | one-call audit: F.standard/robust/cluster/bootstrap/effective, AR with inverted CI, tF (Lee et al.), ltz local-to-zero | every variable passed as a name string; pulls the lfe dependency chain |
-| ShiftShareSE | 1.1.0 (CRAN, Kolesar) | reg_ss / ivreg_ss with method = "akm" / "akm0" (AKM0 = null-imposed, better small-K coverage); sector_cvar clusters shocks | X is the aggregated shift-share vector, shares go in W, the instrument never appears in the formula; the akm0 "se" is a normalized CI length, never a t-stat input |
-| ssaggregate | GitHub kylebutts/ssaggregate (0.0.0.9000, pushed 2025-11) | BHJ shock-level aggregation for the equivalent shift-level regression and the exposure-robust F | dev version, no CRAN release or visible tests; n/s/l/t are strings while vars/controls are formulas; template keeps a hand-coded fallback |
-| bpbounds | 0.1.8 (CRAN) | Balke-Pearl inequality checks and ACE bounds (binary Y, X; Z with 2-3 categories) | xtabs order is positional treatment-outcome-instrument with margin = 3 on the instrument |
+| fixest | 0.14.2 (CRAN, 2026-06-26) | 2SLS with FE and clustered SEs; first stage via summary(est, stage = 1); fitstat(~ ivf1 + ivwald1 + sargan + wh) | IV part must be the LAST formula element, after fixed effects; fitstat keywords lowercase (pinned also in did's details; update the two pins together on refresh) |
+| ivreg | 0.6-8 (CRAN, 2026-07-10) | TSLS with diagnostics rows (weak instruments, Wu-Hausman, Sargan); successor to AER::ivreg | three-part form is y ~ exogenous \| endogenous \| instruments; in the two-part form, controls not repeated after the pipe silently become instruments; vcov. must be a function when diagnostics = TRUE |
+| ivmodel | 1.9.1 (CRAN, 2023-04-09) | AR.test and CLR with inversion CIs (matrix of interval rows; unions and unbounded sets happen), KClass/LIML/Fuller, heteroSE and clusterID options | KClass has a capital K; single endogenous regressor; takes data vectors, not formulas |
+| ivDiag | 1.0.6 (CRAN, 2023-09-17; yiqingxu.org/packages/ivDiag) | one-call audit: F.standard/robust/cluster/bootstrap/effective, AR with inverted CI, tF (Lee et al.), ltz local-to-zero. The components are also exported one at a time: `eff_F()` returns the Montiel Olea-Pflueger effective F alone, `AR_test()` the AR test with its inverted CI alone, and `plot_coef()` draws the estimator comparison (OLS, 2SLS, and the AR interval), which is what the Mixtape's code calls. The template calls the omnibus `ivDiag()` and reads `$F_stat`, `$AR`, and `$tF` off one fit, so reach for the components only when you want a single number without the bootstrap | every variable passed as a name string; pulls the lfe dependency chain |
+| ShiftShareSE | 1.1.0 (CRAN, 2022-04-24, Kolesar) | reg_ss / ivreg_ss with method = "akm" / "akm0" (AKM0 = null-imposed, better small-K coverage); sector_cvar clusters shocks | X is the aggregated shift-share vector, shares go in W, the instrument never appears in the formula; the akm0 "se" is a normalized CI length, never a t-stat input |
+| ssaggregate | GitHub kylebutts/ssaggregate (0.0.0.9000, HEAD 22df939 dated 2025-11-02) | BHJ shock-level aggregation for the equivalent shift-level regression and the exposure-robust F | dev version, no CRAN release or visible tests; n/s/l/t are strings while vars/controls are formulas; template keeps a hand-coded fallback |
+| bpbounds | 0.1.8 (CRAN, 2026-07-13) | Balke-Pearl inequality checks and ACE bounds (binary Y, X; Z with 2-3 categories) | xtabs order is positional treatment-outcome-instrument with margin = 3 on the instrument |
 | ManyIV | GitHub kolesarm/ManyIV (0.0.2.9000, HEAD 0b82852 dated 2025-06-17; source read and run 2026-08-04) | the leniency-design workhorse and the package `goldsmithpinkham2026leniency` uses for its own checklist: `ujive(formula, data, subset, na.action, tol = 1e-8, dropleverage = TRUE)` with formula `y ~ d + controls \| instruments`, returning class `IVResults` whose `$estimate` is a data frame with rows ols / tsls / ujive / "old ujive" / ijive1 / jive1 and columns `estimate`, `se_text` (textbook robust), `se_hte` (heteroskedasticity- and treatment-effect-heterogeneity-robust, the column the paper's tables report, and it absorbs the Bekker many-instrument term), plus `$IVData$F` (homoskedastic first-stage F), `$IVData$k` (instruments after collinear drops), `$IVData$l` (controls), `$IVData$n`, `$drop_obs`. Also `IVreg(..., inference = "standard"/"md")` for Kolesár 2018 minimum-distance many-instrument SEs (JoE 204(1):86-100, distinct from Kolesár-Rothe 2018 on discrete running variables in the rdd skill) and `IVoverid()` for Sargan + modified Cragg-Donald | the endogenous variable must be the FIRST right-hand term (put it second and another regressor is silently treated as endogenous, verified by running both orders); NO cluster argument, so the leave-own-cluster-out UJIVE that clustered assignment requires has to be hand-coded; no null-imposed SE, so the Yap (2025) weak-IV test is hand-coded too; `dropleverage = TRUE` silently drops leverage-one and singleton-dummy rows, `FALSE` returns NaN for UJIVE with a warning; no weights argument; rough dev API (man pages still carry TODOs); for single-endogenous LIML/Fuller use ivmodel |
-| AER | 1.2-17 (CRAN) | legacy ivreg (two-part formula only), kept for compatibility notes | superseded by the ivreg package |
+| AER | 1.2-17 (CRAN, 2026-07-11) | legacy ivreg (two-part formula only), kept for compatibility notes | superseded by the ivreg package |
+| lfe | 3.1.1 (CRAN, 2025-02-11) | `felm(y ~ x \| fe \| (d ~ z))`, the IV route in the Mixtape's bail code | superseded by fixest, which is faster, is maintained, and gives the first stage and fitstat keywords the template uses |
+| SteinIV | 0.1-1 (CRAN, 2016-01-26) | `jive.est(y, X, Z)`, the JIVE the Mixtape runs on the Stevenson data | JIVE only, with no UJIVE and no heterogeneity-robust SE; superseded by ManyIV, which returns OLS, 2SLS, UJIVE, IJIVE, and JIVE from one call. Unchanged on CRAN since 2016 |
 | ivmte | 1.4.0 (CRAN, 2021-09-17; GitHub jkcshea/ivmte slightly ahead, last commit 2024-08-27) | MST bounds and extrapolation, single entry point ivmte(): target 'ate'/'att'/'atu'/'late'/'genlate' with genlate.lb/.ub the u-interval (the alpha dial) or custom target.weight0/1; MTR space via m0/m1 formulas with uSpline(degree, knots, intercept); ivlike list of regression formulas as the estimands; shape flags m0/m1/mte .lb/.ub/.inc/.dec enforced on the audit grid (initgrid.nx/.nu, audit.nx/.nu); bootstraps for inference; cite `shea2023ivmte` | needs one of gurobi/cplexapi/rmosek/lpsolveapi; the only fully free solver (lpSolveAPI) is roughly an order of magnitude slower and cannot run the regression-based direct criterion (QCQP, Gurobi or MOSEK only), so with it always supply ivlike moments; point = TRUE forces GMM and silently ignores every shape constraint; the unobservable in m0/m1 must match uname (default u); m0/m1 bounds default to the observed outcome range, which is the bounded-outcome assumption |
 
 R has no reliable CUE implementation; for the overidentified heteroskedastic case the canon's
@@ -302,5 +330,7 @@ the R fallback. Rotemberg weights: reference implementation at github.com/paulgp
 decomposition and labels it as our implementation.
 
 Stata mirror (the Keane-Neal workflow is Stata-first): ivregress 2sls/liml, ivreg2 (cue, J),
-weakiv (AR/CLR inversion, Finlay-Magnusson-Schaffer), weakivtest (effective F), ssaggregate,
-bartik_weight, manyiv.
+weakiv (AR/CLR inversion, Finlay-Magnusson-Schaffer), weakivtest (Pflueger-Wang effective F),
+twostepweakiv (Sun, AR intervals after 2sls, the pairing the Mixtape's code uses), ssaggregate,
+bartik_weight, manyiv. These are names and roles only: unlike the R rows above, no Stata API
+here has been verified against its help file.

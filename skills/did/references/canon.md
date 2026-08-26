@@ -176,6 +176,41 @@ AEA Papers and Proceedings 116: 75-80. Key: `wooldridge2026nonlinear`.
 - Quote: "Assumption CPT imposes the parallel trends assumption on G^{-1}(E[Y_t(∞) | D, X_t]).
   In general, CPT does not hold for E[Y_t(∞) | D, X_t]" (p. 76).
 
+## Ghanem, Sant'Anna, and Wüthrich
+
+"Selection and Parallel Trends". Key: `ghanem2022selection` (still a preprint, SSRN 4215029;
+the circulating version is dated 2024, which is how the Mixtape cites it).
+
+- Role: the assignment-mechanism half of parallel trends, and the source for SKILL.md's "Why
+  these units were treated". Read alongside Marx, Tamer, and Tang (2024) on forward-looking
+  choice.
+- Settles: which selection mechanisms are compatible with PT (common constant trend, selection
+  on baseline Y(0), selection on fixed effects, selection on observables, imperfect foresight)
+  and which is not (selection on realized gains, Heckman-Urzua-Vytlacil essential heterogeneity,
+  after Roy 1951); and that selection on baseline Y(0) breaks pre-trends mechanically while
+  leaving PT intact, because the baseline is both the selection point and the omitted category.
+- Binds when: reading a pre-trend picture; deciding whether a baseline dip is a problem; setting
+  the HonestDiD relative-magnitudes anchor.
+- Implement: names no software. The mechanism table and the HonestDiD interaction are in
+  details.md, the latter labeled as the skill's own judgment.
+
+## Roth (2026), event-study interpretation
+
+The Japanese Economic Review 77(2): 275-288, "Interpreting event-studies from recent
+difference-in-differences methods". Key: `roth2026interpreting`. The Mixtape cites the 2024
+working paper; this is the published version.
+
+- Role: what an event-study coefficient means once the estimator is not OLS.
+- Settles: short gaps versus long differences (a rolling baseline estimates a different quantity
+  from a universal one, and OLS can only produce the latter); the BJS kink at t = -1, which
+  comes from fitting the counterfactual on the whole pre-period, so imputation pre-period
+  coefficients are a valid pre-trend test only if PT holds in every period and are not
+  comparable to CS or TWFE coefficients.
+- Binds when: choosing `base_period`; reading someone else's CS or dCDH event study; deciding
+  whether to overlay estimators on one plot.
+- Implement: `base_period = "universal"` in R's did; `long2` in Stata's csdid (csdid2 already
+  defaults to long differences).
+
 ## Named disagreements the skill carries
 
 - TWFE in practice: Baker et al. and Arkhangelsky-Imbens against routine use; AAFP find it
@@ -198,7 +233,7 @@ AEA Papers and Proceedings 116: 75-80. Key: `wooldridge2026nonlinear`.
 ## Excluded
 
 - de Chaisemartin and D'Haultfoeuille, "Credible Answers to Hard Questions" (SSRN 4487202,
-  384pp): dropped from canon by human decision 2026-07-28. Their coverage here rests on their
+  384pp): dropped from canon by user decision 2026-07-28. Their coverage here rests on their
   published papers as relayed by the surveys, plus the public companion ecosystem:
   github.com/Credible-Answers (did_multiplegt_dyn and relatives), SSC cc_xd_didtextbook,
   anzonyquispe.github.io/did_book solutions in Stata, R, and Python.
@@ -213,12 +248,24 @@ re-checked with bibcheck at manuscript time. Keys: `goodmanbacon2021timing` (dec
 published ReStat 108(4) on 2026-07-17, superseding NBER w29873); `borusyak2024revisiting`
 (imputation, efficiency); `wooldridge2025mundlak` (ETWFE, supersedes the 2021 SSRN WP);
 `santanna2020doubly` (doubly robust); `rambachan2023credible` (honest inference);
-`roth2022pretest` (pretest power); `ghanem2022selection` (selection mechanisms; preprint);
+`roth2022pretest` (pretest power); `ghanem2022selection` (selection mechanisms; preprint;
+promoted to its own entry above 2026-08-26);
 `caetano2024covariates` (covariate TWFE; preprint; the four-author time-varying-covariates paper
 is separate); `harmon2022efficient` (pre-period averaging precision; unpublished WP, R&R
 ReStat); `chen2025efficient` (efficient combination; preprint); `roth2023functional`
 (functional form); `chen2024logs` (zeros and logs); `abadie2023clustering` (clustering);
 `gardner2022twostage` (two-stage; preprint, revised co-authored version circulates).
+
+Added 2026-08-26 from the Mixtape gap analysis (chapters 8, 9, 10), each Crossref-verified on
+that date: `marx2024parallel` (forward-looking choice and PT, JPE: Micro 2(1)); `olden2022triple`
+(the triple-difference parallel-bias assumption, Econometrics Journal 25(3));
+`santanna2026compositional` (compositional changes; published Journal of Econometrics 253,
+article 106147, superseding the 2023 working paper the Mixtape cites); `kahnlang2019promise`
+(explain the level difference before differencing it away; JBES 38(3), online 2019, print issue
+2020); `callaway2024continuous` (continuous treatment, NBER WP 32117; preprint, R package
+contdid); `hong2013napster` (compositional change in repeated cross-sections, the Napster
+exemplar; JAE 28(2)). All six are cited in prose in SKILL.md or details.md and previously had
+no key.
 
 Added 2026-08-26 through the two new canon entries, resolver-verified against Crossref on that
 date: `wooldridge2023simple` (nonlinear DiD with panel data, Econometrics Journal 26(3));
@@ -228,3 +275,28 @@ revised April 2026, preprint, cited by Wooldridge as Deb et al. 2025); `santossi
 `correia2020ppmlhdfe` (ppmlhdfe); `ciani2019multiplicative` (multiplicative DiD and the
 variance-shift diagnostic, J. Econometric Methods 8(1)). Wooldridge 1997 (the QMLE consistency
 result the companion cites) is cited in prose only; it has no entry yet.
+
+## Exemplar rows
+
+The recognition table's canonical cases. New keys were Crossref-verified and merged into causal.bib 2026-08-26. One
+line each, with the design shape the case is the precedent for.
+
+- Miller, Johnson, and Wherry 2021 (`miller2021medicaid`), the never-treated comparison with the
+  full evidence battery, and the model of a complete DiD paper: bite three ways, event studies, a
+  same-outcome-alternative-group falsification, and a mechanism.
+- Braghieri, Levy, and Makarin 2022 (`braghieri2022social`), the staggered rollout across
+  institutions with adoption dates rebuilt from an archive, TheFacebook by way of the Wayback
+  Machine.
+- Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna 2026 (`baker2026did`), forward
+  engineering from estimand to estimator, with the Medicaid application as the working template.
+  Key already resolves in causal.bib, and the paper has its own canon section above.
+- Winkler, Hotz-Behofsits, Wlomert, Papies, and Liaukonyte 2026 (`winkler2026tiktok`), estimand
+  first on a heavy-tailed outcome, the UMG-TikTok withdrawal. Key already resolves in causal.bib,
+  and the paper has its own canon section above.
+- Hong 2013 (`hong2013napster`), compositional change in repeated cross-sections, Napster and
+  music spending in the Consumer Expenditure Survey. Key merged into causal.bib with the Mixtape
+  gap-analysis batch.
+- Gruber 1994 (`gruber1994incidence`), triple differences, and the origin of the design, with the
+  ineligible group sitting inside the same treated states.
+- Card and Krueger 1994 (`card1994minimum`), the idea rather than the inference: the DiD
+  exemplar and the bite figure, but G = 2 with one treated cluster, so not an inference template.

@@ -2,27 +2,30 @@
 
 Heavy reference content the SKILL.md points into. Current as of 2026-08-26.
 
-## Package index (verified 2026-07-28)
+## Package index (verified 2026-07-28; CRAN versions and release dates re-checked 2026-08-26)
 
 | Package | Where | Version seen | Role |
 |---|---|---|---|
-| did | CRAN; bcallaway11.github.io/did | 2.5.1 | Callaway-Sant'Anna att_gt/aggte |
-| HonestDiD | CRAN; github.com/asheshrambachan/HonestDiD | 0.2.8 | Rambachan-Roth, both restrictions; README ships the aggte adapter |
-| didimputation | CRAN; github.com/kylebutts/didimputation | 0.5.1 | BJS imputation |
-| did2s | CRAN | | Gardner two-stage |
-| fixest | CRAN; lrberge.github.io/fixest | 0.14.2 | sunab (Sun-Abraham), TWFE (pinned also in iv's details; update the two pins together on refresh) |
+| did | CRAN; bcallaway11.github.io/did | 2.5.1 (2026-07-08) | Callaway-Sant'Anna att_gt/aggte; aggte types simple, group, calendar, dynamic |
+| HonestDiD | CRAN; github.com/asheshrambachan/HonestDiD | 0.2.8 (2026-04-12) | Rambachan-Roth, both restrictions; README ships the aggte adapter |
+| didimputation | CRAN; github.com/kylebutts/didimputation | 0.5.1 (2026-03-09) | BJS imputation |
+| did2s | CRAN | 1.2.1 (2026-03-05) | Gardner two-stage |
+| DRDID | CRAN; psantanna.com/DRDID | 1.3.0 (2026-06-10) | Sant'Anna-Zhao 2x2 doubly robust building block that did calls; drdid/ipwdid/ordid for a two-period design estimated directly |
+| panelView | CRAN; yiqingxu.org/packages/panelview | 1.3.1 (2026-05-14) | treatment rollout plot, unit by period (Mou, Liu, and Xu 2023); design-stage step 3 |
+| fixest | CRAN; lrberge.github.io/fixest | 0.14.2 (2026-06-26) | sunab (Sun-Abraham), TWFE (pinned also in iv's details; update the two pins together on refresh) |
 | pretrends | GitHub ONLY: github.com/jonathandroth/pretrends | master | pretest power, slope_for_power |
-| staggered | CRAN; github.com/jonathandroth/staggered | 1.2.2 | efficient random-timing estimators |
-| TwoWayFEWeights | CRAN; github.com/Credible-Answers/twowayfeweights | 2.1.0 | dCDH negative-weight diagnostics |
-| bacondecomp | CRAN; github.com/evanjflack/bacondecomp | 0.1.1 | Goodman-Bacon decomposition |
-| etwfe | CRAN; grantmcdermott.com/etwfe | 0.6.2 | Wooldridge extended TWFE, linear and nonlinear (family = "poisson", "logit", "negbin" through fixest::feglm); a nonlinear family forces ivar = NULL and enters cohort and period as explicit dummies (emfx cannot compute SEs with absorbed FEs in nonlinear models); controls on the RHS of fml are demeaned by cohort and the xvar moderator by cohort-by-period cell (source, not docs); nothing unit-level is used, so repeated cross sections run unchanged (run on simulated repeated-cross-section data 2026-08-26, pilot only); emfx returns APEs (predict = "response") or index-scale effects (predict = "link") and compresses to cohort-period cells above 500,000 rows unless compress = FALSE; verified 2026-08-26 |
+| staggered | CRAN; github.com/jonathandroth/staggered | 1.2.2 (2025-01-09) | efficient random-timing estimators |
+| TwoWayFEWeights | CRAN; github.com/Credible-Answers/twowayfeweights | 2.1.0 (2026-05-27) | dCDH negative-weight diagnostics |
+| bacondecomp | CRAN; github.com/evanjflack/bacondecomp | 0.1.1 (2020-01-24) | Goodman-Bacon decomposition; last released 2020 and still the only R implementation |
+| etwfe | CRAN; grantmcdermott.com/etwfe | 0.6.2 (2026-03-23) | Wooldridge extended TWFE, linear and nonlinear (family = "poisson", "logit", "negbin" through fixest::feglm); a nonlinear family forces ivar = NULL and enters cohort and period as explicit dummies (emfx cannot compute SEs with absorbed FEs in nonlinear models); controls on the RHS of fml are demeaned by cohort and the xvar moderator by cohort-by-period cell (source, not docs); nothing unit-level is used, so repeated cross sections run unchanged (run on simulated repeated-cross-section data 2026-08-26, pilot only); emfx returns APEs (predict = "response") or index-scale effects (predict = "link") and compresses to cohort-period cells above 500,000 rows unless compress = FALSE; verified 2026-08-26 |
 | jwdid (Stata) | SSC; github.com/friosavila/stpackages | 2.0 (2024-05-04) | Wooldridge ETWFE; no ivar means repeated cross-section; method(poisson), method(logit), method(ppmlhdfe); covariates demeaned and interacted by default (xasis to disable); verified 2026-08-26 |
 | ppmlhdfe (Stata) | SSC | | PPML with high-dimensional FEs (Correia-Guimarães-Zylkin 2020); R equivalent fixest::fepois |
-| DIDmultiplegt / did_multiplegt_dyn | CRAN/SSC; github.com/Credible-Answers | | dCDH intertemporal, on/off treatments |
-| summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
-| fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
-| clubSandwich | CRAN | 0.7.0 | CR2 vcovCR + Satterthwaite coef_test, the CRAN-resident cross-check |
-| sandwich | CRAN | | vcovBS(type = "jackknife"), a CRAN-resident CV3 route for linear models, no leverage diagnostics |
+| DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. The older DIDmultiplegt (2.1.0, 2026-02-17) is the static estimator and is not the one the skill's reversal rule calls |
+| csdid / csdid2 (Stata) | SSC (Rios-Avila) | | Callaway-Sant'Anna in Stata. csdid defaults to short gaps and needs `long2`; csdid2 defaults to long differences and is faster. Both from the Mixtape ch. 10 code blocks, option names not API-verified here |
+| summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 (r-universe build 2026-08-03; last CRAN release 0.7.2, 2023-08-10) | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
+| fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 (r-universe build 2026-08-01; ahead of the last CRAN release 0.13.0) | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
+| clubSandwich | CRAN | 0.7.0 (2026-05-04) | CR2 vcovCR + Satterthwaite coef_test, the CRAN-resident cross-check |
+| sandwich | CRAN | 3.1-3 (2026-08-03) | vcovBS(type = "jackknife"), a CRAN-resident CV3 route for linear models, no leverage diagnostics |
 
 Never-treated coding by package: did and didimputation use 0 (didimputation also accepts NA);
 staggered uses Inf; sunab treats any cohort value outside the observed periods as never-treated
@@ -36,6 +39,36 @@ mechanically. Recode per package; never recycle blindly.
 Cluster-inference rows verified 2026-07-29. Install the archived pair with
 install.packages(c("summclust", "fwildclusterboot"), repos = "https://s3alfisc.r-universe.dev").
 boottest's fixest method takes feols objects only and disallows weights with fixed effects.
+
+## Exemplar designs: what each one teaches
+
+The recognition table is in SKILL.md; this is the longer read on each row.
+
+- Miller, Johnson, and Wherry (2021), ACA Medicaid expansion and near-elderly mortality. The
+  Mixtape's model of a complete DiD paper: bite shown three ways (eligibility, enrollment, and
+  the share uninsured, the last of which shows some enrollment came from people with no coverage
+  at all), event studies, a same-outcome-alternative-group falsification on the 65-and-over
+  population, main results (0.13pp, 9.3% of the sample mean), and a mechanism. Never-treated
+  comparison states.
+- Braghieri, Levy, and Makarin (2022), the staggered rollout of TheFacebook across colleges and
+  student mental health. The staggered exemplar: treatment dates built from the Wayback Machine
+  (the platform announced each new school on its front page) and linked to an existing
+  repeated-cross-section student survey, with the outcome z-scored so effects read in standard
+  deviations. Also the Mixtape's instance of the multi-estimator plot it argues against.
+- Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna (2026), Medicaid. The build order,
+  forward-engineered from estimand to estimator, with the AEA replication package (materials
+  25430, 25431) as a working R and Stata template.
+- Winkler et al. (2026), UMG's TikTok withdrawal. Estimand first on a heavy-tailed outcome:
+  53,753 matched song pairs, log OLS +0.0063 against PPML -0.0310 on the same panel.
+- Hong (2013), Napster and music spending in the Consumer Expenditure Survey. Compositional
+  change in a repeated cross-section: internet users got older, poorer, and less likely to hold
+  a college degree between 1997 and 2000, and those covariates predict Y(0), so who is sampled
+  breaks parallel trends without anyone being mistreated.
+- Gruber (1994), state-mandated maternity benefits. The origin of triple differences, with the
+  ineligible group (single men aged 20-40 and older workers) inside the same states.
+- Card and Krueger (1994), NJ versus PA fast food. The exemplar of the DiD idea, the bite figure
+  (mass at the new minimum), and primary data the authors collected twice themselves. Not an
+  inference template: at the assignment level it is G = 2 with one treated cluster.
 
 ## Few-clusters map (choose by the homogeneity you believe)
 
@@ -103,6 +136,54 @@ and nominal size, screening pays when |delta_s| / (2 - theta) < delta. Caveat ca
 screened BJS can be more biased than screened regression under linear divergent trends, because
 BJS baselines on the whole pre-period average (short lags worst).
 
+## Selection mechanisms and parallel trends (Ghanem-Sant'Anna-Wüthrich; Marx-Tamer-Tang)
+
+Source: the Mixtape ch. 9 section on treatment assignment mechanisms, which reads
+`ghanem2022selection` and Marx, Tamer, and Tang (2024). The two columns come apart, which is the
+whole point of the table: a mechanism can leave PT intact and still wreck the pre-trend picture.
+
+| Mechanism | Parallel trends | Pre-trends | What to do |
+|---|---|---|---|
+| Common constant trend in Y(0) | cannot be violated, for any assignment rule | clean | nothing; covariates are unnecessary here |
+| Selection on baseline Y(0) (enrolled below a threshold on Y) | holds | broken mechanically, a dip at t = -1, because the baseline is both the selection point and the omitted category | no fix, because no problem. Do not re-base to t = -2: PT held from the original baseline. See the HonestDiD note below |
+| Selection on fixed effects (only certain types enroll) | holds | clean | nothing |
+| Selection on observables | holds conditional on X | clean given X | conditional PT: RA, IPW, or DR |
+| Imperfect foresight about own gains | holds | clean | nothing |
+| Selection on realized gains (Perfect Doctor, essential heterogeneity) | broken | E[Y(0)] diverges before and after, so pre-trends usually show it | DiD is biased by construction; clean pre-trends are no defense. Route out |
+
+HonestDiD interaction, the skill's own judgment and stated in neither source: relative
+magnitudes anchors on the largest pre-treatment violation, so a mechanical baseline dip from
+selection on baseline Y(0) inflates the anchor and the robust interval with it. Prefer
+smoothness there, or recompute the anchor from the pre-treatment periods excluding the selection
+period, and say which. The mirror-image failure is that under selection on realized gains the
+pretest-plus-HonestDiD chain passes a design that is biased by construction.
+
+## Triple differences: assumption and specifications (Olden and Møen 2022; Gruber 1994)
+
+Identifying assumption (parallel bias), with D the treatment level (experimental vs
+non-experimental states) and G the group (eligible vs placebo):
+
+    E[dY(0) | D=1, G=1] - E[dY(0) | D=0, G=1] = E[dY(0) | D=1, G=0] - E[dY(0) | D=0, G=0]
+
+The main DiD equals ATT plus its own non-parallel-trends bias, the placebo-group DiD equals its
+non-parallel-trends bias alone, and subtracting the second from the first leaves the ATT when
+the two biases match. Eight averages and seven subtractions. The placebo DiD is not required to
+be zero; a zero one means the main DiD was already unbiased.
+
+Saturated OLS (Gruber's own form), with tau the post dummy, delta the eligible-group dummy, and
+D the treated-unit dummy:
+
+    Y = a + b2 tau + b3 delta + b4 D + b5 (delta x tau) + b6 (tau x D) + b7 (delta x D)
+        + b8 (delta x tau x D) + e
+
+b8 is the DDD estimate, and only in exactly this saturated specification. Event-study form:
+replace the post dummy with period dummies (t = -1 omitted) throughout, so the regression carries
+group-by-period, unit-by-period, and group-by-unit fixed effects plus the triple interaction with
+each period dummy; the DDD leads and lags are the coefficients on that last set. Cluster at the
+level at which treatment was applied. Present the main DiD event study, the placebo-group event
+study, and the DDD event study together, since the design's claim is that the first two share a
+bias term.
+
 ## Covariate balance: normalized differences
 
 (X-bar_T - X-bar_C) / sqrt((S_T^2 + S_C^2)/2), reported for baseline levels and for pre-period
@@ -117,7 +198,13 @@ if X is strictly exogenous; if treatment can move X, the imbalance may be a trea
   overlap by extrapolation; credibility rests on that extrapolation.
 - IPW: reweight control trends by p(X)/(1-p(X)) so the control covariate distribution matches
   the treated. Noisy as control p(X) approaches 1; trim at 0.995 (package default), keep the
-  trim, use bias correction (Ma-Sasaki-Wang) if trimming more aggressively.
+  trim, use bias correction (Ma-Sasaki-Wang) if trimming more aggressively. Only the control
+  group is weighted, which is why extreme scores matter on that side only. The arithmetic is
+  brutal and hides inside a histogram: p = 0.99991 gives 0.99991/0.00009 = 11,110, and in the
+  Mixtape's CAPS data p = 0.999971 gives 34,481, so one control unit outweighs thousands. Eleven
+  CAPS control municipalities sat above 0.995. Count the near-1 control scores by hand, since
+  a density plot hides them, and check whether your package trims: R's did does, and Stata
+  routines vary.
 - DR: combine; consistent if either model is right, efficient if both are (Sant'Anna-Zhao).
 - Event studies: long differences Y_t - Y_{g-1}; propensity model period-invariant, outcome
   model per-period. Staggered: group-time propensity P(G=g | X, in g or not-yet-treated at t).
@@ -143,7 +230,16 @@ plausible, add the exposure-squared interaction and report both.
 ## Repeated cross-sections and unbalanced panels (Baker et al. 2026)
 
 Unconditional DiD needs only group-time means: repeated cross-sections and unbalanced panels are
-fine with the estimand reinterpreted (ATT among units sampled post). With covariates: if the
+fine with the estimand reinterpreted (ATT among units sampled post), provided missingness is
+independent of Y(0) given X. That is weaker than missing at random (Wooldridge 2010) and it is
+the condition that matters, because PT is a statement about Y(0). When dropout is caused by the
+outcome (churned users, delisted stores, closed accounts, the worker who leaves because earnings
+fell), PT breaks and forcing balance by dropping units does not fix it: reason about the
+mechanism instead. Options once the mechanism is understood are imputation of the missing
+untreated cells (Heckman 1979; Athey et al. 2021; BJS 2024) and the chained DiD of Bellego,
+Benatia, and Dortet-Bernadet (2024), which chains short-run effects across adjacent-period
+overlaps and so discards nothing. Report attrition rates by cohort either way, since
+differential attrition is itself a PT diagnostic. With covariates: if the
 joint distribution of (D, X) is time-invariant, pool across periods for precision; if
 composition may change, do not pool, target ATT(2 | sampled in 2), and run the Sant'Anna-Xu
 Hausman-type comparison. Staggered warning: the Sun-Abraham regression with unit FEs on
@@ -162,6 +258,11 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
 - fixest::sunab equals CS-never numerically on balanced panels; on unbalanced panels the
   equivalence fails (see above).
 - lpdid (local projections DiD) is equivalent to the CS-NYT plug-in (Dube-Girardi-Jorda-Taylor).
+- dCDH weight diagnostics (TwoWayFEWeights) are not a staggered-adoption tool. Any within
+  regression with a time-varying treatment and heterogeneous effects has an implicit weighting
+  problem, so the diagnostic is available to a plain fixed-effects fit on an on/off treatment
+  too, even with no cohorts and no adoption date. The template files it under divergence
+  diagnostics because that is where it usually earns its run, not because staggering is required.
 - Stacked regression (clean-controls stacks) appears in marketing practice and in the AMA
   Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter); its
   implicit variance weights are a known problem (Baker et al.), so prefer Callaway-Sant'Anna

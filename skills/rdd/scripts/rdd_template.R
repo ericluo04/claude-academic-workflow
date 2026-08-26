@@ -16,6 +16,12 @@ d  <- df$takeup              # observed treatment (fuzzy designs only)
 Z  <- as.matrix(df[, c("cov1", "cov2")])   # predetermined covariates
 CUT <- 350                   # the cutoff
 set.seed(94305)
+# Which side of the cutoff does the institutional rule treat? rdrobust treats x >= c, so every
+# hand-written comparison below is `x >= CUT` and never `x > CUT`. Check yours matches before
+# running anything. The Mixtape (Cunningham, Causal Inference: The Remix, ch. 6) writes
+# `df$dui = (df$bac1 > 0.08)` in its R code where its Stata code uses `bac1>=0.08`; this skill
+# fixes the convention here because the strict inequality moves every observation sitting
+# exactly on the cutoff to the control side, and a heaped score puts many of them there.
 
 library(rdrobust); library(rddensity); library(rdlocrand); library(rdpower)
 
@@ -34,10 +40,18 @@ length(unique(x))
 # MSE-optimal bandwidth (bwselect="mserd" default), robust bias-corrected CIs.
 fit <- rdrobust(y, x, c = CUT)
 summary(fit, all = TRUE)          # Conventional + Bias-Corrected + Robust rows
+# The Robust row is NOT the HC-robust standard error from lm() or feols(vcov = "hc1"). It
+# recenters the estimate on the bias-corrected value and widens the interval by the variance of
+# the bias estimate itself. Never describe the two as the same thing in a table note.
 
 # With covariates (precision only; the point estimate should barely move):
 fit_cov <- rdrobust(y, x, c = CUT, covs = Z)
-# With clustering (note the vce requirement in 4.0.0):
+# With clustering (note the vce requirement in 4.0.0). NEVER put the running variable, or any
+# bin or rounding of it, in cluster=: Kolesar and Rothe (2018) show that clustering on the score
+# inflates Type I error. Cluster only on a real sampling or assignment unit (customer, store,
+# market). The Mixtape (ch. 6) records the Lee (2008) and Lee and Card (2008) practice as
+# historical; this skill bans it outright, and when you replicate or referee an older RD, expect
+# to find it and take it out.
 # fit_cl <- rdrobust(y, x, c = CUT, cluster = df$cluster, vce = "cr2")
 # Robustness variants: p = 2, uniform kernel, CE-optimal bandwidth:
 fit_p2 <- rdrobust(y, x, c = CUT, p = 2)
