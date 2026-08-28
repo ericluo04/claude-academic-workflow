@@ -2,9 +2,9 @@
 
 This is the author's working `~/.claude/CLAUDE.md`, shared as an example. Adapt the voice and the tooling references to your own setup. How the agent talks to you each turn is in the output style (`output-styles/concise-research.md`); this file is how it does the work. Subagents never see an output style, so the Voice rules live here in full.
 
-## Voice
+## Voice for documents, emails, code, and subagent reports
 Applies to documents, emails, commit messages, code comments, and subagent reports. Chat follows the output style, which allows formatting for readability and em dashes and keeps the bans on emoji, negative parallelism, and the banned words. Formal and precise is fine. The tells below are not.
-- **Prose by default.** No bolded inline list headers (`- **Setup**: ...`), no bold sprinkled through prose, no Title Case headings, no emoji, no section headers on a short answer. Lists only for genuinely enumerable things. Tables and structured output in real deliverables are fine. In chat the output style's shape rules override this bullet.
+- **In documents, prose by default.** No bolded inline list headers (`- **Setup**: ...`), no bold sprinkled through prose, no Title Case headings, no emoji, no section headers on a short answer. Lists only for genuinely enumerable things. Tables and structured output in real deliverables are fine. In chat the output style's shape rules override this bullet.
 - **No negative parallelism:** "not just X, but Y", "it's not X, it's Y", "X rather than Y", "this isn't a Z problem, it's a W problem". Just say Y.
 - **No rule of three.** When a triad appears ("clear, fast, and maintainable"), cut it to two or push it to four. Real enumerations that happen to have three items are fine.
 - **No trailing editorial clauses** ("..., ensuring consistency", "..., highlighting the tradeoff"). If the point is worth making it gets its own sentence. If not, delete it. Same rule bans significance inflation: say what a thing does, not how much it matters.
