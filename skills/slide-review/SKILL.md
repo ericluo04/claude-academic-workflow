@@ -1,6 +1,6 @@
 ---
 name: slide-review
-description: Render a Quarto reveal.js deck, screenshot every slide in a real browser, and review the pictures for overflow, unreadable type, low contrast, broken figures, failed math, and a weak argument, on a light talk deck or a dark lecture deck, and check that an offline-variant deck still works with no network. TRIGGER on "review my slides", "check my deck", "audit my slides", "pre-talk check", "pre-flight my deck", "am I ready to present", "are my slides readable", "will this deck work offline", "does my math render", "is anything cut off", "did my slides overflow", or before a seminar, job talk, conference talk, or lecture. Works on .qmd or an already-rendered .html; handles light and dark themes. macOS toolchain: quarto, deck-check.mjs on node 22, Playwright MCP, pdfread.py.
+description: Audit a Quarto reveal.js deck that already exists: render it, screenshot every slide in a browser, and report overflow, unreadable type, low contrast, broken figures, failed math, and a weak argument. TRIGGER on "review my slides", "check my deck", "pre-talk check", "am I ready to present", "are my slides readable", "is anything cut off". Authoring a new deck is research-talk or teaching-lecture.
 argument-hint: "[deck.qmd|deck.html] [--preflight] [--type=talk|lecture] [--slides=1-12] [--goal=\"...\"]"
 ---
 
@@ -11,8 +11,8 @@ reviewer subagents that judge from pixels. The predecessor skill read `.tex` sou
 overflow by counting characters, which is how a deck reaches the podium with its last bullets below the
 bottom edge. Nothing here infers layout from source. A browser measures it and the reviewers look at it.
 
-Same loop as `tikz-iterate`: render, rasterize, let an agent with eyes judge the image, report exact
-fixes. This skill reports and does not edit, because a deck revision is the author's call.
+Same loop as `compile-latex --figures`: render, rasterize, let an agent with eyes judge the image,
+report exact fixes. This skill reports and does not edit, because a deck revision is the author's call.
 
 Descends from the `slide-excellence` orchestrator, the `create-lecture` workflow, and its four review
 agents in [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
@@ -546,20 +546,11 @@ pixels could not be read is reported as sent for human review, with the slide nu
 
 Finish with the run directory, the PNG paths, and the agent count.
 
-## Failure taxonomy, the short form
+## Failure taxonomy
 
-The eight commonest rows. The full table is `references/failure-taxonomy.md`.
-
-| Symptom | Response |
-|---|---|
-| `quarto render` non-zero | `RENDER_FAILED:<msg>` from the log, stop. Do not review the previous HTML. |
-| An external `cdn.jsdelivr` MathJax reference | Expected on every default deck. Not a finding, and not a reason to run the offline check. |
-| `deck-check.mjs fit` exit 1 | Working as intended. Every slide it names is a finding; carry its numbers through unaltered. |
-| `stage-check.mjs` exit 1 with `LEAKS AT STEP 0` | Content is visible before the first keypress. CRITICAL. Name every slide it lists; the usual causes are a figure cell, an `.r-stack` base layer, or a top-level `.nonincremental` list. |
-| `stage-check.mjs` exit 1 with `DEAD STEP` or `DEAD STEPS` | A press advances the deck and changes nothing on the wall. CRITICAL. Quote the slide and the press numbers it names. The usual cause is a container div wrapped around content that already stages itself, so the fix is to drop the wrapper or mark it `.together` if the beat was meant. |
-| `browser_navigate` on a `file://` path | Playwright blocks it. Serve over HTTP; there is no workaround. |
-| Page changes under you mid-capture | Another agent grabbed the browser. Abandon the capture and switch to the decktape path; do not retry browser work in parallel. |
-| `Read` fails on a `.pdf` | Expected, there is no poppler. Convert with `pdfread.py png` and read the PNG. |
+Every symptom this skill has met, with the response to each, is the table in
+`references/failure-taxonomy.md`. Read it when a stage exits non-zero or a tool behaves oddly, and
+before reporting a tool failure as a finding.
 
 ## Out of scope
 

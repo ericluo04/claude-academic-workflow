@@ -1,6 +1,6 @@
 ---
 name: course-site
-description: Build and maintain the semester course website that a set of Quarto lecture decks hangs off: the landing page students bookmark, the week table, the site theme, the navbar and school mark, the instructor line, the handout post-render hook, and publishing to GitHub Pages. TRIGGER on "course website", "course site", "syllabus page", "course landing page", "week table", "add week 4 to the site", "link the new deck on the site", "publish the course site", "GitHub Pages for my course", "the site navbar", "logo on my course page", "put my syllabus online", "the site looks wrong on a phone". Use teaching-lecture to write or repair a deck; this skill owns everything around the decks.
+description: Build and maintain the Quarto course website the lecture decks hang off: landing page, week table, site theme, navbar, handout hook, publishing to GitHub Pages. TRIGGER on "course website", "syllabus page", "week table", "add week 4 to the site", "link the new deck on the site", "publish the course site", "GitHub Pages for my course". Writing or repairing a deck is teaching-lecture.
 ---
 
 # Course website
@@ -13,8 +13,8 @@ The boundary with `teaching-lecture` is hard. That skill owns a deck: slide
 staging, the teaching blocks, figures, pacing, the fit gate. This skill owns the
 site: `_quarto.yml`, `index.qmd`, the site theme, the navbar, handout wiring, and
 publishing. `teaching-lecture` carries a short course-website section for the case
-where someone arrives from the deck side; this file is the authority, and where the
-two disagree this one is newer.
+where someone arrives from the deck side. `teaching-lecture/SKILL.md` owns the
+deck-level YAML and this skill owns only the site-level files.
 
 The measured numbers below come from the example course this repo's `examples/`
 lecture was extracted from; the mechanisms are what transfer to yours.

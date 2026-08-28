@@ -1,6 +1,6 @@
 ---
 name: replication-package
-description: Assemble a journal-ready replication archive (code, data, exhibit-to-code map, environment, manifest, README) for a quantitative-marketing paper, scanning for secrets, PII, and absolute local paths before the zip is built. Targets what Marketing Science, Management Science, JMR, and JCR require at acceptance. TRIGGER on "/replication-package", "build a replication package", "data availability statement", "code and data disclosure", "zip up the code and data for submission", a pasted data-editor email asking what to send, or any "gather everything a replicator would need into one archive" request. Assembles the archive; does not re-run the code.
+description: Assemble a journal-ready replication archive for a quantitative-marketing paper, scanning for secrets, PII, and absolute local paths before the zip is built. TRIGGER on "/replication-package", "build a replication package", "data availability statement", "zip up the code and data for submission", a data-editor email asking what to send, or any "gather everything a replicator would need" request.
 ---
 
 # Replication package

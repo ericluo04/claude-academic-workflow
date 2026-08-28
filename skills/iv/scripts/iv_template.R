@@ -47,7 +47,7 @@ m <- ivmodel(Y = df$y, D = df$d, Z = df[, c("z"), drop = FALSE],
              X = df[, c("x1", "x2")])
 # Heteroskedastic / clustered variants: ivmodel(..., heteroSE = TRUE) or
 # ivmodel(..., clusterID = df$cl). Single endogenous regressor only.
-# With few clusters the F and chi2 versions of AR can diverge; check both (references/details.md).
+# With few clusters the F and chi2 versions of AR can diverge; check both (../references/details.md).
 AR.test(m)     # $ci is a matrix of interval rows: possibly a union, possibly unbounded.
 CLR(m)         # coincides with AR when just-identified; the overidentified default test.
 # An unbounded AR set is the design's verdict (identification not established at 95%),
@@ -61,7 +61,7 @@ g <- ivDiag(data = df, Y = "y", D = "d", Z = "z",
 g$F_stat   # F.standard / F.robust / F.cluster / F.bootstrap / F.effective
 g$AR       # AR test + inversion CI
 g$tF       # Lee et al. (2022) tF on the effective F, for the referee who asks
-# Read F.robust against the Keane-Neal ladder (references/details.md): 50 certifies ~29,
+# Read F.robust against the Keane-Neal ladder (../references/details.md): 50 certifies ~29,
 # 10 certifies only 2.3. Below 3.84, stop: do not run IV.
 # OLS-proximity audit: if the 2SLS estimate is near OLS, F is in the 10-50 band, and only
 # the t-test is significant, treat significance as suspect until AR confirms.
@@ -119,7 +119,7 @@ summary(fit, diagnostics = TRUE)   # Weak instruments, Wu-Hausman, Sargan rows
 # form Gd with G = H - diag(H_ii/(M_ii - H_ii))(M - H), and tr(G) = 0 is the unbiasedness
 # condition. 2SLS carries a bias that scales in K and points at OLS. JIVE1 carries a
 # many-covariate bias that scales in L. UJIVE removes both. Trace algebra and the paper's
-# empirical numbers are in references/details.md.
+# empirical numbers are in ../references/details.md.
 library(ManyIV)   # remotes::install_github("kolesarm/ManyIV"), the paper's own package
 # API verified against the source at commit 0b82852 (2025-06-17) and run on the package's
 # own fhl data on 2026-08-04:
@@ -338,7 +338,7 @@ lapply(runs, range)                       # the RI 95% set, a union printed as a
 # When the policy question is a rollout or an incentive change, the target is a PRTE, not the
 # LATE: bound a generalized LATE extrapolated alpha beyond the complier interval, anchored by
 # the IV-like estimands under stated MTR restrictions (Mogstad-Santos-Torgovitsky 2018,
-# implemented by ivmte; see references/details.md for the package row).
+# implemented by ivmte; see ../references/details.md for the package row).
 # SOLVER TRAP: ivmte needs one of gurobi / cplexAPI / Rmosek / lpSolveAPI. The only fully
 # free solver (lpSolveAPI) is roughly an order of magnitude slower and cannot run the
 # regression-based direct criterion (a QCQP; Gurobi or MOSEK only), so this section always

@@ -37,7 +37,7 @@ The email and the website go on their own lines as live links, the email
 opening a compose window and the site opening the page. The example theme sets
 both in its mono face; yours styles `.thanks-contact` however it likes.
 
-The heading is empty on purpose and all three classes are load-bearing.
+The heading is empty on purpose and all three classes are key.
 
 | class | what it does |
 |---|---|

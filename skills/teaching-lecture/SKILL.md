@@ -1,6 +1,6 @@
 ---
 name: teaching-lecture
-description: Author Quarto reveal.js lecture decks for a classroom, built for engagement: incremental reveals, animation, discussion prompts, checks for understanding, worked examples. Teaching blocks, staged reveals, and figures sized for a projector. TRIGGER on "build a lecture", "slides for my class", "teaching deck", "lecture on X", "course slides", "class on AI", "make a lecture for week 3", "MBA lecture", "undergrad lecture", "add a discussion slide". Use research-talk for a conference, seminar, or job talk, slide-review to audit a deck that already exists, and course-site for the landing page, the week table, and publishing.
+description: Author a Quarto reveal.js lecture deck for a class meeting. TRIGGER on "build a lecture", "slides for my class", "teaching deck", "lecture on X", "course slides", "make a lecture for week 3", "add a discussion slide". Conference and seminar decks are research-talk, the site around the decks is course-site, auditing an existing deck is slide-review.
 ---
 
 # Teaching lecture decks

@@ -1,7 +1,7 @@
 ---
 name: bibcheck
-description: Audit an existing .bib file entry by entry against canonical metadata (Crossref, OpenAlex, arXiv, Zotero) to catch silent citation errors that pass spell-check and kill peer review, including wrong years, mis-cited authors, wrong journal or volume, swapped title-author pairs, dead DOIs, and hallucinated entries from LLM-assisted drafting. TRIGGER on "/bibcheck", "audit my .bib", "verify my references", "check my bibliography", "are any of these citations fake", "did Claude hallucinate a citation", "pre-submission bib audit", or before shipping a manuscript or R&R to Marketing Science, JMR, JCR, or Management Science. Read-only: writes a report and a separate corrected.bib, never touches the source.
-allowed-tools: Read, Write, Glob, Grep, Bash, Task, Agent, Monitor, WebFetch, mcp__zotero__zotero_search_items, mcp__zotero__zotero_get_item_metadata
+description: Audit an existing .bib entry by entry against Crossref, OpenAlex, arXiv, and Zotero for wrong years, mis-cited authors, wrong venue or volume, dead DOIs, and hallucinated entries. TRIGGER on "/bibcheck", "audit my .bib", "verify my references", "check my bibliography", "are any of these citations fake", "did Claude hallucinate a citation", or a pre-submission bib audit.
+allowed-tools: Read, Write, Glob, Grep, Bash, Agent, Monitor, WebFetch, mcp__zotero__zotero_search_items, mcp__zotero__zotero_get_item_metadata
 ---
 
 # bibcheck

@@ -1,6 +1,6 @@
 ---
 name: tikz-reviewer
-description: Adversarial visual critic for a rendered TikZ diagram. Looks at the actual PNG and reports overlaps, geometric errors, and spacing failures, each backed by explicit arithmetic, then returns either APPROVED or a numbered list of exact search-and-replace fixes. Use after writing or editing TikZ in a paper or Beamer deck, or as the review step inside the tikz-iterate loop. Call it repeatedly until it approves.
+description: Adversarial visual critic for a rendered TikZ diagram. Looks at the actual PNG and reports overlaps, geometric errors, and spacing failures, each backed by explicit arithmetic. Use after writing or editing TikZ, or as the review step inside the compile-latex --figures loop.
 tools: Read, Bash, Glob, Grep
 model: inherit
 ---

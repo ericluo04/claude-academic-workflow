@@ -1,6 +1,6 @@
 ---
 name: referee-response
-description: Draft an R&R response letter to a journal decision, sectioned by role (Senior Editor, Associate Editor, Reviewer 1, Reviewer 2), where every claimed change is located and read in the actual manuscript before a location pin is written, and anything unverifiable becomes a TODO instead of a claim. TRIGGER on "respond to the referees", "draft the R&R response", "write the R2R", "address the reviewer comments", "respond to the AE", "continue the R2R", or when the user pastes reviewer comments, forwards a decision email, or points at a decision-letter PDF. Also owns checking a finished response letter before resubmission ("check the R2R letter before we resubmit"). Writes <project>/R2R_R<n>.tex and never edits the manuscript.
+description: Draft an R&R response letter to a journal decision, sectioned by Senior Editor, Associate Editor, and each reviewer, and check a finished letter before resubmission. TRIGGER on "respond to the referees", "draft the R&R response", "write the R2R", "address the reviewer comments", "respond to the AE", "continue the R2R", "check the R2R letter", or when the user pastes reviewer comments or a decision letter.
 ---
 
 # Referee response letter

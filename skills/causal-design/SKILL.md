@@ -1,16 +1,17 @@
 ---
 name: causal-design
-description: Triage any causal question to the identification strategy the data can support, then hand off to the owning method skill; owns the selection-on-observables branch (overlap, doubly robust estimation, double ML, causal forests, policy learning, sensitivity analysis) and the inference rules shared across designs. Produces the design recommendation with the assumption that licenses it, the estimand and its subpopulation, R estimation code for the observables branch, and a drafted taxonomy paragraph. TRIGGER on "causal inference", "identification strategy", "which method", "research design", "endogeneity", "quasi-experiment", "natural experiment", "observational study", "selection on observables", "unconfoundedness", "conditional ignorability", "matching", "propensity score", "doubly robust", "AIPW", "double machine learning", "DML", "causal forest", "CATE", "policy learning", "targeting", "sensitivity analysis", "omitted variable bias", "Oster bounds", "coefficient stability", "overlap", "trimming", "panel fixed effects", "within estimator", "strict exogeneity", "marketplace experiment", "surrogate index", "mediation", "mediation analysis", "indirect effect", "conjoint", "AMCE", or any "how do I estimate the effect of X on Y" question with no design chosen yet. Once a design is chosen, the method skills own it: field-experiment, did, synthetic-control, rdd, iv, causal-unstructured, sae, sae-image, conjoint, steering.
+description: Triage a causal question to the identification strategy the data can support, then hand off to the owning method skill. Owns the selection-on-observables branch (overlap, doubly robust estimation, double ML, causal forests, policy learning, sensitivity analysis), plain panel fixed effects, and the inference rules shared across designs (clustering, multiplicity, interference routing). TRIGGER on "identification strategy", "which causal method", "research design", "endogeneity", "quasi-experiment", "natural experiment", "selection on observables", "unconfoundedness", "propensity score", "doubly robust", "double machine learning", "causal forest", "policy learning", "sensitivity analysis", "Oster bounds", "overlap", "panel fixed effects", "strict exogeneity", "surrogate index", "mediation", or "how do I estimate the effect of X on Y" with no design chosen yet. Once a design is named, its method skill owns it.
 ---
 
 # Causal design triage
 
-The router of the family, grounded in a read canon of three user-picked reviews
-(references/canon.md, current as of 2026-07-28): Imbens (2024) supplies the assumption axis
+The router of the family, grounded in a read canon of four sources
+(references/canon.md, current as of 2026-08-05): Imbens (2024) supplies the assumption axis
 (what licenses identification), Li, Luo, and Pattabhiramaiah (2024, hereafter AMA) the
 marketing data-shape axis (how many treated units, how many pre-periods, how rich the
-covariates), and Feder et al. (2022) the text-role axis (which role unstructured data plays
-in the graph). The deliverable is a design
+covariates), Feder et al. (2022) the text-role axis (which role unstructured data plays
+in the graph), and Abadie, Athey, Imbens, and Wooldridge (2023) the clustering rules the
+family shares. The deliverable is a design
 recommendation carrying four things: the assumption that licenses it, the estimand it
 actually identifies WITH its subpopulation named, the handoff to the owning skill, and, for
 the one branch no method skill owns (selection on observables), estimation code and a methods
@@ -18,9 +19,8 @@ paragraph. Marketing's framing throughout: randomization is the gold standard, a
 quasi-experimental work substitutes statistical rigor for design rigor (AMA); a design that
 fails its gate is a verdict, not an obstacle.
 
-Refresh path: the panel-methods corner moves fastest. To update, run the litreview skill on
-quasi-experimental methods in marketing since the canon date and fold results into
-references/canon.md as flagged addenda.
+Refresh path: run litreview on quasi-experimental methods in marketing since the canon date,
+then propose additions to references/canon.md as flagged addenda.
 
 ## The triage: four questions in order
 
@@ -69,10 +69,11 @@ references/canon.md as flagged addenda.
      identification rests on distributional assumptions that need their own defense.
 4. Does unstructured data (text, image, audio, video) appear anywhere in the graph, and in
    which role: confounder, outcome, treatment, or machine-coded measurement?
-   causal-unstructured, with the role warnings below. Unknown-concept discovery and
-   model-internals measurement: sae. Steering a model's internals (steered stimuli,
-   steered model-respondents, dose-response manipulations) is instrument practice owned by
-   steering; the design around it still routes through the questions above.
+   The role warnings below apply, and the measurement it rests on is settled before the
+   estimate, not after. Discovering an unknown concept, or measuring one from a model's
+   internals, is a measurement problem with its own validity argument. Intervening on a
+   model's internals to build stimuli or model-respondents is instrument practice, and the
+   design around it still routes through the questions above.
 
 ## The panel branch: routing by data shape
 
@@ -127,17 +128,9 @@ comparisons exist. The design needs within-unit variation in D and identifies no
 time-invariant covariate's effect (the Mixtape's Table 8.3 shows the column of exact zeros
 with (.) standard errors).
 
-The Mixtape (Cunningham, Causal Inference: The Remix, panel-data chapter) presents columns 3
-and 4 of its Table 8.2, from Cornwell and Rupert (1997), which add job tenure and then
-quadratics in years married and walk the marriage premium from the column 1 FGLS 0.083 to
-0.033, as evidence about time-varying unobserved heterogeneity; under this skill's rule
-those columns are inadmissible, because years married and job tenure are plausibly
-consequences of marriage, so they condition on descendants of the treatment, which is
-verbatim the error Imbens (2024) calls the most common one. The chapter assumes constant
-effects and declares that scope. A non-absorbing time-varying treatment with heterogeneous
-effects has left it, the implicit weighting is live, and the dCDH weight diagnostic in did
-applies. Random effects, Mundlak-Chamberlain devices, and dynamic panel estimators stay out,
-and Wooldridge (2010) is the shelf for them.
+Do not add controls that are consequences of the treatment, which is what makes columns 3 and 4
+of the Mixtape's Table 8.2 inadmissible here (references/details.md for the argument, the
+constant-effects scope it assumes, and the estimators that stay out).
 
 ```r
 library(fixest)                     # panel: one row per unit-period, unit = the panel id
@@ -187,90 +180,15 @@ etable(pols, within)                # side by side: the gap is the unit effects 
 
 ## Rules shared across every design
 
-- Estimand first, subpopulation named: IV and fuzzy RDD identify complier effects; DiD and
-  SC identify the ATT of the treated units; overlap weighting identifies the overlap
-  population. The methods template forces the clause.
-- Clustering is a design property, not a data property (Abadie, Athey, Imbens, and Wooldridge
-  2023): cluster standard errors at the level at which treatment was assigned or the sample was
-  drawn, and be able to say which; do not cluster by habit at whatever level makes the panel.
-  The decision "depends on the nature of the sampling and the assignment processes only, and
-  not on the presence of within-cluster error components in the outcome variable," so
-  within-cluster outcome correlation is not a reason to cluster and the size of the change in
-  your standard error is not evidence you needed it. Both errors are live and they are not
-  symmetric. Robust standard errors can be ANTI-conservative, severely so when clusters explain
-  much of the heterogeneity in treatment effects or potential outcomes. Clustered standard
-  errors are always conservative and never anti-conservative, but the conservativeness scales
-  with average sampled cluster size, so clustering "just in case" is not free. Under random
-  sampling with unit-level random assignment, do not cluster at all; under clustered
-  assignment, cluster at the assignment level; when the sampled clusters are a small fraction
-  of the population, or few units are sampled per cluster, the choice stops mattering.
-  One half of this decision is untestable and the skill states it rather than estimating it:
-  the sample "is not informative" about what fraction of clusters was sampled, so "information
-  about the need to adjust for clustered sampling must come from outside the sample," while the
-  sample IS informative about clustered assignment. The Mixtape's rationale for clustering
-  by panel unit, "to allow for correlation in the eps_it's for the same person i over time,"
-  is the one reason AAIW rule out, and the answer often coincides only because panel units
-  in a survey are genuinely the sampling clusters. Say which of the two you are invoking.
-  Two further facts to carry. Robust standard errors are conservative rather than exact when
-  the sample is a large share of the population and effects are heterogeneous (the Neyman
-  finite-sample correction; `abadie2020sampling` buys the precision back if unit attributes
-  predict the treatment effect). And for partially clustered assignment with large clusters,
-  their CCV and TSCB estimators sit between robust and clustered and can be considerably
-  smaller than conventional cluster standard errors; neither applies under perfectly clustered
-  assignment, and this family ships no implementation of either. Scope: linear estimators only
-  (least squares and fixed effects). Once the level is chosen, few-cluster inference is a
-  separate problem with its own answer (MacKinnon, Nielsen, and Webb 2023; the map is in did).
-- Multiplicity, staged by what a false positive costs. One correction applied at every stage is
-  wrong in both directions at once, so match the procedure to what the output is. SCREENING,
-  where the output is a candidate list something downstream will re-test: FDR, at q = .10 and
-  not .05, since a false positive costs one wasted follow-up. Benjamini-Hochberg is the
-  default and holds under positive regression dependence; the Benjamini-Krieger-Yekutieli
-  two-stage sharpened q-values that Anderson (2008) made the applied convention recover power
-  by estimating the null proportion instead of fixing it at 1, at the price of an
-  independence-flavoured guarantee and less stability. So BKY suits a screen over
-  machine-generated candidates and BH suits estimates that share respondents; the choice is
-  design-dependent, and say which you took and why. CONFIRMATORY, where each hypothesis is
-  named and defended: FWER by a resampling method that bootstraps the actual dependence among
-  the test statistics (Romano-Wolf stepdown, Westfall-Young maxT), uniformly at least as
-  powerful as Holm and equal to it only under independence. Where resampling is impractical,
-  Holm. Never plain Bonferroni: Holm step-down dominates it at zero cost under no extra
-  assumptions, so Bonferroni is never the right answer to a question Holm also answers. ACROSS
-  STAGES of a staged design: fixed-sequence gatekeeping. Preregister the order, test each
-  stage's primary hypothesis at full alpha, stop at the first failure. It costs no alpha, and
-  the price accepted in advance is that nothing downstream of a failed gate is confirmatory.
-  Worked instantiations: sae (screens over a latent dictionary), field-experiment (subgroups
-  and multiple outcomes), conjoint (AMCE families).
-- Interference routing, by structure (designs, estimators, and diagnostics live in
-  field-experiment): clustered interference routes to two-stage randomization (Hudgens
-  and Halloran 2008, Crepon et al. 2013); network interference to exposure mappings
-  (Aronow and Samii 2017) with exact tests (Athey, Eckles, and Imbens 2018); marketplaces
-  and two-sided platforms to multiple randomization designs (Bajari et al. 2023, Johari
-  et al. 2022).
-- Combined experimental and observational data: the surrogate index for long-run outcomes
-  (retention, LTV) from short experiments, valid only when all causal paths from treatment
-  to the long-run outcome pass through the surrogates (Athey, Chetty, Imbens, and Kang
-  2026). The family ships no estimation template for the surrogate index; Athey, Chetty,
-  Imbens, and Kang's own empirical implementation is the recipe to follow, and the
-  router's deliverable stops at the validity argument.
-- Text-role warnings at handoff (Feder): as confounder, ignorability over text aspects is
-  untestable, argue it from domain knowledge, and audit positivity (a representation that
-  nearly encodes the treatment leaves no counterfactual); as outcome or discovered
-  treatment, never train the measurement function on the estimation sample (split-sample,
-  via Egami; the authoritative rule lives in causal-unstructured); as treatment,
-  disentangle the named aspect from correlated aspects, and random assignment of texts
-  leaves reader-side confounding. Any machine-coded variable in any design gets the PPI
-  rectifier logic before it enters a regression (causal-unstructured). One revision the
-  family makes to Feder: his supervised text-as-confounder route (fine-tuned causally
-  sufficient embeddings, Veitch 2020) is superseded; the GPI results say never fit the
-  inference-time propensity on a representation learned with a treatment-prediction loss
-  (on GPI's own simulation evidence; causal-unstructured carries the dispute and owns the
-  replacement).
-- Mediation (process evidence, treatment affecting the outcome through a mediator, natural
-  direct and indirect effects) has NO route in this family: sequential ignorability is an
-  assumption regime none of the family's skills carries. Where to go: Imai, Keele, and
-  Tingley (2010) for identification and sensitivity analysis, Pieters (2017) for the
-  marketing-native statement of what a mediation claim requires. causal-unstructured's
-  note that Fong-Grimmer treatment discovery is not mediation remains authoritative there.
+- Estimand first, with the subpopulation named: complier, ATT, or overlap population.
+- Cluster where treatment was assigned or the sample was drawn, and say which of the two.
+- Multiplicity staged by cost: FDR to screen, resampling FWER to confirm, gatekeeping by stage.
+- Interference routes to field-experiment by structure: clustered, network, or marketplace.
+- Surrogate index for long-run outcomes, valid only if every causal path runs through it.
+- Text-role warnings at handoff (Feder). Machine-coded variables get PPI first.
+- Mediation has no route here. Sequential ignorability is a regime no skill carries.
+
+Full argument: references/shared-rules.md.
 
 ## Implementation
 
@@ -309,11 +227,13 @@ Every claim traces to references/canon.md; keys live in references/causal.bib.
 - rdd: thresholds on running variables; the design gate and falsification battery.
 - iv: instruments, shift-share, formula instruments, leniency and examiner designs;
   weak-instrument inference.
-- causal-unstructured: any text/image/audio/video role in the graph; PPI for machine-coded
-  variables; GPI for internal-state adjustment; the split-sample rule.
-- sae: unknown-concept discovery in text; model-internals measurement instruments.
-- steering: activation-steering practice for steered stimuli and model-respondents
-  (instrument choice, strength calibration, damage audits); the surrounding design stays
-  with the owning method skill.
+- Any text, image, audio, or video role in the graph carries a measurement design of its own:
+  a prediction-powered correction for machine-coded variables, an internal-state adjustment
+  where the confounder is latent, and the split-sample rule throughout.
+- Unknown-concept discovery and model-internals measurement are instruments, and their
+  validity is argued before they enter a design.
+- Activation steering for stimuli and model-respondents (instrument choice, strength
+  calibration, damage audits) is instrument practice; the surrounding design stays with the
+  owning method skill.
 - preregister: pre-analysis plans once the design is chosen (experiment-first skill;
   quasi-experimental and measurement PAPs adapt its structure).

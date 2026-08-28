@@ -298,7 +298,7 @@ QME 5(3): 313-331. Key: `sonnier2007heterogeneity`.
 
 ## Primary papers cited through the canon
 
-Already in the shared bib and load-bearing here: `hainmueller2014causal`,
+Already in the shared bib and key here: `hainmueller2014causal`,
 `hainmueller2015validating`, `bansak2021conjoint`, `bansak2018number`, `bansak2021beyond`,
 `leeper2020measuring`, `egami2019causal`, `delacuesta2022improving`, `abramson2022what`,
 `bansak2023using`, `clayton2026correcting`, `liu2023multiple`, `netzer2008beyond`,
@@ -310,7 +310,7 @@ New to the bib with the Egami-Imai addendum, cited through it and NOT read: `pos
 FindIt's screening option and named in the paper as a method that lacks the invariance).
 
 Flagged-unread neighbors (NOT canon; addendum candidates needing user approval before any
-load-bearing citation): Ganter 2023 (direct-preference
+key citation): Ganter 2023 (direct-preference
 estimand); Ham-Imai-Janson 2022 (the CRT carryover test's own paper); Dafoe-Zhang-Caughey
 2018 (information equivalence / masking formalized); Horiuchi-Markovich-Yamamoto (social
 desirability); Goplerud-Imai-Pashley 2022 (heterogeneity); Train-Weeks 2005 (econ-side WTP

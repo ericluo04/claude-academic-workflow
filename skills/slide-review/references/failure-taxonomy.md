@@ -1,7 +1,7 @@
 # Failure taxonomy, the full table
 
-Every symptom this skill has met and the response to each. The eight commonest rows are inline in
-SKILL.md; this is the complete set.
+Every symptom this skill has met and the response to each. SKILL.md points here instead of carrying
+a short form of the table.
 
 | Symptom | Response |
 |---|---|

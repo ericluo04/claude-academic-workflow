@@ -1,20 +1,18 @@
 ---
 name: did
-description: Design, estimate, validate, and write up a difference-in-differences analysis of a natural experiment, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "difference-in-differences", "diff-in-diff", "DiD", "TWFE", "two-way fixed effects", "event study", "staggered adoption", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "HonestDiD", "triple differences", "PPML", "Poisson DiD", "heavy-tailed outcome", "log outcome", "nonlinear DiD", "binary outcome", or any panel/repeated-cross-section setting where some units become treated over time (policy rollout, staggered feature launch, state law changes). For a single treated unit or when pre-trends visibly fail, see the synthetic-control handoff inside. Design triage across methods belongs to causal-design.
+description: Design, estimate, validate, and write up a difference-in-differences analysis, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. TRIGGER on "difference-in-differences", "DiD", "TWFE", "event study", "staggered adoption", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "HonestDiD", "triple differences", "Poisson DiD", "nonlinear DiD", or any panel or repeated-cross-section setting where units become treated over time (policy rollout, staggered feature launch, state law changes). One or a few treated aggregate units: synthetic-control. No design chosen yet: causal-design.
 ---
 
 # Difference-in-differences
 
 An opinionated DiD workflow grounded in a read canon (references/canon.md, current as of
-2026-08-26). The deliverable is threefold: the specification decision with the citation that
-justifies it, the estimation and diagnostics code in R (Stata on request), and a methods
-paragraph with citations placed and the limitation stated in first person at the point of the
-choice. Where the literature is unsettled the skill names a default and the condition that moves
-you off it, and where the canon genuinely disagrees it says so instead of faking consensus.
+2026-08-26). Deliverable: the recommendation with its citation, the R estimation and diagnostics
+code, and a methods paragraph. Where the literature is unsettled the skill names a default and
+the condition that moves you off it, and where the canon genuinely disagrees it says so instead
+of faking consensus.
 
-Refresh path: this literature moved fast in 2018-2024 and is still moving. To update, run the
-litreview skill on "difference-in-differences" since the canon date and fold results into
-references/canon.md as flagged addenda.
+Refresh path: run litreview on "difference-in-differences" since the canon date, then propose
+additions to references/canon.md as flagged addenda.
 
 ## Exemplar designs
 
@@ -419,19 +417,14 @@ for the APEs). Stata: jwdid with `method(poisson)` or `method(logit)`.
 
 ## Inference
 
-Cluster at the level at which treatment is independently assigned (state policies: state). This
-is the design-based rule (`rambachan2025design`, the DiD instance of
-`abadie2023clustering`),
-and group fixed effects do not get you out of it: adding them "allows for group-specific linear
-trends in the underlying potential outcomes series but does not change the answer to the
-question whether one needs to adjust for clustering" (AAIW, on the common-timing case, which
-reduces to a cross-sectional regression of the change in unit-level average outcomes),
-and it also answers "what is the superpopulation" when the sample is the population. With few
-treated clusters, no method is assumption-free: the map in references/details.md lists each
-option with the homogeneity assumption it needs, which is the selection criterion (Roth et al.
-2023). The honest fallbacks are folding the cluster shock into the HonestDiD violation bound, or
-a cluster-level Fisher randomization test, exact under the sharp null when timing is as good as
-random.
+Cluster at the level at which treatment is independently assigned (state policies: state), the
+design-based rule (`rambachan2025design`, the DiD instance of `abadie2023clustering`), and group
+fixed effects do not get you out of it. With few treated clusters no method is assumption-free:
+the map in references/details.md lists each option with the homogeneity assumption it needs,
+which is the selection criterion (Roth et al. 2023). The honest fallbacks are folding the
+cluster shock into the HonestDiD violation bound, or a cluster-level Fisher randomization test,
+exact under the sharp null when timing is as good as random.
+Full argument: ../causal-design/references/shared-rules.md.
 
 Two Mixtape rules to disarm. Chapter 9 reads Card and Krueger's two-state minimum wage design off
 a t-statistic of about 2 and calls it significant; at the assignment level that is G = 2 with one
@@ -621,7 +614,7 @@ Adapt, keeping the first-person limitation at the point of the choice:
 > [level], the level at which treatment is independently assigned (Roth et al. 2023).
 
 Every claim in the paragraph must trace to a canon entry; references/canon.md maps claims to
-papers and BibTeX keys in the shared causal-design/references/causal.bib. Verify any primary
+papers and BibTeX keys in the shared ../causal-design/references/causal.bib. Verify any primary
 paper cited beyond the canon with bibcheck before submission.
 
 ## Handoffs

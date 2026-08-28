@@ -1,19 +1,13 @@
 # Reviewer prompts
 
 The four lens prompts stage 6 sends, the paragraph on settled decisions that precedes them, and the
-contract every reviewer returns. The density calibration and the settled decisions these prompts
-encode are `style/house.md`; the paragraph below is the version reviewers receive.
+contract every reviewer returns. The density calibration is in `style/house.md`.
 
 ## Settled decisions, said in every prompt
 
-Some of the design is settled, and a reviewer proposing a change to any of it has produced a false
-finding. Say so in the prompt. Assertion titles are mandated on content slides: the author's Beamer
-deck lacked them only because Beamer made them awkward, and the current direction is the one they
-want. The numbered section discs and the segmented bottom progress bar are the design as intended.
-The appendix and the references sit outside the bar with the fill full through both, on purpose.
-Theorem environments and speaker notes are wanted and the author plans to use more of them, so no
-reviewer asks whether a `.proposition` block or a `::: {.notes}` block belongs in the deck; a finding
-about one is a finding about its content or its legibility.
+The list is the "Settled design decisions" section of `style/house.md`. Open it and put those
+decisions at the top of every lens prompt below, in prose, with the standing rule that a reviewer
+proposing a change to any of them has produced a false finding.
 
 ## Layout
 

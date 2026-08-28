@@ -1,6 +1,6 @@
 ---
 name: compile-latex
-description: Compile a .tex with latexmk, auto-detecting the engine (pdflatex/xelatex/lualatex) and bib backend (biber/bibtex), then emit a ranked error report with accurate file:line attribution across \input'd files, plus a diff against the last compile. Guards against Dropbox conflicted-copy files in Overleaf projects. TRIGGER on "compile this", "build my paper", "build the beamer deck", "why won't this compile", "what are the latex errors", "did my edit add warnings", or any request to build or debug a LaTeX document; Quarto .qmd decks belong to research-talk and teaching-lecture. An opt-in --figures pass hands TikZ/pgfplots blocks to the tikz-iterate skill.
+description: Compile a .tex with latexmk and report ranked errors with file:line attribution across \input'd files, plus a diff against the last compile. TRIGGER on "compile this", "build my paper", "build the beamer deck", "why won't this compile", "what are the latex errors", "did my edit add warnings", or any request to build or debug a LaTeX document. TRIGGER also on polishing or debugging a TikZ or pgfplots figure whose labels overlap or that "looks wrong" (the --figures loop). Quarto .qmd decks belong to research-talk and teaching-lecture.
 ---
 
 # compile-latex
@@ -23,7 +23,10 @@ Read it before steps 3 through 5. Diff-vs-last-compile is adapted from
 | `--engine=` | `auto` | Force `pdflatex` / `xelatex` / `lualatex`. |
 | `--outdir=` | `build` | Aux directory (`latexmk -outdir`). |
 | `--box-threshold=` | `5pt` | Overfull reporting gate. |
-| `--figures` | off | Opt-in: polish TikZ/pgfplots figures via `tikz-iterate`, then splice back. |
+| `--figures` | off | Opt-in: run the step-6 review loop on every TikZ/pgfplots figure, then splice back. |
+| `--max-iter=` | 5 | Rounds per figure in the `--figures` loop. |
+| `--goal=` | from caption | What a figure should communicate. Passed to the reviewer verbatim. |
+| `--output=` | `$RUN/final.tex` | Where an approved standalone figure lands when there is no master to splice into. |
 | `--no-bib` | off | Skip the bib run (`-bibtex-`). |
 | `--force` | off | Compile even if a conflicted copy is present. |
 | `--clean` / `--clean-all` | off | `latexmk -c` / `-C`, then stop. |
@@ -35,6 +38,12 @@ otherwise `Glob` `~/Library/CloudStorage/Dropbox*/Apps/Overleaf/*/**/<name>.tex`
 project name was mentioned, filter to that project directory; otherwise `Glob`
 `*.tex` in the cwd and pick the one with `\documentclass`. Ask only if that
 leaves zero or several plausible masters.
+
+A `.tikz` path, or an inline TikZ block pasted into the request, has no master to
+compile. Take it as `--figures` on that one block: skip steps 1 through 5 and go
+to step 6 with the block as the single unit, wrapped as step 6 describes. There
+is nothing to splice back, so the approved source goes to `--output` (default
+`$RUN/final.tex`) and the path is reported.
 
 ## Step 0, pre-flight
 
@@ -131,34 +140,141 @@ note `first compile (no baseline)` and just write. Schema in §8.
 ## Step 6, figures (opt-in, `--figures` only)
 
 Runs only under `--figures`, and only when the build was clean and figures
-exist.
+exist. Extract, compile, render, review, apply, repeat, until the `tikz-reviewer`
+agent answers `APPROVED` or `--max-iter` rounds are gone. The agent does the
+visual judgment and it judges from pixels, never from reading source. Loop
+concept borrowed from Scott Cunningham's `/tikz` collision audit in
+[MixtapeTools](https://github.com/scunning1975/MixtapeTools).
 
-1. `Grep` the master and its `\input`'d files for `\begin{tikzpicture}` and
-   pgfplots `\begin{axis}` / `\begin{groupplot}` blocks (§7). Treat the
-   outermost `tikzpicture` as the unit.
-2. For each block, record the file, the exact body text, and `sha1(body)`.
-   Harvest the parent preamble's `\usepackage` / `\usetikzlibrary` /
-   `\usepgfplotslibrary` / `\pgfplotsset` / `\definecolor` / `\colorlet` /
-   `\newcommand` / `\def` / `\tikzset` lines into a standalone wrapper so colors
-   and macros resolve.
-3. Hand each wrapped figure to the `tikz-iterate` skill (one subagent per
-   figure, run concurrently), with a goal derived from the caption if there is
-   one. Do not reimplement its refine loop here.
-4. Splice back only on a verified anchor. Re-`Read` the source file, confirm the
-   captured body still appears exactly once and its `sha1` is unchanged, then
-   `Edit` with that body as `old_string`. If it is missing, appears more than
-   once, or the hash moved, skip it and report `not spliced (source changed)`.
-   Strip the wrapper first; keep the surrounding `figure` env, `\caption`,
-   `\label`, `\centering`, and any `\resizebox` / `\adjustbox`.
-5. Recompile once and report which blocks changed.
+### 6.1 Extract
 
-Rasterization belongs to `tikz-iterate`, which uses ghostscript (this setup
-assumes no poppler is installed; adjust to your machine); leave it there. To
-inspect the compiled document's
-text, run `~/.claude/assets/bin/pdfread.py text <outdir>/<jobname>.pdf`. On a
-machine without poppler, the Read
-tool cannot open a PDF (no `pdftoppm`), and `pdftotext` does
-not exist either, so never shell out to those.
+`Grep` the master and its `\input`'d files for `\begin{tikzpicture}` and pgfplots
+`\begin{axis}` / `\begin{groupplot}` blocks (§7). Treat the outermost
+`tikzpicture` as the unit. For each block, record the file, the exact body text,
+and `sha1(body)`.
+
+Harvest the parent preamble's `\usepackage` / `\usetikzlibrary` /
+`\usepgfplotslibrary` / `\pgfplotsset` / `\definecolor` / `\colorlet` /
+`\newcommand` / `\def` / `\tikzset` lines into a `standalone` wrapper, so colors
+and macros resolve and the crop is the drawing rather than a page:
+
+```tex
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathreplacing,shapes.geometric}
+\usepackage{amsmath,amssymb}
+% --- harvested preamble lines here ---
+\begin{document}
+% --- the captured block here ---
+\end{document}
+```
+
+A block that has to stay in place (a figure that `\input`s a shared preamble)
+compiles where it lives with the build diverted by `-outdir`. Record which case
+each block is, since it sets the render DPI.
+
+### 6.2 Compile the figure
+
+Every round of every figure gets its own directory, so nothing is clobbered and
+the history stays inspectable if the loop stalls. That also keeps `.aux` churn
+out of the user's project tree and out of Dropbox sync.
+
+```bash
+export PATH="/Library/TeX/texbin:$HOME/.local/bin:$PATH"
+RUN="$HOME/.claude/state/compile-latex/figures/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$RUN/fig-01/iter-01"   # and iter-NN at the top of every later round
+cd "$RUN/fig-01/iter-NN" && latexmk -pdf -interaction=nonstopmode -halt-on-error diagram.tex
+```
+
+`-halt-on-error` is right here and wrong in step 2. A figure that will not build
+has one error worth reading and the next round needs it now, whereas the whole
+document wants every error at once. On a non-zero exit, pull the message:
+
+```bash
+grep -A2 '^! ' diagram.log | head -3
+```
+
+The `l.<N>` line follows the bang line. Do not add `-m1`: BSD grep stops reading
+at the match and drops the trailing context, so you get the message with no line
+number. Report `COMPILE_FAILED:<line>:<message>` for that figure and move to the
+next one. If the log names a missing `.sty`, retry once with `tectonic -X compile
+diagram.tex --outdir <dir>`, which fetches it; the outdir must already exist.
+Never render a stale PDF from the previous round.
+
+### 6.3 Render to PNG
+
+```bash
+gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r200 \
+   -dTextAlphaBits=4 -dGraphicsAlphaBits=4 \
+   -sOutputFile=page-%d.png diagram.pdf
+```
+
+The `%d` writes one PNG per page. The alpha-bits flags are anti-aliasing; without
+them thin rules and small type alias badly and the reviewer reports artifacts as
+real defects. On a full document, review only the page carrying the figure.
+
+Pick DPI from the canvas. `-r200` suits a full page (a Beamer frame lands near
+1000px wide) and `-r300` a dense one, but a cropped `standalone` PDF is often two
+inches across, where `-r200` yields about 390px and millimetre clearances become
+unjudgeable. Start those at `-r600`, then confirm:
+
+```bash
+long=$(sips -g pixelWidth -g pixelHeight page-1.png | awk '/pixel(Width|Height)/{print $2}' | sort -rn | head -1)
+```
+
+Under 700, re-render at double the DPI; over 2400, halve it. Correct once, do not
+loop. If `gs` exits non-zero or the PNG is missing or empty, surface
+`RENDER_FAILED:<message>` for that figure and move on. Ghostscript is the
+rasterizer here. This setup assumes no Homebrew and no poppler, so `pdftoppm`
+and `pdftotext` do not exist and nothing should reach for them; adjust to your
+machine.
+
+### 6.4 Review
+
+Launch the `tikz-reviewer` agent (`subagent_type: "tikz-reviewer"`) with
+absolute paths: the PNG, the
+current `.tex`, the round number against `--max-iter`, and the goal from `--goal`
+or the figure's `\caption`. Tell it to read the PNG and judge from the pixels.
+
+Its output contract is in `~/.claude/agents/tikz-reviewer.md`: either
+the bare word `APPROVED`, or a numbered list of severity-tagged findings each
+carrying its arithmetic and an exact search-and-replace. It already knows this,
+so do not restate the contract in the prompt.
+
+### 6.5 Apply or finish
+
+On `APPROVED`, go to 6.6. Otherwise apply each numbered item with `Edit`, using
+the exact `old_string` / `new_string` given. Surgical replacements only; never
+regenerate the block. Copy the edited file into the next round's directory and
+return to 6.2.
+
+Before applying, diff the list against the previous round's. A verbatim repeat
+means the loop is oscillating between two fixes, so stop early and report that
+instead of burning the remaining rounds. A reply that is neither `APPROVED` nor a
+parseable list earns one re-prompt ("Please respond in the required format"); on
+a second drift, stop and surface the raw reply.
+
+At `--max-iter` without approval, surface the last PNG, the outstanding
+objections, and the in-progress source, and leave that block unspliced.
+
+With several figures, run the loops in lockstep: compile and render all of them,
+launch every reviewer call for that round in one message, then apply. A figure
+that approves drops out of later rounds.
+
+### 6.6 Splice back and rebuild
+
+Splice only on a verified anchor. Re-`Read` the source file, confirm the captured
+body still appears exactly once and its `sha1` is unchanged, then `Edit` with that
+body as `old_string`. If it is missing, appears more than once, or the hash moved,
+skip it and report `not spliced (source changed)`. Strip the wrapper first; keep
+the surrounding `figure` env, `\caption`, `\label`, `\centering`, and any
+`\resizebox` / `\adjustbox`.
+
+Recompile once. Report which blocks changed and what each round fixed, and for
+every block that did not finish, the round it reached and why it stopped. To
+inspect the compiled document's text, run
+`~/.claude/assets/bin/pdfread.py text <outdir>/<jobname>.pdf`. This setup assumes
+the Read tool cannot open a PDF (no `pdftoppm`; adjust to your machine).
 
 ## Step 7, cleanup
 

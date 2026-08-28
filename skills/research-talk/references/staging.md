@@ -141,6 +141,47 @@ each other. Mark every layer `.fragment`, including the base. Leave the base
 plain and the filter wraps the whole stack instead, which still keeps it off
 the title beat but spends a keypress before the overlays start.
 
+Replace rather than accumulate when a slide shows a run of parallel examples
+(packaging, then ads, then posters). Same `.r-stack`, but the children carry
+`.current-visible`, so each row leaves as the next arrives and the slide never
+grows. The last child must be a plain `.fragment` and never
+`.current-visible`: reveal has nothing current once you advance past the final
+one, so the slide goes blank, live and in the decktape export.
+
+```markdown
+::: {.r-stack}
+::: {.fragment .current-visible}
+![](fig/packaging.png){width=900}
+:::
+::: {.fragment .current-visible}
+![](fig/ads.png){width=900}
+:::
+::: {.fragment}
+![](fig/posters.png){width=900}
+:::
+:::
+```
+
+Where the point is the set and not the sequence, drop the stack and let every
+example arrive on one beat with `.together`.
+
+Group the setup and land the punchline alone by sharing one index across the
+setup blocks and giving the last its own. This is the shape for three bullets
+that set up a fourth:
+
+```markdown
+- [First]{.fragment fragment-index=1}
+- [Second]{.fragment fragment-index=1}
+- [Third]{.fragment fragment-index=1}
+- [The problem all three create]{.fragment fragment-index=2}
+```
+
+A footnote that should arrive AFTER the content it annotates, rather than on
+its beat, is the one case where `.aside-note` is not enough on its own: give
+it `.fragment` and an index one above the block it follows. A footnote that
+appears before its content makes the room read the footnote first, which is
+why the default rides the previous beat and why this override is explicit.
+
 `auto-animate` is for a thing that changes, not a thing that appears. Two
 consecutive slides with the same heading and `auto-animate="true"` tween
 between them, which is how an equation rearranges or an estimate moves in
@@ -151,6 +192,52 @@ A custom fragment class has to restore `opacity: 1; visibility: inherit` in
 CSS, because reveal hides every fragment that is not `.custom`. The theme's
 `.highlight-yale` does this already; a hand-rolled one that skips it never
 appears.
+
+The recurring roadmap is the framework arc's convention (SKILL.md, deck
+architecture): the framework overview slide carries the whole pipeline as one
+schematic, and each stage reopens on that same schematic with the active
+stage highlighted. Two mechanics implement the highlight. An `.r-stack` of
+stage-lit variants, one per fragment as above, fits when the roadmap recurs
+on a single slide and the stages light up on successive keypresses. Repeated
+image files (`roadmap-1.png`, `roadmap-2.png`, ...) on consecutive
+`auto-animate` slides fit the arc's normal shape, where each stage's
+reopening is its own slide after that stage's `.section-break`; export every
+variant from one figure script so the geometry matches between slides.
+
+## Demo frames
+
+A run of full-bleed exhibit frames continuing a titled slide's thought (a
+generation demo cycling images, a schematic built in steps, a table revealed
+in two passes) is written as repeats of the same title: one slide
+per frame, the title verbatim on each, `auto-animate="true"` on all of them,
+the exhibit swapped per slide. Staging stays on, so each frame opens on the
+standing title and its exhibit arrives on one keypress; because the repeated
+title never moves, the run reads as one continuing thought.
+
+```markdown
+## The model generates coherent variants {auto-animate="true"}
+
+![](fig/demo-real.png){width=800}
+
+## The model generates coherent variants {auto-animate="true"}
+
+![](fig/demo-generated.png){width=800}
+```
+
+Verified: this passes both gates at exit 0. The other candidate, a titleless
+`## {.center}` exhibit slide after the titled one, fails `stage-check.mjs`,
+which classifies it as content and prints `HEADING NOT VISIBLE   (none)`
+with the verdict `STEP-0-CLEAN: NO`, while the fit gate passes it.
+`{.no-stage}` does not rescue it: the report becomes `LEAKS AT STEP 0:
+<img>; HEADING NOT VISIBLE; NO FRAGMENTS ON A CONTENT SLIDE`. No existing
+class makes the titleless form pass, so do not use it, and do not put
+`{.no-stage}` on the repeated-title frames either; the two leak messages
+fail that slide the same way.
+
+For two or three such frames, the `.r-stack` above on the single titled
+slide is often the better replacement: the exhibits cycle in place on
+keypresses, nothing on the slide moves, and the `c/t` meter does not
+inflate.
 
 ## Jump buttons and beats
 

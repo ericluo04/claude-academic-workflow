@@ -1,6 +1,6 @@
 ---
 name: preregister
-description: Draft a registry-ready preregistration or preanalysis plan (AsPredicted, OSF, or AEA RCT Registry) from a study spec or a free-form description, with MUST/SHOULD/MAY flags on every field, [CLARIFY:] placeholders instead of invented content, a stated target N with power basis and stopping rule, and an explicit falsification criterion. TRIGGER on "preregister", "draft a preregistration", "AsPredicted form", "OSF prereg", "AEA RCT registry", "PAP", "preanalysis plan", or before launching a vignette, eye-tracking, MTurk/Prolific, or field experiment. Refuses to write a preregistration for analyses already run on data already seen. Writes Markdown for pasting into the web forms, .tex on request.
+description: Draft a registry-ready preregistration or preanalysis plan for AsPredicted, OSF, or the AEA RCT Registry. TRIGGER on "preregister", "draft a preregistration", "AsPredicted form", "OSF prereg", "AEA RCT registry", "PAP", "preanalysis plan", or before launching a vignette, conjoint, MTurk/Prolific, or field experiment. Refuses to write one for analyses already run on data already seen.
 ---
 
 # Preregistration
@@ -55,12 +55,16 @@ If the description has no directional hypothesis, ask once. Do not invent a dire
 | Signal | Style |
 |---|---|
 | Online vignette, MTurk or Prolific study, short lab experiment, 1 to 3 DVs | `aspredicted` |
-| Eye-tracking, multi-DV survey experiment, complex or stratified sampling | `osf` |
+| Conjoint, eye-tracking, multi-DV survey experiment, complex or stratified sampling | `osf` |
+| Steering calibration study (confirmatory steering work) | `osf` |
 | Field experiment or RCT (livestream pilot, retailer pilot, app A/B test) | `aea-rct` |
 | Observational confirmatory analysis | `osf`, preanalysis-plan variant |
 | Ambiguous | `aspredicted` |
 
 The 1 to 3 DVs cut is a rule of thumb for form length, not a registry rule.
+
+Steering calibration studies prespecify the sweep protocol, the quality gate, and the audit
+battery, plus the primary construct instrument.
 
 AEA RCT registration is required for field experiments at AEA journals (lab experiments are
 exempt) and accepted by Marketing Science and Management Science; either OSF or AEA works for

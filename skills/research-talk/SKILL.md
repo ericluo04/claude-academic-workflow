@@ -1,6 +1,6 @@
 ---
 name: research-talk
-description: Author a Quarto reveal.js deck for an academic research presentation: conference talk, seminar, job talk, brown bag, workshop. Restrained styling, assertion titles, one argument per deck, exhibits from R or Python, deep appendix for questions. TRIGGER on "make slides for my talk", "build a seminar deck", "conference presentation", "job talk", "brown bag", "turn this paper into slides", "slides for my paper", "deck for the referee's question", "add an appendix slide", "export a handout". Use teaching-lecture for classroom material, and slide-review to audit a deck that already exists.
+description: Author a Quarto reveal.js deck for a research talk: seminar, conference, job talk, brown bag. TRIGGER on "slides for my talk", "seminar deck", "job talk", "turn this paper into slides", "add an appendix slide", "export a handout". Classroom material is teaching-lecture; auditing an existing deck is slide-review.
 ---
 
 # Research talk decks
@@ -57,26 +57,31 @@ guess, and do not infer them from the paper.
    R or Python that produces the exhibits. Rebuilding a figure from scratch
    when the script exists wastes the time budget.
 
-Then write the title list before any slide bodies, and read it back to the user
-as a list of assertions. Fixing the argument at that stage costs one message;
-fixing it after twenty slides exist costs an hour.
+Then write the title list before any slide bodies, and read it back to the
+user as a list. Fixing the argument at that stage costs one message; fixing it
+after twenty slides exist costs an hour.
 
 ## Content doctrine
 
-Titles are assertions. "Results" is a label; "Disclosure raises prices only
-where search costs are high" is an assertion. Every content slide title states
-its own takeaway, so a listener who tunes out for a minute can rejoin by
-reading one line. One or two lines; if the title needs three, the point is not
-sharp yet.
+Titles are either assertions or short labels, and `style/house.md` is the
+calibration: check it before writing a title list. Assertions state the
+takeaway in the title ("Disclosure raises prices only where search costs are
+high") so a listener who tunes out for a minute can rejoin by reading one
+line; labels ("Where we are", "Prompting confounds") are three to five words
+and put the claim in the body and the voiceover instead. Ask which the deck
+wants when it is not your own. Either way: one or two lines, and if the title
+needs three, the point is not sharp yet.
 
 The deck is one argument. A paper has four contributions and a talk has one.
 Pick the claim that can be defended in the slot and move the rest to the
 appendix. Deciding what the talk is not about is most of the work. One idea per
 slide; a slide with two jobs also tends to be the slide that overflows.
 
-A narrated picture book, which is the house style and deliberate: the slide
-carries the exhibit and the one line that names what it shows, and the speaker
-carries the argument. A sparse slide is finished, so do not fill it in with
+A narrated picture book, which is the house style and deliberate. Where
+`style/house.md` sets a harder bar than what follows (phrases and not
+sentences, the figure sized to the geometry rather than to what looks safe),
+it wins. The slide carries the exhibit and the one line that names what it
+shows, and the speaker carries the argument. A sparse slide is finished, so do not fill it in with
 supporting sentences; err to the sparse side every time. Longer text is
 welcome when it arrives as one block of full sentences, staged so it lands as
 you say it; three sentences of prose land more easily than eight compressed
@@ -86,8 +91,8 @@ a proxy for that. The calibration numbers and their Beamer anchors are in
 a turn in the argument on its own: `## {.center}` holding `::: {.r-fit-text}`
 scales the line to the slide width (the starter template has one).
 
-What goes on the slide: the assertion title, the exhibit, the focal number, and
-any formal statement whose exact wording has to be on the wall. What the
+What goes on the slide: the title, the exhibit, the focal number, and any
+formal statement whose exact wording has to be on the wall. What the
 speaker says: the setup, the intuition, the caveats, and the sentence that
 connects this slide to the one before it. A line that exists so the audience
 can follow along later belongs in `::: {.notes}` or in the paper. Write
@@ -121,6 +126,14 @@ the theme gives `.aside-note` and `.citation`; do not make the audience wait
 for a references slide to learn whose figure they are looking at. The full
 list still goes at the end, after the appendix (`references/citations.md`).
 
+Never type a reference by hand. Not into a slide, not into a tooltip, not into
+the `.bib`. Every author, year, journal, and title comes out of a verified
+`.bib` mechanically, because a citation typed from memory or reconstructed from
+a citekey is how five fabricated entries reached a finished deck for a room
+that included the authors being cited. `references/citations.md` has the rule
+and the generator pattern; run the `bibcheck` skill on the `.bib` before the
+talk.
+
 ## Deck architecture
 
 A workable spine for empirical work: title, motivation (one or two), the
@@ -128,6 +141,24 @@ claim, setting and data, identification or method, results (one finding per
 slide), mechanism or heterogeneity, the main threat and what answers it,
 conclusion, thank you, then appendix. Theory talks substitute setup,
 assumptions, main proposition, intuition for the proof, comparative statics.
+
+A third spine, the framework arc, for a paper whose contribution is a method
+or framework, with the application there to demonstrate it: title, motivation,
+the claim, setting and data, then a framework overview slide whose exhibit is
+a roadmap (the whole pipeline in one schematic), then one numbered
+`.section-break` per pipeline stage (represent, discover, validate, redesign,
+or whatever the pipeline's verbs are). Each stage reopens on the same roadmap
+exhibit with the active stage highlighted and closes on its own deliverable;
+results live inside the stages, with no separate results act. After the last
+stage: the causal or external validation study, the main threat, conclusion,
+thank you. The recurring-roadmap mechanics are in `references/staging.md`.
+
+A multi-study paper (observational plus experiment is the common marketing
+shape) gets one `.section-break` per study, each study running a mini arc
+inside its section: design, stimuli or data, specification, result,
+heterogeneity if any. The claim slide early and the conclusion slide
+aggregate across studies, and a confirmatory experiment is its own station,
+never filed under mechanism-or-heterogeneity. No new classes are needed.
 
 Budget roughly one slide per minute of speaking, and leave the last slide up.
 Twenty-minute conference talk: fifteen to eighteen content slides.
@@ -300,6 +331,26 @@ for one slide. Everything else, and the caveats, are in
 The render exits 0 whether or not the deck is presentable, so the gates are
 not optional. Run them every time, and again before the talk.
 
+Put the sequence in a `build.sh` next to the deck on day one, rather than
+running the commands by hand, with two entry points: `./build.sh` renders the
+HTML and runs both gates, and `./build.sh full` adds the self-contained
+variant, the offline gate, and the PDF. On a deck that also ships the
+self-contained variant, derive that variant's `.qmd` inside the script by
+injecting the three embed keys into the real source, so there is one source
+file and the standalone cannot drift from the deck being edited. Keeping two
+`.qmd` files in sync by hand fails silently: the deck renders, the gates pass,
+and the file uploaded to the conference is a week old.
+
+Iterate on the HTML and leave the PDF for the end. The render is not the slow
+step: on a 26-slide deck carrying 129 images (62 MB), `quarto render` takes 2
+seconds, the standalone render 5, both gates about 9, and the decktape PDF 49,
+because decktape drives a headless browser through every slide and every
+fragment and does not care how the HTML was made. So the everyday loop is edit,
+`./build.sh`, open the HTML; `./build.sh full` runs once when the slides are
+final, and once more after any late edit. A PDF built mid-iteration is stale
+the moment the next edit lands, and the minutes it costs are what make a deck
+feel slow to work on.
+
 ```bash
 cd <deck dir>
 quarto render deck.qmd 2>&1 | tee /tmp/render.log
@@ -340,16 +391,23 @@ not self-contained and fails it by design.
 
 ### Looking at the slides
 
-Read the pictures, not the markup:
+Read the pictures, not the markup. While iterating, export only the slide
+under edit; the full PDF is the end-of-build artefact above:
 
 ```bash
+# one slide (about 20 s, most of it browser start-up and the deck load)
+npx -y decktape@latest reveal --size 1050x700 --slides 20 "file://$PWD/deck.html" one.pdf
+~/.claude/assets/bin/pdfread.py png one.pdf --pages 1 --dpi 110 --out /tmp/s   # /tmp/s-1.png
+# then Read /tmp/s-1.png
+
+# the whole deck, once the slides are final
 npx -y decktape@latest reveal --size 1050x700 "file://$PWD/deck.html" deck.pdf
-~/.claude/assets/bin/pdfread.py png deck.pdf --pages 3 --dpi 110 --out /tmp/s   # /tmp/s-3.png
-# then Read /tmp/s-3.png
 ```
 
-`--pages` takes `3`, `1-5`, or `1,4,9`; `pdfread.py text` pulls the wording
-across many slides at once, and `pdfread.py pages` gives the count. Chrome's
+`--slides` takes `20`, `1-3`, or `1-3,5,8` (decktape's own help), and the
+one-slide PDF has one page, so `--pages 1`. On the full PDF, `--pages` takes
+`3`, `1-5`, or `1,4,9`; `pdfread.py text` pulls the wording across many slides
+at once, and `pdfread.py pages` gives the count. Chrome's
 own `--headless --print-to-pdf` writes a blank PDF on a live deck, and the
 Read tool cannot open PDFs on this machine. Playwright MCP shares one browser
 across agents; prefer decktape, and serialize if you must use it.
@@ -422,3 +480,24 @@ variant whenever the room is uncertain.
   slide; every other archetype is classified and skipped.
 - Do not put a `#thm-` id on a callout div: two filters both process it and
   the title comes out twice.
+- A `<style>` block parked on a `{visibility="hidden"}` slide is dropped
+  silently, so every custom class fails and the deck renders unstyled at exit
+  0 with both gates passing. Custom CSS goes in a separate file loaded with
+  `include-in-header:`.
+- A slide whose body is a ```` ```{=html} ```` block buys a dead first
+  keypress: the filter wraps the raw block in its own fragment. Put
+  `{.no-stage}` on that heading and let reveal drive the fragments inside.
+- An empty spacer div is a top-level block, so it becomes a beat that paints
+  nothing. Put the margin on the real element.
+- The filter wraps a top-level div in its own `<div class="fragment">`, so a
+  CSS rule keyed on `section > .myclass` matches only on a `{.no-stage}` slide
+  and silently does nothing everywhere else. Match the wrapper too.
+- `stage-check.mjs` reports false `DEAD STEP`s on any slide that swaps one
+  same-sized image for another: its ink fingerprint is tag, box, and text, and
+  ignores `src`. Confirm those slides by eye, then ignore the flag.
+- `deck-check.mjs`'s `FIG SHRUNK` rule (natural width >= 1200 and rendered
+  width < 600) cannot be satisfied by a portrait or square figure on a 700px
+  canvas. Resample the source down instead of inflating it on the slide.
+- reveal's own `.reveal section img` rule outranks any `.myclass img` rule you
+  write, so a nested figure ignores your sizing. Inline `style="height:..."`
+  is the reliable fix.

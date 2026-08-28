@@ -1,6 +1,6 @@
 ---
 name: field-experiment
-description: Design, analyze, and write up randomized experiments (field experiments, A/B tests, RCTs), covering stratified and clustered designs, randomization inference, covariate adjustment done right, noncompliance, attrition and gated outcomes, treatment-effect heterogeneity, and interference. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "A/B test", "randomized experiment", "RCT", "field experiment", "holdout", "lift test", "randomization inference", "stratified randomization", "cluster randomized", "geo experiment", "power analysis", "MDE", "encouragement design", "noncompliance", "ITT", "attrition", "Lee bounds", "CUPED", "variance reduction", "uplift", "heterogeneous treatment effects", "causal forest" (experimental heterogeneity; observational causal forests belong to causal-design), "interference", "spillover", "SUTVA". Pre-registration documents belong to the preregister skill; design triage across methods belongs to causal-design.
+description: Design, analyze, and write up randomized experiments (field experiments, A/B tests, RCTs): stratified and clustered designs, randomization inference, covariate adjustment done right, noncompliance, attrition and gated outcomes, treatment-effect heterogeneity, and interference. TRIGGER on "A/B test", "randomized experiment", "RCT", "field experiment", "holdout", "lift test", "randomization inference", "stratified randomization", "cluster randomized", "geo experiment", "power analysis", "MDE", "encouragement design", "noncompliance", "ITT", "attrition", "Lee bounds", "CUPED", "uplift", "heterogeneous treatment effects", "interference", "spillover", "SUTVA". Observational causal forests belong to causal-design, the pre-registration document to preregister.
 ---
 
 # Field experiments
@@ -9,11 +9,10 @@ An opinionated experimental workflow grounded in a read canon (references/canon.
 of 2026-07-28): the Athey-Imbens handbook chapter as the spine (randomization-based inference
 first), Freedman's logistic-regression critique and Lin's repair for covariate adjustment,
 Guo-Basse's generalization to nonlinear outcomes, and Lee's bounds for attrition and gated
-outcomes. The deliverable is the design or analysis decision with the citation that justifies
-it, the estimation and diagnostics code in R, and a methods paragraph with the limitation
-stated in first person at the point of the choice.
+outcomes. Deliverable: the recommendation with its citation, the R estimation and diagnostics
+code, and a methods paragraph.
 
-Refresh path: run the litreview skill on the method since the canon date and fold results into
+Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
 
 ## Design first: decisions that cannot be fixed ex post
@@ -80,7 +79,7 @@ Beyond those two, this family declines.
   table number, visibly not the product of a specification search.
 - If adjusting with OLS: demeaned covariates, full treatment-by-covariate interactions, HC2.
   That estimator cannot hurt asymptotic precision relative to the difference in means (Lin
-  2013); both conditions are load-bearing, and uncentered interactions lose the guarantee
+  2013); both conditions are key, and uncentered interactions lose the guarantee
   entirely. With near-equal arms the uninteracted legacy specification is asymptotically
   harmless; with a 90/10 holdout the interactions are what protect you. estimatr::lm_lin is
   the reference implementation.
@@ -240,7 +239,7 @@ Package index with versions, links, and traps in references/details.md.
 > data and not the design, and I do not extrapolate to units whose observation status
 > responds to treatment.]
 
-Every claim traces to references/canon.md; keys live in causal-design/references/causal.bib.
+Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
 
 ## Handoffs
 
@@ -251,3 +250,15 @@ Every claim traces to references/canon.md; keys live in causal-design/references
 - causal-design: whether to experiment at all; clustering questions shared across designs.
 - did / synthetic-control: staggered rollouts and geo designs analyzed observationally when
   randomization was infeasible or broken.
+- conjoint: profile experiments randomizing multiple attributes within alternatives, and
+  the per-component estimand family. The seam cuts both ways: collapsing arms of any
+  multi-factor design on one dimension estimates an implicit AMCE averaged over the other
+  factors' assignment distribution, and the full machinery (averaging-distribution
+  disclosure, corrections, claims firewall) lives there.
+- Text or model-generated stimuli as treatments carry a latent-treatment identification problem,
+  so randomize over many stimuli instead of one, and correct any machine-coded outcome against a
+  human-labeled subsample before it enters an estimate.
+- Stimuli produced by intervening on a model's internals carry a coherence confound. Run the
+  manipulation checks at matched or logged intervention strength and audit the damage on both
+  the intended and the unintended channel. Whether the intervention itself is valid is a
+  separate question from whether the experiment is.

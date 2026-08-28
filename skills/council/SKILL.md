@@ -1,13 +1,13 @@
 ---
 name: council
-description: Spawn five independent critic subagents in parallel on any target (research idea, draft, R&R strategy, grant, experimental design, pre-analysis plan, talk plan, IRB protocol, or a SKILL.md), then a separate synthesis pass ranks findings by how load-bearing they are, never by vote count. Default roster is tuned for quantitative marketing; --chef-skill swaps in a skill-design roster. TRIGGER on "council", "spawn critics", "parallel critique", "kitchen cabinet", "panel review", "stress-test this", "poke holes in this", "what would five experts say". Use review-paper for a complete manuscript, slide-review for an existing deck, and preregister to draft (not critique) a prereg.
+description: Five independent critic subagents in parallel on an idea, plan, design, R&R strategy, grant, or SKILL.md, then a synthesis pass that ranks findings by how much of the argument rests on them, never by vote count. TRIGGER on "council", "spawn critics", "parallel critique", "kitchen cabinet", "panel review", "stress-test this", "poke holes in this", "what would five experts say". A complete manuscript goes to review-paper.
 ---
 
 # council
 
 Five independent critics, one synthesizer, no majority voting. Single round. Adapted from Chris
 Blattman's [claudeblattman](https://github.com/chrisblattman/claudeblattman), including the rule
-that the synthesizer ranks by how load-bearing a finding is and never by how many critics raised it.
+that the synthesizer ranks by how much of the argument rests on a finding and never by how many critics raised it.
 
 ## When to use
 
@@ -43,7 +43,7 @@ If the user asks for more than five critics, refuse: "Hard cap is 5. Pick a tigh
 Spawned as `general-purpose` subagents with inline role-string prefixes. No persona files.
 
 1. Skeptic. "Challenge the core claim. What would have to be true for this to be wrong? Where is
-   the load-bearing assumption the author has not stress-tested? Name the specific assumption in
+   the key assumption the author has not stress-tested? Name the specific assumption in
    this target, not the genre-typical one."
 2. Pre-mortem. "It is twelve months from now and this paper, plan, or grant has failed. What is
    the most likely failure mode? Walk back from the failure and name the decision point today at
@@ -110,7 +110,7 @@ truncating to `--n`. Truncation keeps the first K critics in list order, so `--n
 default roster drops the academic editor and the harsh referee. Create a scratch directory `~/.claude/cache/council_<YYYYMMDD>_<run_id>/`
 for raw critic output.
 
-Phase 1, parallel dispatch. This is the load-bearing step. Send ONE message containing N subagent
+Phase 1, parallel dispatch. This is the key step. Send ONE message containing N subagent
 calls, one per critic, so they run concurrently. Never serialize them. Each call uses
 `subagent_type: general-purpose`, a three-to-five word description, and a prompt made of the
 critic's role string, the target content, and: "Produce raw critique in this role's voice. Be
@@ -125,9 +125,9 @@ Phase 2, synthesis, a separate call after all critics return. One more `general-
 gets the raw critic outputs, the original target, the report shape below, and this instruction
 spelled out verbatim:
 
-> You are not summarizing votes. A single critic raising a load-bearing concern outweighs four
-> critics who did not notice it. Decide which concerns are load-bearing, meaning they would kill
-> the paper, plan, or skill if true, and put those first. A minority concern that is load-bearing
+> You are not summarizing votes. A single critic raising a key concern outweighs four
+> critics who did not notice it. Decide which concerns are key, meaning they would kill
+> the paper, plan, or skill if true, and put those first. A minority concern that is key
 > dominates. A majority concern that is cosmetic goes to the bottom.
 
 Phase 3, emit. Print the synthesis to the conversation with the raw critic outputs in a
@@ -138,7 +138,7 @@ Phase 3, emit. Print the synthesis to the conversation with the raw critic outpu
 Multi-critic systems drift toward majority voting because counting is the easy aggregation, and
 that defeats the point of running specialized lenses. If the methodologist names an identification
 problem nobody else noticed, it goes at the top, not at the bottom for lack of seconds. The
-synthesizer reasons about load-bearingness, never frequency. Re-read its output before emitting:
+synthesizer reasons about which concerns have the most resting on them, never frequency. Re-read its output before emitting:
 if it ranked by how many critics agreed, re-spawn it with a sharper instruction.
 
 ## Report shape
@@ -149,8 +149,8 @@ if it ranked by how many critics agreed, re-spawn it with a sharper instruction.
 Date: YYYY-MM-DD | Mode: <default | chef-skill> | Critics: <N> (<roster>)
 Synthesizer verdict: <SHIP | REVISE-MINOR | REVISE-MAJOR | REJECT-AND-REFRAME>
 
-## Load-bearing concerns (action required)
-1. [lens] <concern>. Why it is load-bearing, one sentence. Recommended fix.
+## Key concerns (action required)
+1. [lens] <concern>. Why it matters, one sentence. Recommended fix.
 
 ## Second-tier concerns
 - [lens] <concern>. Recommended fix.

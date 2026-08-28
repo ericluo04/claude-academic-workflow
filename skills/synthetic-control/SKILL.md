@@ -1,6 +1,6 @@
 ---
 name: synthetic-control
-description: Design, estimate, validate, and write up a synthetic control analysis, including synthetic difference-in-differences, augmented/penalized variants, and factor-model/matrix-completion relatives for panel counterfactuals. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "synthetic control", "synthetic DiD", "SDID", "staggered SDID", "donor pool", "comparative case study", "weighted counterfactual", "geo holdout", "CausalImpact", "matrix completion", "interactive fixed effects", "gsynth", "generalized synthetic control", or any setting where one or a few aggregate units (a state, market, DMA, category, platform region) got treated and untreated units must form the counterfactual. Staggered-adoption panels with many treated units belong to did; design triage across methods belongs to causal-design. Prospective geo experiments (choosing treatment markets by design) belong to field-experiment.
+description: Design, estimate, validate, and write up a synthetic control analysis, including synthetic difference-in-differences, augmented and penalized variants, and factor-model/matrix-completion relatives for panel counterfactuals. TRIGGER on "synthetic control", "synthetic DiD", "SDID", "donor pool", "comparative case study", "geo holdout", "CausalImpact", "matrix completion", "interactive fixed effects", "gsynth", or any setting where one or a few aggregate units (a state, market, DMA, category, platform region) got treated and untreated units must form the counterfactual. Many treated units with staggered timing belong to did; choosing treatment markets prospectively to field-experiment.
 ---
 
 # Synthetic control
@@ -8,11 +8,10 @@ description: Design, estimate, validate, and write up a synthetic control analys
 An opinionated synthetic-control workflow grounded in a read canon (references/canon.md,
 current as of 2026-07-28): Abadie's JEL survey, the practice manual by the method's originator,
 with the synthetic-DiD bridge and the DiD-vs-SC boundary supplied by the Arkhangelsky-Imbens
-panel survey (shared with the did skill). The deliverable is the feasibility verdict with the
-citation that justifies it, the estimation and diagnostics code in R, and a methods paragraph
-with the limitation stated in first person at the point of the choice.
+panel survey (shared with the did skill). Deliverable: the recommendation with its citation, the
+R estimation and diagnostics code, and a methods paragraph.
 
-Refresh path: run the litreview skill on the method since the canon date and fold results into
+Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
 
 ## Which precedent your design looks like
@@ -105,7 +104,7 @@ One continuous decision path, not competing methods:
 
 - DiD is the special case of the SC factor model with constant factor loadings. If the treated
   unit's pre-trend parallels a plausible comparison average, use did. Long pre-periods are
-  load-bearing for SC identification. DiD needs one pre-period to identify the ATT and more
+  key for SC identification. DiD needs one pre-period to identify the ATT and more
   only for credibility, so the SC pre-period gate does not transfer to a DiD routing decision.
 - When the pre-period plot shows the donor average diverging from the treated unit before
   treatment, parallel trends has already failed and SC is the tool. The sharpest known
@@ -244,7 +243,7 @@ Package index with versions, links, and traps in references/details.md.
 > directly.] The estimand is the effect on [treated unit] alone, and I generalize to
 > [other units] only [not at all / under the stated assumption].
 
-Every claim traces to references/canon.md; keys live in causal-design/references/causal.bib.
+Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
 
 ## Handoffs
 

@@ -26,7 +26,7 @@ library(policytree)      # 1.2.4
 library(sensemakr)       # 0.1.6
 library(WeightIt)        # 1.7.0
 library(marginaleffects) # 0.32.0
-# Package index with versions, links, and traps in references/details.md.
+# Package index with versions, links, and traps in ../references/details.md.
 
 ## df: one row per unit. y outcome; d treatment CODED NUMERIC 0/1; x1..xK PRETREATMENT
 ## covariates; cl cluster id at the level treatment was ASSIGNED (drop clusters= below if
@@ -98,7 +98,7 @@ summary(sens); plot(sens)
 ovb_minimal_reporting(sens, format = "latex")  # the Cinelli-Hazlett reporting table
 # Read the verdict on the DESIGN: an estimate that flips under a confounder 1-3x as
 # strong as the best observed covariate indicts the identification, not the estimator.
-# Ladder alternatives in references/details.md: Manski bounds (assumption-free),
+# Ladder alternatives in ../references/details.md: Manski bounds (assumption-free),
 # oster2019unobservable (state its proportional-selection and R2-target assumptions),
 # rosenbaum2002observational design sensitivity for matched designs.
 

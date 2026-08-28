@@ -1,6 +1,6 @@
 ---
 name: rdd
-description: Design, estimate, validate, and write up a regression discontinuity analysis, in both the continuity and local-randomization frameworks, with the full falsification battery and a refusal rule for designs that fail validation. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "regression discontinuity", "RDD", "RD design", "running variable", "cutoff", "threshold", "rdrobust", "bandwidth", "McCrary test", "density test", "fuzzy RD", "regression kink", or any setting where treatment switches at a known score threshold (loyalty tiers, spend thresholds, ranking cutoffs, algorithmic triggers, eligibility scores, age or tenure rules). Design triage across methods belongs to causal-design.
+description: Design, estimate, validate, and write up a regression discontinuity analysis, in both the continuity and local-randomization frameworks, with the full falsification battery and a refusal rule for designs that fail validation. TRIGGER on "regression discontinuity", "RDD", "running variable", "cutoff", "rdrobust", "bandwidth", "McCrary test", "density test", "fuzzy RD", "regression kink", or any setting where treatment switches at a known score threshold (loyalty tiers, spend thresholds, ranking cutoffs, algorithmic triggers, eligibility scores, age or tenure rules).
 ---
 
 # Regression discontinuity
@@ -8,11 +8,10 @@ description: Design, estimate, validate, and write up a regression discontinuity
 An opinionated RD workflow grounded in a read canon (references/canon.md, current as of
 2026-07-28): the Cattaneo-Titiunik Annual Review of Economics survey and its applied companion,
 the Cattaneo-Keele-Titiunik guide, which includes a real failed design this skill uses as its
-refusal template. The deliverable is the specification decision with the citation that justifies
-it, the estimation and diagnostics code in R (Stata and Python exist for the whole suite), and a
-methods paragraph with the limitation stated in first person at the point of the choice.
+refusal template. Deliverable: the recommendation with its citation, the R estimation and
+diagnostics code, and a methods paragraph.
 
-Refresh path: run the litreview skill on the method since the canon date and fold results into
+Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
 
 ## Design shapes and the case that anchors each
@@ -126,12 +125,10 @@ Hard rules from the review, stated as prohibitions because that is how it states
 
 ## The local-randomization recipe
 
-Select the window by nested covariate-balance tests: start from the smallest window with at
-least about 10 observations per side, enlarge until balance rejects, using a deliberately loose
-threshold (p < 0.15, no multiplicity correction, since over-rejection just shrinks the window).
-Then difference in means inside the window, with Fisherian randomization inference when the
-window holds few observations (exact under the sharp null; point estimates and CIs then require
-a constant-effect model), Neyman or super-population inference when it is well populated.
+Select the window by nested covariate-balance tests, then difference in means inside it, with
+Fisherian randomization inference when the window holds few observations (exact under the sharp
+null) and Neyman or super-population inference when it is well populated. Window-selection
+mechanics, thresholds, and what a narrow window does to power: references/details.md.
 
 ## Fuzzy designs: the IV discipline applies
 
@@ -157,39 +154,31 @@ monotonicity, so the iv skill's habits transfer:
 
 ## Falsification battery
 
-Run them in this order, with each check's bandwidth convention:
+Run them in this order. Each check's bandwidth convention and what its failure means are in
+references/details.md.
 
-1. Qualitative manipulation account (who computes the score, who knows the cutoff).
-2. Density continuity test (rddensity, robust bias-corrected) plus the exact binomial count
-   test in small windows (framework-free, works for discrete scores; keep the window narrow
-   enough that a constant assignment probability is sensible). A discontinuous density is
-   neither necessary nor sufficient for invalidity, but it demands an explanation; sorting can
-   be administrative rather than strategic.
-3. Heaping: plot the raw histogram of the score at its finest granularity before any test. Excess
-   mass at round values (hundreds, integers, instrument ticks) comes from rounding or a coarse
-   measuring technology, a separate threat from strategic sorting, and the density test can pass
-   while heaping biases the estimate. Almond et al. 2010 found no sorting at the 1500-gram
-   very-low-birth-weight cutoff, and the donut in Barreca et al. 2011 (with Barreca, Lindo, and
-   Waddell 2016 on the heaping mechanics) still cut the one-year mortality effect by about half
-   on a 2 percent sample reduction. Run the donut
-   whatever the density test says.
+1. Qualitative manipulation account, written before estimation (who computes the score, who
+   knows the cutoff).
+2. Density continuity test (rddensity, robust bias-corrected) plus the exact binomial count test
+   in small windows. A discontinuous density demands an explanation, and the sorting behind it
+   can be administrative rather than strategic.
+3. Heaping: plot the raw histogram of the score at its finest granularity before any formal
+   test. The density test can pass while heaping biases the estimate, so run the donut whatever
+   the density test says (Almond et al. 2010; Barreca et al. 2011, 2016).
 4. Covariate and placebo-outcome balance: the full RD machinery with each predetermined
    covariate as the outcome, a fresh MSE-optimal bandwidth per covariate, robust p-values. A
-   failure on a covariate that plausibly drives the outcome invalidates the design. The
-   equivalence-test formulation (null of imbalance) is the more honest variant when you want to
-   claim balance affirmatively.
-5. Placebo cutoffs: re-run at artificial cutoffs, one side of the true cutoff at a time so
-   treatment effects do not contaminate the placebo.
+   failure on a covariate that plausibly drives the outcome invalidates the design, and the
+   verdict is to walk away rather than to adjust.
+5. Placebo cutoffs, one side of the true cutoff at a time so treatment effects do not
+   contaminate the placebo.
 6. Donut hole: drop the observations at and immediately adjacent to the cutoff, keep the
-   original bandwidth, re-estimate. Binds hardest where agents can time their crossing (spend
-   thresholds). Large swings mean the effect rides on the most manipulable observations. The
-   donut estimate is a different parameter, local to a wider neighborhood, and the write-up
-   should describe it as one.
-7. Bandwidth and window sensitivity: instability at or below the chosen bandwidth is the
-   warning sign; failure far above it is expected by construction and not damning.
+   original bandwidth, re-estimate. The donut estimate is a different parameter, local to a
+   wider neighborhood, and the write-up should describe it as one.
+7. Bandwidth and window sensitivity: instability at or below the chosen bandwidth is the warning
+   sign, failure far above it is expected by construction.
 
-Ex-post power calculations from observed effects are unreliable; when a null matters, report
-minimum detectable effects instead (rdpower).
+When a null matters, report minimum detectable effects (rdpower), never ex-post power from the
+observed effect.
 
 ## The live dispute, carried honestly
 
@@ -208,9 +197,9 @@ intervals, report RDHonest alongside with the M choice justified in text, and ci
   estimand's interpretation checked.
 - RD in time: hard to justify as standard RD; the local-randomization framework is the
   adaptation when it works at all. Prefer did or synthetic-control for policy-date designs.
-- Extrapolation beyond the cutoff LATE needs added assumptions: multi-cutoff variation,
-  pre-period outcomes, ignorability-based, or derivative-based local extrapolation. Say which
-  when claiming anything away from the cutoff.
+- Extrapolation beyond the cutoff LATE needs added assumptions, and the menu is in
+  references/details.md. Say which one when claiming anything away from the cutoff. Absent one,
+  the methods paragraph says the estimate is local to the cutoff, full stop.
 
 ## R implementation
 
@@ -253,7 +242,7 @@ whole suite live at rdpackages.github.io; the guide ships full replication code 
 > [units far from the threshold], and I extrapolate only [not at all / under the stated
 > assumption], which costs [generalizability across the score distribution].
 
-Every claim traces to references/canon.md; keys live in causal-design/references/causal.bib.
+Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
 
 ## Handoffs
 

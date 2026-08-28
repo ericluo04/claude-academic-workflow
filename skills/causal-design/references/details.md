@@ -59,6 +59,21 @@ mistakes in economics (Imbens); the descendant rule catches the common error.
   family ships no estimation template; Athey, Chetty, Imbens, and Kang's own empirical
   implementation is the recipe, and the deliverable stops at the validity argument.
 
+## Plain panel fixed effects: the Mixtape's Table 8.2 columns
+
+The Mixtape (Cunningham, Causal Inference: The Remix, panel-data chapter) presents columns 3
+and 4 of its Table 8.2, from Cornwell and Rupert (1997), which add job tenure and then
+quadratics in years married and walk the marriage premium from the column 1 FGLS 0.083 to
+0.033, as evidence about time-varying unobserved heterogeneity. Under this skill's rule those
+columns are inadmissible, because years married and job tenure are plausibly consequences of
+marriage, so they condition on descendants of the treatment, which is verbatim the error
+Imbens (2024) calls the most common one.
+
+The chapter assumes constant effects and declares that scope. A non-absorbing time-varying
+treatment with heterogeneous effects has left it, the implicit weighting is live, and the dCDH
+weight diagnostic in did applies. Random effects, Mundlak-Chamberlain devices, and dynamic
+panel estimators stay out, and Wooldridge (2010) is the shelf for them.
+
 ## SDID inference by data shape (pointer)
 
 The authoritative statement lives in synthetic-control's details, absorbed there from the
@@ -118,21 +133,21 @@ Designs, estimators, and diagnostics live in field-experiment.
   representation predicts treatment nearly perfectly, overlap has failed; narrow the
   estimand or re-specify. The family's revision: the banned part of Feder's recommended
   Veitch-style fine-tuning is the treatment-prediction loss (GPI's own deconfounder trains
-  on the outcome loss); the dispute, the replacement, and the TI-estimator carve-out live
-  in causal-unstructured.
+  on the outcome loss). The dispute, the replacement, and the TI-estimator carve-out belong
+  to the text-causal literature and are out of scope for this skill.
 - Outcome: consistency fails when the measurement model was trained on all the data (each
   unit's inferred outcome then depends on other units' treatments); split-sample
   measurement is the fix (egami2022make; this is Feder's consistency framing of the rule
-  whose authoritative statement, the FPCILV, lives in causal-unstructured). Randomizing
-  treatment fixes ignorability and positivity here, not consistency.
+  stated authoritatively as the FPCILV). Randomizing treatment fixes ignorability and
+  positivity here, not consistency.
 - Treatment: treatment discovery vs prespecified latent aspects; disentangle the aspect
   from correlated aspects of the same text; random assignment of texts leaves reader-side
   confounding.
 - No real-world ground-truth causal benchmarks exist for text; semi-synthetic benchmark
   wins never validate a real estimate.
 - Deployment shift tests (invariance: perturb what should not matter, predictions must not
-  move; sensitivity: minimal label-flipping edits, predictions must move) now live in
-  causal-unstructured's diagnostics battery; this line is a pointer.
+  move; sensitivity: minimal label-flipping edits, predictions must move) belong to the
+  diagnostics battery for the measurement model, run before it feeds a causal estimate.
 
 ## Package index (verified against docs/source 2026-07-28, CRAN versions re-checked 2026-08-26; the observables and plain-FE branches only, method skills carry their own)
 
