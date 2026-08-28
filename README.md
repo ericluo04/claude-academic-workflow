@@ -16,7 +16,7 @@ cp -R slide-tooling ~/.claude/assets/quarto-yale
 cp output-styles/concise-research.md ~/.claude/output-styles/
 ```
 
-Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume (the Crossref contact address, the PDF helper, the Overleaf glob) and how to adjust each one. `CLAUDE.md` is the author's working global configuration, shared as an example. The three `style/house.md` files in the slide skills are stubs for your own taste: author line, closing-slide wording, palette rationale, density calibration.
+Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume (the Crossref contact address, the PDF helper, the Overleaf glob) and how to adjust each one. `CLAUDE.md` is the author's working global configuration, shared as an example. The three `style/house.md` files in the slide skills are stubs for your own taste: author line, closing-slide wording, palette rationale, density calibration. [docs/mirror-notes.md](docs/mirror-notes.md) records how these files were genericized from the author's private copies, and where this repository deliberately diverges from them.
 
 ## The global CLAUDE.md
 
