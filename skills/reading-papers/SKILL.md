@@ -1,6 +1,6 @@
 ---
 name: reading-papers
-description: Look up, resolve, and read academic papers when the user sends a link, DOI, title, author name, or vague description, across marketing (Marketing Science, JMR, JM, JCR), economics (QJE, AER, ECMA, JPE, ReStud, AEJs, AER:Insights), psychology (Psych Science), and CS (ICLR/ICML/NeurIPS, JMLR, ACL). Preserves LaTeX equations; integrates the user's Zotero library and an optional ~/ocr-examples HPC OCR pipeline. TRIGGER whenever the user asks to read, summarize, check, find, or cite a paper, asks "what does X argue", pastes a paper URL, or asks what an author has written. For a whole literature on a topic, use litreview instead.
+description: Read one known paper the user points at: a link, DOI, title, author name, or vague reference. TRIGGER when the user pastes a paper URL, names a paper to read or summarize, asks "what does X argue", or asks what an author has written. A topic-level search is litreview; auditing a .bib is bibcheck.
 ---
 
 # Reading papers
@@ -28,6 +28,12 @@ Flags: `--venue "…"` · `--since/--until YEAR` · `-n N` · `--json` · `--sav
 
 Keys (optional, all free) live in `~/.claude/secrets/scholar.env`; the script auto-loads them.
 
+Run it by path exactly as shown: the uv shebang provisions its dependencies (httpx, lxml,
+pypdf) in an isolated environment. Invoking it as `python3 paper.py` bypasses the shebang and
+fails wherever httpx is not installed (this happened in a subagent environment, 2026-07). If
+uv itself is missing, fall back to plain curl against the resolver APIs for the one lookup
+you need.
+
 ## How resolution works, and why order matters
 
 `resolve` is cheap and prints whether a free copy exists and where. Always resolve before
@@ -43,7 +49,11 @@ web-searching or guessing URLs. The routing is cost- and Cloudflare-aware:
 
 Version-of-record vs preprint: a title search can surface the NBER or SSRN copy. The matcher
 ranks the journal version above preprint containers, but econ papers genuinely exist as several
-records with different DOIs and different citation counts, so say which one you mean.
+records with different DOIs and different citation counts, so say which one you mean. Default
+rule (made explicit after a 2026-07 reading campaign): read the version of
+record whenever one exists and is reachable; fall back to arXiv/NBER only when it is not, and
+name the version you read either way, since numbers and author lists can differ across
+versions.
 
 `search` is the topic-level entry point (`resolve` is for a known item). One query per source,
 merged on DOI → arXiv id → normalized title, re-ranked by reciprocal-rank fusion, one OpenAlex
@@ -186,6 +196,10 @@ Use it to see what a paper is actually being used for.
 - "Open access" that isn't fetchable: for hybrid-OA Oxford/SAGE, OpenAlex reports a PDF URL on
   `academic.oup.com` / `journals.sagepub.com` (legally open, technically Cloudflare-dead). The
   green-OA (repository/PMC/OSF/arXiv) locations are the ones that resolve; `resolve` prefers them.
+  Wiley behaves the same: `onlinelibrary.wiley.com` pdfdirect URLs 403 even for OA articles
+  (confirmed twice, 2026-07), and the landing pages 403 too; the working route is an
+  institutional-repository or author-page copy (MIT DSpace and an author's Harvard page both
+  delivered papers Wiley refused).
 - Missing abstracts: Crossref lacks abstracts for JPE (Chicago) and JPSP (APA), though OpenAlex has
   them. Semantic Scholar *elides AEA abstracts* by publisher request.
 
@@ -200,6 +214,10 @@ Use it to see what a paper is actually being used for.
   institutional repository, which `resolve` finds. 2023+ INFORMS DOIs changed shape; listings
   contain non-article DOIs (`…ack…`, `…eb…`) worth ignoring.
 - Psychology: Psych Science is SAGE (PMC holds front matter only). Try PsyArXiv/OSF.
+- Annual Reviews: CC-BY articles fetched directly in early July 2026, but as of 2026-07-28
+  the landing pages sit behind a Cloudflare challenge that blocks curl. Go arXiv-first for AR
+  titles (accepted versions usually exist and worked where the AR page failed); treat any
+  direct-fetch success as date-dependent.
 
 ## Honesty rules
 

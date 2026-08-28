@@ -1,12 +1,12 @@
 ---
 name: conjoint
-description: Design, analyze, and write up conjoint experiments in both traditions, as randomized experiments identifying average marginal component effects (design-based, no behavioral model) and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. Produces advice with citations, R estimation code, and a drafted methods paragraph. TRIGGER on "conjoint", "conjoint analysis", "conjoint experiment", "AMCE", "marginal component effect", "marginal means", "AMIE", "causal interaction", "attribute interactions", "choice-based conjoint", "CBC", "profile experiment", "paired profiles", "candidate experiment", "attribute randomization", "partworth", "part-worth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "Sawtooth", "MaxDiff", "best-worst scaling", "forced choice profiles", "vignette experiment" (fully randomized factorial vignettes; single composite-treatment vignettes stay in field-experiment), "intra-respondent reliability", "IRR correction", "projoint", "cjoint", "factorEx", "FindIt", "bayesm", "market simulator", "choice share simulation". Randomization mechanics, power, and attrition belong to field-experiment; design triage across methods to causal-design.
+description: Design, analyze, and write up conjoint experiments in both traditions: as randomized experiments identifying average marginal component effects, and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. TRIGGER on "conjoint", "AMCE", "marginal means", "AMIE", "choice-based conjoint", "CBC", "paired profiles", "attribute randomization", "partworth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "Sawtooth", "MaxDiff", "best-worst scaling", "vignette experiment" (fully randomized factorial vignettes only), "IRR correction", "projoint", "cjoint", "factorEx", "bayesm", "choice share simulation". Text or image profiles whose treatment components are latent inside the stimulus are out of scope: the component needs a design of its own.
 ---
 
 # Conjoint experiments
 
-Design, estimate, validate, and write up conjoint experiments. The canon is fourteen
-hand-picked sources (see references/canon.md, current as of 2026-07-31) spanning two
+Design, estimate, validate, and write up conjoint experiments. The canon is fifteen
+hand-picked sources (see references/canon.md, current as of 2026-08-05) spanning two
 traditions that share one instrument: political science's design-based causal track
 (Hainmueller, Hopkins, and Yamamoto 2014 and its correction wave) and marketing's
 preference-measurement track (Netzer et al. 2008; Agarwal et al. 2015; Rossi, Allenby,
@@ -169,10 +169,9 @@ Never mix the interpretations silently.
   adaptive shrinkage (ashr) on the estimates and clustered SEs when priors about which
   effects exist are weak; Benjamini-Hochberg at FDR .05 for exploratory work; Holm with a
   preregistered family for confirmatory work. Corrected and uncorrected shown
-  side by side, every status change discussed. Never plain Bonferroni: Holm step-down rejects
-  everything Bonferroni rejects and sometimes more, under the same assumptions and at no extra
-  cost, so it is a drop-in with strictly more power (the family-wide statement is in
-  causal-design's shared rules). Plain BH and not the adaptive BKY variant, deliberately: BKY's
+  side by side, every status change discussed. Never plain Bonferroni
+  (../causal-design/references/shared-rules.md). Plain BH and not the adaptive BKY variant,
+  deliberately: BKY's
   extra power comes with an independence-flavoured guarantee, and AMCEs estimated on the same
   respondents are dependent in a way BH's positive-regression-dependence condition covers and
   BKY's does not. A screen over machine-generated candidates, where the candidates are not
@@ -338,19 +337,10 @@ references/details.md.
 
 ## Implementation
 
-Package index with versions, verified traps, and the hand-rolled fallbacks lives in
-references/details.md. Headlines: projoint (CRAN, maintained) is the code path for
-choice-level MMs/AMCEs with the IRR correction; factorEx for pAMCE estimation; FindIt
-(1.3.0, CRAN 2025-09-23, verified 2026-08-05) for AMEs and AMIEs, with the choice-based
-mode, level collapsing, and the held-out-sample inference path;
-cjoint is the AMCE reference implementation; cregg is ARCHIVED off CRAN (cite it as the
-method reference, do not depend on it; MMs hand-roll in three lines on estimatr with
-respondent clustering); ashr for adaptive shrinkage; CRTConjoint (0.1.0, verified
-2026-07-31) for the carryover test; bayesm 3.1-7 for the HB track; logitr (1.2.0,
-verified 2026-07-31) for the preference-space/WTP-space pair (re-verify at use). The
-template (scripts/conjoint_template.R) runs the full
-randomized-experiment pipeline and the HB block, every call verified against package
-documentation.
+Which package does which job, with pinned versions, verified traps, and the hand-rolled
+fallbacks: references/details.md. Read it before writing any package call. The template
+(scripts/conjoint_template.R) runs the full randomized-experiment pipeline and the HB block,
+every call verified against package documentation.
 
 ## Methods paragraph template
 
@@ -390,5 +380,6 @@ validated on [h] holdout tasks.]"
 - preregister: drafts the preregistration; this skill supplies the conjoint field list
   (see Design defaults).
 - Text or image profiles whose treatment components are latent inside the stimulus are out of
-  scope for this skill: randomizing the object does not randomize the component, and the
-  component needs a design of its own.
+  scope for this skill (the Fong-Grimmer boundary): randomizing the object does not randomize
+  the component, and the component needs a design of its own. Discovering the latent drivers in
+  unstructured stimuli is a problem for that separate design, not for this one.

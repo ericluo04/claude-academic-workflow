@@ -1,10 +1,10 @@
-# Router canon
+# causal-design canon
 
 Current as of 2026-08-05. Four sources: three hand-picked and a fourth,
 `abadie2023clustering`, approved on 2026-08-05, which was promoted from a cross-reference to
 a full entry because five skills lean on it. Nothing enters this file without explicit human
 approval. BibTeX keys point into ./causal.bib, which is the
-one shared bib for the whole skill family. The router also leans on `arkhangelsky2024causal`
+one shared bib for the whole skill family. causal-design also leans on `arkhangelsky2024causal`
 (the three-axis panel taxonomy), a cross-reference owned by the did canon. The family-wide
 clustering statement is owned by this skill's own SKILL.md, whose frontmatter claims the shared
 inference rules, while method skills carry design-specific instances. Refresh:
@@ -71,8 +71,8 @@ Key: `li2024quasiexperimental`.
   practice; writing for marketing reviewers.
 - Caveats: read via WebFetch extraction, so re-verify any quotation against the live page
   before it enters a paper; two of the three authors developed the augmented/forward DiD
-  estimators, so the piece leans toward that family and the synth/did skills weigh those
-  methods independently; silent on RDD and nearly silent on IV, so it never covers the
+  estimators, so the piece leans toward that family and the synthetic-control and did skills
+  weigh those methods independently; silent on RDD and nearly silent on IV, so it never covers the
   confounded-observational branch beyond panel methods. Figure 1 ("Overview of Design
   Choices in Quasi-Experimental Settings") was read against the article text on
   2026-07-28. The figure is coarser than the article text (it lumps augmented DiD
@@ -87,8 +87,8 @@ Transactions of the Association for Computational Linguistics 10:1138-1158. Key:
 
 - Role: the text-role triage question. Any causal analysis where unstructured data appears
   gets asked: which role does it play (confounder, outcome, treatment)? Each role has its
-  own assumption failures; the router states the question and the warnings, then hands off
-  to causal-unstructured.
+  own assumption failures; causal-design states the question and the warnings, then hands
+  the measurement problem to whoever owns it.
 - Settles: ignorability over text aspects is untestable and must be argued from domain
   knowledge; positivity is generically fragile in high dimensions (a representation that
   nearly encodes the treatment leaves no conceivable counterfactual); consistency fails
@@ -96,11 +96,11 @@ Transactions of the Association for Computational Linguistics 10:1138-1158. Key:
   split-sample measurement (via Egami et al.); invariance and sensitivity test batteries
   for any NLP measure feeding a causal pipeline; there are no real-world ground-truth
   causal text benchmarks, so semi-synthetic wins are never validation of a real estimate.
-- Binds when: any unstructured data in the causal graph; the router's role question.
+- Binds when: any unstructured data in the causal graph; causal-design's role question.
 - REVISED WITHIN THE FAMILY: Feder's supervised text-as-confounder route (fine-tuned
   causally sufficient embeddings, Veitch et al. 2020) is superseded by the GPI results, on
-  GPI's own simulation evidence; causal-unstructured carries the dispute and the
-  replacement route. The router cites Feder for the role triage and the assumption
+  GPI's own simulation evidence, and the dispute and its replacement route belong to the
+  text-causal literature. causal-design cites Feder for the role triage and the assumption
   failures, never for the Veitch route.
 - Version note: read as the arXiv accepted version; cite with TACL pagination (1138-1158).
 
@@ -168,9 +168,9 @@ panel family (`hsiao2012panel`, `li2020inference`, `li2023augmented`, `li2024for
 `li2023statistical` for Li-Sonnier). Already in the bib from
 method skills and reused here: `crump2009dealing`, `wager2018estimation`,
 `chernozhukov2018double`, `xu2017generalized`, `athey2021matrix`, `crepon2013labor`,
-`hudgens2008toward`, `athey2018exact`, `egami2022make`, the did/rdd/synth canons. New with
-the mediation decline: `imai2010general` and `pieters2017meaningful`, decline pointers
-only, NOT canon (the router declines mediation and points to them; no skill carries the
+`hudgens2008toward`, `athey2018exact`, `egami2022make`, the did/rdd/synthetic-control canons.
+New with the mediation decline: `imai2010general` and `pieters2017meaningful`, decline pointers
+only, NOT canon (causal-design declines mediation and points to them; no skill carries the
 route).
 
 Reference shelf, not canon: `wooldridge2010econometric` (Econometric Analysis of Cross

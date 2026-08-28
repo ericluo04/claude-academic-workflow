@@ -4,6 +4,31 @@ A seminar deck cites constantly, so the citation has to be visible and has to
 stay under the claim. Cite on the slide where the borrowed thing appears; the
 full list goes at the very end, after the appendix, and paginates itself.
 
+## Never type a reference by hand
+
+Not into a slide, not into a tooltip, not into the `.bib`. An audit of a
+finished deck found five entries with invented content: authors who were not on
+the paper, a year off by two, a title assembled out of a citekey. Every one of
+them was typed from memory while the deck was being written, and every one read
+as plausible, in a deck for a room that included the authors being cited.
+
+The rule that follows from it: the `.bib` is the only place reference text
+exists, it is verified before the talk with the `bibcheck` skill, and anything
+else that shows a reference is generated from it. A deck that wants hover
+tooltips carrying the full entry keeps one hand-authored artifact, a
+`label -> citekey` map, and a script that reads the `.bib` and rewrites the
+matching spans. Nothing in the pipeline retypes an author or a year.
+
+Two mechanics that pipeline needs. It has to strip its own previous wrapper
+before re-wrapping, so it can run repeatedly without nesting. And it runs
+AFTER any edit to the slide text, never before: once a phrase is wrapped in a
+`<span>`, plain-string matching against the slide source stops finding it.
+Editing text after a wrap pass and wondering why the tooltip vanished cost two
+rounds in one session.
+
+Entries cited only inside tooltips are invisible to citeproc, so they get
+dropped from the list unless the front matter carries `nocite: |` with `@*`.
+
 ## Writing citations
 
 Use Quarto's own syntax:

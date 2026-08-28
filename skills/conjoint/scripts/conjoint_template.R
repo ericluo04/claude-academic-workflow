@@ -57,7 +57,7 @@ summary(amce_fit)
 mm_A1 <- lm_robust(y ~ 0 + A1, data = df_est, clusters = id)  # MMs with clustered SEs
 # RESTRICTED or WEIGHTED randomization: plain dummies silently change the estimand.
 # Include the linked interactions and report the probability-weighted combination over
-# admissible strata (HHY eq. 9; references/details.md). The packaged route:
+# admissible strata (HHY eq. 9; ../references/details.md). The packaged route:
 # cjoint::amce(y ~ A1 + A2 + A3, data = df_wide, design = my_design,
 #              cluster = TRUE, respondent.id = "id")   # design from makeDesign()
 
@@ -137,7 +137,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # summary(fit_p); decompose_pAMCE(fit_p)   # where the uAMCE-pAMCE gap comes from
 # Design-based route (target enters the randomization): design_pAMCE(..., target_type =
 # "partial_joint", partial_joint_name = list(c("A1","A2"), "A3")). Run the ESS check
-# before fielding (references/details.md).
+# before fielding (../references/details.md).
 
 ## ---- 7b. Causal interaction: AMEs and AMIEs (FindIt) -----------------------------------
 # The estimand behind section 7's gap. Do NOT read a dummy-coded interaction coefficient as

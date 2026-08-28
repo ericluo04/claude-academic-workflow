@@ -172,7 +172,7 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 ## Marketing translations
 
 - Small-cell email/pricing tests: rare-arm HC2 + Behrens-Fisher regime.
-- 90/10 holdouts: the imbalanced-arms case where Lin's interactions are load-bearing.
+- 90/10 holdouts: the imbalanced-arms case where Lin's interactions are key.
 - CUPED: fixed-slope regression adjustment on pre-period outcomes in Lin's survey-sampling
   framing; lm_lin with the pre-period metric is the design-based version.
 - Conversion/click/churn lifts: report percentage-point risk differences, never adjusted

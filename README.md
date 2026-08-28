@@ -33,14 +33,13 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. See the [note of caution](#a-note-of-caution-on-reviewing) below. |
 | `referee-response` | Drafts an R&R response letter where every claimed change is located and read in the manuscript before a location pin is written. |
 | `replication-package` | Assembles a journal-ready replication archive and scans it for secrets, PII, and absolute local paths first. |
-| `compile-latex` | Compiles with latexmk, auto-detects the engine and bib backend, and emits a ranked error report with file:line attribution. |
-| `tikz-iterate` | Compiles a TikZ figure, rasterizes it, has the `tikz-reviewer` agent actually look at the image, and iterates until approved. |
+| `compile-latex` | Compiles with latexmk, auto-detects the engine and bib backend, and emits a ranked error report with file:line attribution. Its `--figures` pass rasterizes each TikZ figure, has the `tikz-reviewer` agent look at the image, and iterates until approved. |
 | `research-talk` | Authors a Quarto reveal.js deck for a seminar, conference talk, or job talk: assertion titles, staged reveals, a deep appendix for questions. See the [example decks](#quarto-for-slides) below. |
 | `teaching-lecture` | Authors classroom lecture decks built for engagement: worked examples, discussion prompts, checks for understanding, projector-sized figures. |
 | `slide-review` | Renders a deck, screenshots every slide in a real browser, and reviews the pictures for overflow, contrast, broken figures, and a weak argument. |
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
 
-`agents/tikz-reviewer.md` is the adversarial visual critic `tikz-iterate` loops on. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and two webfont families; its README documents all of it.
+`agents/tikz-reviewer.md` is the adversarial visual critic the `compile-latex --figures` loop calls. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and two webfont families; its README documents all of it.
 
 ### A note of caution on reviewing
 

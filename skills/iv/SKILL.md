@@ -1,6 +1,6 @@
 ---
 name: iv
-description: Design, estimate, validate, and write up an instrumental-variables analysis, covering single-instrument LATE designs, weak-instrument-robust inference, shift-share instruments, formula/composite instruments that need recentering, and leniency (judge and examiner) designs estimated by UJIVE. Produces advice with citations, R estimation and diagnostics code, and a drafted methods paragraph. TRIGGER on "instrumental variable", "IV", "2SLS", "two-stage least squares", "LATE", "complier", "exclusion restriction", "first stage", "weak instrument", "Anderson-Rubin", "shift-share", "Bartik", "judge design", "examiner design", "examiner leniency", "leniency design", "UJIVE", "jackknife IV", "encouragement design" (field-experiment leads these end to end, including the ITT/LATE analysis; here for the exclusion-restriction discipline and weak-instrument inference when the encouragement is the instrument), "price endogeneity", "cost shifter", "Hausman instrument", "simulated eligibility", "recentered instrument", or any setting where treatment is chosen by agents and an incentive or cost shifter moves it. Design triage across methods belongs to causal-design.
+description: Design, estimate, validate, and write up an instrumental-variables analysis: single-instrument LATE designs, weak-instrument-robust inference, shift-share instruments, formula instruments that need recentering, and leniency (judge and examiner) designs estimated by UJIVE. TRIGGER on "instrumental variable", "IV", "2SLS", "LATE", "complier", "exclusion restriction", "first stage", "weak instrument", "Anderson-Rubin", "shift-share", "Bartik", "judge design", "examiner leniency", "UJIVE", "jackknife IV", "price endogeneity", "cost shifter", "Hausman instrument", "simulated eligibility", "recentered instrument", or any setting where treatment is chosen by agents and an incentive or cost shifter moves it. Randomized encouragement designs are led end to end by field-experiment.
 ---
 
 # Instrumental variables
@@ -11,11 +11,10 @@ estimand, Keane-Neal's Annual Review guide for the weak-instrument inference reg
 Borusyak-Hull(-Jaravel) papers for shift-share and formula instruments,
 Mogstad-Santos-Torgovitsky's Econometrica framework for extrapolating beyond the compliers, and
 Goldsmith-Pinkham-Hull-Kolesár's JEP operator's manual for leniency designs.
-The deliverable is the identification argument with the citation that justifies each leg, the
-estimation and diagnostics code in R (Stata mirrors noted where the canon is Stata-first), and
-a methods paragraph with the limitation stated in first person at the point of the choice.
+Deliverable: the recommendation with its citation, the R estimation and diagnostics code, and a
+methods paragraph.
 
-Refresh path: run the litreview skill on the method since the canon date and fold results into
+Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
 
 ## Six designs to recognize
@@ -269,25 +268,12 @@ The five checks, in their order:
 4. Test monotonicity (below).
 5. Characterize compliers (below).
 
-Inference. Under independent assignment, plain robust standard errors are valid, and clustering
-on the examiner is never justified. Abadie-Athey-Imbens-Wooldridge say so by name: "in a
-judge-leniency design, where defendants are randomly assigned to judges, standard errors should
-not be clustered at the level of the judge." This reverses the usual reflex, so state it
-explicitly when a referee expects examiner clusters. Their argument is DESIGN-based, and give
-it that way rather than as a claim about what the residuals do: the sampling variance depends
-on the sampling and assignment processes only, so within-examiner correlation in outcomes is
-irrelevant by construction and not by cancellation. Two refinements. "Valid" means conservative
-rather than exact when your sample is a large share of the population and effects are
-heterogeneous, which is the Neyman finite-sample correction. And the half of the clustering
-question that concerns SAMPLING (did you draw a subset of courts, hospitals, or offices?) is
-untestable from the data by their own argument, so assert it from how the data were collected.
-Clustering "just in case" buys conservative intervals, and whether it moves the magnitude is no
-evidence it was needed. Cluster only when ASSIGNMENT is clustered (one doctor covers a whole
-shift, one lottery routes a whole filing date), at that level. Clustering also changes the
-estimator: clustered assignment calls for leave-own-cluster-out UJIVE
-(Frandsen-Leslie-McIntyre 2025), so the clustering decision comes before the estimation. Carry
-the caveat that this result is proved for iid assignment with a fixed number of examiners, and
-the extension to many examiners is asserted as natural without being proved.
+Inference. Clustering follows assignment, so with independent assignment to examiners plain
+robust standard errors are valid and clustering on the examiner is never justified. Say so
+explicitly when a referee expects examiner clusters. Clustered assignment (one doctor covers a
+whole shift) also changes the estimator, calling for leave-own-cluster-out UJIVE
+(Frandsen-Leslie-McIntyre 2025), so the clustering decision comes before the estimation.
+Full argument: ../causal-design/references/shared-rules.md.
 
 Strength and the weak-instrument fallback. Do not read the first-stage F against a threshold
 here. UJIVE stays approximately unbiased and consistent even as E[F] approaches one, provided
@@ -481,7 +467,7 @@ A leniency design shares almost none of that structure, so it gets its own templ
 > estimate as informative beyond the marginal cases. We do not extrapolate further, because the
 > frameworks for doing so have not been formalized for designs with many decision-makers.
 
-Every claim traces to references/canon.md; keys live in causal-design/references/causal.bib.
+Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
 
 ## Handoffs
 
@@ -494,7 +480,7 @@ Every claim traces to references/canon.md; keys live in causal-design/references
 - field-experiment: randomized encouragement designs end to end (including the ITT/LATE
   analysis) and randomization inference on a simple physically randomized instrument;
   recentered and formula instruments keep their RI machinery here.
-- causal-unstructured: the perceived-treatment design (actual feature instruments the perceived
-  feature) arrives here; the exclusion and weak-instrument discipline apply unchanged.
+- Perceived-treatment designs, where an actual feature instruments the perceived feature, arrive
+  here: the exclusion and weak-instrument discipline apply to them unchanged.
 - preregister: pre-specifying the instrument, specification, and weak-IV fallback before
   outcomes are seen (experiment-first skill; adapt its structure for quasi-experimental PAPs).

@@ -171,7 +171,7 @@ for (let i = 0; i < 80; i++) {
 }
 // Math and fonts have to settle before anything is read. MathJax attaches
 // `window.MathJax` only once its script arrives (the self-hosted 2.7.9 copy
-// the yale formats ship, or a CDN on an unmigrated deck), so a fixed sleep
+// the starter format ships, or a CDN on an unmigrated deck), so a fixed sleep
 // undershoots. Poll up to 5s for either engine's ready hook: v2 exposes
 // Hub.Queue (a callback queued behind the initial Typeset fires when it
 // drains), v3+ exposes startup.promise. Skip cleanly when the deck's reveal

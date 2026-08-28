@@ -1,7 +1,7 @@
 ---
 name: litreview
-description: Find, rank, and synthesize the literature on a TOPIC or research question: paper.py search across Semantic Scholar, OpenAlex, and arXiv, dedupe, relevance-score 1-5, flag what is already in Zotero, read the top hits with parallel subagents, return a ranked list plus synthesis. TRIGGER on "lit review", "find papers on X", "what is the literature on Y", "any recent work on Z", "who has studied W", "find references for my intro", "prior work on", or a topic plus a scope phrase ("since 2022", "Marketing Science only"). Use reading-papers when the user has one specific paper in hand.
-allowed-tools: Read, Write, Bash, Task, Agent, Monitor, mcp__zotero__zotero_search_items, mcp__zotero__zotero_advanced_search, mcp__zotero__zotero_get_item_metadata
+description: Find and synthesize the literature on a topic or research question, returning a ranked reading list with a takeaway per paper. TRIGGER on "lit review", "find papers on X", "what is the literature on Y", "recent work on Z", "who has studied W", "find references for my intro", or a topic plus a scope phrase ("since 2022", "Marketing Science only"). One paper the user already has is reading-papers.
+allowed-tools: Read, Write, Bash, Agent, Monitor, mcp__zotero__zotero_search_items, mcp__zotero__zotero_advanced_search, mcp__zotero__zotero_get_item_metadata
 ---
 
 # litreview
@@ -131,6 +131,7 @@ request per three seconds.
 
 Read the papers scoring 4 and 5, capped at twelve by default. Ask before going past that. Hand each
 subagent an identifier, never a title: a DOI or arXiv id costs 1 OpenAlex credit, a title costs 10.
+Launch every reader with the `Agent` tool.
 
 Subagent prompt template:
 
@@ -162,6 +163,12 @@ Return exactly:
   bears_on:      <one or two sentences: how it speaks to the question above>
   limits:        <one sentence, the honest caveat a referee would raise>
   quote:         <verbatim, 25 words max, with its section name, or none>
+  bibtex:        <a complete, ready-to-use BibTeX entry, key <lastname><year><firsttitleword>>
+
+Build the BibTeX from the metadata paper.py returned, or from the Zotero item when there is one.
+Never write one from memory: a fabricated year, volume, or page range is the failure mode this
+whole pipeline exists to avoid. Fill author, title, year, journal or booktitle, volume, number,
+pages, and doi, and leave a field out rather than guess it.
 
 If no free full text is reachable, say so plainly, set version_read to `abstract only`, and
 return what the abstract supports. Never paraphrase an abstract as if you read the paper.
@@ -169,63 +176,51 @@ return what the abstract supports. Never paraphrase an abstract as if you read t
 
 ## Step 6: output
 
-Order by score descending, then year descending. Per paper:
+The deliverable is two files in the current project's `Paper/` folder, created if it is absent. If
+the request carries no project context, ask for the path and write nothing until you have it.
 
+`Paper/litreview-<slug>.tex` holds the ranked list. Order by score descending, then year
+descending, one block per paper:
+
+```latex
+\subsection*{[1] score 5, 2020, Calvano, Calzolari, Denicolò, Pastorello}
+Artificial Intelligence, Algorithmic Pricing, and Collusion. \emph{American Economic Review}.
+\texttt{doi:10.1257/aer.20190623}, cited\_by 579 (OpenAlex), found in openalex and
+semanticscholar. Cite as \verb|\citep{calvano2020artificial}|.
+
+Takeaway: Q-learning agents in a repeated Bertrand duopoly converge to supracompetitive prices
+with no communication and no instruction to collude.
+
+Bears on the question: the canonical simulation result that field evidence has to beat.
+
+Method: agent-based simulation. Read: published version, arXiv HTML rung.
+Free copy: \url{https://art.torvergata.it/.../aer.20190623.pdf}. In Zotero: 8KQ2M4TR.
 ```
-[1] score 5 · 2020 · Calvano, Calzolari, Denicolò, Pastorello
-    Artificial Intelligence, Algorithmic Pricing, and Collusion. American Economic Review.
-    doi:10.1257/aer.20190623 · arXiv:none · cited_by 579 (OpenAlex) · found in openalex, semanticscholar
-    Takeaway: Q-learning agents in a repeated Bertrand duopoly converge to supracompetitive
-      prices with no communication and no instruction to collude.
-    Bears on the question: the canonical simulation result that field evidence has to beat.
-    Method: agent-based simulation. Read: published version, arXiv HTML rung.
-    Free copy: https://art.torvergata.it/.../aer.20190623.pdf   [in Zotero: 8KQ2M4TR]
-```
 
-Then a synthesis of four to six sentences covering what the cluster agrees on, where it splits into
-camps (a split is where a new paper can position itself), what is missing, and which two or three
-papers to read first if the user reads nothing else.
+The same file closes with two things. A synthesis of four to six sentences covering what the
+cluster agrees on, where it splits into camps (a split is where a new paper can position itself),
+what is missing, and which two or three papers to read first if the user reads nothing else. Then a
+coverage line: which sources answered, which failed, which venues were unreadable, and what the
+user would have to do to close each gap.
 
-Close with a coverage line: which sources answered, which failed, which venues were unreadable, and
-what the user would have to do to close each gap.
+`Paper/references.bib` gets the `bibtex:` field every reader returned, one entry per paper in the
+list, verbatim. Append to an existing `references.bib` and match the key style already in it. Never
+rewrite an entry that is already there.
+
+The chat reply is the two paths and the ranked list, nothing else. Takeaways, the synthesis, and
+the coverage line live in the `.tex` and are not repeated in chat.
 
 Stop there. Ask before adding anything to Zotero; writes need the web key and the user did not ask
 for a library edit unless they said so.
 
-## Coverage limits, and saying so
+## Coverage limits and cost
 
-A lit review that quietly skips a literature is worse than a short one. These venues are
-hard-blocked to plain HTTP (verified July 2026, per the reading-papers skill): INFORMS (Marketing
-Science, Management Science), SSRN, the AEA direct PDF, Elsevier, Wiley, Oxford, Chicago, SAGE,
-and anonymous OpenReview. They are indexed, so they appear in search results with metadata and
-abstracts; only the body is unreachable.
-
-What that means in practice:
-
-- Marketing is the field most exposed, because INFORMS and SAGE own it. The metadata is fine and
-  the accepted manuscript is usually on an institutional repository, which `paper.py` finds and
-  reports as the free copy. Run a `--venue "Marketing Science"` pass (and JMR, JCR, Journal of
-  Marketing, Management Science) alongside the open topic search so the field is represented even
-  when arXiv dominates the unfiltered ranking.
-- Economics is easier: the NBER or CEPR working paper is usually near-identical to the published
-  version, and AEA appendices with the proofs are free even when the article PDF is not.
-- Semantic Scholar elides AEA abstracts by publisher request, and Crossref has no abstracts for
-  JPE or JPSP. OpenAlex covers both, which is another reason an OpenAlex failure matters.
-- arXiv covers CS and parts of economics and statistics. It does not cover consumer behavior. A
-  review of a marketing topic that returns only arXiv hits is a failed search, not a thin field.
-- For a specific paper behind Cloudflare, the Playwright MCP with the user's institutional
-  session is the
-  last rung. One paper at a time, ask first, never in a loop.
-
-## Cost
-
-Each `search` invocation spends one OpenAlex `search` call at 10 credits (an id lookup is 1), plus
-free calls to Semantic Scholar and arXiv. Three query variants is 30 credits against a daily budget
-of 10,000 with the key in `~/.claude/secrets/scholar.env`. Every response is disk-cached for 30
-days, so a rerun of the same query is free and parallel readers share the cache.
-
-The expensive mistake is looping searches over near-identical phrasings. Two or three deliberate
-variants beat ten sprayed ones.
+Which venues are hard-blocked, the escalation ladder for a paywalled paper, and the OpenAlex credit
+prices are all in `~/.claude/skills/reading-papers/SKILL.md`. Name in the output every
+venue this run could not reach. One rule is specific to searching rather than reading: INFORMS and
+SAGE own marketing, so run a `--venue` pass over Marketing Science, JMR, JCR, Journal of Marketing,
+and Management Science alongside the open topic search. A marketing review that comes back all
+arXiv is a failed search, not a thin field.
 
 ## Failure modes
 

@@ -45,6 +45,33 @@ Keep figures static. Each ggplot PNG adds roughly 100 KB. Plotly adds 3.8 MB
 the first time it appears, and a seminar exhibit almost never gains from
 hover; `teaching-lecture` covers the interactive case.
 
+## Sizing a row of images by hand
+
+A hand-laid row (a set of product photos, four stimulus conditions, a before
+and after pair) gets none of Quarto's stretching, so its size is arithmetic.
+For n images at a shared height h, the row occupies
+
+    h * sum(w_i / h_i)  +  (n - 1) * gap  +  any separator column
+
+against the 945px content width, or 1050px if the row goes full bleed. Solve
+for h, take the lesser of that and the vertical room under the heading, and
+back off about 20px.
+
+With portrait images the width term binds well before height does, which is
+counterintuitive on a slide showing a wide empty band under the row: four
+portrait images averaging 0.67 aspect need 2.68 times their height in width, so
+425px tall would need 1140px across on a 1050px slide however much vertical
+room is free. When a request for a much larger figure is geometrically
+impossible, the recoverable slack is in the gaps and the separator column, and
+it is worth saying what the real ceiling is rather than silently landing under
+it.
+
+Read the actual numbers rather than eyeballing a screenshot. Serve the deck
+(`python3 -m http.server`), drive it with Playwright to the slide, and divide
+every `getBoundingClientRect()` by `Reveal.getScale()` to get canvas pixels;
+elements on non-current slides measure zero, so jump with `Reveal.slide(i, 0)`
+first.
+
 ## Code and output on the same slide
 
 Set `echo: true` on the chunk (the format defaults `echo: false`).
