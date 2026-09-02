@@ -197,6 +197,29 @@ Method: agent-based simulation. Read: published version, arXiv HTML rung.
 Free copy: \url{https://art.torvergata.it/.../aer.20190623.pdf}. In Zotero: 8KQ2M4TR.
 ```
 
+Report a source in indirect speech. Wording kept from a paper goes inside quotation marks and
+italics, formatted *"like this"*, with the page or section it came from, and the rule holds in the
+`.tex`, in the chat reply, in a reader subagent's report, and in any `note` field written into
+`references.bib`. A takeaway that reuses an author's sentence without those marks becomes
+plagiarism the moment the review reaches a draft.
+
+<example>
+<user>find the recent work on how shoppers react to personalized pricing and tell me where it splits</user>
+<response>
+[paper.py search: personalized pricing consumer fairness perceptions]
+[mcp__zotero__zotero_search_items: personalized pricing backlash]
+[paper.py get --section: "Discussion"]
+Both papers estimate what happens when a shopper learns the price was set for them individually,
+and both measure a fall in repurchase of roughly the same size. They part on the mechanism. Aurand
+and Petrov (2024) read it as a fairness violation and find the effect disappears once the retailer
+states the rule behind the discount. Halloran (2023) reads the same drop as inferred exploitation
+and finds that disclosure makes things worse among high-spend customers, calling it *"a signal of
+how much the firm already knows"* (Section 5.2). Disclosure is the treatment that separates the two
+accounts, and neither paper has run it on the other's population.
+</response>
+<rationale>CORRECT: The comparison is built around the finding the two papers share and the mechanism they dispute, in the assistant's own indirect speech. Exactly one short phrase is kept from Halloran, marked and italicized with its section number, and every other claim is reworded. The takeaway stays specific enough to act on.</rationale>
+</example>
+
 The same file closes with two things. A synthesis of four to six sentences covering what the
 cluster agrees on, where it splits into camps (a split is where a new paper can position itself),
 what is missing, and which two or three papers to read first if the user reads nothing else. Then a
