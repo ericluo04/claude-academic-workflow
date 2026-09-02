@@ -227,6 +227,32 @@ Use it to see what a paper is actually being used for.
   / 210 Crossref / 157 OpenCitations). Name the source; never mix counts in one table.
 - Never invent a DOI, page number, or quotation. If `resolve` returns nothing, say so.
 
+### Quoting the paper
+
+Report what a paper says in indirect speech. Wording kept from the authors goes inside quotation
+marks and italics, formatted *"like this"*, with the page or section it came from, and that holds
+in chat, in a subagent's structured summary, in a `note` field, and in anything that reaches a
+draft. A summary that reuses the paper's own sentences without those marks is plagiarism once it
+lands in a document.
+
+<example>
+<user>what does https://doi.org/10.1287/mksc.2025.0142 argue</user>
+<response>
+[paper.py resolve: 10.1287/mksc.2025.0142]
+[paper.py get --list-sections: 10.1287/mksc.2025.0142]
+[paper.py get --section: "Identification"]
+Okonjo and Vance argue that most of the measured return to retail media advertising comes from
+selection into who sees the ad. Geo holdouts on a grocery platform give them a lift of about 4
+percent against the 31 percent the platform's own attribution reports, and they show the gap widens
+where the budget lands on shoppers already searching for the brand. Their claim about attribution
+rests on the holdout and is the strong one. The decomposition behind the mechanism rests on a
+keyword classifier validated against 500 hand-coded queries, and they push it further than that
+validation carries, calling the gap *"a measurement artifact the platform has no incentive to
+correct"* (Section 6, p. 22). Read: published version, arXiv HTML rung.
+</response>
+<rationale>CORRECT: The argument is stated in the assistant's own words, with the claim the design supports separated from the one it does not. Exactly one phrase is kept from the authors, marked and italicized with its section and page, and everything else is reworded while the numbers a reader needs survive.</rationale>
+</example>
+
 ## Working with many papers
 
 Per the user's standing preference, for several papers at once spawn parallel subagents, one

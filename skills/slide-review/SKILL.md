@@ -490,6 +490,19 @@ is staged by `stage-slide.lua`, so the screenshots show the fully revealed slide
 audience meets it one block at a time; a point that arrives on a later keypress is present, not
 missing.
 
+Every reviewer gets one more instruction. Before ruling on a candidate defect, crop that region out of
+the full-resolution PNG and look at the crop enlarged. This setup assumes no ImageMagick, so the crop
+goes through PIL; adjust to your machine. One crop per suspect region, written beside the screenshot it
+came from:
+
+```bash
+python3 -c "from PIL import Image; im=Image.open('$RUN/shots/slide-07.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('$RUN/shots/slide-07-crop1.png')"
+```
+
+A coordinate read off the crop gets the crop origin added back before the halving to deck px, so the
+arithmetic in a finding is always full-image. A defect that resolves at full resolution in the crop is
+not reported, and a finding that survives names its crop file next to its evidence line.
+
 The lenses: layout, argument, and copy on every deck, pedagogy on a lecture only. The prompts, the
 settled-decisions paragraph that opens each of them, and the reply contract are in
 `references/reviewer-prompts.md`; send them as written. The density calibration and the settled

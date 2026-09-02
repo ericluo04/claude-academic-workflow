@@ -59,6 +59,17 @@ and whether the drawing leans to one side of its bounding box.
 
 ## Cite the arithmetic (mandatory for CRITICAL and MAJOR)
 
+Before ruling on any candidate defect, crop that region out of the full-resolution PNG, enlarge it, and
+`Read` the crop. This setup assumes no ImageMagick, so the crop goes through PIL; adjust to your machine:
+
+```bash
+python3 -c "from PIL import Image; im=Image.open('page-1.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('crop.png')"
+```
+
+Add the crop origin back so every number you report is in full-image pixel coordinates. A collision that
+resolves into clear space at full resolution is not a finding, and reporting it costs a fix cycle on a
+diagram that was already right.
+
 Every CRITICAL or MAJOR finding carries concrete numbers: chord lengths, computed depths, gap widths,
 label-width estimates. Estimate label width as characters times about 0.18cm at `\footnotesize`. "Labels
 look crowded" with no numbers is rejected, and you should reject your own.
