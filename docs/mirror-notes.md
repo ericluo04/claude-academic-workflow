@@ -28,6 +28,9 @@ re-deriving them, and so a reader can tell an adaptation from an oversight.
    skill is rewritten to say what to do instead of naming a skill the reader does not have.
 9. No skill directory is added that is not already here. Files inside an existing skill may be
    added.
+10. A named model version becomes "a model". The private files pin rules to the model the author
+   runs, and a reader on a different model needs the rule without the attribution. The plagiarism
+   rule in the Research prose section is the current instance.
 
 ## Deliberate divergences
 

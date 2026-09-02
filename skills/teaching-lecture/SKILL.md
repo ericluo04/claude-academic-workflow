@@ -5,6 +5,8 @@ description: Author a Quarto reveal.js lecture deck for a class meeting. TRIGGER
 
 # Teaching lecture decks
 
+Create a professional presentation on the requested topic. Include thoughtful design elements, visual hierarchy, and engaging animations where appropriate.
+
 Builds a `.qmd` that renders to a reveal.js HTML deck for a class meeting, and
 organizes a semester of them into one published course site.
 Students are seeing the ideas for the first time, they are taking notes, they
