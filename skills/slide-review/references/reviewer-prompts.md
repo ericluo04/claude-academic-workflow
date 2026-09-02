@@ -38,6 +38,13 @@ before.
 > in `style/house.md`, so leave that judgment to them. Crowding is yours where it is geometric: items with no
 > separation between them, a block running into the slide margin.
 >
+> Before ruling on a candidate defect, crop that region out of the full-resolution PNG and look at the
+> enlarged crop. One crop per suspect region, written beside the screenshot it came from:
+> `python3 -c "from PIL import Image; im=Image.open('$RUN/shots/slide-07.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('$RUN/shots/slide-07-crop1.png')"`
+> A coordinate read off the crop gets the crop origin added back before the halving to deck px. A defect
+> that resolves at full resolution in the crop is not reported, and a finding that survives names its
+> crop file beside its evidence line.
+>
 > Every geometric claim carries its arithmetic, with the measurement and the threshold both stated.
 > "The table's right edge is at 1358 deck px against a 1050 px canvas, so 308 px, roughly 29% of the
 > width, is off screen." "The caption measures 11 deck px, 1.6% of the 700 px canvas height, under the
@@ -85,6 +92,8 @@ All PNGs.
 > asking students to hold more than about four new things at once. Blocks on a content slide arrive one
 > keypress at a time under `stage-slide.lua`, and a `.together` group is one beat, so count what is on
 > screen at the same moment. Report each against a slide number.
+> Where a symbol or a term is too small to read with confidence, crop it out of the PNG and read it
+> enlarged (`python3 -c "from PIL import Image; im=Image.open('$RUN/shots/slide-07.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('$RUN/shots/slide-07-crop1.png')"`) before reporting it as undefined.
 >
 > Students save this PDF and study from it, so the deck is also a document and carries more text than
 > a conference slide would. Never report a slide as too wordy on that basis. Report text that is
@@ -102,6 +111,9 @@ All PNGs, plus the `.qmd` source so fixes can be exact.
 > a term that changes mid-deck, numbers that disagree between a table and the sentence describing it,
 > a citation rendered as a raw bibtex key or as `(smith2020?)`, and any math showing a backslash
 > command on screen.
+> Before reporting anything you read off a screenshot, crop that line out of the PNG and read it
+> enlarged with `python3 -c "from PIL import Image; im=Image.open('$RUN/shots/slide-07.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('$RUN/shots/slide-07-crop1.png')"`. What is correct at full resolution is not a finding, and a finding
+> that survives names its crop file beside the evidence line.
 > Every item gets an exact `old_string` to `new_string` pair, unique in the source.
 >
 > Do not comment on the author's writing style, sentence length, tone, or word choice. Only errors and
