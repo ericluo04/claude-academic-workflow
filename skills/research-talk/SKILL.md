@@ -5,6 +5,8 @@ description: Author a Quarto reveal.js deck for a research talk: seminar, confer
 
 # Research talk decks
 
+Create a professional presentation on the requested topic. Include thoughtful design elements, visual hierarchy, and engaging animations where appropriate.
+
 Builds a `.qmd` that renders to a reveal.js HTML deck for a seminar, conference
 talk, job talk, or brown bag. The audience is other researchers who are reading
 dense exhibits and following an argument, so the deck stays quiet and the
