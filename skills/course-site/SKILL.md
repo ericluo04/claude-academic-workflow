@@ -1,6 +1,7 @@
 ---
 name: course-site
 description: Build and maintain the Quarto course website the lecture decks hang off: landing page, week table, site theme, navbar, handout hook, publishing to GitHub Pages. TRIGGER on "course website", "syllabus page", "week table", "add week 4 to the site", "link the new deck on the site", "publish the course site", "GitHub Pages for my course". Writing or repairing a deck is teaching-lecture.
+disable-model-invocation: true
 ---
 
 # Course website
