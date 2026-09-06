@@ -66,8 +66,8 @@ impossible, the recoverable slack is in the gaps and the separator column, and
 it is worth saying what the real ceiling is rather than silently landing under
 it.
 
-Read the actual numbers rather than eyeballing a screenshot. Serve the deck
-(`python3 -m http.server`), drive it with Playwright to the slide, and divide
+Read the actual numbers instead of eyeballing a screenshot. Open the deck in a
+browser (`file://` is fine), navigate to the slide, and divide
 every `getBoundingClientRect()` by `Reveal.getScale()` to get canvas pixels;
 elements on non-current slides measure zero, so jump with `Reveal.slide(i, 0)`
 first.

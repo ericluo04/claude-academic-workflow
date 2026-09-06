@@ -6,8 +6,8 @@
 //   node deck-check.mjs handout deck.html out.pdf      # print view, honors pdf-separate-fragments
 //
 // Drives headless Chrome over CDP using node 22's global WebSocket, so there is
-// no npm install and no Playwright MCP involved (the MCP browser is shared
-// across agents and concurrent runs steal each other's page).
+// no npm install and no browser MCP involved (a headless Chrome of its own, so
+// concurrent runs cannot steal each other's page).
 //
 // Chrome is found in the Playwright cache, then /Applications. Override with
 // CHROME_BIN.

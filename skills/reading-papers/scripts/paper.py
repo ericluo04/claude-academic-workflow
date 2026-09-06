@@ -31,7 +31,7 @@ Full-text ladder, best-math-fidelity first:
   3. ar5iv.labs.arxiv.org   -> same, for papers predating native arXiv HTML
   4. OA PDF via Unpaywall / OpenAlex best_oa_location  (NBER, repositories, JMLR, PMLR...)
   5. Publisher landing page -> usually 403 for INFORMS/SSRN/Elsevier; caller should
-     fall back to the Playwright MCP with the user's institutional session.
+     fall back to Claude in Chrome with the user's institutional session.
 
 `search` is the topic-level entry point: one query per source (Semantic Scholar, OpenAlex,
 arXiv), merged on DOI -> arXiv id -> normalized title and ranked by reciprocal-rank fusion.
@@ -931,7 +931,7 @@ def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
         ctype = r.headers.get("content-type", "")
         if r.status_code != 200:
             _warn(f"{url} -> HTTP {r.status_code}"
-                  + (" (paywall/bot-wall; use the Playwright MCP with institutional access)"
+                  + (" (paywall/bot-wall; open it in Claude in Chrome with institutional access)"
                      if r.status_code in (401, 403) else ""))
             continue
         if "pdf" in ctype:
@@ -1189,7 +1189,7 @@ def main() -> None:
                 sys.exit(3)
     if not text:
         print(header + "\nNO FREE FULL TEXT REACHABLE.\n"
-              "Next step: open the landing page with the Playwright MCP using the user's\n"
+              "Next step: open the landing page in Claude in Chrome using the user's\n"
               "institutional session, or look for an NBER/SSRN/author-site version.",
               file=sys.stderr)
         print(header)

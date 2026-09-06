@@ -337,7 +337,7 @@ node ~/.claude/assets/quarto-yale/deck-check.mjs handout deck.html out.pdf
 ```
 
 `deck-check.mjs` drives headless Chrome over CDP (node 22's built-in WebSocket,
-so no npm install, and it does not touch the shared Playwright browser). It
+so no npm install and no browser MCP). It
 navigates slide by slide, forces every fragment visible, waits on
 `MathJax.startup.promise` and `document.fonts.ready`, then measures. It finds
 Chrome in the Playwright cache, then `/Applications`, and honours `CHROME_BIN`.
@@ -1038,10 +1038,10 @@ This setup assumes the agent's Read tool cannot open PDFs directly (no
 poppler installed), so it always rasterizes first; adjust to your machine. `pdfread.py text` pulls
 text out of long documents and `pdfread.py pages` gives the count.
 
-Playwright MCP can drive a real browser, but there is one shared instance and
-concurrent agents hijack each other's page, so serialize browser work. Playwright
-also blocks `file://`, so serve the deck (`python3 -m http.server`) before
-navigating.
+Claude in Chrome (`claude --chrome`) drives the user's real browser, but it is a
+visible window at whatever size the user has it, with no headless mode. So the
+gate scripts and slide-review's `capture.mjs` launch their own headless Chrome
+over CDP and open the deck over `file://`, with no server and no MCP.
 
 ## PDF handouts
 
