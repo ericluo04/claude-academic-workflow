@@ -67,8 +67,8 @@
 //   * Put the slide back to `f = -1` when the walk is done, before anything reads
 //     step 0, so the assertions above see the state they have always seen.
 //
-// Same CDP plumbing as deck-check.mjs (node 22 WebSocket, no npm install, does
-// not touch the shared Playwright browser).
+// Same CDP plumbing as deck-check.mjs (node 22 WebSocket, no npm install, a
+// headless Chrome of its own).
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";

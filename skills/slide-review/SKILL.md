@@ -26,26 +26,26 @@ that README owns are cited below, never restated.
 
 | File | What it holds |
 |---|---|
-| `scripts/probe.js` | The stage 4 probe. Read the file and paste the whole function into `browser_evaluate`. |
-| `scripts/figure-ground.js` | The stage 4 figure-ground pass. Same usage. |
+| `scripts/capture.mjs` | Stages 4 and 5 in one run: launches a headless Chrome of its own over CDP, opens the deck over `file://`, runs both probes, and writes the PNGs. |
+| `scripts/probe.js` | The stage 4 probe. `capture.mjs` reads it and runs it in the page. |
+| `scripts/figure-ground.js` | The stage 4 figure-ground pass. Same. |
 | `references/probe-reading.md` | The theme ink tables with measured ratios, the font-size and contrast thresholds, the four math-failure kinds, the dark-deck defect classes. |
 | `references/reviewer-prompts.md` | The four reviewer prompts, the settled-decisions paragraph reviewers receive, and the reply contract. |
 | `references/failure-taxonomy.md` | The full failure table. The eight commonest rows are inline below. |
 | `style/house.md` | This author's expectations: the closing-slide contact block, density calibration by deck type, settled design decisions, the author line. A public fork swaps this file. |
 
-## One browser, so serialize it
+## Every browser here is headless and private to the run
 
-There is a single shared Playwright instance on this machine. Two agents driving it will hijack each
-other's page mid-capture. So all Playwright work happens here, in one place, sequentially. Never spawn
-parallel subagents that navigate or screenshot. Fan out only after the PNGs are on disk, where the
-reviewers read image files and touch no browser.
+The capture path never touches Claude in Chrome. The gate scripts and `capture.mjs` each launch their
+own headless Chrome over CDP, open the deck over `file://`, and exit, so runs cannot collide, no server
+is started, and no permission prompt fires. Claude in Chrome is the user's visible browser at whatever
+window size they have, with no headless mode, so it cannot deliver the fixed 2334x1556 viewport the
+screenshots and the reviewers' arithmetic depend on. Fan out reviewers only after the PNGs are on
+disk; they read image files and touch no browser.
 
-Playwright also blocks `file://`, so the deck has to be served over HTTP.
-
-The stage 3 gate is exempt from all of this. `deck-check.mjs` launches its own headless Chrome over CDP,
-so it cannot be hijacked and needs no server. That is why the measurements live there and Playwright is
-kept for the things only it can do: the deck's ground colour, contrast against composited backgrounds,
-the math-engine signals, and the screenshots.
+The measurements are split by what each pass can see. `deck-check.mjs` owns geometry (stage 3).
+`capture.mjs` owns what needs a rendered page at review size: the deck's ground colour, contrast
+against composited backgrounds, the math-engine signals, and the screenshots.
 
 ## Inputs
 
@@ -66,21 +66,18 @@ file is read.
 export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 ASSETS="$HOME/.claude/assets/quarto-yale"
 RUN="$HOME/.claude/state/slide-review/$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$RUN/shots"
-PORT=$(python3 -c "import socket;s=socket.socket();s.bind(('127.0.0.1',0));print(s.getsockname()[1]);s.close()")
+mkdir -p "$RUN"
 ```
 
-Preflight `quarto`, `python3`, and the Playwright MCP tools. Missing quarto or python3, surface
-`SETUP_MISSING:<tool>` and stop. Missing the browser, fall back to the capture path in stage 5 rather
-than reading the source, which is the failure this skill replaces. node 22 and Chrome are
-needed for the stage 3 gate, which is not optional.
+Preflight `quarto`, `python3`, `node` (22 or later), and a Chrome binary (`/Applications`, or
+`CHROME_BIN`). Missing quarto or python3, surface `SETUP_MISSING:<tool>` and stop. node and Chrome
+are needed for the stage 3 gate and the stage 4 capture, neither of which is optional; a missing
+Chrome is `SETUP_MISSING:chrome`, never a reason to read the source, which is the failure this
+skill replaces.
 
 There is no Homebrew on this machine, so no `pdftoppm`, no `pdftotext`, no ImageMagick. Do not reach for
 them. Every PDF goes through `~/.claude/assets/bin/pdfread.py` (see stage 5), including any
 PDF you need to look at, because `Read` cannot open one here.
-
-`mkdir` the shots directory before any screenshot. Playwright returns a bare `ENOENT` if the parent
-directory does not exist, and it does not create it.
 
 ## Stage 0: deck type and ground
 
@@ -268,13 +265,13 @@ README's `Things that will silently break the deck`.
 numbers come out right (README, fit-gate section). Do not write your own overflow probe: the obvious
 one-pass snippet reads `scrollHeight` 0 off every non-present slide and reports a broken deck as
 clean, as the README explains. `deck-check.mjs handout deck.html out.pdf` exports a PDF; offer it
-when the user wants a handout, and use it as the capture fallback in stage 5.
+when the user wants a handout, and use it as the capture fallback in stage 4.
 
 ### Stage 3b: jump buttons and the progress bar
 
 The staging filter gives every deck two behavioural features no static screenshot can check, and both fail silently.
-Run this only on a deck that has an appendix or `.jump` spans. It needs its own headless Chrome
-rather than the shared Playwright browser, because it navigates and clicks:
+Run this only on a deck that has an appendix or `.jump` spans. Stage 3 covers the static half from
+its own headless Chrome; the interactive half runs in a browser you can script, below:
 
 ```bash
 grep -c 'class="jump-btn' deck.html          # 0 means skip the jump half
@@ -296,10 +293,11 @@ What has to be true, and what each failure means:
 **Stage 3 already ran the dangling-target check**: `deck-check.mjs fit` fails on
 `DANGLING TARGET #id "label"` and warns on a jump target with no `.jump-back`, so read its
 jump-button block before doing this by hand, and carry its label and id into the report verbatim.
-The equivalent in the browser, if you need it on an HTML you were handed:
+The equivalent by hand, on an HTML you were handed: open the deck in Claude in Chrome (`file://` is
+fine there) and run this with its JavaScript tool:
 
 ```
-browser_evaluate: () => [...document.querySelectorAll('a.jump-btn[data-jump]')].map(a => {
+() => [...document.querySelectorAll('a.jump-btn[data-jump]')].map(a => {
   const id = a.getAttribute('data-jump'), el = document.getElementById(id);
   const sec = el && el.closest('.slides section');
   return { label: a.textContent.trim(), target: id,
@@ -312,7 +310,8 @@ Report `resolves: false` as CRITICAL with the label and the target id. `hasBack:
 the presenter can get there and not back. `isAppendix: false` is not a finding; a jump to a main
 slide is legitimate.
 
-The round-trip check needs interaction, so it belongs in one evaluate that drives reveal itself:
+The round-trip check needs interaction, so it belongs in one script that drives reveal itself, run
+the same way:
 put the origin slide at a known fragment step, read `Reveal.getState()`, dispatch a bubbling `click`
 on the button, dispatch one on the `.jump-back` it lands next to, and compare `Reveal.getState()` to
 what you stored. A synthetic bubbling click is the right tool here: the handler is delegated, and a
@@ -347,41 +346,39 @@ same positions off those.
 The bar reads full on the closing slide, since it is the last main-body slide. That is stage 3b's
 fill check and not a second finding here.
 
-## Stage 4: serve and probe
+## Stage 4: probe and capture
 
-The browser handles what only it can: the deck's real ground colour, contrast against composited
-backgrounds, the math-engine failure signals, unresolved citations, and the PNGs the reviewers look
-at. Geometry is already settled by stage 3, so this probe no longer measures it, which keeps the hold
-on the shared browser short.
+The rendered page supplies what stage 3 cannot: the deck's real ground colour, contrast against
+composited backgrounds, the math-engine failure signals, unresolved citations, and the PNGs the
+reviewers look at. Geometry is already settled by stage 3, so the probe does not measure it.
 
-```bash
-cd "$(dirname deck.html)" && nohup python3 -m http.server "$PORT" --bind 127.0.0.1 >/dev/null 2>&1 &
-sleep 2 && curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:$PORT/deck.html"
-```
-
-Anything but `200` means the server did not come up; check the port and retry once. Kill it at the end
-of the run, on every exit path including failure:
+One command does the probe and the screenshots. It launches its own headless Chrome, opens the deck
+over `file://`, sizes the viewport to 2334x1556, waits for Reveal, the math engine, and the fonts,
+switches fragments and transitions off, runs `probe.js` and `figure-ground.js`, and shoots every
+slide:
 
 ```bash
-lsof -ti tcp:$PORT | xargs -r kill
+SKILL="$HOME/.claude/skills/slide-review"
+node "$SKILL/scripts/capture.mjs" deck.html "$RUN"                          # probe.json + shots/
+node "$SKILL/scripts/capture.mjs" deck.html "$RUN" --slides=1,3-5 --no-probe  # a subset, shots only
 ```
 
-Navigate with `browser_navigate` to `http://127.0.0.1:$PORT/deck.html`, then size the viewport so the
-render scale is exactly 2.0, which makes every later measurement trivial to convert:
+Verified output on the public example talk deck, 26 slides in six seconds:
 
 ```
-browser_resize  width=2334  height=1556
+canvas 1050x700, scale 2.000, 26 slides
+probe: $RUN/probe.json (26 slides, 2 figures)
+shots: 26 -> $RUN/shots/slide-01.png .. slide-26.png
 ```
 
 Reveal computes `scale = min(0.9 * innerW / 1050, 0.9 * innerH / 700)` at the Quarto default margin of
 0.1, so 2334x1556 gives scale 2.000 against the 1050x700 logical canvas. Verified. One screenshot
-pixel is half a deck pixel, and the reviewers are told so.
+pixel is half a deck pixel, and the reviewers are told so. The script prints a `WARNING` when the
+scale comes out anything else, which happens on a deck that overrides `width`, `height`, or
+`margin`; carry the printed scale into the reviewer prompts in that case.
 
-Collapse animation so one capture per slide is the whole slide:
-
-```
-browser_evaluate: () => { Reveal.configure({fragments: false, transition: 'none', autoAnimate: false}); Reveal.layout(); return {total: Reveal.getTotalSlides(), scale: Reveal.getScale()}; }
-```
+The script sets `fragments: false`, `transition: 'none'`, and `autoAnimate: false` before it measures
+or shoots anything, so one capture per slide is the whole slide.
 
 `fragments: false` is what makes staged content measurable, and it has to stay. Decks run
 `stage-slide.lua`, which wraps nearly every top-level block on a content slide in a `.fragment` so
@@ -390,8 +387,8 @@ hidden, so it is content, not missing content. Never report a slide as empty or 
 because it arrives on a later keypress, and tell the reviewers the same, since the screenshots are
 taken with fragments off and show the fully revealed slide.
 
-Then run the probe: read `scripts/probe.js` and paste the whole function into one
-`browser_evaluate`, and save the returned JSON to `$RUN/probe.json`. It forces each section visible
+The probe (`scripts/probe.js`, run in the page by `capture.mjs`, its JSON at `$RUN/probe.json`)
+forces each section visible
 in turn and restores the inline style afterwards, because Reveal sets `display: none` on off-screen
 sections and a hidden element reports no computed geometry and no client rects. It measures font
 size and contrast against the composited background, reads the deck's own ground colour instead of
@@ -402,40 +399,38 @@ audience sees it on the attribute's colour.
 
 Images cannot be measured in that pass: reveal lazy-loads them from `data-src`, so off-screen
 `<img>` elements report `naturalWidth` 0 and a zero-size box, and forcing the section visible does
-not change that (verification in `references/probe-reading.md`). So run `scripts/figure-ground.js`
-the same way: it loads each image into a detached `Image` and samples the border band. Append the
-result to `$RUN/probe.json` as `figures`.
+not change that (verification in `references/probe-reading.md`). So `capture.mjs` runs
+`scripts/figure-ground.js` as a second pass: it loads each image into a detached `Image` and samples
+the border band, and the result sits in `$RUN/probe.json` as `figures`. Under `file://` that read
+needs Chrome's `--allow-file-access-from-files`, which the script passes; without it every figure
+comes back `unmeasurable`.
 
 Read both against `references/probe-reading.md`: the font-size and contrast thresholds, the
 `figures[].lightbox` rule with its verified calibrations, the four math-failure kinds and how each
 engine shows them, the unresolved-citation shape, and the four dark-deck defect classes, which apply
 only when `deck.dark` is true and are all skipped on a talk deck.
 
-## Stage 5: capture
+## Stage 5: the PNGs
 
-For each slide index `n` from 0 to `total - 1`, two calls, in order:
-
-```
-browser_evaluate: () => { Reveal.slide(N); Reveal.layout(); return Reveal.getIndices(); }
-browser_take_screenshot: filename=$RUN/shots/slide-NN.png  type=png  scale=css
-```
-
-`Reveal.slide(n)` is the only navigation that works reliably. URL fragments do not, and arrow keys
-drift on decks with vertical stacks. Zero-pad `NN` so the files sort.
+`capture.mjs` has already written them. It navigates with `Reveal.slide(h, v)` from
+`Reveal.getIndices`, which is the only navigation that works reliably (URL fragments do not, and
+arrow keys drift on decks with vertical stacks), and names each file by its flat index, zero-padded,
+so `slide-07.png` is slide 7 in `fit.json` and on the slide number.
 
 The capture is a viewport screenshot, so content past the canvas edge is cut off in the image exactly
 as the projector will cut it. A bullet sliced through its x-height in the PNG is the defect, not an
 artifact of the capture.
 
-Above about 40 slides this is 80 tool calls. Say so and offer `--slides=` before starting a long deck.
-In `--preflight` mode, capture only the slides the probe flagged, plus the title slide.
+A full deck costs a few seconds, so `--slides=` scopes the review and never the capture cost. In
+`--preflight` mode, capture only the slides the probe flagged, plus the title slide: run the probe
+pass first, read `probe.json`, then run again with `--slides=` and `--no-probe`.
 
-### Fallback when the browser is contended
+### Fallback when capture.mjs cannot run
 
-If another agent holds the browser, or the page keeps changing under you mid-capture, export the deck
-to PDF and rasterize from there. Stage 3 has already run, so the geometry is in hand either way; what
-this route gives up is stage 4's contrast and KaTeX signals, so get those from the browser first if you
-can hold it even briefly.
+If Chrome cannot be launched at all (no binary, or a sandbox that blocks `--remote-debugging-port`),
+export the deck to PDF and rasterize from there. Stage 3 has already run, so the geometry is in hand
+either way; what this route gives up is stage 4's contrast and math-engine signals, and the report
+says so.
 
 ```bash
 node "$ASSETS/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
@@ -443,10 +438,8 @@ node "$ASSETS/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
 
 That reuses the same headless Chrome the gate uses and needs nothing installed. decktape is the second
 option if the handout export disagrees with what you saw on screen; the README's PDF sections carry
-the exact `npx -y decktape@latest reveal` invocation. Both drive their own browser, so neither is
-blocked by the shared Playwright instance, and `file://` is fine here because that restriction is
-Playwright's. Chrome's `--headless --print-to-pdf` is not an alternative; it produces a blank PDF on
-reveal decks.
+the exact `npx -y decktape@latest reveal` invocation. Both drive their own browser over `file://`.
+Chrome's `--headless --print-to-pdf` is not an alternative; it produces a blank PDF on reveal decks.
 
 ### Reading any PDF
 
@@ -479,7 +472,7 @@ if PyMuPDF is unavailable, and `pdfread.py --help` prints the equivalent invocat
 
 ## Stage 6: fan out
 
-Now the browser is idle and the PNGs are on disk, so this part parallelizes safely. One `Agent` call
+Now the PNGs are on disk, so this part parallelizes safely. One `Agent` call
 per lens, all in one message, `subagent_type: "general-purpose"`. Every reviewer gets the deck facts
 (canvas 1050x700, screenshots at scale 2.0, root font size, deck type, and the ground colour from
 `deck.ground`) and absolute PNG paths, and every reviewer is told to read the images.

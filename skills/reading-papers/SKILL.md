@@ -142,7 +142,7 @@ AEA direct PDF, Elsevier/Wiley/OUP/Chicago, OpenReview anonymous `api2`. Escalat
    is usually near-identical to the published version.
 3. Free AEA appendix/data: for AER/AEJ the article PDF is walled but the online appendix
    (where the proofs live) and replication package are free; `resolve` surfaces them.
-4. Playwright MCP, a real browser, the only thing that clears Cloudflare. An institutional
+4. Claude in Chrome, the user's real browser, the only thing that clears Cloudflare. An institutional
    proxy has the shape
    `https://<your-library>.idm.oclc.org/login?URL=<target>`, but login is typically SSO + MFA, so the
    user must be in the loop. Ask first; one paper at a time. Systematic proxy downloading can
@@ -264,7 +264,7 @@ apply: results are disk-cached (so re-reads across agents are free), and for a v
 
 ## Setup state
 
-- This setup assumes Zotero MCP (`zotero-mcp-launch.sh` reads `scholar.env`), Playwright MCP,
+- This setup assumes Zotero MCP (`zotero-mcp-launch.sh` reads `scholar.env`), Claude in Chrome,
   and Scholar Gateway are installed and connected; adjust to your machine. `paper.py` needs no keys.
 - `~/.claude/secrets/scholar.env`: put `OPENALEX_API_KEY` and `S2_API_KEY` here, plus the
   optional Zotero web-API creds; REFERENCE.md §7 says how to get all of them.

@@ -25,15 +25,12 @@ a short form of the table.
 | A reviewer proposes dropping the numbered section discs, unsegmenting the progress bar, or putting the appendix or the references back into it | Not a finding. Those are settled and the author likes them. Drop the item in synthesis and keep it out of the report. |
 | A reviewer reports a sparse talk slide as underdeveloped, or a lecture slide as too wordy on the amount of text alone | Not a finding on either type, per the density rules in stage 6. Drop it in synthesis. A talk slide is flagged for text the speaker could say instead; a lecture slide is flagged for text that is unclear or that overwhelms. |
 | Slide numbers all one colour in the handout PDF and a different colour on screen | A theme rule shaped `:has(section.present…)`, which matches every page in print because reveal marks every section `.present` there. Both current themes guard these with `html:not(.print-pdf)`; a third-party theme may not. |
-| `deck-check.mjs` cannot find Chrome | Set `CHROME_BIN` to the binary in `/Applications`. Do not substitute a hand-written overflow probe. |
-| `curl` returns anything but 200 | Server did not bind. New port, retry once, then `SETUP_MISSING:http.server`. |
-| `browser_navigate` on a `file://` path | Playwright blocks it. Serve over HTTP; there is no workaround. |
-| Screenshot returns `ENOENT` | The shots directory does not exist. `mkdir -p`, retry. |
+| `deck-check.mjs` or `capture.mjs` cannot find Chrome | Set `CHROME_BIN` to the binary in `/Applications`. Do not substitute a hand-written overflow probe. |
+| `capture.mjs` prints `WARNING: scale is ...` | The deck overrides `width`, `height`, or `margin`. Carry the printed scale into the reviewer prompts in place of 2.0. |
+| `capture.mjs` reports every figure `unmeasurable` | Chrome ran without `--allow-file-access-from-files`, so the canvas was tainted under `file://`. The script passes the flag; a wrapper that relaunches Chrome must too. |
 | `Reveal is not defined` | Page not finished loading, or an HTML that is not a reveal deck. Re-evaluate once, then stop. |
 | Page changes under you mid-capture | Another agent grabbed the browser. Abandon the capture and switch to the decktape path; do not retry browser work in parallel. |
 | Rasterizer reports an unrecoverable error | Usually not a PDF at all. Confirm the first five bytes are a PDF magic number. |
 | `Read` fails on a `.pdf` | Expected, there is no poppler. Convert with `pdfread.py png` and read the PNG. |
 | `decktape` gives a blank or single-page PDF | Wrong exporter. It must be `decktape reveal`, with the deck's own `file://` path. |
-| Probe returns `scale` other than 2 | Viewport was resized by something else. Re-issue `browser_resize` and re-probe; do not convert with a stale factor. |
 | Reviewer returns prose, not the numbered contract | Re-prompt once with "Please respond in the required format." On a second drift, surface the raw reply. |
-| Server still listening at the end | `lsof -ti tcp:$PORT \| xargs -r kill`. Do this even when the run failed. |

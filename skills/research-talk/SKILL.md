@@ -411,8 +411,8 @@ one-slide PDF has one page, so `--pages 1`. On the full PDF, `--pages` takes
 `3`, `1-5`, or `1,4,9`; `pdfread.py text` pulls the wording across many slides
 at once, and `pdfread.py pages` gives the count. Chrome's
 own `--headless --print-to-pdf` writes a blank PDF on a live deck, and the
-Read tool cannot open PDFs on this machine. Playwright MCP shares one browser
-across agents; prefer decktape, and serialize if you must use it.
+Read tool cannot open PDFs on this machine. Claude in Chrome opens a visible
+window at whatever size it has; prefer decktape or `deck-check.mjs handout`.
 
 ### Handout
 

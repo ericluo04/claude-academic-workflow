@@ -29,7 +29,7 @@ promising more is either wrong or routing through Sci-Hub.
 | Tool | What it actually is |
 |---|---|
 | **Scholar Gateway** (`semanticSearch`) | Published by Wiley. Semantic search over a licensed corpus returning *passages* with citations. Cannot fetch by DOI, cannot read a paper end-to-end. Good for corroborating a claim or locating something. |
-| **Playwright MCP** | A real browser. The only tool here that clears Cloudflare. Your institutional-access escape hatch. |
+| **Claude in Chrome** (`mcp__claude-in-chrome__*`) | Your real Chrome, driven by Claude Code, with your logins in it. The only tool here that clears Cloudflare. Your institutional-access escape hatch. |
 
 ## 3. MCP servers worth knowing (surveyed, not installed)
 
@@ -137,7 +137,7 @@ Zotero (this setup assumes it is installed and connected). Things to know:
   → Create new private key → allow library access (+ write if wanted). Put the key in
   `ZOTERO_API_KEY=` and your numeric userID (same page) in `ZOTERO_LIBRARY_ID=`.
 
-Playwright + an institutional EZproxy for INFORMS/SSRN: human-in-the-loop only. Login
+Claude in Chrome + an institutional EZproxy for INFORMS/SSRN: human-in-the-loop only. Login
 is typically SSO + MFA (not automatable); at-scale proxy use risks access for the *whole
 university*. One paper at a time, ask first, never loop.
 
