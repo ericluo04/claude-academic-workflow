@@ -30,7 +30,7 @@ Keys (optional, all free) live in `~/.claude/secrets/scholar.env`; the script au
 
 Run it by path exactly as shown: the uv shebang provisions its dependencies (httpx, lxml,
 pypdf) in an isolated environment. Invoking it as `python3 paper.py` bypasses the shebang and
-fails wherever httpx is not installed (this happened in a subagent environment, 2026-07). If
+fails wherever httpx is not installed, which includes subagent environments. If
 uv itself is missing, fall back to plain curl against the resolver APIs for the one lookup
 you need.
 
@@ -50,10 +50,9 @@ web-searching or guessing URLs. The routing is cost- and Cloudflare-aware:
 Version-of-record vs preprint: a title search can surface the NBER or SSRN copy. The matcher
 ranks the journal version above preprint containers, but econ papers genuinely exist as several
 records with different DOIs and different citation counts, so say which one you mean. Default
-rule (made explicit after a 2026-07 reading campaign): read the version of
-record whenever one exists and is reachable; fall back to arXiv/NBER only when it is not, and
-name the version you read either way, since numbers and author lists can differ across
-versions.
+rule: read the version of record whenever one exists and is reachable; fall back to arXiv/NBER
+only when it is not, and name the version you read either way, since numbers and author lists can
+differ across versions.
 
 `search` is the topic-level entry point (`resolve` is for a known item). One query per source,
 merged on DOI → arXiv id → normalized title, re-ranked by reciprocal-rank fusion, one OpenAlex
@@ -214,10 +213,9 @@ Use it to see what a paper is actually being used for.
   institutional repository, which `resolve` finds. 2023+ INFORMS DOIs changed shape; listings
   contain non-article DOIs (`…ack…`, `…eb…`) worth ignoring.
 - Psychology: Psych Science is SAGE (PMC holds front matter only). Try PsyArXiv/OSF.
-- Annual Reviews: CC-BY articles fetched directly in early July 2026, but as of 2026-07-28
-  the landing pages sit behind a Cloudflare challenge that blocks curl. Go arXiv-first for AR
-  titles (accepted versions usually exist and worked where the AR page failed); treat any
-  direct-fetch success as date-dependent.
+- Annual Reviews: the landing pages sit behind a Cloudflare challenge that blocks curl
+  (checked 2026-07-28). Go arXiv-first for AR titles; accepted versions usually exist. Treat
+  any direct-fetch success as date-dependent.
 
 ## Honesty rules
 
@@ -256,11 +254,11 @@ correct"* (Section 6, p. 22). Read: published version, arXiv HTML rung.
 ## Working with many papers
 
 Per the user's standing preference, for several papers at once spawn parallel subagents, one
-paper each, returning structured summaries. Every API call in `paper.py` now retries with
+paper each, returning structured summaries. Every API call in `paper.py` retries with
 exponential backoff on 429/503 (arXiv, Semantic Scholar, OpenAlex, Crossref), and the OpenAlex key
-gives a 10,000-credit daily budget, so a fan-out of a dozen readers is safe. Two things still
-apply: results are disk-cached (so re-reads across agents are free), and for a very large batch
-(many dozens) keep arXiv-heavy concurrency modest, since arXiv politeness is ~1 request / 3s.
+gives a 10,000-credit daily budget, so a fan-out of a dozen readers is safe. Results are
+disk-cached, so re-reads across agents are free. For a very large batch (many dozens) keep
+arXiv-heavy concurrency modest, since arXiv politeness is about one request per 3 seconds.
 
 ## Setup state
 

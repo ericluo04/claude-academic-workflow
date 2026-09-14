@@ -7,15 +7,12 @@ argument-hint: "[deck.qmd|deck.html] [--preflight] [--type=talk|lecture] [--slid
 # slide-review
 
 Render the deck, gate it on a headless-Chrome fit check, screenshot every slide, then hand those PNGs to
-reviewer subagents that judge from pixels. The predecessor skill read `.tex` source and guessed at
-overflow by counting characters, which is how a deck reaches the podium with its last bullets below the
-bottom edge. Nothing here infers layout from source. A browser measures it and the reviewers look at it.
+reviewer subagents that judge from pixels. Nothing here infers layout from source: counting characters
+in a `.qmd` cannot see a slide whose last bullets sit below the bottom edge. A browser measures it and
+the reviewers look at it.
 
 Same loop as `compile-latex --figures`: render, rasterize, let an agent with eyes judge the image,
 report exact fixes. This skill reports and does not edit, because a deck revision is the author's call.
-
-Descends from the `slide-excellence` orchestrator, the `create-lecture` workflow, and its four review
-agents in [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
 
 ## Where things live
 
@@ -116,13 +113,11 @@ What the deck's ink should measure, hex by hex, comes from the theme's own palet
 `Theme classes` section; a cheap single fingerprint is that talk sources use `.ymid` where
 lecture sources use `.ypale` (the starter theme styles both).
 
-`.section-break` styling is per theme, so old advice about it goes stale, and
-the README's `Things that will silently break the deck` section has the current rule: no
-`background-color` attribute on a section divider, whatever the theme. On a dark deck the attribute
-is also a defect
-the probe can see, because reveal's `has-dark-background` then forces that slide's body text to pure
-white (verification in `references/probe-reading.md`, dark defects). Do not carry an old
-hard-coded `background-color` fix forward from memory.
+`.section-break` styling is per theme. The rule, from the README's `Things that will silently
+break the deck` section, is no `background-color` attribute on a section divider, whatever the
+theme. On a dark deck the attribute is also a defect the probe can see, because reveal's
+`has-dark-background` then forces that slide's body text to pure white (verification in
+`references/probe-reading.md`, dark defects).
 
 ## Stage 1: render
 
@@ -154,10 +149,10 @@ review, and any offline claim gets confirmed in stage 2. Skip stage 1 entirely w
 
 ## Stage 2: offline check, only when the deck asked for it
 
-This used to be a mandatory gate and is not one any more. Decks now default to MathJax loaded from a
-CDN, so an external MathJax reference is the expected state of a correct deck, and reporting it as a
-defect sends the author after a bug that is not there. Offline is an opt-in variant, declared in
-front matter as `embed-resources: true` together with `html-math-method: katex`. Run the check only
+Decks default to MathJax loaded from a CDN, so an external MathJax reference is the expected state
+of a correct deck, and reporting it as a defect sends the author after a bug that is not there.
+Offline is an opt-in variant, declared in front matter as `embed-resources: true` together with
+`html-math-method: katex`. Run the check only
 in that case, using the facts stage 0 already read:
 
 ```bash

@@ -10,9 +10,6 @@ when it is not gets caught immediately, and the cost of that is much higher than
 honest TODO. So the letter may only say what the manuscript actually says. Step 3 is the point of
 this skill: a verification pass sitting between classifying the comments and writing any prose.
 
-The `--five-q` so-what gate on pushback paragraphs is adapted from
-[aspi6246/Claude-Code-Presentation](https://github.com/aspi6246/Claude-Code-Presentation).
-
 ## Arguments
 
 - `continue`: extend a partial `R2R_R<n>.tex` already in the project instead of starting fresh.
@@ -70,15 +67,8 @@ change promised last round gets checked in step 3 like every other claim.
 
 ## Step 1. Parse into role-keyed comments
 
-Extract comment text verbatim into:
-
-```
-[ { role: "Senior Editor",    comments: ["<verbatim>", ...] },
-  { role: "Associate Editor", comments: [...] },
-  { role: "Reviewer 1",       comments: [...] },
-  { role: "Reviewer 2",       comments: [...] } ]
-```
-
+Key every comment to its author (Senior Editor, Associate Editor, Reviewer 1, Reviewer 2, and so
+on) and keep its text verbatim, since the letter quotes each comment before replying to it.
 If the source is not labeled by role, ask once to confirm the assignment. If the comments are not
 numbered in the source, preserve the source's own structure (paragraphs, bullets) rather than
 imposing numbering the user never received. Use internal ids like R1.3 for the chat report.
@@ -169,7 +159,8 @@ Not into the file:
 ## --five-q mode
 
 Opt-in only, never automatic. It applies a hostile-editor test to every paragraph classified
-Polite disagreement. In a scratch block, not in the file, answer for the disputed claim:
+Polite disagreement. Before drafting that paragraph, test the disputed claim against five
+questions; the answers do not go in the file:
 
 1. What is the question?
 2. Why should anyone care?

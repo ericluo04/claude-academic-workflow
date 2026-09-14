@@ -62,26 +62,22 @@ verbatim copy of the source for provenance.
 ## Phase 1: dispatch
 
 Group the well-formed entries into batches of 5, preserving file order; the last batch holds the
-remainder. Launch one subagent per batch with the `Agent` tool, 8 per message, so 40 entries are in
-flight per wave. Wait for the wave to return, then send the next 8. 170 cited entries is 34 batch
-subagents in 5 waves. Respect `--max-parallel N` if the user passes it; drop to 2 when
-rate-limited.
+remainder. Launch batch subagents with the `Agent` tool, keeping 8 in flight. They run in the
+background: when a completion notice arrives, launch the next batch, and carry on with any
+aggregation already possible in the meantime. Respect `--max-parallel N` if the user passes it;
+drop to 2 when rate-limited.
 
 Each subagent gets its batch's raw entry texts, the absolute `entries/` paths, one absolute output
 path `reports/<citekey>.json` per entry, and the check list below. Subagent working directories
 reset between Bash calls, so every path handed to a subagent must be absolute.
 
-The batch contract: the subagent MUST return the full per-entry output schema for every one of its
-entries, each verified independently against the lookup tools, with no verdict inferred from a
-batchmate. State in the subagent prompt that the failure mode to guard against is skimping on the
-later entries in the batch, and that entry 5 gets the same treatment as entry 1.
+The batch contract: the subagent returns the full per-entry output schema for every entry in its
+batch, each verified independently against the lookup tools, with no verdict inferred from a
+batchmate.
 
 Give each subagent a 60-second lookup budget per entry. On expiry it writes
 `{"verdict": "WARN", "diagnostic": "lookup_timeout"}` for that entry and moves to its next one.
 Raise the budget on a cold cache; `paper.py` disk-caches responses for 30 days, so reruns are fast.
-
-For a long run, dispatch waves of background subagents with the `Agent` tool and act on their
-completion notifications, sending the next wave as each one finishes.
 
 ## Phase 2: per-entry checks
 
@@ -154,7 +150,19 @@ only when the entry has no identifier at all.
 
    Title match rule: lowercase, strip LaTeX braces and accents, strip punctuation, drop the
    stopwords {a, an, the, of, on, in, for, and, to}, tokenize on whitespace, and compute Jaccard
-   overlap of the token sets. Accept at ≥ 0.85.
+   overlap of the token sets. Accept at ≥ 0.85. Run the comparison in code, never by inspection:
+
+   ```bash
+   python3 -c 'import re,sys,unicodedata
+   S={"a","an","the","of","on","in","for","and","to"}
+   def t(s):
+       s=unicodedata.normalize("NFKD",s); s="".join(c for c in s if not unicodedata.combining(c))
+       return {w for w in re.sub(r"[^a-z0-9 ]"," ",s.lower().replace("{","").replace("}","")).split() if w not in S}
+   a,b=t(sys.argv[1]),t(sys.argv[2]); print(round(len(a&b)/len(a|b),3))' "<entry title>" "<candidate title>"
+   ```
+
+   The same normalization (NFKD, combining marks stripped, lowercase, punctuation removed) is what
+   check 5 means for surnames; reuse `t()` on the surname strings.
 
 4. Fabrication test. FAIL with `fabricated? DOI does not resolve and no index recognizes the title`
    when all of these hold: the entry is an indexed type; a `doi` is present and both Crossref and
@@ -225,6 +233,11 @@ One file per entry at `reports/<citekey>.json`:
 ```
 
 ## Phase 3: aggregate and report
+
+First reconcile: every `entries/<key>.bib` must have a `reports/<key>.json`
+(`comm -3 <(ls entries | sed 's/.bib$//' | sort) <(ls reports | sed 's/.json$//' | sort)`).
+Re-dispatch the missing keys as one batch before aggregating, and state the reconciled count in
+the report header.
 
 Read every JSON in `reports/`. Bucket by FAIL, then WARN, then PASS; sort alphabetically by citekey
 within each bucket so runs diff cleanly. Write

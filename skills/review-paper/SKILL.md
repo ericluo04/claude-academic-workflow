@@ -52,6 +52,12 @@ editor and the authors in the conventional register:
 
 1. A summary paragraph restating the paper in the referee's own words: the research question, the
    design, the data, and the main findings. Specific enough to show the paper was read.
+   Illustrative shape of a correct summary: `The paper asks whether platform-supplied badges
+   change which sellers buyers choose. It uses a paired-profile conjoint on 2,400 Prolific
+   respondents and a field test on one marketplace, and finds a badge effect of about 4 points of
+   choice share, concentrated among first-time buyers. The authors call the field estimate their
+   *"most conservative benchmark"* (section 5.2).` Every claim is reworded; the one phrase kept
+   verbatim is marked and located.
 2. Major comments, numbered. Built from the CRITICAL and MAJOR findings: identification threats,
    missing analyses, overclaiming, internal contradictions. Each states the issue, points at the
    exact location, and where possible says what would resolve it.
@@ -263,10 +269,26 @@ beyond it? Does it settle something researchers disagree about? Does it change h
 about the topic? Rate it Transformative, Significant, Incremental, or Insufficient for the target
 journal, and justify in two or three sentences.
 
-Part 1b, buried-contribution gate. From `\begin{document}`, counting prose only (skip LaTeX
-commands, comments, and the abstract), count words until the first sentence containing "we find",
-"we show", "we document", "our main result", "the headline", "we report", "in this paper, we",
-"the contribution", or "we contribute". Report the count and the phrase that matched, or "no
+Part 1b, buried-contribution gate. Compute the runway in code, never by reading. Flatten the
+main file into a scratch directory with `D=$(mktemp -d); latexpand main.tex > "$D/flat.tex"`, then
+run:
+
+```bash
+python3 - "$D/flat.tex" <<'EOF'
+import re, subprocess, sys
+body = open(sys.argv[1]).read().split(r'\begin{document}', 1)[1]
+body = re.sub(r'\\begin\{abstract\}.*?\\end\{abstract\}', '', body, flags=re.S)
+body = re.sub(r'(?m)(?<!\\)%.*$', '', body)
+trig = re.compile(r'we find|we show|we document|our main result|the headline|we report|in this paper, we|the contribution|we contribute', re.I)
+m = trig.search(body)
+head = body[:m.start()] if m else body
+words = len(subprocess.run(['detex'], input=head, capture_output=True, text=True).stdout.split())
+print(words, m.group(0) if m else 'no trigger found in body')
+EOF
+```
+
+It counts prose words from `\begin{document}` (LaTeX commands, comments, and the abstract
+skipped) up to the first trigger phrase. Report the count and the phrase that matched, or "no
 trigger found in body". Over 2500 words: `[MAJOR]`, headline finding buried deep, strong
 desk-reject risk at MKSCI, JMR, JCR, and MS. Between 1500 and 2500: `[WARN]`, buried roughly
 three double-spaced pages in, a common desk-reject signal. At or under 1500: `[OK]`. If the

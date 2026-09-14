@@ -5,7 +5,7 @@ description: Author a Quarto reveal.js deck for a research talk: seminar, confer
 
 # Research talk decks
 
-Create a professional presentation on the requested topic. Include thoughtful design elements, visual hierarchy, and engaging animations where appropriate.
+Build a deck a seminar audience can follow cold: a clear visual hierarchy in which the exhibit dominates each slide, and staged reveals only where they help a point land.
 
 Builds a `.qmd` that renders to a reveal.js HTML deck for a seminar, conference
 talk, job talk, or brown bag. The audience is other researchers who are reading
@@ -23,10 +23,6 @@ the gates assert, the reference packer, the progress-bar takeover, and the
 settings that silently break a deck. Read it for any of that; where it and the
 source disagree, the source wins. The head of `starter-theme.scss` carries the
 theme's own reasoning about each class.
-
-Deck architecture and the review-before-the-talk discipline are adapted from
-the `slide-excellence` orchestrator and its review agents in Pedro Sant'Anna's
-`pedrohcgs/claude-code-my-workflow`.
 
 ## Read next to this file
 
@@ -65,25 +61,24 @@ after twenty slides exist costs an hour.
 
 ## Content doctrine
 
-Titles are either assertions or short labels, and `style/house.md` is the
-calibration: check it before writing a title list. Assertions state the
-takeaway in the title ("Disclosure raises prices only where search costs are
-high") so a listener who tunes out for a minute can rejoin by reading one
-line; labels ("Where we are", "Prompting confounds") are three to five words
-and put the claim in the body and the voiceover instead. Ask which the deck
-wants when it is not your own. Either way: one or two lines, and if the title
-needs three, the point is not sharp yet.
+Titles are short labels of three to five words, and `style/house.md` is the
+calibration; read it before writing a title list. Labels ("Where we are",
+"Prompting confounds") put the claim in the body and the voiceover. The
+alternative is assertion titles ("Disclosure raises prices only where search
+costs are high"), which let a listener who tunes out for a minute rejoin by
+reading one line; offer them only when the deck is not your own, and ask which
+the deck wants. Either way: one or two lines, and if the title needs three, the
+point is not sharp yet.
 
 The deck is one argument. A paper has four contributions and a talk has one.
 Pick the claim that can be defended in the slot and move the rest to the
 appendix. Deciding what the talk is not about is most of the work. One idea per
 slide; a slide with two jobs also tends to be the slide that overflows.
 
-A narrated picture book, which is the house style and deliberate. Where
-`style/house.md` sets a harder bar than what follows (phrases and not
-sentences, the figure sized to the geometry rather than to what looks safe),
-it wins. The slide carries the exhibit and the one line that names what it
-shows, and the speaker carries the argument. A sparse slide is finished, so do not fill it in with
+The house style is a narrated picture book, calibrated in `style/house.md`:
+phrases and not sentences, and the figure sized to the slide geometry. The
+slide carries the exhibit and the one line that names what it shows, and the
+speaker carries the argument. A sparse slide is finished, so do not fill it in with
 supporting sentences; err to the sparse side every time. Longer text is
 welcome when it arrives as one block of full sentences, staged so it lands as
 you say it; three sentences of prose land more easily than eight compressed
@@ -128,13 +123,12 @@ the theme gives `.aside-note` and `.citation`; do not make the audience wait
 for a references slide to learn whose figure they are looking at. The full
 list still goes at the end, after the appendix (`references/citations.md`).
 
-Never type a reference by hand. Not into a slide, not into a tooltip, not into
+Never type a reference by hand: not into a slide, not into a tooltip, not into
 the `.bib`. Every author, year, journal, and title comes out of a verified
 `.bib` mechanically, because a citation typed from memory or reconstructed from
-a citekey is how five fabricated entries reached a finished deck for a room
-that included the authors being cited. `references/citations.md` has the rule
-and the generator pattern; run the `bibcheck` skill on the `.bib` before the
-talk.
+a citekey gets fabricated, and the room often includes the people being cited.
+`references/citations.md` has the rule and the generator pattern; run the
+`bibcheck` skill on the `.bib` before the talk.
 
 ## Deck architecture
 
@@ -301,9 +295,9 @@ centred title), which is what makes them read as a turn in the talk:
 
 `stage-slide.lua` numbers the `.section-break` dividers, so never hand-number
 them: insert a section and the rest renumber on the next render. Copy the
-appendix attribute exactly as written; forgetting it is no longer silent (the
-theme paints the same ground as a fallback), and the references divider
-takes `var(--references-ground)` the same way. Do not add `background-color`
+appendix attribute exactly as written; if it is missing the theme paints the
+same ground as a fallback, and the references divider takes
+`var(--references-ground)` the same way. Do not add `background-color`
 to a `.section-break`: a coloured field there is noise, and the class alone is
 the contract. Appendix content slides keep the page ground on purpose, marked
 by the muted
@@ -368,12 +362,11 @@ node ~/.claude/assets/quarto-yale/stage-check.mjs deck.html      # must print ST
 The fit gate exists because the reveal canvas is a fixed 1050x700 that reveal
 scales to the window: a slide overflowing by 345 px looks fine on a laptop and
 gets cut off on the projector, and there is no `allowframebreaks` to save it.
-On a real test the deck rendered at exit 0 with no warning, and the exported
-PDF simply stopped mid-list with a figure and two paragraphs gone. The gate
-visits every slide with fragments forced visible and fails on overflow, excess
-width, missing images, crushed or shrunk figures, unrendered math, a dangling
-`.jump` target, and an unpaginated bibliography; it warns on a nearly empty
-slide (the stray macro block), and `--json` prints per-image geometry. On
+The gate visits every slide with fragments forced visible and fails on
+overflow, excess width, missing images, crushed or shrunk figures, unrendered
+math, a dangling `.jump` target, and an unpaginated bibliography; it warns on
+a nearly empty slide (the stray macro block), and `--json` prints per-image
+geometry. On
 overflow, cut content or split the slide; do not shrink the font, since the
 30 px root is already calibrated for a seminar room.
 
@@ -459,8 +452,7 @@ variant whenever the room is uncertain.
 - `panel-tabset` prints only its first tab, so it destroys a handout. Use
   separate slides when the deck will be exported.
 - Do not add `top: 0 !important` to a theme: it outranks the inline `top`
-  reveal writes to centre the title slide and kills per-slide `{.center}`; the
-  theme once carried it and title-slide centring died silently.
+  reveal writes to centre the title slide and kills per-slide `{.center}`.
 - Do not switch the engine to `mathml` (Chrome loses operator spacing,
   mispositions subscripts, and misaligns `aligned` blocks) or `plain` (strips
   the markup, so `p^*` comes out as `p *`).

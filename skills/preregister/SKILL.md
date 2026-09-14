@@ -195,7 +195,9 @@ document still gets written but is reported as INCOMPLETE with the count of unre
 
 If the document cites prior literature, and `--no-verify` was not passed, spawn a general-purpose
 subagent with the Agent tool and this prompt. Pass the citation strings and the claim each one
-supports, not the draft, so the verifier judges the citation independently.
+supports, not the draft, so the verifier judges the citation independently. Launch it as soon as
+the draft's citation list is fixed and keep working: run the Phase 4 cross-checks and write the
+file while it runs, then fold the verdict lines into the Phase 6 report when they arrive.
 
 Two checks run on every citation, each with its own verdict line.
 
