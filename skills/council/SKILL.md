@@ -1,6 +1,6 @@
 ---
 name: council
-description: Five independent critic subagents in parallel on an idea, plan, design, R&R strategy, grant, or SKILL.md, then a synthesis pass that ranks findings by how much of the argument rests on them, never by vote count. TRIGGER on "council", "spawn critics", "parallel critique", "kitchen cabinet", "panel review", "stress-test this", "poke holes in this", "what would five experts say". A complete manuscript goes to review-paper.
+description: Five independent critic subagents in parallel on an idea, plan, design, R&R strategy, grant, or SKILL.md, then a synthesis pass that ranks findings by how much of the argument rests on them, never by vote count. A markdown work plan gets the plan roster (assumptions, pre-mortem, what to delete, alternatives per piece, can it be run as written). TRIGGER on "council", "spawn critics", "parallel critique", "kitchen cabinet", "panel review", "stress-test this", "poke holes in this", "critique my plan", "review this plan", "what would five experts say". A complete manuscript goes to review-paper; a rendered deck to slide-review.
 ---
 
 # council
@@ -25,7 +25,9 @@ never edits the target.
 | Argument | Default | Meaning |
 |---|---|---|
 | target | required | file path, or an inline paragraph describing the idea, plan, or decision |
+| `--plan` | inferred | force the plan roster; inferred for a markdown plan or project document when no roster flag is given |
 | `--chef-skill` | off | swap in the skill-design roster |
+| `--goal="..."` | none | the overarching goal the target serves, passed verbatim to every critic; without it each critic infers the goal from the target and states the inference at the top of its output |
 | `--critics=a,b,c` | default roster | explicit roster; unknown names become free-form role prompts |
 | `--n=K` | 5 | number of critics, hard cap 5 |
 
@@ -102,10 +104,46 @@ For a `SKILL.md` the user wants stress-tested before installing.
 
 Each ends with `VERDICT: SHIP | REVISE | REJECT` plus a one-line rationale.
 
+## `--plan` roster (work plans and project documents)
+
+For a markdown plan, a PLAN.md, a pipeline design, a project brief, or any document that says what
+will be built and in what order. Every critic gets the goal (from `--goal`, or inferred and stated)
+and judges each piece of the plan against it.
+
+1. Skeptic. "Challenge the core claim of this plan: that doing these steps reaches the goal. What
+   would have to be true for that to fail? Name the specific assumption in this plan that has not
+   been stress-tested, not the genre-typical one, and say what evidence would settle it."
+2. Pre-mortem. "It is three months from now and this plan has failed. What is the most likely
+   failure mode? Walk back from the failure and name the decision point today at which it could
+   have been avoided."
+3. Reductionist. "Think from first principles about what this plan is trying to achieve, given the
+   goal. Interrogate each piece: is it unnecessary, overly complicated, or resting on a weak
+   assumption? First name what can be deleted entirely. Then, with those pieces gone, name what
+   can be simplified. Quote each piece you cut or shrink and give the shorter form. A piece that
+   moves no reported number and answers no objection is a deletion candidate by default."
+4. Alternatives. "Take each major piece of the plan in turn (a method, a model, a package, a data
+   source, a step) and ask whether there is a better, more current, more stable, or cheaper way to
+   serve its purpose given the goal. Verdict per piece: keep, swap (name the alternative and its
+   tradeoff), or drop. Implementability weighs as much as performance: maintained code, published
+   weights, a clean licence, a form the user can state in a methods section. You may run up to five
+   WebSearch calls, only on pieces where you doubt that your own knowledge is current (models,
+   packages, APIs, benchmarks); say which pieces you searched and which you judged from memory."
+5. Executor. "You are the agent who will run this plan tomorrow with nobody to ask. Walk it step by
+   step. Where does it stop you: a missing input, an undefined threshold, an ambiguous order, a
+   step that depends on a result not yet available, a success criterion nobody wrote down, a
+   destructive action with no confirmation point? List the top five blockers and the sentence
+   that would unblock each."
+
+Each ends with `VERDICT: SHIP | REVISE | REJECT` plus a one-line rationale. `--n=3` keeps the
+skeptic, the pre-mortem, and the reductionist.
+
 ## Workflow
 
-Phase 0, prep. Parse the target and flags. With `--chef-skill`, lock the roster and skip
-target-type inference. Read a file target once here; use inline text as-is. Resolve the roster,
+Phase 0, prep. Parse the target and flags. With `--chef-skill` or `--plan`, lock that roster and
+skip target-type inference. Otherwise infer: a `.md` or `.txt` whose headings read as phases,
+steps, milestones, or a plan of record takes the plan roster; a paper idea, R&R strategy, grant, or
+design memo takes the default roster; say which roster was chosen and why in one line before
+dispatching. Read a file target once here; use inline text as-is. Resolve the roster,
 truncating to `--n`. Truncation keeps the first K critics in list order, so `--n=3` on the
 default roster drops the academic editor and the harsh referee. Create a scratch directory `~/.claude/cache/council_<YYYYMMDD>_<run_id>/`
 for raw critic output.
@@ -113,7 +151,9 @@ for raw critic output.
 Phase 1, parallel dispatch. This is the key step. Send ONE message containing N subagent
 calls, one per critic, so they run concurrently. Never serialize them. Each call uses
 `subagent_type: general-purpose`, a three-to-five word description, and a prompt made of the
-critic's role string, the target content, and: "Produce raw critique in this role's voice. Be
+critic's role string, the goal line (`Goal, as stated by the user: ...` when `--goal` was passed;
+otherwise `Goal: not stated; infer it from the target and open your output with the goal you
+inferred`), the target content, and: "Produce raw critique in this role's voice. Be
 specific to this target, not to the genre. Quote the target where you object to it. End with
 VERDICT plus a one-line rationale. Write your output to
 `~/.claude/cache/council_<YYYYMMDD>_<run_id>/critic_<role>.md` and also return it as your final
@@ -146,7 +186,7 @@ if it ranked by how many critics agreed, re-spawn it with a sharper instruction.
 ```markdown
 # Council review: <target>
 
-Date: YYYY-MM-DD | Mode: <default | chef-skill> | Critics: <N> (<roster>)
+Date: YYYY-MM-DD | Mode: <default | plan | chef-skill> | Goal: <stated | inferred: ...> | Critics: <N> (<roster>)
 Synthesizer verdict: <SHIP | REVISE-MINOR | REVISE-MAJOR | REJECT-AND-REFRAME>
 
 ## Key concerns (action required)
@@ -182,6 +222,10 @@ Every critic approves: report it honestly with a SHIP verdict. Do not manufactur
 justify the run.
 
 `--chef-skill` on a non-skill target: say so and ask whether to switch to the default roster.
+
+`--plan` on a paper idea or a manuscript: run it anyway, since the reductionist and alternatives
+lenses apply to a research design too, but say that the default roster carries the venue and
+referee pressure this run will not.
 
 ## Out of scope
 
