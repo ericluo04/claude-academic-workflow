@@ -84,8 +84,8 @@ For a `SKILL.md` the user wants stress-tested before installing.
    MCP (`mcp__zotero__*`, including semantic search, PDF page reads, annotations, bibliography
    export), Claude in Chrome (`mcp__claude-in-chrome__*`, the user's real Chrome with its logins, one tab group per session, no headless mode), Scholar Gateway
    (`semanticSearch`, a semantic passage search over a Wiley-leaning corpus, not a fetcher for
-   arbitrary DOIs), WebSearch and WebFetch, and the Notion, Gmail, Google Drive, and Google
-   Calendar connectors through claude.ai. Local CLI:
+   arbitrary DOIs), WebSearch and WebFetch, and whichever claude.ai connectors the session has
+   enabled. Local CLI:
    `~/.claude/skills/reading-papers/scripts/paper.py` (search, resolve, get, author,
    cites, `--json`) for literature lookup and citation checks. This inventory may lag the
    machine, so verify against the live tool list in your own context before flagging a tool as

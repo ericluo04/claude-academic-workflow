@@ -38,9 +38,9 @@ Never call `pdftotext` or `pdftoppm`; neither is installed.
 
 A package needs two directories, and in this setup they are normally in different places.
 
-Paper root is an Overleaf project, normally under `$HOME/Library/CloudStorage/Dropbox*/Apps/Overleaf/<project>/`, holding `main*.tex`, `.bib`, `Tables/`, and `Figures/`. These projects are for academic writing, so they hold no analysis code by design. A paper root with nothing but `.tex`, `.bib`, and exhibit assets in it is the expected case. Do not report it, do not warn about it, do not search it for code, and do not imply anything is misconfigured. Read it for the exhibit list, the title, the abstract, and the author block; never copy the manuscript into the archive.
+Paper root is an Overleaf project, normally under `$HOME/Library/CloudStorage/Dropbox*/Apps/Overleaf/<project>/`, holding `main*.tex`, `.bib`, `Tables/`, and `Figures/`. These projects are for academic writing, so a paper root with nothing but `.tex`, `.bib`, and exhibit assets is the expected case and needs no comment. Read it for the exhibit list, the title, the abstract, and the author block; never copy the manuscript into the archive.
 
-Code root is wherever the analysis lives, which is somewhere else entirely: a local git repo, a research folder elsewhere in Dropbox, or a directory on the HPC grid. It is a separate input. Take it from the arguments when given, and otherwise ask for it in the batched question message and wait for the answer. Do not go hunting for it across the filesystem and do not report a failure to find it.
+Code root is wherever the analysis lives, which is somewhere else entirely: a local git repo, a research folder elsewhere in Dropbox, or a directory on the HPC grid. It is a separate input: take it from the arguments when given, otherwise ask for it in the batched question message and wait for the answer.
 
 The one genuine blocker is code that lives on an HPC cluster (`/gpfs/...`, `/home/<user>/`) and has not been synced down. Confirm the given path really exists locally before believing it:
 

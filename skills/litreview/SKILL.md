@@ -131,7 +131,9 @@ request per three seconds.
 
 Read the papers scoring 4 and 5, capped at twelve by default. Ask before going past that. Hand each
 subagent an identifier, never a title: a DOI or arXiv id costs 1 OpenAlex credit, a title costs 10.
-Launch every reader with the `Agent` tool.
+Launch every reader with the `Agent` tool. While the readers run, write the
+`Paper/litreview-<slug>.tex` skeleton from the search metadata (header line, doi, cited_by, sources,
+Zotero key) and fill each block's takeaway lines as its summary arrives.
 
 Subagent prompt template:
 
@@ -230,8 +232,9 @@ user would have to do to close each gap.
 list, verbatim. Append to an existing `references.bib` and match the key style already in it. Never
 rewrite an entry that is already there.
 
-The chat reply is the two paths and the ranked list, nothing else. Takeaways, the synthesis, and
-the coverage line live in the `.tex` and are not repeated in chat.
+The chat reply carries the two paths, the ranked list, and anything the user has to act on now
+(Zotero looked closed, a source failed). Takeaways, the synthesis, and the coverage line live in
+the `.tex` and are not repeated in chat.
 
 Stop there. Ask before adding anything to Zotero; writes need the web key and the user did not ask
 for a library edit unless they said so.

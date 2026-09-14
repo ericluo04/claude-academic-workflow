@@ -257,9 +257,9 @@ a second drift, stop and surface the raw reply.
 At `--max-iter` without approval, surface the last PNG, the outstanding
 objections, and the in-progress source, and leave that block unspliced.
 
-With several figures, run the loops in lockstep: compile and render all of them,
-launch every reviewer call for that round in one message, then apply. A figure
-that approves drops out of later rounds.
+With several figures, launch every reviewer for the current round in one message,
+then advance each figure to its next round as its own reviewer returns; do not
+hold a figure for the others. A figure that approves drops out of later rounds.
 
 ### 6.6 Splice back and rebuild
 
