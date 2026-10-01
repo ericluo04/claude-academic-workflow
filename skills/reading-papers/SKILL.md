@@ -146,7 +146,7 @@ AEA direct PDF, Elsevier/Wiley/OUP/Chicago, OpenReview anonymous `api2`. Escalat
    `https://<your-library>.idm.oclc.org/login?URL=<target>`, but login is typically SSO + MFA, so the
    user must be in the loop. Ask first; one paper at a time. Systematic proxy downloading can
    get the whole university cut off, so never loop it.
-5. Scholar Gateway (`semanticSearch`): Wiley-leaning licensed corpus, returns *passages*, not
+5. Wiley Scholar Gateway (`search_wiley_fulltext`): Wiley-leaning licensed corpus, returns *passages*, not
    full text; can't fetch by DOI. Good for corroborating a claim, not reading a paper.
 6. Say plainly that only the abstract is reachable. Never paraphrase an abstract as if you read the
    paper.
@@ -263,7 +263,7 @@ arXiv-heavy concurrency modest, since arXiv politeness is about one request per 
 ## Setup state
 
 - This setup assumes Zotero MCP (`zotero-mcp-launch.sh` reads `scholar.env`), Claude in Chrome,
-  and Scholar Gateway are installed and connected; adjust to your machine. `paper.py` needs no keys.
+  and Wiley Scholar Gateway are installed and connected; adjust to your machine. `paper.py` needs no keys.
 - `~/.claude/secrets/scholar.env`: put `OPENALEX_API_KEY` and `S2_API_KEY` here, plus the
   optional Zotero web-API creds; REFERENCE.md §7 says how to get all of them.
 - Background on the whole landscape (what's blocked, what's open, why a script beat a fleet of MCP

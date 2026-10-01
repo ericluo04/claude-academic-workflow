@@ -84,8 +84,8 @@ For a `SKILL.md` the user wants stress-tested before installing.
    project the skill was not tuned for. List the top five and what the skill should do in each."
 4. Tooling fit, macOS. "Does this skill match what is actually on this machine? Available: Zotero
    MCP (`mcp__zotero__*`, including semantic search, PDF page reads, annotations, bibliography
-   export), Claude in Chrome (`mcp__claude-in-chrome__*`, the user's real Chrome with its logins, one tab group per session, no headless mode), Scholar Gateway
-   (`semanticSearch`, a semantic passage search over a Wiley-leaning corpus, not a fetcher for
+   export), Claude in Chrome (`mcp__claude-in-chrome__*`, the user's real Chrome with its logins, one tab group per session, no headless mode), Wiley Scholar Gateway
+   (`search_wiley_fulltext`, a semantic passage search over a Wiley-leaning corpus, not a fetcher for
    arbitrary DOIs), WebSearch and WebFetch, and whichever claude.ai connectors the session has
    enabled. Local CLI:
    `~/.claude/skills/reading-papers/scripts/paper.py` (search, resolve, get, author,
