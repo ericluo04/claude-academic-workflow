@@ -28,7 +28,7 @@ promising more is either wrong or routing through Sci-Hub.
 
 | Tool | What it actually is |
 |---|---|
-| **Scholar Gateway** (`semanticSearch`) | Published by Wiley. Semantic search over a licensed corpus returning *passages* with citations. Cannot fetch by DOI, cannot read a paper end-to-end. Good for corroborating a claim or locating something. |
+| **Wiley Scholar Gateway** (`search_wiley_fulltext`) | Published by Wiley. Semantic search over a licensed corpus returning *passages* with citations. Cannot fetch by DOI, cannot read a paper end-to-end. Good for corroborating a claim or locating something. |
 | **Claude in Chrome** (`mcp__claude-in-chrome__*`) | Your real Chrome, driven by Claude Code, with your logins in it. The only tool here that clears Cloudflare. Your institutional-access escape hatch. |
 
 ## 3. MCP servers worth knowing (surveyed, not installed)
