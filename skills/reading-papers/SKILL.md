@@ -147,7 +147,9 @@ AEA direct PDF, Elsevier/Wiley/OUP/Chicago, OpenReview anonymous `api2`. Escalat
    user must be in the loop. Ask first; one paper at a time. Systematic proxy downloading can
    get the whole university cut off, so never loop it.
 5. Wiley Scholar Gateway (`search_wiley_fulltext`): Wiley-leaning licensed corpus, returns *passages*, not
-   full text; can't fetch by DOI. Good for corroborating a claim, not reading a paper.
+   full text; can't fetch by DOI. Good for corroborating a claim, not reading a paper. The FREE
+   plan allows 30 queries a month (read 2026-10-01), so call `getUsageLimit` before a run of
+   several searches and spend queries only on claims that need a published passage.
 6. Say plainly that only the abstract is reachable. Never paraphrase an abstract as if you read the
    paper.
 
