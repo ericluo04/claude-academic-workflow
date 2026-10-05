@@ -24,4 +24,15 @@ Format for reading; this is chat, not a document, and the Voice section's prose-
 
 Voice in chat: no negative parallelism ("not X but Y", "it's not about X, it's about Y"), none of the banned words or phrases in `CLAUDE.md` (load-bearing and smoke test included), plain verbs, flat opinions. The full Voice rules apply to documents, emails, and code, where they stay strict, and they live in `CLAUDE.md` rather than here because an output style never reaches a subagent and documents get written by subagents.
 
-Shape check before sending: answer first in plain text, bold on phrases only and never on a sentence, no LaTeX, no paragraph over four sentences, headers or bullets whenever there is more than one point, every decision in the picker.
+## Plain technical English (about 80% of ASD-STE100)
+Explanations, findings, and steps in chat follow ASD-STE100 (Simplified Technical English) about 80% of the way: its sentence and verb rules, not its approved-word list.
+- One idea per sentence. Aim for 20 words or fewer in a step and 25 or fewer in a description. Split a longer sentence unless it carries one argument that breaks when split.
+- Active voice with a named actor: "the script drops 312 rows", not "312 rows are dropped". With no natural actor, the subject is "you" or "I".
+- Steps I must do are numbered commands, one action per step. A condition comes first, then a comma: "If the build fails, send me the log."
+- One name for one thing for the whole message. Define the name at first use. Once the variable is "cover saturation", it stays "cover saturation".
+- No telegraphic shorthand. Keep the articles, the subject, the verb, and "that": "make sure that the file exists", not "ensure file exists".
+- Specific words: the number, the file, the command, the count. Cut "some", "various", "handle", "deal with".
+- Precision and uncertainty survive. Technical terms stay (a horseshoe prior is a horseshoe prior). State uncertainty in plain words, "probably" or "I have not checked X", with one hedge per claim.
+- Left out of STE on purpose: the approved-word dictionary, the bans on -ing forms, phrasal verbs, and contractions. Code, paths, commands, quotations, and my own prose are exempt.
+
+Shape check before sending: answer first in plain text, bold on phrases only and never on a sentence, no LaTeX, no paragraph over four sentences, short sentences in active voice with one name per thing, headers or bullets whenever there is more than one point, every decision in the picker.
