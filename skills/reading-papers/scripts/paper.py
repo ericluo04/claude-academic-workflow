@@ -17,7 +17,7 @@ Usage
 
 Options
 -------
-  --venue "Marketing Science"   filter (author/resolve search)
+  --venue "Marketing Science"   filter (search, author, and title resolve)
   --since 2015 --until 2026     year bounds
   -n 10                         number of results
   --save                        write full text into the cache dir and print the path
@@ -38,12 +38,18 @@ arXiv), merged on DOI -> arXiv id -> normalized title and ranked by reciprocal-r
 Exactly one OpenAlex `search` call per invocation (10 credits, cached 30 days like everything
 else). A source that errors or rate-limits is reported and skipped, never fatal.
 
+Every outbound GET waits on a per-host rate limiter shared across processes (a file lock in
+<cache>/ratelimit/), so parallel agents queue instead of retrying in lockstep. On a 401, 403,
+or Cloudflare challenge, `get` tries Europe PMC, CORE, Crossref text-mining links, and Wayback
+snapshots before giving up. Every DOI is checked on Crossref for aliases (10.1509 -> 10.1177).
+
 Everything here uses keyless public APIs. Set S2_API_KEY to enable Semantic Scholar.
 """
 
 from __future__ import annotations
 
 import argparse
+import fcntl
 import io
 import json
 import os
@@ -52,7 +58,9 @@ import re
 import sys
 import tarfile
 import time
+from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 from lxml import html as lxml_html
@@ -76,6 +84,25 @@ CACHE = Path(os.environ.get("PAPER_CACHE", Path.home() / ".claude" / "cache" / "
 META_CACHE = CACHE / "meta"
 UA = f"paper.py (mailto:{MAILTO})"
 T = 40.0
+RATE_DIR = CACHE / "ratelimit"
+BROWSER_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
+BROWSER_ACCEPT = ("text/html,application/xhtml+xml,application/xml;q=0.9,"
+                  "application/pdf;q=0.9,*/*;q=0.8")
+# Full-text hosts that keep the mailto UA: publishers' own domains (a fake browser UA buys
+# nothing against their Cloudflare) and APIs. Every other full-text host (repositories, author
+# pages, Wayback) gets browser-like headers, since several repositories 403 a bot UA.
+PUBLISHER_HOSTS = {
+    "doi.org", "dx.doi.org", "pubsonline.informs.org", "journals.sagepub.com",
+    "academic.oup.com", "onlinelibrary.wiley.com", "www.sciencedirect.com",
+    "linkinghub.elsevier.com", "link.springer.com", "www.tandfonline.com",
+    "www.journals.uchicago.edu", "journals.uchicago.edu", "psycnet.apa.org",
+    "www.cambridge.org", "www.jstor.org", "www.annualreviews.org", "www.aeaweb.org",
+    "pubs.aeaweb.org", "www.pnas.org", "www.science.org", "www.nature.com",
+}
+API_HOSTS = {"www.ebi.ac.uk", "api.core.ac.uk", "api.crossref.org", "archive.org",
+             "api.openalex.org", "api.semanticscholar.org", "api.unpaywall.org"}
+CF_MARKERS = (b"Just a moment", b"cf-chl", b"Are you a robot")
 
 
 def oa_params(**kw) -> dict:
@@ -86,6 +113,95 @@ def oa_params(**kw) -> dict:
     if OA_KEY:
         p["api_key"] = OA_KEY
     return p
+
+
+def _rate_interval(host: str) -> float:
+    """Seconds between requests to one host, shared by every paper.py process on this machine.
+    S2 grants 1 req/s with a key (1.1 s leaves margin) and much less without; OpenAlex allows
+    10/s (8 leaves margin); arXiv asks for one request per 3 s. The 2/s default for every
+    other host is a politeness choice, not a published limit."""
+    if host == "api.semanticscholar.org":
+        return 1.1 if S2_KEY else 3.5
+    if host == "api.openalex.org":
+        return 1 / 8
+    if host == "export.arxiv.org":
+        return 3.2
+    return 0.5
+
+
+def _throttle(url: str) -> None:
+    """Token bucket of size one per host, state in <cache>/ratelimit/<host>.json under an
+    exclusive flock. Each caller reserves the next free slot inside the lock and sleeps outside
+    it, so concurrent processes queue in order instead of retrying in lockstep."""
+    host = _host(url).lower()
+    gap = _rate_interval(host)
+    fname = re.sub(r"[^\w.-]", "_", host) + ".json"
+    try:
+        RATE_DIR.mkdir(parents=True, exist_ok=True)
+        fd = os.open(RATE_DIR / fname, os.O_RDWR | os.O_CREAT, 0o644)
+        with os.fdopen(fd, "r+") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)  # released when the file closes
+            try:
+                nxt = float(json.loads(f.read() or "{}").get("next", 0.0))
+            except (ValueError, AttributeError):
+                nxt = 0.0
+            now = time.time()
+            slot = max(now, nxt)
+            f.seek(0)
+            f.truncate()
+            f.write(json.dumps({"host": host, "interval": gap, "next": slot + gap}))
+    except OSError:
+        return  # an unwritable cache dir must not block the request
+    if slot > now:
+        time.sleep(slot - now)
+
+
+_OA_NOTICE = False
+
+
+def _oa_sentinel() -> Path:
+    # dated in UTC because the OpenAlex daily budget resets at UTC midnight; keyed and
+    # anonymous calls draw on different budgets, so adding a key mid-day clears the skip
+    day = datetime.now(timezone.utc).date().isoformat()
+    return RATE_DIR / f"openalex-budget-exhausted-{day}-{'key' if OA_KEY else 'anon'}"
+
+
+def _oa_exhausted() -> bool:
+    """True once a 429 today said the OpenAlex daily budget is spent. Prints one notice."""
+    global _OA_NOTICE
+    if not _oa_sentinel().exists():
+        return False
+    if not _OA_NOTICE:
+        _OA_NOTICE = True
+        _warn(f"OpenAlex daily budget spent today ({_oa_sentinel().name}); skipping OpenAlex")
+    return True
+
+
+def _429_reason(r: httpx.Response) -> tuple[str | None, dict]:
+    """The server's own message for a 429, plus any rate-limit headers it sent."""
+    msg = None
+    try:
+        j = r.json()
+        if isinstance(j, dict):
+            msg = j.get("message") or j.get("error") or j.get("detail")
+    except Exception:
+        pass
+    msg = str(msg) if msg else (" ".join(r.text.split())[:200] or None)
+    hdrs = {k: v for k, v in r.headers.items()
+            if "ratelimit" in k.lower() or k.lower() == "retry-after"}
+    return msg, hdrs
+
+
+def _oa_budget_exhausted(r: httpx.Response) -> bool:
+    """Does this OpenAlex 429 say the DAILY budget is gone (vs a per-second throttle)?
+    Judged from the body text and from any '*remaining*' header on a daily/credit counter
+    that reads 0. OpenAlex documents no fixed wording, so this is a heuristic."""
+    msg, hdrs = _429_reason(r)
+    if re.search(r"daily|per day|budget|quota|insufficient credits|credits? (?:exhausted|exceeded)",
+                 (msg or "").lower()):
+        return True
+    return any("remaining" in k.lower() and any(t in k.lower() for t in ("credit", "day", "daily"))
+               and v.strip() == "0" for k, v in hdrs.items())
 
 
 def _cache_fp(url: str, params: dict) -> Path:
@@ -115,11 +231,21 @@ def cached_get(url: str, params: dict, ttl_days: int = 30,
     fp = _cache_fp(url, params)
     if (hit := _cache_load(fp, ttl_days)) is not None:
         return hit
+    if "api.openalex.org" in url and _oa_exhausted():
+        return None
     r = http_get(url, headers=headers, params=params)
     if r is None or r.status_code != 200:
         if r is not None and r.status_code == 429:
-            _warn("OpenAlex credit budget exhausted for today — set OPENALEX_API_KEY for 10x headroom"
-                  if "openalex.org" in url else f"{_host(url)} still rate-limited after backoff")
+            if "api.openalex.org" in url:
+                msg, hdrs = _429_reason(r)
+                _warn("OpenAlex 429: " + (f'"{msg}"' if msg else "no message in the body")
+                      + (f" [{', '.join(f'{k}={v}' for k, v in hdrs.items())}]" if hdrs else ""))
+                if _oa_budget_exhausted(r):
+                    RATE_DIR.mkdir(parents=True, exist_ok=True)
+                    _oa_sentinel().write_text(json.dumps({"message": msg, "headers": hdrs}))
+                    _warn("daily budget spent: later OpenAlex calls today skip at once")
+            else:
+                _warn(f"{_host(url)} still rate-limited after backoff")
         return None
     try:
         data = r.json()
@@ -168,16 +294,20 @@ def http_get(url: str, *, headers: dict | None = None, params: dict | None = Non
     hdrs = {"User-Agent": UA, **(headers or {})}
     last: httpx.Response | None = None
     for attempt in range(retries + 1):
+        _throttle(url)
         try:
             with httpx.Client(follow_redirects=True, timeout=T, headers=hdrs) as c:
                 last = c.get(url, params=params)
         except (httpx.TransportError, httpx.TimeoutException):
             if attempt == retries:
                 return None
-            time.sleep(base * (2 ** attempt) + random.uniform(0, 0.5))
+            time.sleep(base * (2 ** attempt) + random.uniform(0, 2))
             continue
+        if (last.status_code == 429 and "api.openalex.org" in url
+                and _oa_budget_exhausted(last)):
+            return last  # a spent daily budget will not recover within the backoff window
         if last.status_code in (429, 503) and attempt < retries:
-            wait = _retry_after(last) or base * (2 ** attempt) + random.uniform(0, 0.5)
+            wait = _retry_after(last) or base * (2 ** attempt) + random.uniform(0, 2)
             _warn(f"{_host(url)} {last.status_code}; retry {attempt + 1}/{retries} in {wait:.1f}s")
             time.sleep(wait)
             continue
@@ -233,6 +363,8 @@ def openalex_source_id(name: str) -> str | None:
 
 
 def _venue_filter(venue: str) -> str | None:
+    if _oa_exhausted():
+        return None
     if sid := openalex_source_id(venue):
         return f"primary_location.source.id:{sid}"
     _warn(f"no OpenAlex source matches {venue!r} — ignoring the venue filter")
@@ -401,6 +533,61 @@ def unpaywall(doi: str) -> dict | None:
     return r.json() if (r is not None and r.status_code == 200) else None
 
 
+def crossref_work(doi: str) -> dict | None:
+    """The Crossref work record for a DOI (free, disk-cached). None for non-Crossref DOIs."""
+    data = cached_get(f"https://api.crossref.org/works/{quote(doi, safe='/')}", {"mailto": MAILTO})
+    return (data or {}).get("message")
+
+
+def normalize_crossref(m: dict) -> dict:
+    """A Crossref work (or search item) in the shape resolve() returns."""
+    return {
+        "doi": m.get("DOI"),
+        "title": (m.get("title") or [None])[0],
+        "venue": (m.get("container-title") or [None])[0],
+        "year": (((m.get("issued") or {}).get("date-parts") or [[None]])[0] or [None])[0],
+        "authors": [" ".join(x for x in (a.get("given"), a.get("family")) if x)
+                    for a in (m.get("author") or [])][:12],
+    }
+
+
+def doi_aliases(doi: str, m: dict | None) -> list[str]:
+    """Other DOIs for the same work, from Crossref relation and alternative-id data.
+
+    SAGE reissued the JMR 10.1509 DOIs under 10.1177 (Yang 2018 is 10.1177/0022243718817004),
+    and doi.org plus most repositories still carry the old one, so a 10.1509 record whose
+    resource URL sits on journals.sagepub.com also yields the DOI printed in that URL."""
+    if not m:
+        return []
+    found: list[str] = []
+    rel = m.get("relation") or {}
+    for key in ("is-identical-to", "is-version-of"):
+        for it in rel.get(key) or []:
+            if it.get("id-type") == "doi" and (x := DOI_RE.search(str(it.get("id") or ""))):
+                found.append(x.group(1))
+    for alt in m.get("alternative-id") or []:
+        if x := DOI_RE.search(str(alt)):
+            found.append(x.group(1))
+    url = ((m.get("resource") or {}).get("primary") or {}).get("URL") or ""
+    if doi.lower().startswith("10.1509/") and "journals.sagepub.com" in url:
+        if x := DOI_RE.search(url):
+            found.append(x.group(1))
+    others = [d for d in found if d.lower() != doi.lower()]  # alternative-id often repeats the DOI
+    if doi.lower().startswith("10.1509/") and not others and (t := (m.get("title") or [None])[0]):
+        # SAGE's 10.1177 reissue need not link back: on 2026-10-07, 10.1509/jmr.15.0474 had no
+        # relation data and a journals.ama.org resource URL. Match title and journal instead.
+        hits = cached_get("https://api.crossref.org/works",
+                          {"query.bibliographic": t, "filter": "prefix:10.1177", "rows": 5,
+                           "select": "DOI,title,container-title", "mailto": MAILTO})
+        venue = _norm_title((m.get("container-title") or [""])[0])
+        for it in ((hits or {}).get("message") or {}).get("items") or []:
+            if (_norm_title((it.get("title") or [""])[0]) == _norm_title(t)
+                    and _norm_title((it.get("container-title") or [""])[0]) == venue):
+                found.append(it["DOI"])
+    out = [d.rstrip(").") for d in found]
+    return list(dict.fromkeys(d for d in out if d.lower() != doi.lower()))
+
+
 def resolve(q: str, venue=None, since=None, until=None, n=5) -> list[dict]:
     kind, val = classify(q)
     if kind == "arxiv":
@@ -415,10 +602,26 @@ def resolve(q: str, venue=None, since=None, until=None, n=5) -> list[dict]:
                 rec = {**normalize_openalex(w), **{k: v for k, v in rec.items() if v}}
         return [rec]
     if kind == "doi":
-        if w := openalex_by_doi(val):
+        cr = crossref_work(val)
+        aliases = doi_aliases(val, cr)
+        used, w = val, openalex_by_doi(val)
+        for alt in aliases:
+            if w:
+                break
+            used, w = alt, openalex_by_doi(alt)
+        if w:
             rec = normalize_openalex(w)
+        elif cr:  # OpenAlex missing or out of budget: Crossref still gives the metadata
+            rec = {**normalize_crossref(cr), "doi": val}
         else:
             rec = {"doi": val, "title": None}
+        if cr and (pu := ((cr.get("resource") or {}).get("primary") or {}).get("URL")):
+            rec["publisher_url"] = pu
+        if aliases:
+            rec["doi_aliases"] = aliases
+            rec["alt_landings"] = [f"https://doi.org/{d}" for d in aliases]
+            _warn(f"DOI {val}: Crossref aliases {', '.join(aliases)}; "
+                  + (f"OpenAlex record found under {used}" if w else "no OpenAlex record under any"))
         # prefer NBER's real PDF path: OpenAlex often reports a bare doi.org link as the
         # "pdf_url", which only resolves to a landing page
         if p := nber_pdf(val):
@@ -436,6 +639,10 @@ def resolve(q: str, venue=None, since=None, until=None, n=5) -> list[dict]:
                 for u in (lloc.get("url_for_pdf"), lloc.get("url_for_landing_page")):
                     if u and (m := ARXIV_RE.search(u)):
                         rec["arxiv_id"] = rec.get("arxiv_id") or m.group(1)
+        for alt in aliases:  # a reissued DOI can carry its own OA location
+            for lloc in (unpaywall(alt) or {}).get("oa_locations") or []:
+                if u := lloc.get("url_for_pdf"):
+                    rec["oa_candidates"] = (rec.get("oa_candidates") or []) + [u]
         # S2 sometimes has a green-OA PDF (often NBER) where Unpaywall and OpenAlex say closed
         if not rec.get("pdf_url") and not rec.get("arxiv_id"):
             if s2 := s2_get(f"paper/DOI:{val}", {"fields": "openAccessPdf"}):
@@ -455,6 +662,8 @@ def resolve(q: str, venue=None, since=None, until=None, n=5) -> list[dict]:
         if best := best_crossref_match(val, crossref_search(val, 5)):
             if w := openalex_by_doi(best["DOI"]):  # 1 credit, cached
                 return [normalize_openalex(w)]
+            if _oa_exhausted():  # OpenAlex is out for today; the Crossref match is the answer
+                return [normalize_crossref(best)]
     works = openalex_search(val, n=n, venue=venue, since=since, until=until) or []
     recs = [normalize_openalex(w) for w in works]
     if not recs:
@@ -633,6 +842,8 @@ def topic_search(q: str, n: int = 10, venue: str | None = None,
         {**normalize_openalex(w), "abstract": _oa_abstract(w),
          "citations": {"openalex": w.get("cited_by_count")}}
         for w in ws])(openalex_search(q, n=per, venue=venue, since=since, until=until)))
+    if not status["openalex"]["ok"] and _oa_exhausted():
+        status["openalex"]["note"] = "skipped: OpenAlex daily budget spent (resets at UTC midnight)"
     run("semanticscholar", lambda: (lambda ps: None if ps is None else [normalize_s2(p) for p in ps])(
         s2_search(q, n=per, venue=venue, since=since, until=until)))
     if venue:
@@ -899,6 +1110,142 @@ def _save_pdf(content: bytes, rec: dict, url: str) -> tuple[str, str]:
     return f"PDF {url}", f"[PDF saved: {p}]\nRead it with the Read tool — it renders PDFs natively."
 
 
+def _is_challenge(r: httpx.Response) -> bool:
+    """A Cloudflare or bot-check interstitial served with status 200."""
+    return r.status_code == 200 and any(m in r.content[:100000] for m in CF_MARKERS)
+
+
+def _fetch_headers(url: str, rec: dict) -> dict | None:
+    """Browser-like headers for repository hosts; None (the mailto UA) for publishers and APIs."""
+    host = _host(url).lower()
+    own = {_host(rec["publisher_url"]).lower()} if rec.get("publisher_url") else set()
+    if host in PUBLISHER_HOSTS | API_HOSTS | own or host.endswith("arxiv.org"):
+        return None
+    return {"User-Agent": BROWSER_UA, "Accept": BROWSER_ACCEPT,
+            "Accept-Language": "en-US,en;q=0.9", "Referer": f"https://{host}/"}
+
+
+def jats_to_markdown(raw: bytes) -> str:
+    """Europe PMC full text arrives as JATS XML: titles become headings, paragraphs text."""
+    parser = lxml_html.etree.XMLParser(recover=True, resolve_entities=False, no_network=True)
+    try:
+        root = lxml_html.etree.fromstring(raw, parser)
+    except Exception:
+        return ""
+    if root is None:
+        return ""
+    def local(el) -> str:
+        return el.tag.rsplit("}", 1)[-1] if isinstance(el.tag, str) else ""
+    out: list[str] = []
+    for el in root.iter():
+        tag = local(el)
+        txt = " ".join("".join(el.itertext()).split()) if tag in ("article-title", "title", "p") else ""
+        if not txt:
+            continue
+        if tag == "p":
+            out.append(txt)
+        else:
+            depth = sum(1 for a in el.iterancestors() if local(a) in ("sec", "ref-list", "abstract"))
+            out.append("\n" + "#" * (1 if tag == "article-title" else min(depth + 1, 6)) + " " + txt + "\n")
+    return "\n\n".join(out)
+
+
+def europepmc_urls(doi: str) -> list[str]:
+    data = cached_get("https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+                      {"query": f"DOI:{doi}", "format": "json", "resultType": "core"})
+    out: list[str] = []
+    for res in ((data or {}).get("resultList") or {}).get("result", [])[:1]:
+        if (pmcid := res.get("pmcid")) and res.get("inEPMC") == "Y":
+            out.append(f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML")
+        for u in (res.get("fullTextUrlList") or {}).get("fullTextUrl", []):
+            if u.get("documentStyle") == "pdf" and u.get("availabilityCode") in ("OA", "F"):
+                out.append(u.get("url"))
+    return [u for u in out if u]
+
+
+def core_urls(doi: str) -> list[str]:
+    data = cached_get("https://api.core.ac.uk/v3/search/works", {"q": f'doi:"{doi}"', "limit": 5})
+    return [u for w in (data or {}).get("results") or [] if (u := w.get("downloadUrl"))]
+
+
+def crossref_fulltext_links(m: dict | None) -> list[str]:
+    """Crossref link[] entries that point at a PDF or XML, text-mining links first."""
+    links = [l for l in (m or {}).get("link") or []
+             if l.get("URL") and l.get("content-type") in ("application/pdf", "text/xml")]
+    links.sort(key=lambda l: l.get("intended-application") != "text-mining")
+    return [l["URL"] for l in links]
+
+
+def wayback_url(url: str) -> str | None:
+    data = cached_get("https://archive.org/wayback/available", {"url": url}, ttl_days=7)
+    snap = ((data or {}).get("archived_snapshots") or {}).get("closest") or {}
+    if not snap.get("available") or str(snap.get("status", "200")) != "200" or not snap.get("url"):
+        return None
+    # the id_ flag returns the archived bytes without the Wayback toolbar or link rewriting
+    return re.sub(r"(/web/\d+)/", r"\1id_/", snap["url"], count=1)
+
+
+def _fetch_doc(url: str, rec: dict, via: str) -> tuple[tuple[str, str] | None, str]:
+    """(hit, why): hit is (source_label, text) when the URL gave full text, else None."""
+    r = http_get(url, headers=_fetch_headers(url, rec))
+    if r is None:
+        return None, "network error"
+    if r.status_code != 200:
+        return None, f"HTTP {r.status_code}"
+    ctype = r.headers.get("content-type", "").lower()
+    if "pdf" in ctype or r.content[:5] == b"%PDF-":
+        return _save_pdf(r.content, rec, f"{url} (via {via})"), "ok"
+    if "xml" in ctype and b"<article" in r.content[:20000]:
+        md = jats_to_markdown(r.content)
+        return ((f"JATS {url} (via {via})", md) if md else None), "empty JATS"
+    if "html" in ctype:
+        if _is_challenge(r):
+            return None, "Cloudflare or bot-check page"
+        md = html_to_markdown(r.content)
+        if classify_page(md) == "full":
+            return (f"HTML {url} (via {via})", md), "ok"
+        return None, "abstract-length page"
+    return None, f"unhandled content-type {ctype or '?'}"
+
+
+def access_fallbacks(rec: dict, oa_urls: list[str]) -> tuple[str, str] | None:
+    """Routes around a 401/403/Cloudflare wall, tried lazily in this order: Europe PMC full
+    text, CORE, Crossref text-mining links, then a Wayback snapshot of each OA candidate
+    (including any Europe PMC or CORE copy that was itself walled)."""
+    doi = rec.get("doi")
+    missed: list[str] = []  # walled repository copies, worth a Wayback lookup
+    _warn("blocked; trying Europe PMC, CORE, Crossref text-mining links, then Wayback")
+
+    def routes():
+        if doi:
+            for u in europepmc_urls(doi):
+                yield u, "Europe PMC"
+            for u in core_urls(doi):
+                yield u, "CORE"
+            for u in crossref_fulltext_links(crossref_work(doi)):
+                yield u, "Crossref link"
+        for u in list(dict.fromkeys(x for x in [*oa_urls, *missed] if x))[:5]:
+            if snap := wayback_url(u):
+                yield snap, "Wayback"
+            else:
+                _warn(f"Wayback: no snapshot of {u}")
+
+    seen: set[str] = set()
+    for url, via in routes():
+        if url in seen:
+            continue
+        seen.add(url)
+        hit, why = _fetch_doc(url, rec, via)
+        if hit:
+            _warn(f"fallback hit: {via} {url}")
+            return hit
+        _warn(f"fallback miss: {via} {url} ({why})")
+        if via in ("Europe PMC", "CORE") and _host(url).lower() not in API_HOSTS:
+            missed.append(url)
+    _warn("no fallback route reached full text")
+    return None
+
+
 def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
     """Return (source_label, text)."""
     aid = rec.get("arxiv_id")
@@ -918,18 +1265,20 @@ def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
 
     seen_urls: set[str] = set()
     fallback: tuple[str, str] | None = None
-    candidates = [rec.get("pdf_url"), *(rec.get("oa_candidates") or []),
-                  rec.get("oa_url"), rec.get("landing")]
+    blocked = False
+    oa_urls = [rec.get("pdf_url"), *(rec.get("oa_candidates") or []), rec.get("oa_url")]
+    candidates = [*oa_urls, rec.get("landing"), *(rec.get("alt_landings") or [])]
     for url in candidates:
         if not url or url in seen_urls:
             continue
         seen_urls.add(url)
-        r = http_get(url)
+        r = http_get(url, headers=_fetch_headers(url, rec))
         if r is None:
             _warn(f"{url}: network error after retries")
             continue
         ctype = r.headers.get("content-type", "")
         if r.status_code != 200:
+            blocked = blocked or r.status_code in (401, 403)
             _warn(f"{url} -> HTTP {r.status_code}"
                   + (" (paywall/bot-wall; open it in Claude in Chrome with institutional access)"
                      if r.status_code in (401, 403) else ""))
@@ -937,6 +1286,10 @@ def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
         if "pdf" in ctype:
             return _save_pdf(r.content, rec, url)
         if "html" in ctype:
+            if _is_challenge(r):
+                blocked = True
+                _warn(f"{url} -> Cloudflare or bot-check page")
+                continue
             md = html_to_markdown(r.content)
             if classify_page(md) == "full":
                 return f"HTML {url}", md
@@ -946,7 +1299,7 @@ def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
                 if plink in seen_urls:
                     continue
                 seen_urls.add(plink)
-                pr = http_get(plink)
+                pr = http_get(plink, headers=_fetch_headers(plink, rec))
                 if pr is None or pr.status_code != 200:
                     continue
                 pctype = pr.headers.get("content-type", "")
@@ -958,6 +1311,8 @@ def fetch_fulltext(rec: dict, prefer_raw: bool = False) -> tuple[str, str]:
                         return f"HTML {plink} (via {_host(url)})", md2
             note = "abstract-only" if classify_page(md) == "abstract" else "possibly partial"
             fallback = fallback or (f"HTML {url} ({note})", md)
+    if blocked and (hit := access_fallbacks(rec, oa_urls)):
+        return hit
     if fallback:
         _warn("only an abstract-length page was reachable — escalate per the skill ladder")
         return fallback
@@ -1048,6 +1403,8 @@ def brief(r: dict) -> str:
     bits = [f"**{r.get('title') or '(untitled)'}**", f"  {who} — {r.get('venue') or '?'} {r.get('year') or ''}"]
     if r.get("doi"):
         bits.append(f"  doi:{r['doi']}")
+    if r.get("doi_aliases"):
+        bits.append(f"  alias doi: {', '.join(r['doi_aliases'])}")
     if r.get("arxiv_id"):
         bits.append(f"  arXiv:{r['arxiv_id']}")
     if r.get("cited_by") is not None:
@@ -1174,7 +1531,17 @@ def main() -> None:
 
     if (a.section or a.list_sections) and text:
         if "LaTeX" not in src:
-            _warn("no LaTeX source available; section slicing needs an arXiv e-print")
+            if m := re.search(r"\[PDF saved: (.+?)\]", text):
+                path, kind = m.group(1), "PDF"
+            else:
+                CACHE.mkdir(parents=True, exist_ok=True)
+                stem = re.sub(r"[^\w.-]", "_", (rec.get("doi") or rec.get("title") or "paper"))[:80]
+                path, kind = CACHE / f"{stem}.md", "HTML text"
+                path.write_text(header + "\n" + text)
+            print(header)
+            print("No LaTeX source (no arXiv e-print), so sections cannot be listed or sliced.\n"
+                  f"{kind} at {path}; read it with the Read tool.")
+            return
         else:
             if a.list_sections:
                 print(header)

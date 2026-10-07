@@ -139,7 +139,9 @@ Zotero (this setup assumes it is installed and connected). Things to know:
 
 Claude in Chrome + an institutional EZproxy for INFORMS/SSRN: human-in-the-loop only. Login
 is typically SSO + MFA (not automatable); at-scale proxy use risks access for the *whole
-university*. One paper at a time, ask first, never loop.
+university*. One paper at a time, ask first, never loop. SAGE and OUP are the exception since
+2026-10-07: when the user has run `/chrome`, one sequential Chrome reader opens them routinely
+through the proxy session already live (see the Chrome rung in `SKILL.md`).
 
 ## 8. Still-open policy calls (not technical)
 

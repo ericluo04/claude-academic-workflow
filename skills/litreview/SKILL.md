@@ -50,6 +50,12 @@ Write two or three query strings, not one. Strip filler, keep substantive nouns,
 "algorithmic collusion", computer scientists write "multi-agent reinforcement learning pricing".
 Run the variants as parallel Bash calls in a single message.
 
+Seed-title searches (looking up a list of known titles) run differently: in the foreground, one
+Bash call at a time, never as a background shell loop or `&` job. On 2026-10-07 four of six search
+agents detached their loops and stalled for 10 to 20 minutes waiting on their own background work.
+When search is delegated to a subagent, the subagent returns its report as text and never writes a
+report file.
+
 The JSON shape:
 
 ```json
@@ -102,6 +108,9 @@ desktop app and this can be re-run to flag what is already in the library. It is
 and the user would rather be told than get a silently degraded result. Carry on with the search
 either way; nothing else here needs Zotero.
 
+When no `mcp__zotero__*` tools exist in the session at all (the server is not loaded, as opposed to
+a call failing), say so once at the top of the reply and skip this step without calling anything.
+
 ## Step 4: score relevance, 1 to 5
 
 One score per paper, against the user's stated question, from title, abstract, venue, and year.
@@ -124,12 +133,16 @@ it that implies you saw the body.
 ## Step 5: read the top hits in parallel
 
 Reading is where the value is, and the reading-papers skill documents the pattern: one subagent per
-paper, structured summary back. A fan-out of a dozen concurrent readers is safe here because every
-API call retries with backoff, responses are disk-cached for 30 days, and the keys are configured.
-Keep concurrency near four to six when most hits are arXiv preprints, since arXiv politeness is one
-request per three seconds.
+paper, structured summary back. Run at most twelve readers and six searchers at once, the caps in
+the reading-papers skill. `paper.py` rate-limits each host across processes, so agents past the cap
+queue rather than fail, and responses are disk-cached for 30 days. When most hits are arXiv
+preprints, four to six readers is enough: the limiter spaces arXiv API calls 3.2 seconds apart, so
+more readers only wait.
 
-Read the papers scoring 4 and 5, capped at twelve by default. Ask before going past that. Hand each
+Read the papers scoring 4 and 5, capped at four per search stream by default (a stream is one strand
+of the question with its own query variants, so three streams give twelve). Ask the user once,
+before launching readers, whether to go past that. Papers whose ladder ends at a 403 on SAGE or OUP
+go to the SAGE/OUP Chrome rung in reading-papers ("When there is no free copy", rung 4). Hand each
 subagent an identifier, never a title: a DOI or arXiv id costs 1 OpenAlex credit, a title costs 10.
 Launch every reader with the `Agent` tool. While the readers run, write the
 `Paper/litreview-<slug>.tex` skeleton from the search metadata (header line, doi, cited_by, sources,
@@ -144,14 +157,16 @@ Paper: <doi or arXiv id>       Question it is being read against: <the user's qu
 Tool: ~/.claude/skills/reading-papers/scripts/paper.py
 Follow ~/.claude/skills/reading-papers/SKILL.md for the access ladder.
 
-  paper.py get "<id>" --list-sections     # map first, always
+  paper.py get "<id>" --list-sections     # map first, only when an e-print exists (below)
   paper.py get "<id>" --section "<substr>" # then pull only what you need
+  paper.py get "<id>"                      # no e-print: saves the PDF or HTML, prints the path
 
---list-sections then --section is the context saver on long papers: a 70K-character paper
-becomes a 10K-character section with equations and cross-references intact. Read the abstract
-and introduction, then the sections that bear on the question above. Do not dump full text.
-Section slicing needs an arXiv e-print. When the paper has none, the script says so and hands
-back a PDF path or HTML; read that with the Read tool and skip the section step.
+Run --list-sections first only when <id> is an arXiv id or `paper.py resolve "<id>"` prints an
+arXiv: line. Otherwise go straight to `paper.py get` and read the PDF or HTML at the path it
+prints with the Read tool. --list-sections then --section is the context saver on long papers: a
+70K-character paper becomes a 10K-character section with equations and cross-references intact.
+Read the abstract and introduction, then the sections that bear on the question above. Do not
+dump full text.
 If it is already in Zotero (<key>, when given), read the user's copy and their annotations.
 
 Return exactly:
@@ -248,10 +263,16 @@ SAGE own marketing, so run a `--venue` pass over Marketing Science, JMR, JCR, Jo
 and Management Science alongside the open topic search. A marketing review that comes back all
 arXiv is a failed search, not a thin field.
 
+A venue pass uses a two-to-three-noun query ("conjoint presentation format"), never the full
+topic string. OpenAlex filters by the journal's exact source name and Semantic Scholar matches the
+venue as a raw string, so a long query inside a venue filter returns nothing: on 2026-10-07 every
+long-query venue pass came back empty in all five journals.
+
 ## Failure modes
 
-Zero results: relax once, in this order, dropping `--venue`, then `--since`, then shortening the
-query to its two strongest nouns. If it is still empty, say what was tried and ask for a seed paper.
+Zero results: relax in this order, dropping `--since`, then shortening the query to its two
+strongest nouns, then dropping `--venue` last (dropping it first defeats the venue pass). If it is
+still empty, say what was tried and ask for a seed paper.
 
 One source down: the `sources` block names it. Continue with the others and report the gap.
 

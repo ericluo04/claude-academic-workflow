@@ -26,7 +26,9 @@ first answer on hard cases (common author names, paywalled venues). Verify, as f
 Flags: `--venue "…"` · `--since/--until YEAR` · `-n N` · `--json` · `--save` · `--raw` ·
 `--list-sections` · `--section "<substr>"` · `--affiliation "…"` · `--orcid "…"` · `--contexts`
 
-Keys (optional, all free) live in `~/.claude/secrets/scholar.env`; the script auto-loads them.
+Keys (all free) live in `~/.claude/secrets/scholar.env`; the script auto-loads them. `paper.py`
+works without any key, but the concurrency caps under "Working with many papers" assume
+`OPENALEX_API_KEY` and `S2_API_KEY` are both set.
 
 Run it by path exactly as shown: the uv shebang provisions its dependencies (httpx, lxml,
 pypdf) in an isolated environment. Invoking it as `python3 paper.py` bypasses the shebang and
@@ -73,6 +75,10 @@ paper.py get "10.1257/aer.20181169" --section "decomposition" # that section, ra
 The single biggest context saver: a 70K-char paper becomes a 10K-char section with every
 equation, `\label`, and `\ref` intact. `--section` carries the preamble's `\newcommand` /
 `\newtheorem` definitions along, so macros stay resolvable.
+
+Section slicing needs an arXiv e-print. Without one, `--list-sections` and `--section` print a
+two-line notice naming the saved PDF or HTML file and exit without dumping the text; read that file
+with the Read tool.
 
 ## Math fidelity ladder
 
@@ -136,16 +142,33 @@ AEA direct PDF, Elsevier/Wiley/OUP/Chicago, OpenReview anonymous `api2`. Escalat
 
 1. `resolve` already checked for a green-OA copy (repository, arXiv, RePEc, NBER) and iterates
    *all* OA locations, including the ones it doesn't rank first. Trust it; it finds most paywalled
-   AER / Marketing Science papers as a free copy elsewhere.
+   AER / Marketing Science papers as a free copy elsewhere. It also checks Crossref for alias DOIs
+   (SAGE reissued JMR's 10.1509 DOIs under 10.1177). After a 401, 403, or Cloudflare page, `get`
+   tries Europe PMC full text, CORE, Crossref text-mining links, and a Wayback snapshot of each OA
+   URL on its own, and prints each miss with its reason.
 2. Working-paper version: NBER (`nber.org/papers/wXXXXX`), CEPR, author's site. For econ this
    is usually near-identical to the published version.
 3. Free AEA appendix/data: for AER/AEJ the article PDF is walled but the online appendix
    (where the proofs live) and replication package are free; `resolve` surfaces them.
-4. Claude in Chrome, the user's real browser, the only thing that clears Cloudflare. An institutional
-   proxy has the shape
-   `https://<your-library>.idm.oclc.org/login?URL=<target>`, but login is typically SSO + MFA, so the
-   user must be in the loop. Ask first; one paper at a time. Systematic proxy downloading can
-   get the whole university cut off, so never loop it.
+4. Claude in Chrome, the user's real browser, the only thing that clears Cloudflare. It works only
+   after the user has connected it in the parent session by running `/chrome`; a subagent cannot
+   connect it. A subagent that finds the `mcp__claude-in-chrome__*` tools absent or disconnected
+   reports "Chrome not connected, /chrome would unlock <the paper or venue>" and moves on. It
+   never retries the connection.
+   - SAGE and OUP, routine when Chrome is connected. When the script ladder ends at a 403 on
+     `journals.sagepub.com` or `academic.oup.com` (JM, JMR, JCR, Psych Science, QJE, ReStud), one
+     Chrome reader works through those papers sequentially, never in parallel. It opens the DOI
+     behind your library's proxy prefix (for an OCLC EZproxy, the shape is
+     `https://<your-library>.idm.oclc.org/login?url=https://doi.org/<doi>`), declines non-essential
+     cookies, and extracts the page text. When `get_page_text` truncates, it runs
+     `document.body.innerText` through the JavaScript tool and writes the result to a file. It never
+     enters credentials and never solves a CAPTCHA; a login or CAPTCHA page means stop and report.
+     When Chrome is not connected, mark the paper `read: abstract only`.
+   - ScienceDirect serves a CAPTCHA to automated Chrome. The user can clear it once by hand in
+     that tab, and later reads in the session go through.
+   - Every other walled venue (INFORMS, SSRN, Wiley): institutional proxy login is typically SSO +
+     MFA, so the user must be in the loop. Ask first; one paper at a time. Systematic proxy
+     downloading can get the whole university cut off, so never loop it.
 5. Wiley Scholar Gateway (`search_wiley_fulltext`): Wiley-leaning licensed corpus, returns *passages*, not
    full text; can't fetch by DOI. Good for corroborating a claim, not reading a paper. The FREE
    plan allows 30 queries a month (read 2026-10-01), so call `getUsageLimit` before a run of
@@ -195,8 +218,10 @@ Use it to see what a paper is actually being used for.
   figure-only opening could false-flag; conversely a mostly-image PDF with a text cover could slip
   through. Glance at the PDF before committing to an OCR job.
 - "Open access" that isn't fetchable: for hybrid-OA Oxford/SAGE, OpenAlex reports a PDF URL on
-  `academic.oup.com` / `journals.sagepub.com` (legally open, technically Cloudflare-dead). The
-  green-OA (repository/PMC/OSF/arXiv) locations are the ones that resolve; `resolve` prefers them.
+  `academic.oup.com` / `journals.sagepub.com` (legally open, technically Cloudflare-dead), and
+  SAGE 403s the script even on its open-access articles. Green-OA copies can be walled too: the
+  Erasmus repository (`pure.eur.nl`) and SSRN sit behind Cloudflare, and so do CORE download links
+  (checked 2026-10-07). For those, `get` now falls back to Europe PMC and to Wayback snapshots.
   Wiley behaves the same: `onlinelibrary.wiley.com` pdfdirect URLs 403 even for OA articles
   (confirmed twice, 2026-07), and the landing pages 403 too; the working route is an
   institutional-repository or author-page copy (MIT DSpace and an author's Harvard page both
@@ -211,9 +236,10 @@ Use it to see what a paper is actually being used for.
   Reviews/scores need an authenticated OpenReview client.
 - Econ: arXiv `econ.EM`, then NBER (direct PDF). AER/AEJ article PDF is members-only but
   appendices are free. IDEAS pages give the working-paper ↔ published crosswalk.
-- Marketing: INFORMS is walled but green OA, so the readable copy is normally an
-  institutional repository, which `resolve` finds. 2023+ INFORMS DOIs changed shape; listings
-  contain non-article DOIs (`…ack…`, `…eb…`) worth ignoring.
+- Marketing: INFORMS is walled but green OA, so the free copy is normally an institutional
+  repository, which `resolve` finds; when that repository is behind Cloudflare, `get` tries its
+  Wayback snapshot. SAGE (JM, JMR) and OUP (JCR) go to the Chrome rung above. 2023+ INFORMS
+  DOIs changed shape; listings contain non-article DOIs (`…ack…`, `…eb…`) worth ignoring.
 - Psychology: Psych Science is SAGE (PMC holds front matter only). Try PsyArXiv/OSF.
 - Annual Reviews: the landing pages sit behind a Cloudflare challenge that blocks curl
   (checked 2026-07-28). Go arXiv-first for AR titles; accepted versions usually exist. Treat
@@ -256,16 +282,23 @@ correct"* (Section 6, p. 22). Read: published version, arXiv HTML rung.
 ## Working with many papers
 
 Per the user's standing preference, for several papers at once spawn parallel subagents, one
-paper each, returning structured summaries. Every API call in `paper.py` retries with
-exponential backoff on 429/503 (arXiv, Semantic Scholar, OpenAlex, Crossref), and the OpenAlex key
-gives a 10,000-credit daily budget, so a fan-out of a dozen readers is safe. Results are
-disk-cached, so re-reads across agents are free. For a very large batch (many dozens) keep
-arXiv-heavy concurrency modest, since arXiv politeness is about one request per 3 seconds.
+paper each, returning structured summaries. Run at most six concurrent searchers and twelve
+concurrent readers. The cap is measured: on 2026-10-07, six parallel searchers drove Semantic
+Scholar to 429 on about 80 percent of calls under the old per-process backoff.
+
+`paper.py` now rate-limits per host across processes: a token bucket under a file lock in
+`~/.claude/cache/papers/ratelimit/` spaces requests to Semantic Scholar 1.1 s apart with a key
+(3.5 s without), to OpenAlex at 8 per second, to the arXiv API 3.2 s apart, and to any other host
+at 2 per second. Agents past the cap queue instead of failing, but they also wait, so more agents
+do not mean more throughput on one host. The caps assume `OPENALEX_API_KEY` and `S2_API_KEY` are
+set. Without them the script still runs, but the anonymous OpenAlex budget (1,000 credits, about
+100 searches a day, shared by everyone on the IP) runs out within one literature review. Results
+are disk-cached, so re-reads across agents are free.
 
 ## Setup state
 
 - This setup assumes Zotero MCP (`zotero-mcp-launch.sh` reads `scholar.env`), Claude in Chrome,
-  and Wiley Scholar Gateway are installed and connected; adjust to your machine. `paper.py` needs no keys.
+  and Wiley Scholar Gateway are installed and connected; adjust to your machine. `paper.py` runs without keys; the concurrency caps assume both are set.
 - `~/.claude/secrets/scholar.env`: put `OPENALEX_API_KEY` and `S2_API_KEY` here, plus the
   optional Zotero web-API creds; REFERENCE.md §7 says how to get all of them.
 - Background on the whole landscape (what's blocked, what's open, why a script beat a fleet of MCP
