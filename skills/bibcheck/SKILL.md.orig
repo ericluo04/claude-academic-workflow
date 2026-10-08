@@ -184,15 +184,10 @@ only when the entry has no identifier at all.
      the stripped form (it returns `Yildirim` where OpenAlex returns `Yıldırım`), so a Crossref
      diff alone is not evidence of an error in the entry.
 
-6. Year reconciliation. Crossref `issued` is often the online-first date, while journals cite the
-   print year that goes with the volume and issue. Compare the entry year against both
-   `issued.date-parts[0][0]` and `published-print.date-parts[0][0]` (also `published-online`). A
-   match to either is PASS; record which one matched. With an arXiv id present and the entry year
-   matching the arXiv submission year, WARN
+6. Year reconciliation against Crossref `issued.date-parts[0][0]`. With an arXiv id present and the
+   entry year matching the arXiv submission year, WARN
    (`entry cites preprint year <y1>; published version is <y2>`), because citing the preprint year
-   is a legitimate choice. A year that matches none of these is FAIL. Added 2026-10-08 after six
-   false FAILs on print-year entries (Brutger 2023, Jia 2023, Jonker 2019, Lembregts 2024, Melumad
-   2025, Shamon 2022).
+   is a legitimate choice. Otherwise FAIL.
 
 7. Journal canonicalization. Compare `journal` against Crossref `container-title`. WARN on
    abbreviation drift (`J. Mark. Res.` for `Journal of Marketing Research`, `Mark. Sci.` for
