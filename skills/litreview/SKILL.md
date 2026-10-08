@@ -187,6 +187,12 @@ Never write one from memory: a fabricated year, volume, or page range is the fai
 whole pipeline exists to avoid. Fill author, title, year, journal or booktitle, volume, number,
 pages, and doi, and leave a field out rather than guess it.
 
+Verify the entry before returning it: run `paper.py resolve "<doi or arXiv id>" --json` (or
+Crossref `https://api.crossref.org/works/<doi>` when paper.py has no record) and confirm that the
+author surnames, year, venue, volume, and pages you wrote match. On any mismatch, use the canonical
+value and note the change in one line under the entry. If neither source knows the identifier,
+say `UNVERIFIED` on the bibtex line.
+
 If no free full text is reachable, say so plainly, set version_read to `abstract only`, and
 return what the abstract supports. Never paraphrase an abstract as if you read the paper.
 ```
@@ -247,6 +253,19 @@ user would have to do to close each gap.
 list, verbatim. Append to an existing `references.bib` and match the key style already in it. Never
 rewrite an entry that is already there.
 
+Before the chat reply, run the bibcheck skill on the entries this run added to `references.bib`.
+Invoke it by name through the Skill tool. When the Skill tool is unavailable, have a subagent
+follow `~/.claude/skills/bibcheck/SKILL.md`. Then act on its report. PASS
+entries stay unchanged. WARN corrections that are pure metadata (accents, archived URLs, missing
+pages) are applied from bibcheck's `corrected.bib`. A year WARN on an entry whose print year agrees
+with its volume and issue keeps the print year. Every FAIL is listed in the chat reply with its
+diagnostic, and the entry stays in the `.bib` under bibcheck's `% bibcheck:FAIL` comment until the
+user decides. The chat reply carries the bibcheck summary line (PASS, WARN, FAIL, possibly
+fabricated) and the path to `bibcheck_report.md`.
+
+A review is not finished until bibcheck has run. If it cannot run (no network), say so in the reply
+and put `% UNAUDITED: bibcheck did not run` as the first line of the `.bib`.
+
 The chat reply carries the two paths, the ranked list, and anything the user has to act on now
 (Zotero looked closed, a source failed). Takeaways, the synthesis, and the coverage line live in
 the `.tex` and are not repeated in chat.
@@ -285,6 +304,9 @@ keywords. Include the seed in the output at score 5.
 
 Results dominated by one subfield: the query is inheriting that field's vocabulary. Rewrite it in
 another field's terms and merge.
+
+A `.bib` entry that no index recognizes: report it as unverified in the chat reply and the `.tex`.
+Never include it silently.
 
 ## Out of scope
 
