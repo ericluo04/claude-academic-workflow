@@ -252,6 +252,16 @@ Use it to see what a paper is actually being used for.
 - Citation counts are source-specific and disagree (same Econometrica paper: 235 OpenAlex / 177 S2
   / 210 Crossref / 157 OpenCitations). Name the source; never mix counts in one table.
 - Never invent a DOI, page number, or quotation. If `resolve` returns nothing, say so.
+- Every BibTeX entry this skill emits is checked against Crossref or OpenAlex by identifier before
+  it reaches the user. Before returning an entry for the paper, run
+  `paper.py resolve "<doi or arXiv id>" --json` (or Crossref
+  `https://api.crossref.org/works/<doi>` when paper.py has no record) and confirm that the author
+  surnames, year, venue, volume, and pages in the entry match. On any mismatch, use the canonical
+  value and note the change in one line under the entry. If neither source knows the identifier,
+  say `UNVERIFIED` on the bibtex line. An entry built from a title search alone is also marked
+  `UNVERIFIED`. BibTeX pulled from Zotero gets the same identifier check.
+- When one session produces three or more BibTeX entries, run the bibcheck skill over them before
+  reporting.
 
 ### Quoting the paper
 
@@ -282,7 +292,8 @@ correct"* (Section 6, p. 22). Read: published version, arXiv HTML rung.
 ## Working with many papers
 
 Per the user's standing preference, for several papers at once spawn parallel subagents, one
-paper each, returning structured summaries. Run at most six concurrent searchers and twelve
+paper each, returning structured summaries. A reader that returns a BibTeX entry verifies it by
+identifier first, as the honesty rules above require. Run at most six concurrent searchers and twelve
 concurrent readers. The cap is measured: on 2026-10-07, six parallel searchers drove Semantic
 Scholar to 429 on about 80 percent of calls under the old per-process backoff.
 
