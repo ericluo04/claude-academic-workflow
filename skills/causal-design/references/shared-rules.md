@@ -35,8 +35,9 @@ are sampled per cluster, robust and clustered standard errors coincide (AAIW, Se
 One half of this decision is untestable and the skill states it rather than estimating it: the
 sample "is not informative" about what fraction of clusters was sampled, so "information about
 the need to adjust for clustered sampling must come from outside the sample," while the sample
-IS informative about clustered assignment. The Mixtape's rationale for clustering by panel unit,
-"to allow for correlation in the eps_it's for the same person i over time," is the one reason
+IS informative about clustered assignment. The Mixtape's rationale for clustering by panel unit
+(Cunningham, The Mixtape, online ch. 8 sec. 8.1), "to allow for correlation in the eps_it's
+for the same person i over time," is the one reason
 AAIW rule out, and the answer often coincides only because panel units in a survey are genuinely
 the sampling clusters. Say which of the two you are invoking.
 
@@ -129,6 +130,8 @@ rule out.
 This routing applies to prospective designs, where the researcher still controls assignment. In
 an observational design no prospective fix is available, and did and synthetic-control carry the
 observational fixes (buffer or drop adjacent controls, drop exposed donors, sign the bias).
+Observational interference outside a panel design has no owner. Network spillovers in platform
+data, where nobody assigned treatment, are unrouted in this family, and the router says so.
 
 Designs, estimators, and diagnostics live in field-experiment. Clustered interference routes to
 two-stage randomization (Hudgens and Halloran 2008, Crepon et al. 2013). Network interference
@@ -138,11 +141,15 @@ routes to exposure mappings (Aronow and Samii 2017) with exact tests (Athey, Eck
 
 ## Combined experimental and observational data
 
-The surrogate index gets long-run outcomes (retention, LTV) from short experiments, valid only
-when all causal paths from treatment to the long-run outcome pass through the surrogates (Athey,
-Chetty, Imbens, and Kang 2026). The family ships no estimation template for the surrogate index.
-Athey, Chetty, Imbens, and Kang's own empirical implementation is the recipe to follow, and
-causal-design's deliverable stops at the validity argument.
+The surrogate index gets long-run outcomes (retention, LTV) from short experiments. Athey,
+Chetty, Imbens, and Kang (2026) identify it under three assumptions. Treatment is unconfounded
+in the experimental sample. Surrogacy holds: all causal paths from treatment to the long-run
+outcome pass through the surrogates. The experimental and observational samples are comparable,
+so the surrogate-to-outcome relation carries over. The authors note that comparability *"is
+rarely discussed explicitly"* (NBER w26463, Section 3). A paper that argues surrogacy alone
+has not argued identification. The family ships no estimation template for the surrogate index.
+Athey, Chetty, Imbens, and Kang's own empirical implementation is the recipe to follow, and the
+router's deliverable stops at the validity argument.
 
 ## Text-role warnings at handoff (Feder)
 

@@ -15,15 +15,27 @@ chosen by how much structure you are willing to impose.
   association with assignment and with outcomes via log odds ratios, and trace the
   estimate over a plausible range (rosenbaum1983assessing). Imbens (2003) calibrates the
   range against the strongest observed covariate, which is the move reviewers accept. The
-  modern reporting standards descend from this: Oster's coefficient-stability delta
-  (oster2019unobservable; note it assumes proportional selection and R-squared targets,
-  state both), Cinelli-Hazlett robustness values (cinelli2020making; sensemakr gives the
-  minimal reporting table: RV, partial R2 of the treatment, bounds against 1x/2x/3x the
-  benchmark covariate), plus Masten-Poirier and Chernozhukov et al. long-story bounds as
-  further options.
-- Rosenbaum design sensitivity (rosenbaum2002observational): bound only the odds of
+  modern reporting standard descends from this: Cinelli-Hazlett robustness values
+  (cinelli2020making; sensemakr gives the minimal reporting table: RV, partial R2 of the
+  treatment, bounds against 1x/2x/3x the benchmark covariate). sensemakr works on a linear
+  model, so for a forest AIPW estimate its RV belongs to a linear proxy, and the methods
+  paragraph says so. The bounds for the doubly robust estimate itself are Chernozhukov,
+  Cinelli, Newey, Sharma, and Syrgkanis (chernozhukov2026long, "Long Story Short"). They
+  bound the omitted-variable bias of ATEs and other linear functionals by the explanatory
+  power of the omitted variables. Python DoubleML implements them as sensitivity_analysis()
+  (checked in the DoubleML 0.11 user guide); R DoubleML 1.0.2 has no equivalent.
+- Oster's delta (oster2019unobservable) is dropped from the family's reporting standards.
+  Masten and Poirier (masten2026effect) show that it can be much easier for omitted
+  variables to flip a coefficient's sign than to drive it to zero. Whenever Oster's delta is
+  large, a much smaller value already reverses the sign. Oster's delta assumes the omitted
+  variables are uncorrelated with the included controls. Diegert, Masten, and Poirier
+  (diegert2022assessing) give a sensitivity analysis that drops that assumption. Both papers
+  implement their measures in the Stata module regsensitivity. When a coauthor or referee
+  asks for Oster's delta, cite these two papers and report the Cinelli-Hazlett values.
+- Rosenbaum sensitivity bounds (rosenbaum2002observational, ch. 4): bound only the odds of
   assignment (the Gamma parameter), leave the outcome association unrestricted; matched
-  designs report the Gamma at which significance is lost.
+  designs report the Gamma at which significance is lost. "Design sensitivity" is a
+  different object, the limiting Gamma as the sample grows (rosenbaum2004design).
 
 Failure semantics: an estimate that flips sign or loses significance under mild calibrated
 confounding indicts the design; do not respond by switching estimators. M-bias from
@@ -33,10 +45,14 @@ mistakes in economics (Imbens); the descendant rule catches the common error.
 ## Selection-on-observables facts worth citing
 
 - Doubly robust = consistent if EITHER the outcome model or the propensity model is
-  consistent; tolerates slow (ML-rate) convergence of both nuisances (Imbens 2024, on
-  bang2005doubly and the DML literature).
-- Fixed-number-of-matches matching is never fully efficient, and with many covariates its
-  bias does not vanish asymptotically (Abadie-Imbens 2006, via Imbens 2024);
+  consistent (the AIPW estimator is robins1994estimation; bang2005doubly named the
+  property). Slow ML-rate nuisances are allowed with cross-fitting when the product of the two
+  error rates is o(n^-1/2), for example n^-1/4 each (chernozhukov2018double). grf meets this
+  through out-of-bag nuisance predictions; a hand-rolled AIPW needs sample splitting.
+- Fixed-number-of-matches matching is never fully efficient. With k continuous covariates
+  its bias is of order N^(-1/k). With two or more, the bias does not vanish at the root-N
+  rate and is no longer negligible against the standard error, so the estimator is not
+  root-N consistent in general (abadie2006large);
   bias-corrected matching with a growing number of matches restores the efficiency bound.
 - Weighting by the true propensity score is inefficient relative to the estimated one
   (hirano2003efficient); use the estimated score even in simulations.
@@ -48,21 +64,26 @@ mistakes in economics (Imbens); the descendant rule catches the common error.
   sensitivity to parametric assumptions" (AMA, citing Athey-Imbens); field replacements
   are AIPW, double ML, causal forests.
 - Adaptive experiments: naive sample means are biased under adaptive assignment because
-  adaptivity truncates the losing arms' samples early (Imbens 2024). The family has NO
-  analysis route for bandit-collected data; the adaptive-reweighting literature is outside
-  the canon. Practical exits: a final non-adaptive confirmatory phase, or restricting
-  analysis to a uniform-assignment holdout.
+  adaptivity truncates the losing arms' samples early (Imbens 2024). The analysis route for
+  bandit-collected data is adaptive weighting (hadad2021confidence). Hadad, Hirshberg, Zhan,
+  Wager, and Athey reweight AIPW scores so that the test statistic is asymptotically
+  unbiased and normal under weak conditions on the adaptive design. The CRAN package
+  banditsCI (1.0.0) implements it. The design-side exits stay: a final non-adaptive
+  confirmatory phase, or analysis restricted to a uniform-assignment holdout. field-experiment
+  owns the design decision.
 - Surrogate index (athey2026surrogate): estimate the relation of long-run outcome to
-  surrogates in observational data, apply it to experimental surrogate movements; valid
-  only when all causal paths from treatment to the long-run outcome pass through the
-  measured surrogates, which is the assumption to argue and the limitation to state. The
+  surrogates in observational data, apply it to experimental surrogate movements. It needs
+  three assumptions, each to argue and each a limitation to state: unconfoundedness in the
+  experiment, surrogacy (all causal paths from treatment to the long-run outcome pass
+  through the measured surrogates), and comparability of the experimental and observational
+  samples. The
   family ships no estimation template; Athey, Chetty, Imbens, and Kang's own empirical
   implementation is the recipe, and the deliverable stops at the validity argument.
 
 ## Plain panel fixed effects: the Mixtape's Table 8.2 columns
 
-The Mixtape (Cunningham, Causal Inference: The Remix, panel-data chapter) presents columns 3
-and 4 of its Table 8.2, from Cornwell and Rupert (1997), which add job tenure and then
+The Mixtape (Cunningham, The Mixtape, online ch. 8) presents columns 3 and 4 of
+its Table 8.2, from Cornwell and Rupert (1997), which add job tenure and then
 quadratics in years married and walk the marriage premium from the column 1 FGLS 0.083 to
 0.033, as evidence about time-varying unobserved heterogeneity. Under this skill's rule those
 columns are inadmissible, because years married and job tenure are plausibly consequences of
@@ -87,10 +108,10 @@ Use these to argue a method is accepted practice in marketing journals.
 |---|---|
 | DiD | no marketing exemplar in the AMA piece (it cites Cao, Chintagunta, Li 2023 JMR and Ghose et al. 2024 JMR as randomized experiments); stacked-regression sources Cengiz et al. 2019 QJE, Gormley and Matsa 2011 RFS |
 | Factor models / gsynth | physician payment disclosure and prescribing (Guo, Sriram, Manchanda 2020 MktSci); newspaper paywalls (Pattabhiramaiah, Sriram, Manchanda 2019 JM); advertising and earned word of mouth (Lovett, Peres, Xu 2019) |
-| Synthetic DiD | TV advertising and online sales (Lambrecht, Tucker, Zhang 2024); soda taxes and marketing conduct (Keller, Guyts, Grewal 2024) |
+| Synthetic DiD | TV advertising and online sales (Lambrecht, Tucker, Zhang 2024); soda taxes and marketing conduct (Keller, Guyt, Grewal 2024) |
 | Matrix completion | misinformation and the brand premium (Bronnenberg, Dube, Sanders 2020) |
 | AIPW | advertising measurement at Facebook (Gordon et al. 2019 MktSci) |
-| Causal forest | restaurant survival from consumer photos (Zhang, Luo 2023); digital-engagement spillovers on print subscriptions (Pattabhiramaiah, Overby, Xu 2022); targeted campaigns (Ellickson, Kar, Reeder 2023) |
+| Causal forest | information disclosure and industry payments to physicians (Guo, Sriram, Manchanda 2021 JMR); restaurant survival from consumer photos (Zhang, Luo 2023); digital-engagement spillovers on print subscriptions (Pattabhiramaiah, Overby, Xu 2022); targeted campaigns (Ellickson, Kar, Reeder 2023) |
 | Augmented DiD | Li and Van den Bulte 2023 (MktSci) |
 | Forward DiD | Li 2024 (MktSci Frontiers) |
 
@@ -154,7 +175,7 @@ Designs, estimators, and diagnostics live in field-experiment.
 | Tool | Version | Role | Traps |
 |---|---|---|---|
 | policytree | 1.2.5 | double_robust_scores(forest) -> policy_tree(X, Gamma, depth = 2) | Gamma columns = actions in order (1 control, 2 treated); predict returns the column index, not 0/1; exact search exponential in depth |
-| sensemakr | 0.1.6 | Cinelli-Hazlett sensitivity: robustness values, benchmark bounds, ovb_minimal_reporting (latex/html) | treatment looked up by coefficient name, so factor treatments FAIL (undocumented, in source): code treatment numeric 0/1; kd defaults to 1, pass kd = 1:3 for the standard table; lm objects (fixest method on GitHub) |
+| sensemakr | 0.1.6 | Cinelli-Hazlett sensitivity: robustness values, benchmark bounds, ovb_minimal_reporting (latex/html) | treatment looked up by coefficient name, so factor treatments FAIL (undocumented, in source): code treatment numeric 0/1; kd defaults to 1, pass kd = 1:3 for the standard table; lm objects (the fixest method is GitHub only, not on CRAN 0.1.6); works on a linear model, so for a forest AIPW estimate the RV belongs to a linear proxy (DR route: Python DoubleML sensitivity_analysis()) |
 | WeightIt | 2.1.0 | balancing weights, estimand = "ATO" for overlap weights (method = "glm") | ATO not available for every method (check ?method_<name>); downstream is lm_weightit/glm_weightit + marginaleffects::avg_comparisons (M-estimation SEs account for estimated weights); plain lm + vcovCL treats weights as fixed; keep.mparts=TRUE default enables the M-estimation SEs |
 | cobalt | 5.0.0 | bal.tab(w) balance table after weighting (standardized mean differences, KS) | thresholds = c(m = .1) flags imbalance at the conventional 0.1 SMD; takes the weightit object directly |
 | DoubleML | 1.0.2 | explicit double/debiased ML when nuisance-learner control is wanted (mlr3) | heavier setup; the grf route covers the default DR case |
@@ -167,8 +188,9 @@ fallback, and hist(cf$W.hat) is the documented overlap check. marginaleffects ru
 g-computation on weightit fits. estimatr's lm_robust(y ~ d, fixed_effects = ~unit,
 clusters = unit, se_type = "stata") is the within fit with Stata's FE standard errors, where
 se_type = "stata" means HC1 without clusters and Stata's cluster-robust variant with them. The
-Mixtape's own FE call has no clusters argument (only its demeaned OLS call has
-`clusters = id`), and its `fixed_effect = ~id` runs only because R partial-matches the name.
+Mixtape's own FE call (online ch. 8 sec. 8.1, sex-work R code) has no clusters argument
+(only its demeaned OLS call has `clusters = id`), and its `fixed_effect = ~id` runs only
+because R partial-matches the name.
 fixest's feols(y ~ d | unit, cluster = ~unit) is the plain-FE fit, and the plain-FE section of
 SKILL.md runs the zero-variance count first because fixest keeps units with no within
 variation without a message.
