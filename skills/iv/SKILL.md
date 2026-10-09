@@ -1,6 +1,6 @@
 ---
 name: iv
-description: Design, estimate, validate, and write up an instrumental-variables analysis: single-instrument LATE designs, weak-instrument-robust inference, shift-share instruments, formula instruments that need recentering, and leniency (judge and examiner) designs estimated by UJIVE. TRIGGER on "instrumental variable", "IV", "2SLS", "LATE", "complier", "exclusion restriction", "first stage", "weak instrument", "Anderson-Rubin", "shift-share", "Bartik", "judge design", "examiner leniency", "UJIVE", "jackknife IV", "price endogeneity", "cost shifter", "Hausman instrument", "simulated eligibility", "recentered instrument", or any setting where treatment is chosen by agents and an incentive or cost shifter moves it. Randomized encouragement designs are led end to end by field-experiment.
+description: Design, estimate, validate, and write up an instrumental-variables analysis: single-instrument LATE designs, weak-instrument-robust inference, shift-share instruments, formula instruments that need recentering, and leniency (judge and examiner) designs estimated by UJIVE. TRIGGER on "instrumental variable", "IV", "2SLS", "LATE", "complier", "exclusion restriction", "first stage", "weak instrument", "Anderson-Rubin", "shift-share", "Bartik", "judge design", "judge IV", "examiner design", "examiner leniency", "UJIVE", "JIVE", "jackknife IV", "LIML", "Rotemberg weights", "exposure-robust", "AKM", "price endogeneity", "cost shifter", "Hausman instrument", "simulated eligibility", "recentered instrument", or any setting where treatment is chosen by agents and an incentive or cost shifter moves it. Randomized encouragement designs are led end to end by field-experiment.
 ---
 
 # Instrumental variables
@@ -25,7 +25,7 @@ case teaches, are in references/details.md.
 
 | Design | Canonical case | Marketing analogue | What kills it |
 |---|---|---|---|
-| Randomized encouragement with noncompliance | Oregon Medicaid lottery (Finkelstein et al. 2012) | ghost ads, PSA holdouts, invite-only betas | the offer itself moves the outcome, because the invitation signals |
+| Randomized encouragement with noncompliance (routes to field-experiment) | Oregon Medicaid lottery (Finkelstein et al. 2012) | ghost ads, PSA holdouts, invite-only betas | the offer itself moves the outcome, because the invitation signals |
 | Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | moderation queues, credit underwriting, support-ticket routing | units re-enter the queue after seeing their assignment; monotonicity across case types |
 | Shift-share exposure | Bartik 1991; Autor-Dorn-Hanson 2013 | category demand growth from national demographic shifts weighted by sales shares | generic shares, which proxy exposure to any shock |
 | Formula or network exposure | Borusyak-Hull 2023, China high-speed rail | fraction of friends treated in seeding and referral programs | no recentering; connected users are mechanically more exposed |
@@ -41,7 +41,7 @@ market numbers in references/details.md are the two-line demonstration). An inst
 incentive or cost shifter: it changes the attractiveness of taking treatment without entering the
 potential outcomes. A price elasticity estimated this way is the elasticity of the compliers the
 instrument moved (Angrist, Graddy, and Imbens 2000), and need not be the elasticity a firm faces
-when it sets price itself. Cunningham (Causal Inference: The Remix, section 7.7) puts it as
+when it sets price itself. Cunningham (The Mixtape, online ch. 7 sec. 7.7) puts it as
 *"But when the firm lowers its price, it won't do so using storms!"* Route
 a pricing question to the PRTE ladder below, naming the policy that will move the price.
 
@@ -73,19 +73,22 @@ Five assumptions, argued separately because they have different characters (Imbe
    cutoff falls, which fails whenever examiners weight criteria differently or differ in skill
    (Chan-Gentzkow-Yu find that skill accounts for 39 percent of the variation in radiologists'
    diagnosis rates, which is the leniency measure in this design). A leniency design needs less
-   than this. The operative condition is average
-   monotonicity, no unit a defier on average across pairwise comparisons, which is necessary
-   and sufficient for nonnegative weights and is testable. The leniency section below carries
-   the weakening and the test; do not price a leniency design against the uniform condition.
-   One-sided noncompliance buys the uniform version for free and turns the LATE into an effect
-   on treated compliers.
+   than this. The operative condition is average monotonicity, no unit a defier on average
+   across pairwise comparisons. Frandsen, Lefgren, and Leslie (2023) show it is sufficient for
+   nonnegative weights, Goldsmith-Pinkham, Hull, and Kolesár (2026) state it is also necessary,
+   and it is testable. The leniency section below carries the weakening and the test; do not
+   price a leniency design against the uniform condition. One-sided noncompliance (no
+   always-takers) buys the uniform version for free, and the LATE then equals the average
+   treatment effect on the treated (ATT).
 5. Relevance, tested with the discipline in the next section, never with a full-sample afterthought.
 
 The estimand under all five is the complier average effect (LATE). Compliers are the focus
-because theirs is the only point-identified average, an honest second best. When the first stage
-varies across units, the LATE weights units by their first-stage responsiveness, so the compliers
-are defined by responsiveness and not by membership alone (Huntington-Klein 2020). Report the compliance
-shares (always-takers, never-takers, compliers, three lines of code) and, when the ATE was the
+because theirs is the only point-identified average, an honest second best. When the treatment
+or the instrument is non-binary and the first stage varies across units, the LATE weights units
+by their first-stage responsiveness. Compliers are then defined by responsiveness and not by
+membership alone (Huntington-Klein 2020). With binary Z and D every complier moves by the same
+one unit, so this weighting drops out. Report the compliance shares (always-takers,
+never-takers, compliers, three lines of code) and, when the ATE was the
 stated target, Manski bounds alongside the LATE. When the stated question is a rollout or an
 incentive change (a bigger subsidy, wider eligibility, "what if we gave it to everyone"), name
 the target as a PRTE and take the middle rung (Mogstad-Santos-Torgovitsky 2018): the LATE and
@@ -102,26 +105,31 @@ The binding constraint in modern IV practice is inference, and the canon's posit
 2024) is blunt:
 
 - Test significance with the Anderson-Rubin test at EVERY instrument strength (CLR when
-  overidentified; they coincide with one instrument). Just-identified, AR is simply the robust
-  t-test on the instrument in the reduced form, so it costs one regression.
+  overidentified; they coincide with one instrument). Just-identified, the AR test of a zero
+  effect is the robust t-test on the instrument in the reduced form, so it costs one
+  regression. The inverted interval repeats that test with y - b0 x as the outcome for each
+  candidate b0.
 - Confidence intervals only by inverting AR/CLR, never from the 2SLS standard error. Valid
   intervals cannot be symmetric in finite samples, and an unbounded AR interval is an honest
   statement that identification is not established, never something to suppress by switching
-  back to t-intervals. The Mixtape (Cunningham, Causal Inference: The Remix, ch. 7) reports AR
-  intervals "for robustness"; this skill makes them the only interval, because the two disagree
-  in the chapter's own fish example: at an effective F of 22.929 the 2SLS estimate is -1.119 with
-  a robust standard error of 0.431, so the t-interval is about [-1.96, -0.27] against a printed
-  AR interval of [-2.186, -0.394]. Both ends move, and the AR interval is asymmetric.
+  back to t-intervals. Cunningham (The Mixtape, online ch. 7 sec. 7.4) reports AR intervals
+  "for robustness"; this skill makes them the only interval, because the two disagree in the
+  chapter's own fish example (sec. 7.7, Table 7.14, on Graddy's data): at an effective F of
+  22.929 the 2SLS estimate is -1.119 with a robust standard error of 0.431, so the t-interval
+  is about [-1.96, -0.27] against a printed AR interval of [-2.186, -0.394]. Both ends move,
+  and the AR interval is asymmetric.
 - Hold instruments to a robust first-stage F of about 50 (about 50/K^(3/4) with K instruments),
-  not 10. F of 10 only controls two-tailed t size; below roughly 50, 2SLS is quite likely
-  farther from the truth than OLS unless endogeneity is severe. The sample-F-to-certified-
+  not 10. A sample F of 10 bounds worst-case two-tailed t size at about 13.5 percent, not 5.
+  Under a uniform prior on rho in [0, 0.45], 2SLS beats OLS in distance to the truth 47
+  percent of the time at population F 10 and 65 percent at 29.44, the population F that a
+  sample F of 50 certifies (Keane and Neal 2024, Table 5). The sample-F-to-certified-
   population-F ladder, and when a severe-endogeneity relaxation of this bar is credible, are
   in references/details.md. This bar prices 2SLS bias, so it moves with the estimator: it does
   not transfer to a jackknife estimator in a many-instrument design (see the leniency section).
-  The Mixtape calls an F of 17.6 "strong enough for identification" and the fish instrument
-  "strong (F > 22)", both inside the band this ladder distrusts (a sample F of 23.1 certifies a
-  population F of 10), so a reader who copies that language into a current submission will draw
-  the objection.
+  The Mixtape calls an F of 17.6 "strong enough for identification" (online ch. 7 sec. 7.8, on
+  Cunningham and Finlay's data) and the fish instrument "strong (F > 22)" (sec. 7.7), both
+  inside the band this ladder distrusts (a sample F of 23.1 certifies a population F of 10), so
+  a reader who copies that language into a current submission will draw the objection.
 - Below F = 3.84 do not run IV at all; the AR interval will be unbounded and rightly so.
 - The reason the t-test dies even at strong F is power asymmetry, a mechanism worth knowing when
   refereeing: the 2SLS standard error is spuriously small exactly when the estimate lands near
@@ -170,6 +178,12 @@ disqualifier:
   because the shares are generic. Generic shares (industry mix) proxy exposure to any industry
   shock; tailored shares (origin-country migrant networks for migration treatments) can qualify.
 
+Refusal. A design that fails both disqualifiers has no identification path, and no estimator or
+standard error repairs that. Report no shift-share IV estimate. The write-up says the shifts are
+too few or too endogenous to instrument on their own and the shares are generic, and the
+question goes back to causal-design. This exit is our judgment, built on the Table 2
+disqualifiers.
+
 Three mechanical rules that are silently violated in practice:
 
 1. Control for the sum of shares whenever shares are incomplete (do not renormalize), interacted
@@ -203,11 +217,21 @@ process (a permutation class in natural experiments), recompute the instrument u
 average to get the expected instrument mu_i, then instrument with z_i - mu_i or control for
 mu_i. Recenter first in a true experiment; in a natural experiment prefer controlling for
 several candidate mu_i from different guessed assignment processes, which is doubly robust (a
-wrong candidate cannot introduce bias where none existed). The same draws give randomization
-inference and the balance test of the recentered instrument. The China HSR numbers (0.23
-significant collapsing to 0.08 insignificant after recentering) are the calibration for how much
-pure exposure bias can look like an effect. Ordinary controls do not substitute: geography
-absorbing 82 percent of the instrument's variation still left a significant biased estimate.
+wrong candidate cannot introduce bias where none existed). The protection has a price. Each
+extra candidate is one more control, which absorbs instrument variation and widens the
+interval. Our judgment: add a candidate only for an assignment process you can defend. The
+same draws give randomization inference and the balance test of the recentered instrument. The
+China HSR numbers (0.23 significant collapsing to 0.08 insignificant after recentering) are the
+calibration for how much pure exposure bias can look like an effect. Ordinary controls do not
+substitute: geography absorbing 82 percent of the instrument's variation still left a
+significant biased estimate.
+
+Refusal. Recentering needs an assignment process to simulate from. If nobody can state one (no
+protocol, and no stratum of similar shocks within which permutation is credible), mu cannot be
+computed, and the formula instrument is not valid. Report no estimate from it. The write-up says
+which shocks are exogenous, why their assignment process cannot be specified, and that the
+design is set aside for that reason. This exit is our judgment, built on Borusyak and Hull's
+requirement that the process be specified.
 
 ## Leniency designs: UJIVE and the five checks
 
@@ -232,12 +256,17 @@ setting that carries many instruments and many controls at once: 2SLS has trace 
 scales in the number of examiners; JIVE has trace -L, so its bias scales in the number of
 controls and points the opposite way; UJIVE has trace zero. Bias-corrected 2SLS also has trace
 zero, but only under homoskedasticity. IJIVE does not fully clear the bias, though in practice
-it lands close. The trace algebra is in references/details.md.
+it lands close. The trace algebra is in references/details.md. The other jackknife built for
+many covariates is FEJIV, the fixed-effect jackknife IV of Chao, Swanson, and Woutersen (2023).
+Słoczyński, Sun, and Uysal (2026) report it beside UJIVE, and the fejiv package (MATLAB, R,
+Stata) implements it. Their guide is the place to look for covariate specifications, weak
+monotonicity, and software.
 
-The Mixtape (ch. 7) demonstrates JIVE in its bail exercise, calling that treatment "somewhat
-backwards looking", and flags UJIVE itself as the more robust version. This skill runs UJIVE: by
-the trace argument above, many examiners and many controls at once leave JIVE's many-covariate
-bias live and pointing opposite to 2SLS's. Report JIVE beside UJIVE as a diagnostic.
+The Mixtape (online ch. 7 sec. 7.7) demonstrates JIVE in its bail exercise, calling that
+treatment "somewhat backwards looking", and flags UJIVE itself as the more robust version. This
+skill runs UJIVE: by the trace argument above, many examiners and many controls at once leave
+JIVE's many-covariate bias live and pointing opposite to 2SLS's. Report JIVE beside UJIVE as a
+diagnostic.
 
 The five checks, in their order:
 
@@ -250,10 +279,15 @@ The five checks, in their order:
    covariates, which is automatic when w is fixed effects and otherwise needs interactions or
    higher-order terms (sufficient in Kolesár 2013, necessary in Blandhol et al. 2026). Assignment
    can be random and the design still broken if units act on the realization: Gaudet, Harris, and
-   St. John (1933) recorded defendants changing their plea to draw a different judge. Where the
-   data record it, instrument with the initial assignment instead of the final one, and ask the
-   administrators how often re-routing happens, since check 2 misses sorting on unobservables.
-   The platform analogue is the appealed moderation decision or the re-submitted ticket.
+   St. John (1933), as quoted in Cunningham (The Mixtape, online ch. 7 sec. 7.7), recorded
+   defendants changing their plea to draw a different judge. Where the data record it,
+   instrument with the initial assignment instead of the final one, and ask the administrators
+   how often re-routing happens, since check 2 misses sorting on unobservables. The platform
+   analogue is the appealed moderation decision or the re-submitted ticket. Refusal: if
+   re-routing after assignment is common and the data hold only the final assignment, the
+   instrument carries the units' own choices. Report no leniency estimate. The write-up says how
+   often re-routing happens, that the initial assignment is not recorded, and that the design is
+   set aside for that reason (our judgment).
 2. Balance, run as the same UJIVE specification with the covariate as the outcome. This is the
    step that gets done wrong. Do not regress observables on a constructed leniency measure,
    which manufactures mechanical correlation and carries errors-in-variables bias even when the
@@ -262,8 +296,9 @@ The five checks, in their order:
    the same units as the treatment effect, so the two are directly comparable: in their patent
    reanalysis the balance coefficients came in about ten times smaller than the effects. The
    same machinery on a post-assignment variable tests exclusion (their instance is months under
-   review). The Mixtape (ch. 7) calls balance "an absolute must" and says nothing about how, and
-   the two implementations a reader reaches for first are the two ruled out here.
+   review). The Mixtape (online ch. 7 sec. 7.7) calls balance "an absolute must" and says
+   nothing about how, and the two implementations a reader reaches for first are the two ruled
+   out here.
 3. Estimate by UJIVE and report the alternatives beside it. 2SLS on the examiner dummies landing
    between OLS and UJIVE is the signature of many-instrument bias pulling toward OLS, and 2SLS
    standard errors 3 to 4 times tighter than UJIVE's are that same pathology showing up in the
@@ -272,10 +307,13 @@ The five checks, in their order:
 5. Characterize compliers (below).
 
 Inference. Clustering follows assignment, so with independent assignment to examiners plain
-robust standard errors are valid and clustering on the examiner is never justified. Say so
-explicitly when a referee expects examiner clusters. Clustered assignment (one doctor covers a
-whole shift) also changes the estimator, calling for leave-own-cluster-out UJIVE
-(Frandsen-Leslie-McIntyre 2025), so the clustering decision comes before the estimation.
+robust standard errors are valid, and clustering on the examiner is not justified by the
+assignment process. Say so explicitly when a referee expects examiner clusters. Clustered
+assignment (one doctor covers a whole shift) also changes the estimator, calling for
+leave-own-cluster-out UJIVE (Frandsen-Leslie-McIntyre 2025), so the clustering decision comes
+before the estimation. The clusterIV package (CRAN) implements that cluster-jackknife estimator
+and a cluster-jackknife AR test. Confirm that it carries UJIVE's many-control correction before
+reporting it as the headline (row in references/details.md).
 Full argument: ../causal-design/references/shared-rules.md.
 
 Strength and the weak-instrument fallback. Do not read the first-stage F against a threshold
@@ -291,9 +329,10 @@ treatment-effect heterogeneity, which a leniency design has by construction.
 
 Monotonicity, weakened and tested. Price the design against average monotonicity
 (Frandsen-Lefgren-Leslie 2023), meaning no unit is a defier on average across pairwise
-comparisons. That condition is necessary and sufficient for nonnegative weights on the
-individual effects, which is what uniform monotonicity was protecting against in the first
-place, and it is strictly weaker. It is not invariant to first-stage misspecification: when
+comparisons. FLL show that the condition is sufficient for nonnegative weights on the
+individual effects, and Goldsmith-Pinkham, Hull, and Kolesár (2026) state that it is also
+necessary. Nonnegative weights are what uniform monotonicity was protecting in the first place,
+and the condition is strictly weaker. It is not invariant to first-stage misspecification: when
 examiners work across several strata with stratum-specific leniency, an additive first stage can
 break average monotonicity where the true relative leniency satisfies it. Check robustness to
 interacting examiner assignment with the stratum fixed effects, and expect that flexibility to
@@ -309,11 +348,14 @@ distribution of treated compliers, the Kitagawa-type form. An indicator built fr
 determined before assignment checks the complier covariate distribution. Two limits to
 state when reporting it: the null is joint across assignment, exclusion, and monotonicity, so a
 rejection does not localize; and it catches only gross violations, since on-average defiers have
-to be both common and unlike the compliers to push a weighted average out of [0, 1]. What it
-buys over testing the stronger condition is that its rejections bear directly on sign reversals,
-and it needs neither bounded outcomes nor a small number of decision-makers. Sigstad 2026 is the
-calibration for how much to worry: monotonicity is often violated in judicial panels, and the
-disagreements are too small to move leniency IV estimates much.
+to be both common and unlike the compliers to push a weighted average out of [0, 1]. A sharper
+joint test of random assignment, exclusion, and monotonicity is Coulibaly, Hsu, Mourifié, and
+Wan (2024), built from the sharp testable implications. It handles few or many cases per judge
+and discrete or continuous instruments, and they apply it to Stevenson's Philadelphia data.
+What the [0, 1] test buys over testing the stronger condition is that its rejections bear
+directly on sign reversals, and it needs neither bounded outcomes nor a small number of
+decision-makers. Sigstad 2026 is the calibration for how much to worry: monotonicity is often
+violated in judicial panels, yet the violations bias leniency IV estimates little.
 
 Compliers and external validity. The same trick with non-binary v identifies complier means of
 any pre-assignment characteristic under the headline weights. Put the complier mean beside the
@@ -384,8 +426,8 @@ Whether the just-identified 2SLS t-test is rescuable. Angrist-Kolesár 2024 defe
 approximately fine at realistic endogeneity); Lee et al. 2022 patch it with tF critical values,
 and Lee, McCrary, Moreira, Porter, and Yap 2023 (NBER w31893) with VtF intervals. The canon's
 position (Keane-Neal) is that both miss the binding problem: power, not size. The t-test has
-near-zero power against effects opposite the OLS bias, which under
-publication bias manufactures spurious literature-wide consensus, and tF inherits the asymmetry.
+near-zero power against effects opposite the OLS bias, which under publication bias
+manufactures spurious literature-wide consensus, and tF inherits the asymmetry.
 Default in a few-instrument design: AR/CLR and the F-50 standard. When a referee pushes back
 with Angrist-Kolesár, report both and cite the dispute. The AR test costs one regression, so
 there is no economy argument for the t-test.
@@ -431,8 +473,8 @@ Report each effect with the results sentence in ../causal-design/references/shar
 > is [randomized / plausibly unconfounded conditional on X], which justifies the reduced-form
 > intention-to-treat estimates; the IV estimate additionally requires exclusion, which we assess
 > separately for always-takers and never-takers ([arguments]), and monotonicity, which [holds
-> because the instrument is a one-directional incentive / is threatened because this is an
-> examiner-style design, and we report the corresponding bounds]. The estimand is the complier
+> because the instrument is a one-directional incentive]. [If this is an examiner-style design,
+> use the leniency template below in place of this paragraph.] The estimand is the complier
 > average effect (Imbens 2014); compliers are [share] of the sample. Our instrument's robust
 > first-stage F is [value], certifying a population F of at least [ladder value] at 95 percent
 > confidence; following Keane and Neal (2024) we report Anderson-Rubin [CLR] tests and inverted
@@ -455,10 +497,10 @@ A leniency design shares almost none of that structure, so it gets its own templ
 > [randomized / as good as random conditional on the [stratum] fixed effects that
 > [institution]'s routing rule makes necessary]. We instrument [treatment] with the full set of
 > [decision-maker] indicators and estimate by UJIVE (Kolesár 2013), which instruments with a
-> leave-one-out estimate of covariate-residualized leniency and stays unbiased with many
-> decision-makers and many controls at once, where 2SLS and JIVE do not (Goldsmith-Pinkham,
-> Hull, and Kolesár 2026). We report OLS, 2SLS on the indicators, and JIVE alongside.
-> [If assignment is independent across units:] Because assignment is independent across
+> leave-one-out estimate of covariate-residualized leniency and stays approximately unbiased
+> with many decision-makers and many controls at once, where 2SLS and JIVE do not
+> (Goldsmith-Pinkham, Hull, and Kolesár 2026). We report OLS, 2SLS on the indicators, and JIVE
+> alongside. [If assignment is independent across units:] Because assignment is independent across
 > [units], we report heteroskedasticity-robust standard errors and do not cluster on
 > [decision-makers], following Goldsmith-Pinkham, Hull, and Kolesár (2026). [If assignment is
 > clustered:] Because a single [decision-maker] covers an entire [shift], we cluster at the
@@ -470,10 +512,12 @@ A leniency design shares almost none of that structure, so it gets its own templ
 > treatment-effect units: the coefficients are [magnitude] times smaller than the estimated
 > effects. We assess exclusion the same way, using [post-assignment variable] as the outcome.
 > The estimand is a convex weighted average of individual treatment effects under average
-> monotonicity (Frandsen, Lefgren, and Leslie 2023), which is weaker than the usual no-defiers
-> condition and is necessary and sufficient for the weights to be nonnegative. We test it by
-> re-running the specification with [binary pre-assignment variable] times treatment as the
-> outcome, where the estimate must lie in [0, 1]: we obtain [value]. A limitation of this test
+> monotonicity, which is weaker than the usual no-defiers condition. The condition is sufficient
+> for the weights to be nonnegative (Frandsen, Lefgren, and Leslie 2023) and also necessary
+> (Goldsmith-Pinkham, Hull, and Kolesár 2026). We test it by re-running the specification with
+> [binary pre-assignment variable] times treatment as the outcome, whose estimand must lie in
+> [0, 1]: the estimate is [value], and its 95 percent interval [interval] [overlaps / lies
+> wholly outside] [0, 1]. A limitation of this test
 > is that it detects only gross violations, since on-average defiers have to be both common and
 > unlike the compliers to move a weighted average outside those bounds, and its null is joint
 > across assignment, exclusion, and monotonicity, so a rejection would not tell us which failed.
@@ -488,7 +532,8 @@ Every claim traces to references/canon.md. Keys for the canon papers live in
 ## Handoffs
 
 - causal-design: whether IV is the right tool at all; clustering and inference questions shared
-  across designs.
+  across designs. This skill does not take control functions or Gaussian copulas. The decline
+  paragraph at causal-design's triage question 3 carries the pointers for them.
 - rdd: fuzzy RD is IV at a cutoff; its first-stage and exclusion discipline lives there, the
   weak-IV inference regime here.
 - did: the share-exogeneity path is a stack of DiD-style exposure designs, so parallel-trends
@@ -498,5 +543,5 @@ Every claim traces to references/canon.md. Keys for the canon papers live in
   recentered and formula instruments keep their RI machinery here.
 - Perceived-treatment designs, where an actual feature instruments the perceived feature, arrive
   here: the exclusion and weak-instrument discipline apply to them unchanged.
-- Preregistration: the user writes it themselves; this skill supplies the instrument, specification, and weak-IV
-  fallback to pre-specify before outcomes are seen.
+- Preregistration: the user writes it themselves; this skill supplies the instrument, specification,
+  and weak-IV fallback to pre-specify before outcomes are seen.

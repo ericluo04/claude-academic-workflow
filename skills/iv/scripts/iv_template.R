@@ -47,7 +47,8 @@ m <- ivmodel(Y = df$y, D = df$d, Z = df[, c("z"), drop = FALSE],
              X = df[, c("x1", "x2")])
 # Heteroskedastic / clustered variants: ivmodel(..., heteroSE = TRUE) or
 # ivmodel(..., clusterID = df$cl). Single endogenous regressor only.
-# With few clusters the F and chi2 versions of AR can diverge; check both (../references/details.md).
+# With few clusters, use the Wang-Zhang (2024) wild bootstrap AR (../references/details.md);
+# it is not implemented in this template.
 AR.test(m)     # $ci is a matrix of interval rows: possibly a union, possibly unbounded.
 CLR(m)         # coincides with AR when just-identified; the overidentified default test.
 # An unbounded AR set is the design's verdict (identification not established at 95%),

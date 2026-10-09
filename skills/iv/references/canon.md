@@ -155,16 +155,17 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
   balance regression manufactures; the joint F on the examiner dummies is invalid with many
   examiners; the same machinery on a post-assignment variable tests exclusion; average
   monotonicity (Frandsen-Lefgren-Leslie 2023) is the operative condition, weaker than
-  Imbens-Angrist uniform monotonicity and necessary and sufficient for nonnegative weights, but
-  it is not invariant to first-stage misspecification; average monotonicity is testable, by
-  running UJIVE on v_i times treatment for a pre-assignment binary v_i and checking the estimate
-  lands in [0, 1]; the same trick with non-binary v_i characterizes compliers and probes external
-  validity; the first-stage F is the wrong strength diagnostic for UJIVE, which stays
+  Imbens-Angrist uniform monotonicity, sufficient for nonnegative weights (FLL) and, as GHK
+  state, also necessary, but it is not invariant to first-stage misspecification; average
+  monotonicity is testable, by running UJIVE on v_i times treatment for a binary v_i and checking
+  whether the 95 percent interval overlaps [0, 1], since the bound holds for the estimand; the
+  same trick with non-binary v_i characterizes compliers and probes external validity; the
+  first-stage F is the wrong strength diagnostic for UJIVE, which stays
   approximately unbiased as E[F] goes to one provided sqrt(K) times (E[F] - 1) is large; the
   heterogeneity-robust plug-in variance also absorbs the Bekker many-instrument term; under
-  independent assignment plain robust standard errors suffice and clustering by examiner is never
-  justified; clustered assignment changes the estimator as well as the standard error, requiring
-  leave-own-cluster-out UJIVE.
+  independent assignment plain robust standard errors suffice, and clustering by examiner is not
+  justified by the assignment process; clustered assignment changes the estimator as well as
+  the standard error, requiring leave-own-cluster-out UJIVE.
 - Binds when: any design where cases are assigned to decision-makers who differ in strictness and
   the assignment is as good as random within a stratum. Judges, patent examiners, disability
   assessors, loan officers, child-protection investigators, radiologists, immigration officers,
@@ -208,8 +209,9 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
    is a statement about 2SLS and not about IV in general.
 4. Weak-instrument fallback in leniency designs: the skill's general default is AR/CLR, but
    Goldsmith-Pinkham-Hull-Kolesár flag that the jackknife AR of Mikusheva-Sun 2022 and the
-   jackknife LM test of Matsushita-Otsu 2024 are not robust to treatment-effect heterogeneity, which a leniency
-   design has by construction. Inside a leniency design the fallback is Yap 2025 instead.
+   jackknife LM test of Matsushita-Otsu 2024 are not robust to treatment-effect
+   heterogeneity, which a leniency design has by construction. Inside a leniency design the
+   fallback is Yap 2025 instead.
 
 ## Primary papers cited through the canon
 
@@ -231,9 +233,10 @@ Jaeger-Ruist-Stuhler 2018 (dynamic shift-share caveat).
 
 Added with the leniency addendum (2026-08-04): Kolesár 2013 (UJIVE's origin);
 Frandsen-Lefgren-Leslie 2023 (average monotonicity, and their own test of the stronger
-condition); Sigstad 2026 (monotonicity is often violated in judicial panels, and the
-disagreements are too small to bias the estimates much); Chyn-Frandsen-Leslie 2025 (the
-companion examiner-design practitioner's guide in JEL); Blandhol et al. 2026 (linearity of
+condition); Sigstad 2026, AER 116(1): 189-208 (monotonicity is often violated in judicial
+panels, yet the violations cause little bias); Chyn-Frandsen-Leslie
+2025 (the companion examiner-design practitioner's guide in JEL); Blandhol et al. 2026, Review
+of Economic Studies, advance online publication 2026-05-14, formerly NBER w29709 (linearity of
 E[z|w] in the covariates as a necessary condition); Yap 2025 (many-weak-instrument inference
 that survives treatment-effect heterogeneity); Frandsen-Leslie-McIntyre 2025 (cluster jackknife
 IV, the leave-own-cluster-out route under clustered assignment).
@@ -246,9 +249,66 @@ rarely from a new dataset, which is what the "before you estimate" paragraph in 
 on). Both verified against Crossref 2026-08-26; BibTeX drafted as `angrist2000interpretation` and
 `angrist2001instrumental`, merged into causal.bib.
 
+## Flagged addenda (tier-2 audit pass, 2026-10-09)
+
+The user approved these with the tier-2 pass. Each entry was written from the abstract page fetched
+on 2026-10-09, and from the text where the entry says so. Keys are new in causal.bib and await
+the bibcheck pass.
+
+- Wang and Zhang 2024 (`wang2024wild`), Journal of Econometrics 241: 105727 (arXiv
+  2108.13707). Role: inference with few clusters. Settles: with a small fixed number of large
+  clusters, their wild bootstrap AR test controls size even when identification is weak in
+  every cluster. The wild bootstrap Wald test needs strong identification in at least one
+  cluster. Binds when: assignment is clustered and the clusters are few (a handful of markets or
+  states). Caveat: we have not checked for an R implementation.
+- Coulibaly, Hsu, Mourifié, and Wan 2024 (`coulibaly2024sharp`), NBER w32456 (arXiv 2405.06156,
+  v2 November 2025). Role: the sharp joint test for a leniency design. Settles: sharp testable
+  implications of random assignment, exclusion, and monotonicity, for few or many cases per
+  judge and for discrete or continuous instruments. Under rejection, a variant of the MTE is
+  identified under weaker assumptions. They apply it to Stevenson's Philadelphia data. Binds
+  when: a referee wants more than the GHK [0, 1] test. Caveat: preprint, not run by us.
+- Słoczyński, Sun, and Uysal 2026 (`sloczynski2026practical`), arXiv 2605.15115 (v2 July 2026).
+  Role: a practitioner's guide to IV with heterogeneous effects. Settles: different covariate
+  specifications identify different weighted averages of covariate-specific LATEs, and
+  misspecification can break the causal reading, so flexible specifications are a robustness
+  check. It reviews tests of the LATE assumptions and methods robust to monotonicity failure, and
+  it carries a software table. Read in the text: it names FEJIV (Chao, Swanson, and Woutersen
+  2023, `chao2023jackknife`, Journal of Econometrics 235(2): 1747-1769, not read by us) beside
+  UJIVE as the jackknife estimators for many instruments with covariates. In their Stevenson
+  reanalysis (Appendix Table A2), incarceration length rises 666 days (233) by linear IV, 51
+  (91) by FEJIV, and 56 (99) by UJIVE. Binds when: covariates are needed for identification or
+  instrument-covariate interactions create many instruments.
+- Mogstad and Torgovitsky 2024 (`mogstad2024instrumental`), NBER w32927, a Handbook chapter.
+  Role: the current survey behind the MST ladder. Settles (abstract): two strategies under
+  unobserved heterogeneity, reading linear IV as a LATE after the fact and building MTE
+  estimators that allow for it, with links to control-function and bounding methods. Binds when:
+  refreshing the extrapolation ladder, or receiving a control-function question from
+  causal-design. Caveat: abstract only.
+- Słoczyński 2026 (`sloczynski2026when`), arXiv 2011.06695 (v8 April 2026). Role: negative
+  weights under weak monotonicity with covariates. Settles: when covariates are needed and the
+  first stage and reduced form impose a homogeneous instrument effect, some conditional LATEs get
+  negative weights under weak monotonicity. The interacted specification of Angrist and Imbens
+  (1995) removes them. Binds when: beside the Blandhol et al. rich-covariates condition in check
+  1. Caveat: listed as REStud forthcoming in Słoczyński, Sun, and Uysal 2026; unconfirmed in
+  Crossref, which has no DOI for it yet.
+- Ferman 2026 (`ferman2026design`), arXiv 2603.11381. Settles (abstract): in shift-share designs,
+  simulations that fix outcomes and resample shocks can confound true effects with error
+  dependence, so they can overstate inference distortions from spatial correlation. He proposes
+  alternative simulation designs. Binds when: a paper or referee uses resampled-shock simulations
+  to judge shift-share inference. Caveat: abstract only.
+- Hahn, Liao, Liu, and Shi 2024 (`hahn2024econometric`), "Econometric Inference Using Hausman
+  Instruments", University of California Riverside working paper dated 2024-10-01. Unconfirmed:
+  no index carries it, and the series number rests on the file name (202405). Settles (text):
+  an IV estimator built on a Hausman instrument correlates observations, which can invalidate
+  textbook standard errors, and clustering is a pragmatic compromise. In section 5 they suspect
+  that a leave-one-out judge instrument shares the problem when each judge sees few cases. Binds
+  when: Hausman other-market prices instrument a marketing demand model. Caveat: the judge claim
+  sits against GHK's no-clustering rule. The skill keeps GHK's rule, and the conflict is open.
+
 ## Exemplar rows
 
-The recognition table's canonical cases. New keys were Crossref-verified and merged into causal.bib 2026-08-26. One line each, with the design the case is the precedent for.
+The recognition table's canonical cases. New keys were Crossref-verified and merged into
+causal.bib 2026-08-26. One line each, with the design the case is the precedent for.
 
 - Finkelstein et al. 2012 (`finkelstein2012oregon`), randomized encouragement with noncompliance,
   the Oregon Medicaid lottery with the ITT and the LATE reported side by side.
