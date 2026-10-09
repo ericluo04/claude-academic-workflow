@@ -156,29 +156,12 @@ has not argued identification. The family ships no estimation template for the s
 Athey, Chetty, Imbens, and Kang's own empirical implementation is the recipe to follow, and the
 router's deliverable stops at the validity argument.
 
-## Text-role warnings at handoff (Feder)
-
-As confounder, ignorability over text aspects is untestable, argue it from domain knowledge, and
-audit positivity (a representation that nearly encodes the treatment leaves no counterfactual).
-As outcome or discovered treatment, never train the measurement function on the estimation sample
-(split-sample, via Egami). As treatment,
-disentangle the named aspect from correlated aspects, and random assignment of texts leaves
-reader-side confounding. Any machine-coded variable in any design gets a correction
-before it enters a regression: PPI for a predicted outcome, DSL (Egami, Hinck, Stewart, Wei
-2023) or Battaglia et al. 2025 for a predicted treatment or covariate.
-
-One revision the family makes to Feder: his supervised text-as-confounder route (fine-tuned
-causally sufficient embeddings, Veitch 2020) is superseded. The GPI results say never fit the
-inference-time propensity on a representation learned with a treatment-prediction loss (on GPI's
-own simulation evidence; the dispute and its replacement belong to the text-causal literature).
-
 ## Mediation has no route in this family
 
 Process evidence (treatment affecting the outcome through a mediator, natural direct and indirect
 effects) has NO route here: sequential ignorability is an assumption regime none of the family's
 skills carries. Where to go: Imai, Keele, and Tingley (2010) for identification and sensitivity
 analysis, Pieters (2017) for the marketing-native statement of what a mediation claim requires.
-Fong-Grimmer treatment discovery is not mediation either, whatever it is called.
 
 ## Stop points
 

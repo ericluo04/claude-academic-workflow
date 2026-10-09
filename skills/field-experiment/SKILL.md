@@ -369,10 +369,3 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
   multi-factor design on one dimension estimates an implicit AMCE averaged over the other
   factors' assignment distribution, and the full machinery (averaging-distribution
   disclosure, corrections, claims firewall) lives there.
-- Text or model-generated stimuli as treatments carry a latent-treatment identification problem,
-  so randomize over many stimuli instead of one, and correct any machine-coded outcome against a
-  human-labeled subsample before it enters an estimate.
-- Stimuli produced by intervening on a model's internals carry a coherence confound. Run the
-  manipulation checks at the logged intervention strength and audit the damage on both the
-  intended and the unintended channel. Whether the intervention itself is valid is a separate
-  question from whether the experiment is.

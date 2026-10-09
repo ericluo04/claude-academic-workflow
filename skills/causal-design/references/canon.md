@@ -1,6 +1,6 @@
 # causal-design canon
 
-Current as of 2026-10-09. Four sources: three hand-picked and a fourth,
+Current as of 2026-10-09. Three sources: two hand-picked and a third,
 `abadie2023clustering`, approved on 2026-08-05, which was promoted from a cross-reference to
 a full entry because five skills lean on it. Nothing enters this file without explicit human
 approval. BibTeX keys point into ./causal.bib, which is the
@@ -8,7 +8,7 @@ one shared bib for the whole skill family. causal-design also leans on `arkhange
 (the three-axis panel taxonomy), a cross-reference owned by the did canon. The family-wide
 clustering statement is owned by this skill's own SKILL.md, whose frontmatter claims the shared
 inference rules, while method skills carry design-specific instances. Refresh:
-run litreview on the moving corners (panel estimators, text-causal) since the canon date;
+run litreview on the moving corners (panel estimators) since the canon date;
 any addendum needs explicit human approval.
 
 ## Imbens (2024)
@@ -38,7 +38,7 @@ Annual Review of Statistics and Its Application 11:123-152. Key: `imbens2024caus
 - Binds when: every triage; the selection-on-observables branch end to end; any
   sensitivity-analysis request.
 - Scope limits: names no software at all; explicitly excludes dynamic treatment regimes
-  (Robins tradition); no treatment of text or unstructured data.
+  (Robins tradition).
 - Quote (verbatim in SKILL.md): "In practice, using variables causally affected by the
   treatment or outcome is the most common mistake in choosing variables to condition on in
   estimating average treatment effects using unconfoundedness approaches."
@@ -82,30 +82,6 @@ write "AMA (causal-design canon)".
   under too-few-pre-periods where the text gives it the convex-hull condition; HCW and
   matrix completion appear only in the text); where they differ, this skill follows the
   text.
-
-## Feder et al. (2022)
-
-Transactions of the Association for Computational Linguistics 10:1138-1158. Key:
-`feder2022causal`.
-
-- Role: the text-role triage question. Any causal analysis where unstructured data appears
-  gets asked: which role does it play (confounder, outcome, treatment)? Each role has its
-  own assumption failures; causal-design states the question and the warnings, then hands
-  the measurement problem to whoever owns it.
-- Settles: ignorability over text aspects is untestable and must be argued from domain
-  knowledge; positivity is generically fragile in high dimensions (a representation that
-  nearly encodes the treatment leaves no conceivable counterfactual); consistency fails
-  through the measurement model when it was trained on the estimation data, and the fix is
-  split-sample measurement (via Egami et al.); invariance and sensitivity test batteries
-  for any NLP measure feeding a causal pipeline; there are no real-world ground-truth
-  causal text benchmarks, so semi-synthetic wins are never validation of a real estimate.
-- Binds when: any unstructured data in the causal graph; causal-design's role question.
-- REVISED WITHIN THE FAMILY: Feder's supervised text-as-confounder route (fine-tuned
-  causally sufficient embeddings, Veitch et al. 2020) is superseded by the GPI results, on
-  GPI's own simulation evidence, and the dispute and its replacement route belong to the
-  text-causal literature. causal-design cites Feder for the role triage and the assumption
-  failures, never for the Veitch route.
-- Version note: read as the arXiv accepted version; cite with TACL pagination (1138-1158).
 
 ## Abadie, Athey, Imbens, and Wooldridge (2023)
 
@@ -177,7 +153,7 @@ skill keeps the routing fan-out in SKILL.md. The marketplace design keys
 ../../field-experiment/references/canon.md (section "Marketplace designs"). Already in the bib from
 method skills and reused here: `crump2009dealing`, `wager2018estimation`,
 `chernozhukov2018double`, `xu2017generalized`, `athey2021matrix`, `crepon2013labor`,
-`hudgens2008toward`, `athey2018exact`, `egami2022make`, the did/rdd/synthetic-control canons.
+`hudgens2008toward`, `athey2018exact`, the did/rdd/synthetic-control canons.
 New with the mediation decline: `imai2010general` and `pieters2017meaningful`, decline pointers
 only, NOT canon (causal-design declines mediation and points to them; no skill carries the
 route).

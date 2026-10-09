@@ -335,11 +335,5 @@ sole-authored paper.
 - Preregistration: the user writes it themselves; this skill supplies the conjoint field list
   (see Design defaults).
 - Text or image profiles whose treatment components are latent inside the stimulus are out of
-  scope for this skill (the Fong-Grimmer boundary): randomizing the object does not randomize
-  the component, and the component needs a design of its own. Discovering the latent drivers in
-  unstructured stimuli is a problem for that separate design, not for this one. LLM-simulated
-  respondents fall under the same separate design. Two marketing papers frame that case.
-  Goli and Singh (2024) find GPT-3.5 and GPT-4 less patient than humans on intertemporal
-  choices, so elicited LLM preferences can mislead. Wang, Zhang, and Zhang (2026) combine
-  LLM-generated and human conjoint responses in a data-augmentation estimator that stays
-  consistent when the LLM data are biased.
+  scope for this skill: randomizing the object does not randomize the component, and the
+  component needs a design of its own.

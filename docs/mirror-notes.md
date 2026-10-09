@@ -57,10 +57,8 @@ private skill names a specific school's site theme and shield.
 The prose-tell list in `review-paper`. The private skill points at the Voice section of the
 private `CLAUDE.md`; the public copy inlines the list of constructions to flag.
 
-Skills not published. The private tree also holds skills for unstructured-data causal inference,
-sparse autoencoders, activation steering, image-generator interpretability, and email drafting.
-None of them are here, and the shared bibliography's section comments name topics rather than
-those skills.
+Skills not published. The private tree also holds skills that are not published here, email
+drafting among them.
 
 Sections of `CLAUDE.md` not published. The private file carries a section on mirroring the
 configuration to its own repositories and a section on a specific computing grid. Neither belongs

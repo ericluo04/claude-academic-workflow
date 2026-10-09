@@ -562,11 +562,6 @@ paper cited beyond the canon with bibcheck before submission.
 - field-experiment: owns randomized staggered rollouts (stepped wedge), where the adoption
   dates were randomized and inference is design-based. This skill documents the estimator
   for randomized timing (R package staggered, Roth and Sant'Anna 2023, `roth2023efficient`).
-- Machine-coded variables: an outcome or treatment coded by an LLM or a classifier (sentiment of
-  reviews, topics of posts, labels on images). The DiD design stays here, and the measurement
-  correction is added to it: prediction-powered inference on a gold-standard subsample for
-  a coded outcome, DSL or Battaglia et al. 2025 for a coded treatment
-  (../causal-design/references/shared-rules.md).
 - iv: share-balance pre-trend scrutiny for shift-share exposure designs lands here; the
   parallel-trends toolkit applies to share balance.
 - rdd: policy-date designs masquerading as RD in time arrive here when many units switch at a
