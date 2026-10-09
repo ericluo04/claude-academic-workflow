@@ -6,13 +6,12 @@ Heavy reference content the SKILL.md points into. Current as of 2026-08-26.
 
 | Package | Where | Version seen | Role |
 |---|---|---|---|
-| did | CRAN; bcallaway11.github.io/did | 2.5.1 (2026-07-08) | Callaway-Sant'Anna att_gt/aggte; aggte types simple, group, calendar, dynamic |
+| did | CRAN; bcallaway11.github.io/did | 2.5.1 (2026-07-08) | Callaway-Sant'Anna att_gt/aggte; aggte types simple, group, calendar, dynamic. Since 2.5, faster_mode = TRUE and aggte's default type is "group", both changed from the 2.1.x tutorials |
 | HonestDiD | CRAN; github.com/asheshrambachan/HonestDiD | 0.2.8 (2026-04-12) | Rambachan-Roth, both restrictions; README ships the aggte adapter |
 | didimputation | CRAN; github.com/kylebutts/didimputation | 0.5.1 (2026-03-09) | BJS imputation |
 | did2s | CRAN | 1.2.1 (2026-03-05) | Gardner two-stage |
 | DRDID | CRAN; psantanna.com/DRDID | 1.3.0 (2026-06-10) | Sant'Anna-Zhao 2x2 doubly robust building block that did calls; drdid/ipwdid/ordid for a two-period design estimated directly |
 | panelView | CRAN; yiqingxu.org/packages/panelview | 1.3.1 (2026-05-14) | treatment rollout plot, unit by period (Mou, Liu, and Xu 2023); design-stage step 3 |
-| fixest | CRAN; lrberge.github.io/fixest | 0.14.2 (2026-06-26) | sunab (Sun-Abraham), TWFE (pinned also in iv's details; update the two pins together on refresh) |
 | pretrends | GitHub ONLY: github.com/jonathandroth/pretrends | master | pretest power, slope_for_power |
 | staggered | CRAN; github.com/jonathandroth/staggered | 1.2.2 (2025-01-09) | efficient random-timing estimators |
 | TwoWayFEWeights | CRAN; github.com/Credible-Answers/twowayfeweights | 2.1.0 (2026-05-27) | dCDH negative-weight diagnostics |
@@ -20,12 +19,16 @@ Heavy reference content the SKILL.md points into. Current as of 2026-08-26.
 | etwfe | CRAN; grantmcdermott.com/etwfe | 0.6.2 (2026-03-23) | Wooldridge extended TWFE, linear and nonlinear (family = "poisson", "logit", "negbin" through fixest::feglm); a nonlinear family forces ivar = NULL and enters cohort and period as explicit dummies (emfx cannot compute SEs with absorbed FEs in nonlinear models); controls on the RHS of fml are demeaned by cohort and the xvar moderator by cohort-by-period cell (source, not docs); nothing unit-level is used, so repeated cross sections run unchanged (run on simulated repeated-cross-section data 2026-08-26, pilot only); emfx returns APEs (predict = "response") or index-scale effects (predict = "link") and compresses to cohort-period cells above 500,000 rows unless compress = FALSE; verified 2026-08-26 |
 | jwdid (Stata) | SSC; github.com/friosavila/stpackages | 2.0 (2024-05-04) | Wooldridge ETWFE; no ivar means repeated cross-section; method(poisson), method(logit), method(ppmlhdfe); covariates demeaned and interacted by default (xasis to disable); verified 2026-08-26 |
 | ppmlhdfe (Stata) | SSC | | PPML with high-dimensional FEs (Correia-Guimarães-Zylkin 2020); R equivalent fixest::fepois |
-| DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. The older DIDmultiplegt (2.1.0, 2026-02-17) is the static estimator and is not the one the skill's reversal rule calls |
-| csdid / csdid2 (Stata) | SSC (Rios-Avila) | | Callaway-Sant'Anna in Stata. csdid defaults to short gaps and needs `long2`; csdid2 defaults to long differences and is faster. Both from the Mixtape ch. 10 code blocks, option names not API-verified here |
-| summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 (r-universe build 2026-08-03; last CRAN release 0.7.2, 2023-08-10) | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
-| fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 (r-universe build 2026-08-01; ahead of the last CRAN release 0.13.0) | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
+| DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. The older DIDmultiplegt (2.1.0, 2026-02-17) is the static estimator and is not the one the skill's reversal rule calls. Loading it requires the `polars` R package from rpolars.r-universe.dev (template section 8b) |
+| triplediff | CRAN | 0.2.4 (2026-06-13) | doubly robust triple differences with covariates and staggered adoption, `ddd()` and `agg_ddd()` (Ortiz-Villavicencio and Sant'Anna 2025); template section 8c |
+| csdid / csdid2 (Stata) | SSC (Rios-Avila) | | Callaway-Sant'Anna in Stata. csdid 2.0.0 defaults to `base_period(universal)` (long differences); 1.8x defaulted to varying (short gaps), so on 1.8x pass `long2`, which 2.0.0 keeps only as a deprecated compatibility name. csdid 2.0.0 also made not-yet-treated units the default comparison group, where 1.82 used never-treated; pass `nevertreated` to restore the old group (changelog at psantanna.com/csdid/news.html, checked 2026-10-09). The csdid2 default is unverified |
+| summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 (r-universe build 2026-09-02; last CRAN release 0.7.2, 2023-08-10) | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
+| fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 (r-universe build 2026-09-14; ahead of the last CRAN release 0.13.0) | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
 | clubSandwich | CRAN | 0.7.0 (2026-05-04) | CR2 vcovCR + Satterthwaite coef_test, the CRAN-resident cross-check |
-| sandwich | CRAN | 3.1-3 (2026-08-03) | vcovBS(type = "jackknife"), a CRAN-resident CV3 route for linear models, no leverage diagnostics |
+
+Shared with other causal skills: fixest (sunab for Sun-Abraham, and TWFE) and sandwich
+(vcovBS(type = "jackknife") as the CRAN-resident CV3 route). Versions and family-wide traps are in
+../../causal-design/references/packages.md.
 
 Never-treated coding by package: did and didimputation use 0 (didimputation also accepts NA);
 staggered uses Inf; sunab treats any cohort value outside the observed periods as never-treated
@@ -145,7 +148,7 @@ whole point of the table: a mechanism can leave PT intact and still wreck the pr
 | Mechanism | Parallel trends | Pre-trends | What to do |
 |---|---|---|---|
 | Common constant trend in Y(0) | cannot be violated, for any assignment rule | clean | nothing; covariates are unnecessary here |
-| Selection on baseline Y(0) (enrolled below a threshold on Y) | holds | broken mechanically, a dip at t = -1, because the baseline is both the selection point and the omitted category | no fix, because no problem. Do not re-base to t = -2: PT held from the original baseline. See the HonestDiD note below |
+| Selection on baseline Y(0) (enrolled below a threshold on Y) | holds only under the martingale condition E[Y_2(0) given the unit effect and the baseline shock] = Y_1(0), a unit-root restriction on the shocks (Ghanem, Sant'Anna, and Wüthrich, arXiv 2203.09001, Corollary 3.3); fails when Y(0) mean-reverts (the Ashenfelter dip) | broken mechanically, a dip at t = -1, because the baseline is both the selection point and the omitted category | under the martingale condition, no fix: do not re-base to t = -2, since PT held from the original baseline (see the HonestDiD note below). Under mean reversion the dip is a real PT violation, before and after treatment, and needs a design that handles it |
 | Selection on fixed effects (only certain types enroll) | holds | clean | nothing |
 | Selection on observables | holds conditional on X | clean given X | conditional PT: RA, IPW, or DR |
 | Imperfect foresight about own gains | holds | clean | nothing |
@@ -153,10 +156,13 @@ whole point of the table: a mechanism can leave PT intact and still wreck the pr
 
 HonestDiD interaction, the skill's own judgment and stated in neither source: relative
 magnitudes anchors on the largest pre-treatment violation, so a mechanical baseline dip from
-selection on baseline Y(0) inflates the anchor and the robust interval with it. Prefer
-smoothness there, or recompute the anchor from the pre-treatment periods excluding the selection
-period, and say which. The mirror-image failure is that under selection on realized gains the
-pretest-plus-HonestDiD chain passes a design that is biased by construction.
+selection on baseline Y(0) inflates the anchor and the robust interval with it. That
+inflation happens only under the martingale (random-walk) condition in the table. In that case,
+prefer smoothness. Alternatively, recompute the anchor from the pre-treatment periods excluding
+the selection period, and say which you did. Under mean reversion, the dip is a real violation
+and the relative-magnitudes anchor is correct. The mirror-image failure is that under selection
+on realized gains the pretest-plus-HonestDiD chain passes a design that is biased by
+construction.
 
 ## Triple differences: assumption and specifications (Olden and Møen 2022; Gruber 1994)
 
@@ -264,9 +270,12 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
   too, even with no cohorts and no adoption date. The template files it under divergence
   diagnostics because that is where it usually earns its run, not because staggering is required.
 - Stacked regression (clean-controls stacks) appears in marketing practice and in the AMA
-  Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter); its
-  implicit variance weights are a known problem (Baker et al.), so prefer Callaway-Sant'Anna
-  or Sun-Abraham unless the stack weights are examined and reported.
+  Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter). Wing,
+  Freedman, and Hollingsworth (2024, NBER 32054) show that the basic stacked regression
+  identifies no average causal effect, because its implicit weights mix sub-experiments in
+  proportions set by their sample sizes and treatment shares. Their corrective sample weights
+  restore an ATT (code at github.com/hollina/stacked-did-weights). Prefer Callaway-Sant'Anna
+  or Sun-Abraham, or run the stack only with those weights applied and reported.
 
 ## Estimand and estimator under heavy tails (Winkler et al. 2026, companion Steps 1-4)
 
