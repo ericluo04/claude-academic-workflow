@@ -20,7 +20,7 @@ Heavy reference content the SKILL.md points into. Current as of 2026-08-26.
 | jwdid (Stata) | SSC; github.com/friosavila/stpackages | 2.0 (2024-05-04) | Wooldridge ETWFE; no ivar means repeated cross-section; method(poisson), method(logit), method(ppmlhdfe); covariates demeaned and interacted by default (xasis to disable); verified 2026-08-26 |
 | ppmlhdfe (Stata) | SSC | | PPML with high-dimensional FEs (Correia-Guimarães-Zylkin 2020); R equivalent fixest::fepois |
 | DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. The older DIDmultiplegt (2.1.0, 2026-02-17) is the static estimator and is not the one the skill's reversal rule calls. Loading it requires the `polars` R package from rpolars.r-universe.dev (template section 8b) |
-| triplediff | CRAN | 0.2.4 (2026-06-13) | doubly robust triple differences with covariates and staggered adoption, `ddd()` and `agg_ddd()` (Ortiz-Villavicencio and Sant'Anna 2025); template section 8c |
+| triplediff | CRAN | 0.2.4 (2026-06-13) | doubly robust triple differences with covariates and staggered adoption, `ddd()` and `agg_ddd()` (Ortiz-Villavicencio and Sant'Anna 2025, `ortizvillavicencio2025better`); template section 8c |
 | csdid / csdid2 (Stata) | SSC (Rios-Avila) | | Callaway-Sant'Anna in Stata. csdid 2.0.0 defaults to `base_period(universal)` (long differences); 1.8x defaulted to varying (short gaps), so on 1.8x pass `long2`, which 2.0.0 keeps only as a deprecated compatibility name. csdid 2.0.0 also made not-yet-treated units the default comparison group, where 1.82 used never-treated; pass `nevertreated` to restore the old group (changelog at psantanna.com/csdid/news.html, checked 2026-10-09). The csdid2 default is unverified |
 | summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 (r-universe build 2026-09-02; last CRAN release 0.7.2, 2023-08-10) | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
 | fwildclusterboot | ARCHIVED from CRAN 2024-05-29; install from s3alfisc.r-universe.dev | 0.14.3 (r-universe build 2026-09-14; ahead of the last CRAN release 0.13.0) | boottest wild cluster bootstrap: WCR/WCU, Rademacher/Webb weights, MNW "33" variants |
@@ -48,16 +48,18 @@ boottest's fixest method takes feols objects only and disallows weights with fix
 The recognition table is in SKILL.md; this is the longer read on each row.
 
 - Miller, Johnson, and Wherry (2021), ACA Medicaid expansion and near-elderly mortality. The
-  Mixtape's model of a complete DiD paper: bite shown three ways (eligibility, enrollment, and
-  the share uninsured, the last of which shows some enrollment came from people with no coverage
-  at all), event studies, a same-outcome-alternative-group falsification on the 65-and-over
-  population, main results (0.13pp, 9.3% of the sample mean), and a mechanism. Never-treated
-  comparison states.
+  Mixtape's model of a complete DiD paper (Cunningham, The Mixtape, online ch. 9 sec. 9.7): bite
+  shown three ways (eligibility, enrollment, and the share uninsured, the last of which shows
+  some enrollment came from people with no coverage at all), event studies, a
+  same-outcome-alternative-group falsification on the 65-and-over population, main results
+  (0.13pp, 9.3% of the sample mean; these two numbers are not on the Mixtape site and are
+  unconfirmed against the paper), and a mechanism. Never-treated comparison states.
 - Braghieri, Levy, and Makarin (2022), the staggered rollout of TheFacebook across colleges and
   student mental health. The staggered exemplar: treatment dates built from the Wayback Machine
   (the platform announced each new school on its front page) and linked to an existing
   repeated-cross-section student survey, with the outcome z-scored so effects read in standard
-  deviations. Also the Mixtape's instance of the multi-estimator plot it argues against.
+  deviations. Also the Mixtape's instance of the multi-estimator plot it argues against
+  (Cunningham, The Mixtape, online ch. 10 sec. 10.13, Figure 10.13).
 - Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna (2026), Medicaid. The build order,
   forward-engineered from estimand to estimator, with the AEA replication package (materials
   25430, 25431) as a working R and Stata template.
@@ -84,9 +86,9 @@ the rows). Each method with the assumption that is its price:
 | CV3 cluster jackknife with t(G-1) | across-cluster independence only | the default first line at any G, not a few-clusters specialist; sometimes under-rejects; still fails with very few treated clusters |
 | CR2 with Satterthwaite dof | a working model for the dof (identity or random-effects variance); the Imbens-Kolesar variant fails with absorbed cluster FEs | confirmation tool, not first line; the dof can fall far below G-1 |
 | Donald-Lang | homoskedastic Gaussian cluster shocks | few treated and few untreated (the one row MNW do not discuss) |
-| Conley-Taber | treated clusters share controls' error distribution (fails under heterogeneous effects or unequal sizes) | many controls, few treated; RI-beta-like, so under cluster-size heterogeneity prefer RI-t (MacKinnon-Webb 2020b) |
+| Conley-Taber | treated clusters share controls' error distribution (fails under heterogeneous effects or unequal sizes) | many controls, few treated; RI-beta-like. When treated clusters are systematically larger or smaller than controls, neither RI-beta nor RI-t performs well; RI-t usually does better, and it may need a much larger G than the WCR bootstrap (MNW Section 6.2; MacKinnon and Webb 2020, `mackinnon2020randomization`) |
 | Ferman-Pinto | heteroskedasticity only from observables (size); the restriction is exactly why it can work with one treated cluster (MNW p. 287) | Conley-Taber setting plus size variation |
-| Hagemann permutation | bound on maximal relative heterogeneity; no cluster-specific trend heterogeneity in Y(0); G1 >= 4 and G - G1 >= 4 | few clusters both sides |
+| Hagemann permutation (REStat 2025, 107(4), `hagemann2025permutation`) | bound on maximal relative heterogeneity; no cluster-specific trend heterogeneity in Y(0); G1 >= 4 and G - G1 >= 4 | few clusters both sides |
 | Cluster wild bootstrap (WCR) | homogeneity conditions that fail with cluster-and-time FEs or heterogeneous effects (Canay-Santos-Shaikh) | not a general fix. With few treated it under-rejects (every other method over-rejects); a bimodal bootstrap distribution is the tell; use Webb 6-point weights plus enumeration when 2^G is small; the rescue is the ordinary wild restricted (WR, observation-level weights) bootstrap |
 | Long-T methods (Canay-Romano-Shaikh, Ibragimov-Mueller, conformal) | limited time-series dependence, PT over many periods; CRS needs treated and control observations inside every cluster (merge clusters, pay power); IM infeasible when treatment is cluster-invariant | T genuinely large |
 | Fallback A | none beyond honesty | treat the cluster shock as a PT violation inside HonestDiD |
@@ -107,8 +109,9 @@ Condensed from `mackinnon2023cluster` Section 9:
    intervals, as a matter of course. Agreement means finite-sample problems are probably not
    severe. Disagreement means try more variants and the map.
 5. With few or atypical treated (or control) clusters, even CV3 and WCR are unreliable; verify
-   with randomization inference (RI-t degrades less than RI-beta under cluster-size
-   heterogeneity).
+   with randomization inference. RI-t degrades less than RI-beta under cluster-size
+   heterogeneity, but when treated clusters are systematically larger or smaller neither works
+   well (MNW Section 6.2).
 
 Concern zones, verbatim thresholds (p. 290): "few but balanced clusters (say, G <= 12)";
 "balanced but few treated (or few control) clusters (say G1 <= 6 or G - G1 <= 6)"; "seriously
@@ -141,8 +144,8 @@ BJS baselines on the whole pre-period average (short lags worst).
 
 ## Selection mechanisms and parallel trends (Ghanem-Sant'Anna-Wüthrich; Marx-Tamer-Tang)
 
-Source: the Mixtape ch. 9 section on treatment assignment mechanisms, which reads
-`ghanem2022selection` and Marx, Tamer, and Tang (2024). The two columns come apart, which is the
+Sources: `ghanem2022selection` and Marx, Tamer, and Tang (2024, `marx2024parallel`), as
+organized in Cunningham, The Mixtape, online ch. 9 sec. 9.8. The two columns come apart, which is the
 whole point of the table: a mechanism can leave PT intact and still wreck the pre-trend picture.
 
 | Mechanism | Parallel trends | Pre-trends | What to do |
@@ -152,7 +155,7 @@ whole point of the table: a mechanism can leave PT intact and still wreck the pr
 | Selection on fixed effects (only certain types enroll) | holds | clean | nothing |
 | Selection on observables | holds conditional on X | clean given X | conditional PT: RA, IPW, or DR |
 | Imperfect foresight about own gains | holds | clean | nothing |
-| Selection on realized gains (Perfect Doctor, essential heterogeneity) | broken | E[Y(0)] diverges before and after, so pre-trends usually show it | DiD is biased by construction; clean pre-trends are no defense. Route out |
+| Selection on realized gains (Perfect Doctor, essential heterogeneity) | broken | E[Y(0)] diverges before and after, so pre-trends usually show it | DiD is biased by construction; clean pre-trends are no defense. Route out to causal-design (SKILL.md refusal list, case 3) |
 
 HonestDiD interaction, the skill's own judgment and stated in neither source: relative
 magnitudes anchors on the largest pre-treatment violation, so a mechanical baseline dip from
@@ -207,7 +210,8 @@ if X is strictly exogenous; if treatment can move X, the imbalance may be a trea
   trim, use bias correction (Ma-Sasaki-Wang) if trimming more aggressively. Only the control
   group is weighted, which is why extreme scores matter on that side only. The arithmetic is
   brutal and hides inside a histogram: p = 0.99991 gives 0.99991/0.00009 = 11,110, and in the
-  Mixtape's CAPS data p = 0.999971 gives 34,481, so one control unit outweighs thousands. Eleven
+  Mixtape's CAPS data (Cunningham, The Mixtape, online ch. 10 sec. 10.14) p = 0.999971 gives
+  34,481, so one control unit outweighs thousands. Eleven
   CAPS control municipalities sat above 0.995. Count the near-1 control scores by hand, since
   a density plot hides them, and check whether your package trims: R's did does, and Stata
   routines vary.
@@ -242,9 +246,10 @@ the condition that matters, because PT is a statement about Y(0). When dropout i
 outcome (churned users, delisted stores, closed accounts, the worker who leaves because earnings
 fell), PT breaks and forcing balance by dropping units does not fix it: reason about the
 mechanism instead. Options once the mechanism is understood are imputation of the missing
-untreated cells (Heckman 1979; Athey et al. 2021; BJS 2024) and the chained DiD of Bellego,
-Benatia, and Dortet-Bernadet (2024), which chains short-run effects across adjacent-period
-overlaps and so discards nothing. Report attrition rates by cohort either way, since
+untreated cells (Heckman 1979; Athey et al. 2021; BJS 2024) and the chained DiD of Bellégo,
+Benatia, and Dortet-Bernadet (2025, Journal of Econometrics 248, 105783, `bellego2025chained`),
+which chains short-run effects across adjacent-period overlaps and so discards nothing. The R
+package `cdid` (CRAN 0.1.1) implements it. Report attrition rates by cohort either way, since
 differential attrition is itself a PT diagnostic. With covariates: if the
 joint distribution of (D, X) is time-invariant, pool across periods for precision; if
 composition may change, do not pool, target ATT(2 | sampled in 2), and run the Sant'Anna-Xu
@@ -263,7 +268,10 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
   and the nonlinear model and comparing them, as a comparison of assumptions.
 - fixest::sunab equals CS-never numerically on balanced panels; on unbalanced panels the
   equivalence fails (see above).
-- lpdid (local projections DiD) is equivalent to the CS-NYT plug-in (Dube-Girardi-Jorda-Taylor).
+- lpdid (local projections DiD; Dube, Girardi, Jordà, and Taylor 2025, Journal of Applied
+  Econometrics 40(7): 741-758, `dube2025local`): the reweighted LP-DiD, which recovers an
+  equally weighted ATT, equals the CS-NYT estimator. The baseline variance-weighted LP-DiD
+  equals the Cengiz et al. stacked regression instead. State which version you ran.
 - dCDH weight diagnostics (TwoWayFEWeights) are not a staggered-adoption tool. Any within
   regression with a time-varying treatment and heterogeneous effects has an implicit weighting
   problem, so the diagnostic is available to a plain fixed-effects fit on an on/off treatment
@@ -271,7 +279,7 @@ unbalanced data no longer equals the CS estimator; replace unit FEs with group d
   diagnostics because that is where it usually earns its run, not because staggering is required.
 - Stacked regression (clean-controls stacks) appears in marketing practice and in the AMA
   Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter). Wing,
-  Freedman, and Hollingsworth (2024, NBER 32054) show that the basic stacked regression
+  Freedman, and Hollingsworth (2024, NBER 32054, `wing2024stacked`) show that the basic stacked regression
   identifies no average causal effect, because its implicit weights mix sub-experiments in
   proportions set by their sample sizes and treatment shares. Their corrective sample weights
   restore an ATT (code at github.com/hollina/stacked-did-weights). Prefer Callaway-Sant'Anna
