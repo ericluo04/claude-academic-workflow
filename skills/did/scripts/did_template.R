@@ -1,6 +1,8 @@
-# DiD analysis template. Runnable end to end; every call signature verified against the
-# package source/README on 2026-07-28 (versions noted per section). Adapt the column names
-# in the CONFIG block and run section by section.
+# DiD analysis template. Ran end to end on 2026-10-08 on a simulated Poisson panel (200 units,
+# 20 periods, 40 clusters, cohorts 6/10/14 plus never-treated) under R 4.6.1, with the
+# versions in the package index in references/details.md (did 2.5.1, HonestDiD 0.2.8,
+# triplediff 0.2.4, DIDmultiplegtDYN 2.4.0 with polars from r-universe). Adapt the column
+# names in the CONFIG block and run section by section.
 #
 # Data expectations: long panel with one row per unit-period.
 #   unit          unit id
@@ -11,19 +13,20 @@
 #                 Recycling one coding across packages silently misclassifies units.)
 #   y             outcome
 #   cluster       level at which treatment is independently assigned
+#   eligible      section 8c only: 1 for the subgroup eligible for treatment, 0 otherwise
 #   treat         derived below (section 5): post-adoption indicator, 1 from first_treated
 #                 on for treated units, 0 always for never-treated (first_treated == 0)
 
 ## ---- CONFIG ----------------------------------------------------------------
 YNAME <- "y"; TNAME <- "period"; IDNAME <- "unit"; GNAME <- "first_treated"
 CLUSTER <- "cluster"
+PNAME <- "eligible"          # triple differences only (section 8c): 1 = eligible subgroup
 XFORMLA <- NULL              # e.g. ~ x1 + x2 for conditional PT; NULL = unconditional
 df <- your_data              # replace
 set.seed(94305)
 
 ## ---- 0. Packages -----------------------------------------------------------
-# CRAN: did (2.5.x), HonestDiD (0.2.8), didimputation (0.5.x), TwoWayFEWeights (2.1.x),
-#       bacondecomp (0.1.1), fixest, staggered (1.2.x)
+# Versions and install sources: the package index in references/details.md.
 # GitHub only (not on CRAN): pretrends -> devtools::install_github("jonathandroth/pretrends")
 library(did); library(HonestDiD); library(fixest)
 
@@ -31,7 +34,8 @@ library(did); library(HonestDiD); library(fixest)
 # base_period = "universal" gives long differences: every event-study coefficient is measured
 # against a fixed t = -1, which is what OLS event studies do and what readers expect. The
 # alternative, a rolling baseline, produces short gaps, a different quantity (Roth 2026).
-# Stata equivalents: csdid needs long2, csdid2 already defaults to long differences.
+# Stata equivalent: csdid 2.0.0 defaults to the universal base period; on csdid 1.8x pass
+# long2. The csdid2 default is unverified.
 # The honest_did chain below also requires it (the helper hard-errors otherwise).
 # control_group states the PT variant you impose:
 # "notyettreated" = PT-NYT (default here), "nevertreated" = PT-Nev.
@@ -41,7 +45,11 @@ atts <- att_gt(
   control_group = "notyettreated",
   est_method = "dr",                 # "dr" | "ipw" | "reg"
   clustervars = CLUSTER,
-  base_period = "universal"
+  base_period = "universal",
+  anticipation = 0,                 # k > 0 shifts the baseline to g - 1 - k (SKILL.md, anticipation)
+  allow_unbalanced_panel = FALSE,   # TRUE keeps units with missing periods (SKILL.md, unbalanced panels)
+  panel = TRUE,                     # FALSE for repeated cross-sections; idname may then be NULL
+  weightsname = NULL                # column of population or sampling weights; NULL = unit-weighted
 )
 summary(atts)
 
@@ -170,9 +178,9 @@ sa <- feols(as.formula(paste(YNAME, "~ sunab(first_treated_sunab,", TNAME, ") |"
 # variance Dbar(1 - Dbar), which peaks at 0.25 for a cohort treated at the panel midpoint, so
 # TWFE upweights mid-panel cohorts and panel length moves the estimate through the weights
 # alone. twowayfeweights' weights sit on unit-level treatment effects and can be negative.
-# All-positive bacon weights therefore do not license TWFE: under constant effects TWFE is
-# unbiased for the variance-weighted ATT, not the simple ATT. Run this to explain a divergence,
-# not as a standing robustness table.
+# All-positive bacon weights therefore do not license TWFE: with effects that differ across
+# units but not over time, TWFE identifies the variance-weighted ATT, which differs from the
+# simple ATT. Run this to explain a divergence, not as a standing robustness table.
 library(bacondecomp)
 bd <- bacon(as.formula(paste(YNAME, "~ treat")), data = df,
             id_var = IDNAME, time_var = TNAME)   # weights on each 2x2, incl. forbidden
@@ -199,6 +207,34 @@ df$g_inf <- ifelse(df[[GNAME]] == 0, Inf, df[[GNAME]])
 st <- staggered(df = df, i = IDNAME, t = TNAME, g = "g_inf", y = YNAME,
                 estimand = "eventstudy", eventTime = 0:10)
 
+## ---- 8b. On-off treatments (de Chaisemartin-D'Haultfoeuille) ---------------
+# For a treatment that switches on and off, or changes intensity, the absorbing-treatment
+# estimators above do not apply. did_multiplegt_dyn compares switchers with units whose
+# treatment has not yet changed. It needs the polars R package from r-universe:
+#   install.packages("polars", repos = "https://rpolars.r-universe.dev")
+# Attach polars before the call: with polars only installed, DIDmultiplegtDYN 2.4.0 fails
+# with "object 'pl' not found" (seen 2026-10-08).
+# Replace "treat" (the absorbing indicator from section 5) with your on-off treatment column.
+# effects = 5 and placebo = 3 are placeholders; match your panel.
+library(polars); library(DIDmultiplegtDYN)
+dcdh <- did_multiplegt_dyn(df = df, outcome = YNAME, group = IDNAME, time = TNAME,
+                           treatment = "treat", effects = 5, placebo = 3,
+                           cluster = CLUSTER, graph_off = TRUE)
+
+## ---- 8c. Triple differences (Ortiz-Villavicencio and Sant'Anna 2025) -------
+# With covariates or staggered adoption, the saturated three-way-interaction OLS is invalid:
+# DDD estimands then are not differences of two DiD estimands, and pooling not-yet-treated
+# units adds bias (arXiv 2505.09942). triplediff::ddd() implements their doubly robust DDD.
+# PNAME is the partition column: 1 for the subgroup eligible for treatment, 0 otherwise.
+# gname is the period the unit's group enables treatment, 0 or Inf for never-enabled groups.
+library(triplediff)
+ddd_fit <- ddd(yname = YNAME, tname = TNAME, idname = IDNAME, gname = GNAME,
+               pname = PNAME, xformla = if (is.null(XFORMLA)) ~1 else XFORMLA,
+               data = df, control_group = "notyettreated", base_period = "universal",
+               est_method = "dr", cluster = CLUSTER, boot = TRUE, nboot = 999,
+               cband = TRUE)
+ddd_es <- agg_ddd(ddd_fit, type = "eventstudy")
+
 ## ---- 9. Covariate balance: normalized differences --------------------------
 norm_diff <- function(x, treated) {
   (mean(x[treated]) - mean(x[!treated])) /
@@ -209,8 +245,8 @@ norm_diff <- function(x, treated) {
 # the covariate is strictly exogenous.
 
 ## ---- 10. Few clusters / few treated (MacKinnon-Nielsen-Webb) ----------------
-# Signatures in this section verified 2026-07-29. summclust (0.7.0) and
-# fwildclusterboot (0.14.3) are ARCHIVED from CRAN; install from r-universe:
+# summclust and fwildclusterboot are ARCHIVED from CRAN (versions in references/details.md);
+# install from r-universe:
 #   install.packages(c("summclust", "fwildclusterboot"),
 #                    repos = "https://s3alfisc.r-universe.dev")
 # CRAN-resident fallbacks: clubSandwich (CR2 + Satterthwaite, 10c below) and sandwich's
@@ -223,6 +259,9 @@ norm_diff <- function(x, treated) {
 library(summclust)
 sc <- summclust(twfe, cluster = CLUSTER, params = "treat", type = "CRV3")
 summary(sc)   # CV3 vcov with t(G-1); leverage_g, partial_leverage, beta_jack
+# Report G from length(sc$N_G). In a 40-cluster run under summclust 0.7.0 the summary header
+# printed "Number of clusters: 7" and sc$G was empty.
+G_sc <- length(sc$N_G)
 plot(sc)
 # If some leave-one-cluster-out estimate in beta_jack cannot be computed (the only
 # treated cluster was deleted), do not believe the original estimates.
@@ -274,8 +313,9 @@ coef_test(twfe_lm, vcov = vc2, test = "Satterthwaite")
 #   3. the p-value counts the actual assignment among those at least as extreme (the
 #      P*_2 convention).
 # RI needs timing as good as random and treated clusters not systematically different.
-# Under cluster-size heterogeneity RI-t degrades less than RI-beta, so RI-t is the
-# default.
+# When treated clusters are systematically larger or smaller than controls, neither RI-beta
+# nor RI-t performs well (MacKinnon, Nielsen, and Webb 2023, Section 6.2). RI-t usually does
+# better and is the default here, but it may need far more clusters than the WCR bootstrap.
 
 ## ---- 11. Functional form and nonlinear outcomes ----------------------------
 # Signatures verified 2026-08-26 against fixest 0.14.2 and the etwfe 0.6.2 reference pages
@@ -361,8 +401,6 @@ es_idx <- emfx(ll, type = "event", predict = "link")
 # that method() takes poisson, logit, ppmlhdfe).
 
 ## ---- Session ---------------------------------------------------------------
-# Pin versions in the replication package: did >= 2.5, HonestDiD 0.2.8, etwfe 0.6.2. did 2.5
-# defaults faster_mode = TRUE and aggte's default type is "group", both changed
-# from the 2.1.x tutorials. summclust 0.7.0 and fwildclusterboot 0.14.3 come from
-# r-universe, not CRAN; record the repo in the replication package.
+# Pin the versions listed in references/details.md (package index) in the replication package,
+# with the r-universe repo for summclust and fwildclusterboot.
 sessionInfo()

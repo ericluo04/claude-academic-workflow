@@ -185,10 +185,12 @@ the circulating version is dated 2024, which is how the Mixtape cites it).
   these units were treated". Read alongside Marx, Tamer, and Tang (2024) on forward-looking
   choice.
 - Settles: which selection mechanisms are compatible with PT (common constant trend, selection
-  on baseline Y(0), selection on fixed effects, selection on observables, imperfect foresight)
-  and which is not (selection on realized gains, Heckman-Urzua-Vytlacil essential heterogeneity,
-  after Roy 1951); and that selection on baseline Y(0) breaks pre-trends mechanically while
-  leaving PT intact, because the baseline is both the selection point and the omitted category.
+  on baseline Y(0) under the martingale condition of Corollary 3.3, selection on fixed effects,
+  selection on observables, imperfect foresight) and which is not (selection on realized gains,
+  Heckman-Urzua-Vytlacil essential heterogeneity, after Roy 1951). Selection on baseline Y(0)
+  breaks pre-trends mechanically, because the baseline is both the selection point and the
+  omitted category. It leaves PT intact only under the martingale condition (a unit-root
+  restriction on the shocks). When Y(0) mean-reverts, PT fails (the Ashenfelter dip).
 - Binds when: reading a pre-trend picture; deciding whether a baseline dip is a problem; setting
   the HonestDiD relative-magnitudes anchor.
 - Implement: names no software. The mechanism table and the HonestDiD interaction are in
@@ -208,8 +210,8 @@ working paper; this is the published version.
   comparable to CS or TWFE coefficients.
 - Binds when: choosing `base_period`; reading someone else's CS or dCDH event study; deciding
   whether to overlay estimators on one plot.
-- Implement: `base_period = "universal"` in R's did; `long2` in Stata's csdid (csdid2 already
-  defaults to long differences).
+- Implement: `base_period = "universal"` in R's did. Stata's csdid 2.0.0 defaults to the
+  universal base period; on csdid 1.8x pass `long2`. The csdid2 default is unverified.
 
 ## Named disagreements the skill carries
 
