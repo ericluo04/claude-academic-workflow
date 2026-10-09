@@ -5,16 +5,17 @@ description: Design, estimate, validate, and write up a synthetic control analys
 
 # Synthetic control
 
-An opinionated synthetic-control workflow grounded in a read canon (references/canon.md,
-current as of 2026-07-28): Abadie's JEL survey, the practice manual by the method's originator,
+An opinionated synthetic-control workflow grounded in a read canon (references/canon.md):
+Abadie's JEL survey, the practice manual by the method's originator,
 with the synthetic-DiD bridge and the DiD-vs-SC boundary supplied by the Arkhangelsky-Imbens
 panel survey (shared with the did skill). Deliverable: the recommendation with its citation, the
 R estimation and diagnostics code, and a methods paragraph. The skill stops at the four stop
 points in ../causal-design/references/shared-rules.md (section "Stop points") and puts each
 choice to the user.
 
-Refresh path: run litreview on the method since the canon date, then propose additions to
-references/canon.md as flagged addenda.
+Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 
 ## Which precedent your design looks like
 
@@ -26,7 +27,49 @@ references/canon.md as flagged addenda.
 | Mid-pack treated unit, smooth series, long pre-period | Texas prison construction (Cunningham, The Mixtape, online ch. 11 sec. 11.1) | a geo rollout in one DMA | a treated unit at the top or the bottom of the donor range |
 | Comparison units picked by hand and defended in a footnote | Mariel Boatlift (Card 1990; Peri and Yasenov 2019) | a hand-picked matched-market holdout | no test exists on the hand-picked choice. Synthetic control replaces it |
 
-references/details.md carries what each case is the precedent for.
+references/canon.md (section "Exemplar rows") carries the sources behind each row.
+
+## The boundary: DiD, SC, or synthetic DiD
+
+Settle this before the feasibility gate and the donor pool. One continuous decision path, not
+competing methods:
+
+- DiD is the special case of the SC factor model with constant factor loadings. If the treated
+  unit's pre-trend parallels a plausible comparison average, use did, provided more than one
+  unit is treated. With one treated cluster, the cluster-level methods fail: CV1, CV3, and the
+  wild cluster bootstrap. Prefer this skill, after aggregating the micro units to the treated
+  unit, or did's Fallback B, the cluster-level Fisher randomization test. When neither is
+  feasible, use one of the two rescues on did's map: Ferman-Pinto, under its heteroskedasticity
+  restriction, or the ordinary wild restricted bootstrap with observation-level weights.
+  Long pre-periods are key for SC identification. DiD needs one pre-period to identify the
+  ATT and more only for credibility, so the SC pre-period gate does not transfer to a DiD
+  routing decision.
+- When the pre-period plot shows the donor average diverging from the treated unit before
+  treatment, parallel trends has already failed and SC is the tool. The sharpest known
+  routing result: under selection on lagged outcomes with autocorrelated errors, DiD is
+  inconsistent even as the pre-period grows while SC is consistent (Arkhangelsky and
+  Hirshberg 2023, arXiv 2311.13575). If units select into treatment on recent outcomes,
+  that is the SC regime.
+- Synthetic DiD is SC with unit weights plus analogous time weights and a DiD-style
+  adjustment: it does not require the pre-fit to be perfect, it differences the remaining gap
+  out. The price is a stable-bias assumption on that gap. In simulations calibrated to real
+  panels, SDID typically outperforms DiD, SC, and matrix completion. Practical default: run
+  canonical SC when the gate passes cleanly; when level fit is the sticking point, move to
+  SDID and say why. Reporting discipline: plot the time weights beside the trajectory figure
+  so readers see which pre-years carry the counterfactual, and plot the unit weights so they
+  see which donors do. The intercept weakens the visual pre-fit check (scripts/synth_template.R,
+  section 7). The four assumptions SDID actually makes are in references/details.md.
+- Staggered adoption forecloses the standard SC estimator. With a few treated units, first
+  try the staggered SC routes. One is scpi's prediction intervals for multiple treated units
+  and staggered adoption (Cattaneo, Feng, Palomba, and Titiunik 2025, REStat,
+  `cattaneo2025uncertainty`; the package is `cattaneo2025scpi`). The other is stagsynth,
+  which implements Cao, Lu, and Wu (2026). With many treated units it is did territory, or
+  multisynth (Ben-Michael, Feller, and Rothstein 2022) and the factor-model estimators below.
+  Staggered SDID is the exception. Its sources are section 8 of arXiv v4 of Arkhangelsky et
+  al. (2021) and section 2.3 of the Stata Journal SDID article (Clarke, Pailanir, Athey, and
+  Imbens 2024). Porreca (2022) and the sequential SDID of Arkhangelsky and Samkov (2024)
+  extend it. No CRAN package covers staggered SDID; the sources and code links are in
+  references/details.md.
 
 ## The feasibility gate: is SC usable here at all?
 
@@ -121,49 +164,6 @@ The degrees of freedom, each with a discipline:
 Stop before fitting. Present the donor pool, the predictor set, and the V choice to the user, each
 with its reason. This is the "before estimation" stop point in shared-rules.md.
 
-## The boundary: DiD, SC, or synthetic DiD
-
-One continuous decision path, not competing methods:
-
-- DiD is the special case of the SC factor model with constant factor loadings. If the treated
-  unit's pre-trend parallels a plausible comparison average, use did, provided more than one
-  unit is treated. With one treated cluster, the cluster-level methods fail: CV1, CV3, and the
-  wild cluster bootstrap. Prefer this skill, after aggregating the micro units to the treated
-  unit, or did's Fallback B, the cluster-level Fisher randomization test. When neither is
-  feasible, use one of the two rescues on did's map: Ferman-Pinto, under its heteroskedasticity
-  restriction, or the ordinary wild restricted bootstrap with observation-level weights.
-  Long pre-periods are key for SC identification. DiD needs one pre-period to identify the
-  ATT and more only for credibility, so the SC pre-period gate does not transfer to a DiD
-  routing decision.
-- When the pre-period plot shows the donor average diverging from the treated unit before
-  treatment, parallel trends has already failed and SC is the tool. The sharpest known
-  routing result: under selection on lagged outcomes with autocorrelated errors, DiD is
-  inconsistent even as the pre-period grows while SC is consistent (Arkhangelsky and
-  Hirshberg 2023, arXiv 2311.13575). If units select into treatment on recent outcomes,
-  that is the SC
-  regime.
-- Synthetic DiD is SC with unit weights plus analogous time weights and a DiD-style
-  adjustment: it does not require the pre-fit to be perfect, it differences the remaining gap
-  out. The price is a stable-bias assumption on that gap. In simulations calibrated to real
-  panels, SDID typically outperforms DiD, SC, and matrix completion. Practical default: run
-  canonical SC when the gate passes cleanly; when level fit is the sticking point, move to
-  SDID and say why. Reporting discipline: plot the time weights beside the trajectory figure
-  so readers see which pre-years carry the counterfactual, and plot the unit weights so they
-  see which donors do. The intercept means the treated and synthetic series will not overlay,
-  so the visual pre-fit check canonical SC leans on is weaker here. No accepted substitute
-  exists yet. The four assumptions SDID actually makes are in references/details.md.
-- Staggered adoption forecloses the standard SC estimator. With a few treated units, first
-  try the staggered SC routes. One is scpi's prediction intervals for multiple treated units
-  and staggered adoption (Cattaneo, Feng, Palomba, and Titiunik 2025, REStat,
-  `cattaneo2025uncertainty`; the package is `cattaneo2025scpi`). The other is stagsynth,
-  which implements Cao, Lu, and Wu (2026). With many treated units it is did territory, or
-  multisynth (Ben-Michael, Feller, and Rothstein 2022) and the factor-model estimators below.
-  Staggered SDID is the exception. Its sources are section 8 of arXiv v4 of Arkhangelsky et
-  al. (2021) and section 2.3 of the Stata Journal SDID article (Clarke, Pailanir, Athey, and
-  Imbens 2024). Porreca (2022) and the sequential SDID of Arkhangelsky and Samkov (2024)
-  extend it. No CRAN
-  package covers staggered SDID; the sources and code links are in references/details.md.
-
 ## Inference
 
 The primary mode is design-based permutation, honest about its limits:
@@ -196,7 +196,7 @@ The primary mode is design-based permutation, honest about its limits:
    post-period, and the gap still opens at the true date with the same sign and shape. A
    pre-gap estimates the bias's direction and size. Caveat carried from the panel survey:
    backdating assumes strict exogeneity and backfires under selection on recent shocks (the
-   AMA Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; 'AMA' hereafter)
+   AMA Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024; AMA (causal-design canon))
    states this exercise as one of two mandatory best practices; the strict-exogeneity caveat
    here governs when it is informative).
 3. In-space placebos with the RMSPE ratio (above).
@@ -232,10 +232,9 @@ The primary mode is design-based permutation, honest about its limits:
   unit's own time series plus covariates.
 - SC-type weights with many controls and few pre-periods need regularization; unregularized
   in-sample fit can be perfect and meaningless.
-- Treated outcome outside the donor convex hull: augmented DiD (Li and Van den Bulte 2023),
-  a different method from Ben-Michael's ridge-augmented SC in augsynth despite the
-  near-identical name. Too few pre-periods: forward DiD (Li 2024); controls far fewer than
-  pre-periods: HCW OLS (Hsiao, Ching, and Wan 2012). Fuller map in references/details.md.
+- Treated outcome outside the donor convex hull: augmented DiD (Li and Van den Bulte 2023).
+  Too few pre-periods: forward DiD (Li 2024); controls far fewer than pre-periods: HCW OLS
+  (Hsiao, Ching, and Wan 2012). Fuller map in references/details.md.
 
 ## Choosing treated markets before a geo test
 

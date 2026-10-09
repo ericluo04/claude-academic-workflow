@@ -1,7 +1,7 @@
 # Synthetic-control canon
 
-Current as of 2026-07-28. These sources are hand-picked; nothing enters this file without
-explicit human approval. BibTeX keys point into ../../causal-design/references/causal.bib.
+Current as of 2026-10-09. The user picked these sources. BibTeX keys point into
+../../causal-design/references/causal.bib.
 Refresh: litreview on the method since the date above, results proposed as flagged addenda.
 
 ## Abadie (2021)
@@ -145,10 +145,31 @@ The recognition table's worked precedents. The three Abadie rows (Basque terrori
 Prop 99, German reunification) are already in the primary-papers paragraph above as
 `abadie2003economic`, `abadie2010synthetic`, and `abadie2015comparative`, and the Texas prison row
 is the Mixtape's own data exercise with no paper behind it (Cunningham, The Mixtape, online
-ch. 11 sec. 11.1). The two remaining rows were Crossref-verified and merged into causal.bib
-2026-08-26.
+ch. 11 sec. 11.1) and the excellent-fit case where augmented SC equals classic SC. The two
+remaining rows were Crossref-verified and merged into causal.bib 2026-08-26.
 
 - Card 1990 (`card1990impact`), comparison units picked by hand and defended in a footnote, the
   Mariel Boatlift design that motivated the method because no test exists on the hand-picked four.
 - Peri and Yasenov 2019 (`peri2019labor`), the synthetic-control redo of that same design, which is
   the precedent for replacing a hand-picked holdout with a weighted donor pool.
+
+## AMA panel family
+
+Moved from causal-design on 2026-10-09 (tier-3 audit pass): ownership of these keys and of the
+Li-Sonnier statement. The text below is causal-design/references/canon.md's, verbatim apart
+from two lead-ins ("Keys:" and "What the AMA piece settles for this family:"). AMA is
+defined in the causal-design canon. causal-design keeps the routing fan-out in its SKILL.md;
+estimator details are in references/details.md here.
+
+- Keys: the AMA
+  panel family (`hsiao2012panel`, `li2020inference`, `li2023augmented`, `li2024forward`,
+  `li2023statistical` for Li-Sonnier).
+- What the AMA piece settles for this family: the data-shape fan-out within
+  the panel branch: convex-hull failure -> augmented DiD (Li-Van den Bulte), outcome in
+  range but too few pre-periods -> forward DiD (Li), controls far fewer than pre-periods
+  -> HCW OLS (Hsiao-Ching-Wan), many treated units or short panels -> generalized
+  synthetic control / matrix completion, unit and time reweighting both wanted -> SDID
+  with inference procedure chosen by data shape; the Li-Sonnier result that the gsynth
+  parametric bootstrap gives biased coverage when treated and control error variances
+  differ ("false precision or false imprecision... lead to
+  incorrect business decisions").
