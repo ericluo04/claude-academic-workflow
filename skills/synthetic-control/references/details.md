@@ -1,6 +1,6 @@
 # Synthetic-control lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 
 ## The factor model and the bias bound
 
@@ -92,7 +92,7 @@ sentence, or a referee reading the same chapter will catch it.
 - SDID variance: placebo, jackknife, or bootstrap estimators; placebo is the few-treated
   default. The block bootstrap and jackknife estimators need many treated units. The placebo
   estimator (what the AMA Marketing News routing source (Li, Luo, and Pattabhiramaiah 2024;
-  'AMA' hereafter) calls "permutation") works with one or few treated units but needs a
+  AMA (causal-design canon)) calls "permutation") works with one or few treated units but needs a
   moderate-to-large donor pool and roughly similar outcome variances across treated and
   control groups. Divergence across the applicable procedures signals the data shape does
   not support the chosen one.
@@ -159,16 +159,6 @@ sentence, or a referee reading the same chapter will catch it.
 The AMA routing source's 'augmented DiD' (Li and Van den Bulte 2023, convex-hull repair) is a
 different estimator from the augmented (ridge) SC row above (Ben-Michael et al.); do not conflate
 the two.
-
-## Worked precedents (the rows behind SKILL.md's recognition table)
-
-| Application | Source | What it is the precedent for |
-|---|---|---|
-| Basque terrorism | Abadie and Gardeazabal 2003 | The origin. A single treated region, GDP per capita, an outcome that co-moves across Spanish regions |
-| California Prop 99 | Abadie, Diamond, and Hainmueller 2010 | Donor discipline (drop states running their own tobacco programs), the balance table, the 2x pruning rule, the RMSPE-ratio p-value |
-| German reunification | Abadie, Diamond, and Hainmueller 2015 | Restricting the pool to OECD economies, the SC-versus-regression weight table, cross-validated V, the in-time placebo |
-| Texas prison construction | Cunningham, The Mixtape, online ch. 11 sec. 11.1 and 11.3 (`texas.dta`) | A mid-pack treated unit, the full placebo pipeline, and the excellent-fit case where augmented SC equals classic SC |
-| Mariel Boatlift | Card 1990; Peri and Yasenov 2019 | Why ad hoc comparison-city selection motivated the method, and what the synthetic-control redo changed |
 
 ## Marketing translations
 
