@@ -10,7 +10,8 @@ of 2026-07-28): the Athey-Imbens handbook chapter as the spine (randomization-ba
 first), Freedman's logistic-regression critique and Lin's repair for covariate adjustment,
 Guo-Basse's generalization to nonlinear outcomes, and Lee's bounds for attrition and gated
 outcomes. Deliverable: the recommendation with its citation, the R estimation and diagnostics
-code, and a methods paragraph.
+code, and a methods paragraph. The skill stops at the four stop points in
+../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user.
 
 Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
@@ -57,7 +58,10 @@ Beyond those two, this family declines.
   multiple outcomes, all inside the same randomization distribution.
 - Analyze as randomized: stratified designs get within-stratum differences averaged with
   stratum weights, paired designs the across-pair variance, clustered designs the
-  cluster-level machinery or Liang-Zeger with small-sample correction (CR2). Ignoring a
+  cluster-level machinery or Liang-Zeger with small-sample correction. With few clusters,
+  the family's small-G rule applies (../causal-design/references/shared-rules.md, section
+  "Clustering": CV3 plus the wild cluster restricted bootstrap first, CR2 with Satterthwaite
+  dof as the cross-check). Ignoring a
   paired design raised the standard error by about seventy percent in the canon's worked
   example.
 - HC2 is the default variance everywhere (it reproduces the Neyman estimator exactly for a
@@ -78,12 +82,21 @@ Beyond those two, this family declines.
 - The unadjusted difference in means comes first in every table. It is the hands-above-the-
   table number, visibly not the product of a specification search.
 - If adjusting with OLS: demeaned covariates, full treatment-by-covariate interactions, HC2.
-  That estimator cannot hurt asymptotic precision relative to the difference in means (Lin
-  2013); both conditions are key, and uncentered interactions lose the guarantee
-  entirely. With near-equal arms the uninteracted legacy specification is asymptotically
-  harmless; with a 90/10 holdout the interactions are what protect you. estimatr::lm_lin is
+  Under complete randomization that estimator cannot hurt asymptotic precision relative to
+  the difference in means (Lin 2013); both conditions are key, and uncentered interactions
+  lose the guarantee entirely. Lin's guarantee does not carry over to stratified assignment.
+  There, the interacted regression without stratum terms can have a larger variance than
+  the unadjusted estimator (Cytrynbaum 2024). For stratified designs, center the covariates
+  and the stratum indicators within strata and interact both with treatment. Under equal
+  treatment fractions within strata, this estimator keeps the guarantee (Liu and Yang 2020).
+  In estimatr, add factor(stratum) to the lm_lin covariates. Matched-pair designs get pair
+  fixed effects (Bai, Jiang, Romano, Shaikh, and Zhang 2024). With near-equal arms the
+  uninteracted legacy specification is asymptotically harmless; with a 90/10 holdout the interactions are what protect you. estimatr::lm_lin is
   the reference implementation.
-- Choose covariates for outcome prediction, fixed before outcomes are seen. A pre-period
+- Choose covariates for outcome prediction, fixed before outcomes are seen. If the covariates
+  or subgroups are chosen after outcomes were seen, label the analysis exploratory and write no
+  confirmatory claim. A list fixed in a preregistration before outcomes were seen is exempt.
+  A pre-period
   measure of the outcome is the one covariate reliably worth having (this is what CUPED-style
   industry variance reduction adjusts for; same estimator family).
 - Binary outcomes: the logit coefficient on treatment is inconsistent for the marginal effect
@@ -101,8 +114,12 @@ Beyond those two, this family declines.
 - Nonlinear outcomes generally (Guo-Basse 2023): impute each arm's missing potential outcomes
   from separate per-arm fits and average. Routing by outcome type: binary to logistic
   imputation, counts to Poisson (45 percent shorter intervals than linear adjustment in their
-  worked example), skewed-positive (revenue) to log-OLS with second-stage-OLS recalibration,
-  otherwise Lin. Canonical links calibrate automatically; anything else gets recalibrated.
+  worked example), nonnegative outcomes with zeros (revenue per user) to Poisson
+  quasi-likelihood imputation, strictly positive skewed outcomes to log-OLS with
+  second-stage-OLS recalibration, otherwise Lin. The log route is closed to outcomes with
+  zeros: log(y) is undefined at zero, and log-like transforms of such outcomes do not
+  identify a percentage effect (Chen and Roth 2024). Canonical links calibrate automatically.
+  Any other link gets recalibrated.
   Three pre-trust checks: no separation (fitted values near 0/1), per-arm R2 not both near 1,
   model flexibility small relative to arm sizes. There is NO universal never-worse guarantee
   for nonlinear imputation; platforms that want one use linear imputation or no-harm
@@ -148,7 +165,11 @@ perfect experiment identifies nothing about the gated outcome without more assum
    credible excluded instrument for selection, which field experiments rarely have.
 
 Monotonicity failure (imbalance among the selected despite equal rates) means two-way flows,
-and the bounds themselves are compromised; there is no within-model fix.
+and the bounds themselves are compromised. The next step is to test monotonicity within
+covariate cells. Generalized Lee bounds (Semenova 2025) allow the direction of selection to
+differ across cells and need monotonicity only conditional on covariates. The template does
+not implement them. Horowitz-Manski bounds are the fallback only when conditional
+monotonicity also fails.
 
 ## Heterogeneity and multiple testing
 
@@ -157,7 +178,7 @@ and the bounds themselves are compromised; there is no within-model fix.
   Bonferroni, which Holm dominates at zero cost. Multiple outcomes: omnibus statistic or
   corrected p-values; uncorrected per-outcome stars are the failure mode. The staged policy
   this instantiates (screen with FDR, confirm with a resampling FWER method, gate across
-  stages) is in causal-design's shared rules.
+  stages) is in causal-design's shared rules (../causal-design/references/shared-rules.md).
 - Data-driven heterogeneity requires honesty: any CI you will report needs sample splitting
   (one sample picks the partition, an independent one estimates). Coverage survives high
   dimension; MSE does not. Honest trees for interpretable subgroups, causal forests for the
@@ -191,8 +212,11 @@ Johari et al. 2022 analyzes the bias of one-sided designs).
 2. Adjusted vs unadjusted side by side: adjustment should barely move the point estimate and
    shrink the SE by roughly sqrt(1 - R2). A large movement signals compromised
    randomization, attrition, or specification problems, and is never a precision story.
-3. Design-consistent variance check: the design-aware variance should be weakly smaller than
-   the complete-randomization one; larger means the analysis mis-specifies the design.
+3. Design-consistent variance check, for stratified and paired designs only: the
+   design-aware variance should be weakly smaller than the complete-randomization one;
+   larger means the analysis mis-specifies the design. Under clustered assignment the
+   design-aware variance is larger by construction (Abadie et al. 2023), and this check
+   does not apply.
 4. Both cluster estimands when cluster sizes vary; the gap between them is itself evidence
    that effects covary with cluster size.
 5. Zero-effect coverage simulation before reporting: hold outcomes fixed, re-randomize, check
@@ -213,7 +237,7 @@ with every call verified against package documentation. The core:
 library(randomizr); library(estimatr)
 Z <- block_ra(blocks = strata, prob = 0.5)          # design: stratified assignment
 difference_in_means(y ~ z, blocks = strata, data = df)   # analyze as randomized
-lm_lin(y ~ z, covariates = ~ pre_y + x1, data = df)      # Lin adjustment, HC2 default
+lm_lin(y ~ z, covariates = ~ pre_y + x1 + factor(strata), data = df)  # stratified Lin, HC2
 # binary outcome, marginal risk difference via standardization:
 fit <- glm(y ~ z * (pre_y + x1), family = binomial, data = df)
 marginaleffects::avg_comparisons(fit, variables = "z")
@@ -222,6 +246,9 @@ marginaleffects::avg_comparisons(fit, variables = "z")
 Package index with versions, links, and traps in references/details.md.
 
 ## Methods paragraph template
+
+Report each effect with the results sentence in ../causal-design/references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
 > We randomized [units] to [arms] within strata of [X] with equal treatment fractions, and we
 > analyze the experiment as randomized: we report randomization-inference p-values alongside
@@ -259,6 +286,6 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
   so randomize over many stimuli instead of one, and correct any machine-coded outcome against a
   human-labeled subsample before it enters an estimate.
 - Stimuli produced by intervening on a model's internals carry a coherence confound. Run the
-  manipulation checks at matched or logged intervention strength and audit the damage on both
-  the intended and the unintended channel. Whether the intervention itself is valid is a
-  separate question from whether the experiment is.
+  manipulation checks at the logged intervention strength and audit the damage on both the
+  intended and the unintended channel. Whether the intervention itself is valid is a separate
+  question from whether the experiment is.

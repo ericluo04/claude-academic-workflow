@@ -59,8 +59,8 @@ Statistical Science 23(2): 237-249. Key: `freedman2008logistic`.
 Annals of Applied Statistics 7(1). Key: `lin2013agnostic`. Approved addendum.
 
 - Role: closes Freedman's OLS critique; the covariate-adjustment default.
-- Settles: OLS with demeaned covariates and full treatment interactions cannot hurt
-  asymptotic precision and is weakly more efficient than uninteracted adjustment; the
+- Settles: under complete randomization, OLS with demeaned covariates and full treatment
+  interactions cannot hurt asymptotic precision and is weakly more efficient than uninteracted adjustment; the
   sandwich variance is consistent or asymptotically conservative under the Neyman model;
   equal arms make the legacy specification benign, imbalanced arms are where interactions
   protect; adjustment bias is order 1/n with an estimable leading term; covariates chosen
@@ -139,6 +139,5 @@ List-Shaikh-Xu 2019 (multiple testing); Hudgens-Halloran 2008, Athey-Eckles-Imbe
 Crepon et al. 2013 (interference); Imbens-Manski 2004 and Horowitz-Manski 2000 (bounds and
 intervals); Rosenblum-van der Laan 2010 and Ye et al. 2023 (standardization robustness);
 Cohen-Fogarty 2024 (no-harm calibration); Bai 2022 (matched pairs); Tauchmann 2014
-(leebounds); Semenova 2025 (generalized Lee bounds, the published "Better Lee Bounds", now
-J. Econometrics 251); plus reused iv-block entries imbens1994identification,
+(leebounds); Semenova 2025 ("Generalized Lee bounds", J. Econometrics 251); plus reused iv-block entries imbens1994identification,
 angrist1996identification, balke1997bounds and the shared abadie2023clustering.

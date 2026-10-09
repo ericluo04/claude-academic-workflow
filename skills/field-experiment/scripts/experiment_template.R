@@ -1,27 +1,21 @@
-# Field-experiment analysis template. Runnable end to end; every call signature verified
-# against package documentation on 2026-07-28 (randomizr 1.0.1, estimatr 1.0.6, ri2 0.4.1,
-# DeclareDesign 1.1.1, grf 2.6.1, marginaleffects 0.32.0, RobinCar 1.2.0, qte 2.0.0, all
-# CRAN). Adapt the CONFIG block and run section by section.
-#
-# API traps older tutorials get wrong:
-#   - estimatr::difference_in_means auto-detects the design (blocked, clustered,
-#     matched-pair); its se_type is only "default"/"none". HC/CR strings belong to
-#     lm_robust/lm_lin (HC2 default without clusters, CR2 with).
-#   - lm_lin: formula is Y ~ Z with ONLY treatment on the RHS; covariates go in a separate
-#     one-sided formula.
-#   - marginaleffects: comparison = "oravg" DOES NOT EXIST; use "lnoravg" (+ transform =
-#     exp for the odds-ratio scale).
-#   - qte 2.0.0 (2026-07) deprecated ci.qte; the current call is unc_qte(yname, dname, ...).
-#   - wildrwolf and PowerUpR are ARCHIVED from CRAN (2024-05 and 2026-03); install routes
-#     and fallbacks below.
-#   - Lee (2009) bounds have NO reliable R package (the Semenova GitHub repo is a
-#     replication archive whose README example does not run); hand-rolled below.
+# Field-experiment analysis template. Adapt the CONFIG block and run section by section.
+# Package versions, pins, and API traps: the package index in references/details.md.
+# Run end to end on 2026-10-09 on simulated data with seed 94305, once with stratified
+# unit-level assignment (N = 600, 6 strata) and once with stratified cluster assignment
+# (G = 10 clusters in 2 strata) (R 4.6.1; randomizr 2.0.1, estimatr 2.0.0, ri2 0.5.0,
+# DeclareDesign 1.1.1, grf 2.6.1, marginaleffects 1.0.0, dfadjust 1.1.0, qte 2.0.0).
+# Not run: the commented RobinCar, wildrwolf, and PowerUpR calls.
 
 ## ---- CONFIG ----------------------------------------------------------------
 df <- your_data       # unit-level frame: y, z (0/1), stratum, cluster, x1, x2, pre_y,
                       # s (observation gate, for the Lee block), y01 (binary 0/1 outcome,
                       # for the binary-outcome block), d (0/1 treatment actually received,
                       # for the noncompliance block)
+clustered <- FALSE    # TRUE only when z was assigned by cluster, so z is constant within
+                      # cluster. The declaration in section 2 assumes block_and_cluster_ra
+                      # over stratum; after plain cluster_ra, drop blocks there and skip
+                      # the stratified line. Sections 2, 5, 6, 7, and 8 read this
+                      # flag (sections 3, 4, and 9 assume unit-level assignment)
 set.seed(94305)
 library(randomizr); library(estimatr); library(ri2)
 
@@ -42,16 +36,24 @@ power.t.test(delta = 1, sd = 6, sig.level = 0.05,  # .05/.80: the field-standard
 #   declare_assignment(Z = complete_ra(N, prob = 0.5)) +
 #   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
 #   declare_estimator(Y ~ Z, .method = estimatr::lm_robust, inquiry = "ATE")  # .method!
-# diagnose_design(design, sims = 500)   # power is a default diagnosand; Monte Carlo
-#   error is negligible at 500 sims
+# diagnose_design(design, sims = 2000)  # power is a default diagnosand; its Monte Carlo
+#   SE near power 0.8 is sqrt(0.8 * 0.2 / sims): about 0.018 at 500 sims, 0.009 at 2000
 
 ## ---- 2. Primary analysis: Neyman + randomization inference ------------------
 # Analyze as randomized: difference_in_means auto-detects blocked / clustered /
 # matched-pair designs from the arguments and picks the design-appropriate variance.
-difference_in_means(y ~ z, data = df)                       # complete randomization
-difference_in_means(y ~ z, blocks = stratum, data = df)     # stratified
-# Fisher exact p, same declaration that did the assignment:
-decl <- declare_ra(N = nrow(df), blocks = df$stratum, prob = 0.5)
+# Under cluster assignment, clusters = passes the assignment unit (NULL otherwise).
+difference_in_means(y ~ z, clusters = if (clustered) cluster else NULL,
+                    data = df)                                         # complete
+difference_in_means(y ~ z, blocks = stratum,
+                    clusters = if (clustered) cluster else NULL, data = df)  # stratified
+# Fisher exact p, same declaration that did the assignment (permute whole clusters under
+# cluster assignment, or the p-value is wrong):
+decl <- if (clustered) {
+  declare_ra(N = nrow(df), clusters = df$cluster, blocks = df$stratum, prob = 0.5)
+} else {
+  declare_ra(N = nrow(df), blocks = df$stratum, prob = 0.5)
+}
 conduct_ri(y ~ z, declaration = decl, assignment = "z",
            sharp_hypothesis = 0, data = df,
            sims = 2000)   # Monte Carlo error negligible at this budget
@@ -62,9 +64,20 @@ conduct_ri(test_function = function(d) with(d, mean(rank(y)[z==1]) - mean(rank(y
 # not by inverting permutation tests (undercoverage under heterogeneity).
 
 ## ---- 3. Covariate adjustment (Lin) -------------------------------------------
-# Unadjusted first, always. Then the demeaned fully-interacted regression:
-lm_lin(y ~ z, covariates = ~ pre_y + x1, data = df)         # HC2 default
-# se_type = "HC3" with small arms or leverage points.
+# Unadjusted first, always. Then the demeaned fully-interacted regression. Lin's
+# never-hurts guarantee is for complete randomization. Under the stratified CONFIG design,
+# stratum indicators enter the covariates, which gives the stratum-centered interacted
+# estimator that keeps the guarantee under equal treatment fractions within strata (Liu
+# and Yang 2020; without them the variance can rise, Cytrynbaum 2024). Under complete
+# randomization, drop factor(stratum).
+fit_lin <- lm_lin(y ~ z, covariates = ~ pre_y + x1 + factor(stratum), data = df)  # HC2
+fit_lin
+# Rare treatment arm: HC2 with Imbens-Kolesar degrees of freedom. dfadjustSE needs an lm
+# fit, so refit the same specification (centered covariates and stratum dummies,
+# interacted with z) with lm; the z row reports the adjusted df and interval:
+Xc <- scale(model.matrix(~ pre_y + x1 + factor(stratum), df)[, -1], scale = FALSE)
+fit_lm <- lm(df$y ~ df$z * Xc)
+dfadjust::dfadjustSE(fit_lm)$coefficients["df$z", ]
 # Pre-reporting checks (minutes of compute):
 # (a) zero-effect coverage simulation: re-randomize under no effect, check empirical
 #     coverage of every planned estimator-variance pair (loop over declare_ra draws);
@@ -89,25 +102,44 @@ tau_gob + t.test(residuals(mu1, "response"), residuals(mu0, "response"))$conf.in
 # Pre-trust checks: no fitted values hugging 0/1 (separation); per-arm R2 not both
 # near 1; model flexibility small vs arm sizes. No universal never-worse guarantee:
 # platforms wanting one use linear imputation or no-harm calibration.
-# Skewed revenue: fit OLS on log(y), impute exp(Xb), then SECOND-STAGE OLS of y on the
-# fitted values per arm before imputing (recalibration); never the log coefficient.
+# Revenue per user and other nonnegative outcomes with zeros: log(y) is undefined at 0,
+# and log-like transforms do not identify a percentage effect there (Chen and Roth 2024).
+# Impute per arm with Poisson quasi-likelihood (canonical link, so it calibrates):
+if (min(df$y) >= 0) {
+  m1 <- glm(y ~ pre_y + x1, family = quasipoisson, data = subset(df, z == 1))
+  m0 <- glm(y ~ pre_y + x1, family = quasipoisson, data = subset(df, z == 0))
+  y1_hat <- predict(m1, df, type = "response"); y0_hat <- predict(m0, df, type = "response")
+  tau_pois <- mean(y1_hat - y0_hat)                       # ATE in levels
+  print(tau_pois + t.test(residuals(m1, "response"), residuals(m0, "response"))$conf.int)
+  print(tau_pois / mean(y0_hat))                          # as a share of the control mean
+}
+# Strictly positive skewed outcomes only (min(y) > 0): OLS on log(y), impute exp(Xb), then
+# SECOND-STAGE OLS of y on the fitted values per arm (recalibration); never the log
+# coefficient.
 # Covariate-adaptive randomization (Pocock-Simon etc.): RobinCar:
 # RobinCar::robincar_linear(df, treat_col = "z", response_col = "y",
 #   car_strata_cols = "stratum", covariate_cols = c("pre_y", "x1"),
 #   car_scheme = "permuted-block", adj_method = "ANHECOVA")  # arg is car_strata_cols
 
 ## ---- 5. Clustered designs: estimand first ------------------------------------
-# Cluster-average effect (primary): difference in means on cluster means.
-cl_means <- aggregate(cbind(y, z) ~ cluster, data = df, mean)
-difference_in_means(y ~ z, data = cl_means)
-# Unit-average effect: unit-level regression, CR2 + Satterthwaite dof:
-lm_robust(y ~ z, data = df, clusters = cluster, se_type = "CR2")
-# Report BOTH when cluster sizes vary; the gap is evidence effects covary with size.
+# Runs only under cluster assignment (CONFIG clustered = TRUE): z must be constant within
+# cluster, e.g. df$z <- cluster_ra(clusters = df$cluster, prob = 0.5) at design time.
+if (clustered) {
+  stopifnot(all(tapply(df$z, df$cluster, function(v) length(unique(v))) == 1))
+  # Cluster-average effect (primary): difference in means on cluster means.
+  cl_means <- aggregate(cbind(y, z) ~ cluster, data = df, mean)
+  print(difference_in_means(y ~ z, data = cl_means))
+  # Unit-average effect: unit-level regression, CR2 + Satterthwaite dof:
+  print(lm_robust(y ~ z, data = df, clusters = cluster, se_type = "CR2"))
+  # Report BOTH when cluster sizes vary; the gap is evidence effects covary with size.
+}
 
 ## ---- 6. Noncompliance: ITT + LATE, never as-treated --------------------------
-difference_in_means(d ~ z, data = df)     # first stage = compliance-share table
-difference_in_means(y ~ z, data = df)     # ITT, the randomization-justified number
-iv_robust(y ~ d | z, data = df, se_type = "HC2")   # LATE; exclusion/monotonicity
+cl <- if (clustered) df$cluster else NULL  # cluster the variance under cluster assignment
+difference_in_means(d ~ z, clusters = cl, data = df)  # first stage = compliance shares
+difference_in_means(y ~ z, clusters = cl, data = df)  # ITT, the randomization-justified number
+iv_robust(y ~ d | z, data = df, clusters = cl,
+          se_type = if (clustered) "CR2" else "HC2")  # LATE; exclusion/monotonicity
 # argued with the iv skill's discipline; weak first stage -> iv skill's AR machinery.
 # Balke-Pearl bounds when exclusion is doubtful: bpbounds (see iv template, section 4).
 
@@ -121,19 +153,39 @@ c(s1 = s1, s0 = s0, diff = s1 - s0)       # differential observation rate FIRST
 fit1 <- glm(z ~ pre_y + x1, family = binomial, data = subset(df, s == 1))
 fit0 <- glm(z ~ 1, family = binomial, data = subset(df, s == 1))
 anova(fit0, fit1, test = "LRT")           # monotonicity balance test, joint p
-# Otherwise Lee bounds (here assuming treatment RAISES observation; flip arms if not):
+# Otherwise Lee bounds. The function trims whichever arm has the higher observation rate,
+# so the trim share p = |s1 - s0| / max(s1, s0) always lies in [0, 1). The bounds are
+# continuous in s1 - s0 (both directions give the untrimmed contrast at s1 = s0). A
+# bootstrap draw whose direction differs from the full sample's therefore trims the other
+# arm, and the draw is kept; `flipped` counts those draws so the writeup can report them.
 lee_bounds <- function(d) {
   s1 <- mean(d$s[d$z == 1]); s0 <- mean(d$s[d$z == 0])
-  p  <- (s1 - s0) / s1
   y1 <- d$y[d$z == 1 & d$s == 1]; y0 <- d$y[d$z == 0 & d$s == 1]
-  c(lower = mean(y1[y1 <= quantile(y1, 1 - p)]) - mean(y0),
-    upper = mean(y1[y1 >= quantile(y1, p)]) - mean(y0), trim = p)
+  if (s1 >= s0) {               # treatment raises observation: trim the treated arm
+    p <- (s1 - s0) / s1
+    c(lower = mean(y1[y1 <= quantile(y1, 1 - p)]) - mean(y0),
+      upper = mean(y1[y1 >= quantile(y1, p)]) - mean(y0), trim = p, treated_trimmed = 1)
+  } else {                      # treatment lowers observation: trim the control arm
+    p <- (s0 - s1) / s0
+    c(lower = mean(y1) - mean(y0[y0 >= quantile(y0, p)]),
+      upper = mean(y1) - mean(y0[y0 <= quantile(y0, 1 - p)]), trim = p, treated_trimmed = 0)
+  }
 }
 lb <- lee_bounds(df)
 # Bootstrap the WHOLE pipeline (trimming share included; its estimation error was the
-# largest variance component in Lee's application):
+# largest variance component in Lee's application). Under cluster assignment, resample
+# whole clusters within each arm, so that no draw loses an arm when G is small; otherwise
+# resample units.
 B <- 2000   # 2000 draws give stable trim-share quantiles
-boots <- t(replicate(B, lee_bounds(df[sample(nrow(df), replace = TRUE), ])))
+cl_arm <- split(unique(df[, c("cluster", "z")])$cluster, unique(df[, c("cluster", "z")])$z)
+draw <- function() {
+  if (!clustered) return(df[sample(nrow(df), replace = TRUE), ])
+  ids <- unlist(lapply(cl_arm, function(g) g[sample.int(length(g), replace = TRUE)]))
+  do.call(rbind, lapply(ids, function(g) df[df$cluster == g, ]))
+}
+boots <- t(replicate(B, lee_bounds(draw())))
+flipped <- sum(boots[, "treated_trimmed"] != lb["treated_trimmed"])
+c(B = B, flipped = flipped)     # report: draws that trimmed the other arm
 se_l <- sd(boots[, "lower"]); se_u <- sd(boots[, "upper"])
 # Imbens-Manski interval (covers the EFFECT, the right default):
 cn <- uniroot(function(c) pnorm(c + (lb["upper"] - lb["lower"]) / max(se_l, se_u)) -
@@ -154,8 +206,8 @@ c(lb["lower"] - cn * se_l, lb["upper"] + cn * se_u)
 # wildrwolf::rwolf(ms, param = "z", B = 9999)   # B chosen so alpha*(B+1) is an integer
 # Holm fallback (conservative, always available): collect the p-values of the outcome
 # family into pvec; here the two outcomes the CONFIG frame carries, swap in yours:
-pvec <- c(y   = difference_in_means(y ~ z, data = df)$p.value,
-          y01 = difference_in_means(y01 ~ z, data = df)$p.value)
+pvec <- c(y   = difference_in_means(y ~ z, clusters = cl, data = df)$p.value,
+          y01 = difference_in_means(y01 ~ z, clusters = cl, data = df)$p.value)
 p.adjust(pvec, method = "holm")
 # Data-driven: honest causal forest (grf; dot-separated arg names). Randomized
 # experiment: pass the KNOWN W.hat instead of estimating propensities.
@@ -163,7 +215,9 @@ library(grf)
 X <- as.matrix(df[, c("pre_y", "x1", "x2")])
 cf <- causal_forest(X, df$y, df$z, W.hat = 0.5,
                     num.trees = 2000,          # grf default, pinned for reproducibility
-                    clusters = df$cluster)
+                    # cluster only under cluster assignment, never under unit-level
+                    # assignment (causal-design shared rules):
+                    clusters = if (clustered) df$cluster else NULL)
 average_treatment_effect(cf, target.sample = "all")
 best_linear_projection(cf, A = X[, c("pre_y", "x1")])
 test_calibration(cf)
@@ -186,8 +240,5 @@ summary(q)
 # QTE as the ri2 test statistic.
 
 ## ---- Session -------------------------------------------------------------------
-# Pin: estimatr >= 1.0.6, ri2 0.4.1, marginaleffects >= 0.32 (lnoravg spelling),
-# grf >= 2.6 (rank_average_treatment_effect), qte >= 2.0 (unc_qte API),
-# RobinCar >= 1.2 (car_strata_cols). Archived: wildrwolf (r-universe), PowerUpR
-# (CRAN Archive; prefer the hand-coded design effect).
+# Pins and archived packages: the package index in references/details.md.
 sessionInfo()
