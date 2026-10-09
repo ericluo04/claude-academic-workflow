@@ -1,12 +1,9 @@
-# RDD analysis template. Runnable end to end; every call signature verified against the
-# rdpackages suite on 2026-07-28 (rdrobust 4.0.0, rddensity 3.0, rdlocrand 2.0, rdpower 3.0,
-# rdmulti 2.0.0, all CRAN). Suite home: rdpackages.github.io. Adapt the CONFIG block and run
-# section by section. Do NOT trust rdrr.io for these packages (stale 2023 builds).
-#
-# rdrobust 4.0.0 API changes older tutorials get wrong:
-#   - `all=` was REMOVED from rdrobust(); it now lives in summary(fit, all = TRUE)
-#   - `data=` is new (bare column names allowed); covs= accepts a one-sided formula
-#   - cluster= requires vce = "cr1"/"cr2"/"cr3" (other vce values auto-map with a warning)
+# RDD analysis template. Sections 1-7 ran end to end on simulated data on 2026-10-08 under
+# R 4.6.1, rdrobust 4.1.1, rddensity 3.0, rdlocrand 3.0, and rdpower 3.0 (section 8, the only
+# rdmulti section, is commented out and was not run). Version pins, release dates, and the API
+# traps older tutorials get wrong live in the package index, references/details.md.
+# Suite home: rdpackages.github.io. Adapt the CONFIG block and run section by section.
+# Do NOT trust rdrr.io for these packages (stale 2023 builds).
 
 ## ---- CONFIG ----------------------------------------------------------------
 df <- your_data              # replace
@@ -46,13 +43,16 @@ summary(fit, all = TRUE)          # Conventional + Bias-Corrected + Robust rows
 
 # With covariates (precision only; the point estimate should barely move):
 fit_cov <- rdrobust(y, x, c = CUT, covs = Z)
-# With clustering (note the vce requirement in 4.0.0). NEVER put the running variable, or any
-# bin or rounding of it, in cluster=: Kolesar and Rothe (2018) show that clustering on the score
-# inflates Type I error. Cluster only on a real sampling or assignment unit (customer, store,
-# market). The Mixtape (ch. 6) records the Lee (2008) and Lee and Card (2008) practice as
-# historical; this skill bans it outright, and when you replicate or referee an older RD, expect
+# With clustering (cluster= requires vce = "cr1"/"cr2"/"cr3"). NEVER put the running variable,
+# or any bin or rounding of it, in cluster=: Kolesar and Rothe (2018, AER) show that the
+# confidence interval clustered on a discrete score can undercover. Cluster only on a real
+# sampling or assignment unit (customer, store, market). The Mixtape (ch. 6) records the Lee
+# (2008) and Lee and Card (2008) practice as historical; this skill bans it outright, and when you replicate or referee an older RD, expect
 # to find it and take it out.
-# fit_cl <- rdrobust(y, x, c = CUT, cluster = df$cluster, vce = "cr2")
+# With few clusters, use vce = "cr3" first and vce = "cr2" as the cross-check (small-G rule in
+# ../../causal-design/references/shared-rules.md). rdrobust has no wild cluster restricted
+# bootstrap, so that half of the small-G default has no rdrobust implementation.
+# fit_cl <- rdrobust(y, x, c = CUT, cluster = df$cluster, vce = "cr3")
 # Robustness variants: p = 2, uniform kernel, CE-optimal bandwidth:
 fit_p2 <- rdrobust(y, x, c = CUT, p = 2)
 fit_ce <- rdrobust(y, x, c = CUT, bwselect = "cerrd")
@@ -61,22 +61,26 @@ fit_ce <- rdrobust(y, x, c = CUT, bwselect = "cerrd")
 fzy <- rdrobust(y, x, c = CUT, fuzzy = d)
 summary(fzy, all = TRUE)          # prints a first-stage block before the ratio
 # First stage as its own sharp RD at the SAME bandwidths (CKT 2023 pattern):
-h <- fzy$bws[1]; b <- fzy$bws[2]
+h <- fzy$bws["h", ]; b <- fzy$bws["b", ]          # c(left, right); named, so msetwo works too
 fs <- rdrobust(d, x, c = CUT, h = h, b = b)
 summary(fs)
 # Weak-instrument check INSIDE the bandwidth, never full-sample. The package
 # reports no F; the native strength measure is the first-stage z (fs output),
 # z^2 ~ F for one instrument. The manual kernel-weighted F below is OUR addition,
-# not from the guides:
-inb <- abs(x - CUT) <= h
-wgt <- pmax(0, 1 - abs(x - CUT) / h)               # triangular weights
+# not from the guides. It uses an HC1 variance, since a weighted lm() t is homoskedastic:
+hl <- h[["left"]]; hr <- h[["right"]]
+inb <- (x < CUT & x >= CUT - hl) | (x >= CUT & x <= CUT + hr)
+wgt <- ifelse(x >= CUT, pmax(0, 1 - (x - CUT) / hr), pmax(0, 1 - (CUT - x) / hl))  # triangular
 fs_lm <- lm(d ~ I(x >= CUT) * I(x - CUT), weights = wgt, subset = inb)
+fs_t  <- lmtest::coeftest(fs_lm, vcov = sandwich::vcovHC(fs_lm, type = "HC1"))
+fs_F  <- fs_t["I(x >= CUT)TRUE", "t value"]^2      # one instrument: F = t^2
+fs_F
 # ITT effects on take-up and outcome are reported ALONGSIDE the fuzzy ratio, always.
 
 ## ---- 4. Manipulation testing -----------------------------------------------
 # Density test (jackknife vce per the applied guide) + built-in binomial table
 # (bino = TRUE default in rddensity 3.0; binoP = 0.5 null, 10 nested windows).
-mtest <- rddensity(X = x, c = CUT, vce = "jackknife")
+mtest <- rddensity(X = x, c = CUT)   # vce = "jackknife" is the default
 summary(mtest)
 rdplotdensity(mtest, X = x)
 # Manual binomial route on the chosen local-randomization window (guide's pattern):
@@ -92,9 +96,11 @@ w <- rdwinselect(R = x, X = Z, cutoff = CUT, reps = 1000, seed = 50)
 # Fisherian inference in the selected window (exact under the sharp null):
 ri <- rdrandinf(Y = y, R = x, cutoff = CUT, wl = w$w_left, wr = w$w_right,
                 reps = 1000, seed = 50)
-# Fuzzy local randomization:
+# Fuzzy local randomization. fuzzy = list(treatment, statistic). The default statistic
+# "ar" (Anderson-Rubin) is the weak-first-stage-robust one; "tsls" relies on a
+# large-sample approximation, so the exact-under-the-sharp-null framing does not carry over.
 # rdrandinf(Y = y, R = x, cutoff = CUT, wl = w$w_left, wr = w$w_right,
-#           fuzzy = c(d, "tsls"))
+#           fuzzy = list(d, "ar"))
 # Window sensitivity: rdsensitivity(Y = y, R = x, cutoff = CUT, wlist = ..., tlist = ...)
 
 ## ---- 6. Falsification battery ----------------------------------------------
@@ -111,11 +117,13 @@ summary(rdrobust(y[x >= CUT], x[x >= CUT], c = CUT + 50))
 summary(rdrobust(y[x < CUT],  x[x < CUT],  c = CUT - 50))
 # 6c. Donut hole: drop cutoff-adjacent observations, KEEP the original bandwidths.
 donut <- abs(x - CUT) > 1     # tune the radius to the score's granularity
-summary(rdrobust(y[donut], x[donut], c = CUT, h = fit$bws[1], b = fit$bws[2]))
+summary(rdrobust(y[donut], x[donut], c = CUT, h = fit$bws["h", ], b = fit$bws["b", ]))
 # 6d. Bandwidth sensitivity: instability at or below the MSE-optimal h is the
 #     warning sign; degradation far above it is expected by construction.
-for (hh in c(0.75, 1, 1.25, 1.5) * fit$bws[1]) {
-  print(summary(rdrobust(y, x, c = CUT, h = hh)))
+#     Scale b with h so rho = b/h stays at the main fit's value; passing h alone
+#     sets b = h (rho = 1) and mixes a bandwidth change with a rho change.
+for (k in c(0.75, 1, 1.25, 1.5)) {
+  print(summary(rdrobust(y, x, c = CUT, h = k * fit$bws["h", ], b = k * fit$bws["b", ])))
 }
 
 ## ---- 7. Power and MDE (report with any null result) ------------------------
@@ -130,6 +138,5 @@ pow <- rdpower(data = cbind(y, x), cutoff = CUT, tau = 5)   # tau in outcome uni
 # rdmc(Y = y, X = x, C = cvec)                 # per-cutoff + pooled estimands
 
 ## ---- Session ----------------------------------------------------------------
-# Pin: rdrobust >= 4.0.0 (the `all`/summary and cluster/vce changes above),
-# rddensity >= 3.0 (built-in binomial table), rdlocrand 2.0, rdpower 3.0.
+# Pins: see the package index in references/details.md.
 sessionInfo()

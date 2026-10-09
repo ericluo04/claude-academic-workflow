@@ -9,7 +9,8 @@ An opinionated RD workflow grounded in a read canon (references/canon.md, curren
 2026-07-28): the Cattaneo-Titiunik Annual Review of Economics survey and its applied companion,
 the Cattaneo-Keele-Titiunik guide, which includes a real failed design this skill uses as its
 refusal template. Deliverable: the recommendation with its citation, the R estimation and
-diagnostics code, and a methods paragraph.
+diagnostics code, and a methods paragraph. The skill stops at the four stop points in
+../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user.
 
 Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
@@ -105,7 +106,8 @@ Hard rules from the review, stated as prohibitions because that is how it states
   for reproducing a paper that predates the criterion-optimal machinery.
 - Never cluster standard errors on the running variable. The Mixtape (ch. 6) reports the practice
   as history, recommended by Lee 2008 and Lee and Card 2008 and then discouraged; this skill
-  states it as a prohibition because Kolesar and Rothe 2018 show it inflates Type I error. Use
+  states it as a prohibition because Kolesar and Rothe 2018 show that the confidence interval
+  clustered on a discrete score can undercover. Use
   heteroskedasticity-robust variance, honest intervals for a discrete score, and cluster only on
   a real assignment unit that is not the score. Replicating or refereeing an older RD, expect to
   find this and fix it.
@@ -214,7 +216,7 @@ summary(rdrobust(y, x, c = cutoff))           # sharp: local linear, triangular,
 summary(rdrobust(d, x, c = cutoff))           # first stage / ITT on take-up
 summary(rdrobust(y, x, c = cutoff, fuzzy = d))# fuzzy ratio
 summary(rddensity(x, c = cutoff))             # manipulation
-w <- rdwinselect(x, Z, c = cutoff)            # local-randomization window
+w <- rdwinselect(x, Z, cutoff = cutoff)       # local-randomization window
 rdrandinf(y, x, cutoff = cutoff, wl = w$w_left, wr = w$w_right)
 ```
 
@@ -228,6 +230,9 @@ Package index with versions and links in references/details.md. Stata and Python
 whole suite live at rdpackages.github.io; the guide ships full replication code in all three.
 
 ## Methods paragraph template
+
+Report each effect with the results sentence in ../causal-design/references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
 > Treatment assignment changes discontinuously at [cutoff] in [score], a rule set by
 > [institution] before the outcomes we study, and units [cannot / can only imprecisely] control
