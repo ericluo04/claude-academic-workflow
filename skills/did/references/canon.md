@@ -96,7 +96,9 @@ Journal of Econometrics 232(2): 272-299. Key: `mackinnon2023cluster`.
   standard error of this coefficient can easily be too small by a factor of five or more" at
   G1 = 1, and CV3 helps but still fails when G1 is very small) while WCR fails the other way
   (under-rejection, bimodal bootstrap distribution as the tell, ordinary WR bootstrap as the
-  rescue); RI-t over RI-beta under cluster-size heterogeneity; the five concern zones (G <= 12;
+  rescue); RI-t over RI-beta under cluster-size heterogeneity, with the Section 6.2 caveat that
+  neither works well when treated clusters are systematically larger or smaller, and RI-t may
+  need a much larger G than WCR; the five concern zones (G <= 12;
   G1 <= 6 or G - G1 <= 6; seriously unbalanced sizes; atypical treated clusters; leverage
   concentration); reporting G, cluster sizes, leverage, partial leverage, and effective
   clusters is part of the method.
@@ -106,9 +108,10 @@ Journal of Econometrics 232(2): 272-299. Key: `mackinnon2023cluster`.
   fwildclusterboot 0.14.3 and summclust 0.7.0 (both archived from CRAN, r-universe builds),
   clubSandwich CR2/Satterthwaite, sandwich vcovBS jackknife (details.md package index and
   did_template.R section 10); no R package implements RI-t, hand-roll it.
-- Scope limits: IV with clustered data explicitly out of scope (theory and simulations
-  insufficient; the iv skill must not cite it for clustered-IV fixes); two-way clustering
-  theory still developing; model-based inference only, with the design-based AAIW branch set
+- Scope limits: on IV, Section 5 says only that IV coefficients are biased in finite samples
+  and recommends the equal-tail bootstrap P value; the guide does not develop clustered-IV
+  inference further (an earlier "explicitly out of scope" reading was not found in the text);
+  two-way clustering theory still developing; model-based inference only, with the design-based AAIW branch set
   aside; Donald-Lang is the one map row the guide does not discuss.
 - Quote: "it is therefore absolutely essential to report the number of clusters, G, whenever
   inference is based on a CRVE. This is even more important than reporting N."
@@ -178,8 +181,10 @@ AEA Papers and Proceedings 116: 75-80. Key: `wooldridge2026nonlinear`.
 
 ## Ghanem, Sant'Anna, and Wüthrich
 
-"Selection and Parallel Trends". Key: `ghanem2022selection` (still a preprint, SSRN 4215029;
-the circulating version is dated 2024, which is how the Mixtape cites it).
+"Selection and Parallel Trends". Key: `ghanem2022selection` (still a preprint, SSRN 4215029 and
+arXiv 2203.09001; the circulating version is v15, revised 2026-07-24. The Mixtape cites it as
+2024 in the online ch. 9 and 10 reference lists). Companion: "When Should Pre-trends Be
+Parallel?", AEA Papers and Proceedings 116: 64-69 (2026), key `ghanem2026when`.
 
 - Role: the assignment-mechanism half of parallel trends, and the source for SKILL.md's "Why
   these units were treated". Read alongside Marx, Tamer, and Tang (2024) on forward-looking
@@ -200,7 +205,7 @@ the circulating version is dated 2024, which is how the Mixtape cites it).
 
 The Japanese Economic Review 77(2): 275-288, "Interpreting event-studies from recent
 difference-in-differences methods". Key: `roth2026interpreting`. The Mixtape cites the 2024
-working paper; this is the published version.
+working paper (online ch. 10 reference list); this is the published version.
 
 - Role: what an event-study coefficient means once the estimator is not OLS.
 - Settles: short gaps versus long differences (a rolling baseline estimates a different quantity
@@ -254,7 +259,8 @@ published ReStat 108(4) on 2026-07-17, superseding NBER w29873); `borusyak2024re
 promoted to its own entry above 2026-08-26);
 `caetano2024covariates` (covariate TWFE; preprint; the four-author time-varying-covariates paper
 is separate); `harmon2022efficient` (pre-period averaging precision; unpublished WP, R&R
-ReStat); `chen2025efficient` (efficient combination; preprint); `roth2023functional`
+ReStat); `chen2025efficient` (Chen, Sant'Anna, and Xie, efficient combination; preprint);
+`roth2023functional`
 (functional form); `chen2024logs` (zeros and logs); `abadie2023clustering` (clustering);
 `gardner2022twostage` (two-stage; preprint, revised co-authored version circulates).
 
@@ -265,7 +271,8 @@ that date: `marx2024parallel` (forward-looking choice and PT, JPE: Micro 2(1)); 
 article 106147, superseding the 2023 working paper the Mixtape cites); `kahnlang2019promise`
 (explain the level difference before differencing it away; JBES 38(3), online 2019, print issue
 2020); `callaway2024continuous` (continuous treatment, NBER WP 32117; preprint, R package
-contdid); `hong2013napster` (compositional change in repeated cross-sections, the Napster
+contdid; the 2026-10-08 Mixtape check found no citation of it on the online site, so it did not
+come from the Mixtape); `hong2013napster` (compositional change in repeated cross-sections, the Napster
 exemplar; JAE 28(2)). All six are cited in prose in SKILL.md or details.md and previously had
 no key.
 
@@ -275,8 +282,45 @@ date: `wooldridge2023simple` (nonlinear DiD with panel data, Econometrics Journa
 revised April 2026, preprint, cited by Wooldridge as Deb et al. 2025); `santossilva2006log`
 (PPML consistency, the log of gravity); `solon2015weighting` (what are we weighting for);
 `correia2020ppmlhdfe` (ppmlhdfe); `ciani2019multiplicative` (multiplicative DiD and the
-variance-shift diagnostic, J. Econometric Methods 8(1)). Wooldridge 1997 (the QMLE consistency
-result the companion cites) is cited in prose only; it has no entry yet.
+variance-shift diagnostic, J. Econometric Methods 8(1)). Wooldridge 1997, the QMLE consistency
+source the companion cites, did not resolve on Crossref; SKILL.md now cites the primary result,
+Gourieroux, Monfort, and Trognon 1984 (`gourieroux1984pseudo`).
+
+Added 2026-10-09 (tier 2 of the 2026-10-08 audit), each checked against Crossref, arXiv, or the
+NBER abstract page on that date:
+
+- `ghanem2026when` (AEA P&P 116: 64-69): necessary and sufficient conditions for pre-trends and
+  trends to be parallel; pretests can be uninformative about PT except under restrictions on
+  selection. Cited in SKILL.md "Pre-trends and honest sensitivity".
+- `deb2025aggregating` (NBER WP 34331, October 2025; preprint): the standard Callaway-Sant'Anna
+  software's aggregation weights include reference pre-period observations. Cited in "Estimand
+  before estimator".
+- `liu2025cohort` (arXiv 2509.01829; preprint): cohort-anchored HonestDiD; the aggregated event
+  study can mislead when pre-trends differ across cohorts. Cited in the HonestDiD scope note.
+- `caetano2026bad` (arXiv 2608.03881; preprint; R package badcontrols): DiD when PT needs a
+  covariate that treatment moves; dropping it is often ill-advised. Cited in "Covariates".
+- `roth2023efficient` (JPE Micro 1(4): 669-709): efficient estimation under staggered random
+  timing, the R package staggered.
+- `ding2019bracketing` (Political Analysis 27(4): 605-615): the nonparametric bracketing result
+  between DiD and lagged-outcome adjustment.
+- `daw2018matching` (Health Services Research 53(6): 4138-4156): matching on pre-period
+  outcomes can induce regression-to-the-mean bias in DiD.
+- `borusyak2024revisiting`, already keyed: now also cited for the underidentified linear
+  component without never-treated units.
+- `pustejovsky2018small` (JBES 36(4): 672-683): small-sample cluster-robust Wald tests; cited
+  with AAFP for avoiding a clustered joint F over many leads.
+- `gourieroux1984pseudo` (Econometrica 52(3): 681-700): pseudo maximum likelihood consistency
+  under a correct conditional mean, the PPML default.
+- `wing2024stacked` (NBER WP 32054) and `ortizvillavicencio2025better` (arXiv 2505.09942), keyed
+  by the tier-1 bib pass: stacked-regression weights and DDD with covariates or staggering.
+- `bellego2025chained` (Journal of Econometrics 248, 105783; R package cdid): chained DiD for
+  unbalanced panels.
+- `dube2025local` (JAE 40(7): 741-758): LP-DiD and its two equivalences.
+- `mackinnon2020randomization` (Journal of Econometrics 218(2): 435-450): RI-beta and RI-t with
+  few treated clusters.
+- `rubin2008objective` (Annals of Applied Statistics 2(3)): design before outcome data, cited in
+  place of the Mixtape for the design stage.
+- `liu2024practical`, already keyed: FEct imputation, the "LWX" of the PT-menu table.
 
 ## Exemplar rows
 
