@@ -16,12 +16,13 @@ not load rdmulti, since its section 8 is commented out.
 | rdpower | 3.0 (2026-05-17) | rdpower, rdsampsi, rdmde | `rdpow` is the Stata name only; data = cbind(Y, X) |
 | rdmulti | 2.0.0 (2026-05-17) | rdmc, rdms, rdmcplot | C is an observation-level cutoff vector |
 | binsreg | 2.2 (2026-08-21) | binsreg, binsregselect, binstest: the general binscatter tool (Cattaneo, Crump, Farrell, Feng 2024) | no cutoff argument, so fit each side with subset= or by=; bins are quantile-spaced by default (binspos="qs"); rdplot with its IMSE-optimal bins stays the default RD figure |
-| RDHonest | 1.0.2 (2026-09-15) | honest-school intervals | manual smoothness constant M; the canon's critique applies |
+| RDHonest | 1.0.2 (2026-09-15) | RDHonest (sharp and fuzzy honest intervals), RDHonestBME (discrete scores), RDSmoothnessBound | M is the bound on the second derivative; RDSmoothnessBound() estimates a lower bound on it, and RDHonest() uses a rule-of-thumb M when M is omitted (MROT in the GitHub source). The canon's critique aims at these data-driven routes. RDHonestBME implements Kolesar-Rothe 2018 for a discrete score: sharp RD, uniform kernel, bounded misspecification error class |
 | rdhte | 0.2.0 (2026-05-26) | rdhte: conditional (subgroup) RD effects | fully interacted local linear RD with robust bias-corrected inference for heterogeneity and group-difference tests (Calonico, Cattaneo, Farrell, Palomba, Titiunik) |
 | rd2d | 1.0.0 (2026-05-28) | rd2d: boundary (geographic) RD | estimation and uniform inference along a two-dimensional boundary (Cattaneo, Titiunik, Yu) |
 
-The chapter's footnote 8 sends R users to cran.r-project.org/web/packages/rdd, which is the old
-orphaned `rdd` package and not rddensity. Do not use `rdd` or any other pre-rdpackages
+A footnote in Cunningham, The Mixtape, online ch. 6 (section and footnote number
+unconfirmed) sends R users to cran.r-project.org/web/packages/rdd, which is the old orphaned
+`rdd` package and not rddensity. Do not use `rdd` or any other pre-rdpackages
 implementation. The chapter's other R loads (fixest for the hand-bandwidth OLS, haven for .dta)
 are not RD tools and stay out of this index; lpdensity stays out too, since R users get it as an
 rddensity dependency and never call it directly.
@@ -37,9 +38,10 @@ our addition and should be labeled as such.
 | Check | Convention | Failure means |
 |---|---|---|
 | Qualitative manipulation account | written before estimation | design suspect regardless of tests |
-| Density test (rddensity, RBC) | own bandwidth; show the plot | sorting (strategic or administrative); explain or walk away |
+| Density test (rddensity, RBC) | own bandwidth; show the plot | sorting (strategic or administrative); explain it, report manipulation-robust bounds (Gerard, Rokkanen, Rothe 2020; R code at github.com/francoisgerard/rdbounds, not on CRAN), or walk away |
 | Binomial count test | small windows; constant assignment probability must be sensible, so keep the window narrow (a trending density fails it mechanically) | same as density; works for discrete scores |
 | Raw histogram for heaping | finest granularity of the score, before any formal test | excess mass at round values from rounding or coarse measurement; the density test can pass anyway, so run the donut regardless |
+| Measurement error in the score | ask how the score is recorded (rounded spend, self-reported age, noisy tenure) | Dong and Kolesar (2023): ignoring the error still identifies the effect for units whose observed score equals the cutoff, if the observed score classifies treatment correctly and shifts outcome means smoothly; a donut may be needed. If the observed score misclassifies treatment, this skill treats the design as fuzzy in the observed score (our judgment) |
 | Covariate / placebo-outcome balance | fresh MSE-optimal bandwidth PER covariate; RBC p-values; equivalence-test variant to claim balance affirmatively | invalid if the covariate plausibly drives the outcome |
 | Placebo cutoffs | one side of the true cutoff at a time | unexplained jump undermines continuity |
 | Donut hole | drop cutoff-adjacent observations, KEEP the original bandwidth | effect rides on the most manipulable observations; the surviving estimate is a different parameter, local to a wider neighborhood |
@@ -70,8 +72,10 @@ contradiction (ART: 121 vs 2,593 observations).
 
 Roughly 30 or fewer distinct values: treat as discrete. Local randomization applies as-is; RD
 plots need no binning (plot mass-point means); continuity methods extrapolate from the nearest
-mass points and their effective N is the number of mass points (Kolesar-Rothe for honest
-inference in that case). Marketing norm, not exception: weeks of tenure, order counts, months
+mass points and their effective N is the number of mass points. For honest continuity-based
+inference in that case, RDHonestBME() implements Kolesar-Rothe 2018 (sharp RD only, uniform
+kernel). A fuzzy design with a discrete score goes to local randomization or to Noack and Rothe
+(2024). Marketing norm, not exception: weeks of tenure, order counts, months
 since signup, integer spend tiers.
 
 ## Estimation defaults and their citations
@@ -94,18 +98,21 @@ methods paragraph says the estimate is local to the cutoff, full stop.
 ## Power and MDE
 
 Ex-post power from observed effects is unreliable. For nulls that matter, report minimum
-detectable effects (rdpower: rdmde() for the MDE; rdpow is the Stata name). For ex-ante design (choosing which threshold
-experiment to run), rdsampsi gives the required N near the cutoff.
+detectable effects (rdpower: rdmde() for the MDE; rdpow is the Stata name). For ex-ante
+design (choosing which threshold experiment to run), rdsampsi gives the required N near the
+cutoff.
 
 ## Canonical cases and what each teaches
 
-The long form of the recognition table in SKILL.md. All six are worked in Cunningham, Causal
-Inference: The Remix, ch. 6.
+The long form of the recognition table in SKILL.md. Cunningham, The Mixtape, online ch. 6 works
+four of the six: Card-Dobkin-Maestas (sec. 6.5), Hansen (sec. 6.6), Almond and Barreca
+(sec. 6.4), and Lee-Moretti-Butler (sec. 6.4). Hoekstra gets the take-up point in sec. 6.7, and
+Black gets one historical sentence in sec. 6.1.
 
 - Card, Dobkin, and Maestas 2008 (AER 98(5)), Medicare at 65. The compound-treatment discipline.
   Retirement also happens at 65, so the authors brought in a third dataset on the same running
-  variable (March CPS 1996-2004) and showed employment does not jump there. That is the move
-  when the confounder you need to rule out is absent from your own data.
+  variable (the pooled March CPS 1996-2004, pp. 2247-2248) and showed employment does not jump
+  there. That is the move when the confounder you need to rule out is absent from your own data.
 - Hansen 2015 (AER 105(4)), the 0.08 BAC threshold for a DUI charge in Washington State. The
   end-to-end workflow: histogram, density test, covariate balance as both table and figure,
   linear and quadratic outcome plots, then rdrobust. The score is measured by the arresting
@@ -121,7 +128,7 @@ Inference: The Remix, ch. 6.
   cutoff, one panel each.
 - Hoekstra 2009 (REStat 91(4)), flagship-university admission test score. The take-up plot as the
   gate before estimation. He shows the jump in the probability of attending before he shows
-  anything about earnings.
+  anything about earnings (Figure 1, enrollment, before Figure 2, log earnings; pp. 720-721).
 - Black 1999 (QJE 114(2)), school-district zoning boundaries. The origin of the spatial RD, and
   the precedent behind the DMA-border translation below, which otherwise cites nobody.
 
