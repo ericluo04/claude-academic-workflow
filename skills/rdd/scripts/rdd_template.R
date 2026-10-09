@@ -15,7 +15,7 @@ CUT <- 350                   # the cutoff
 set.seed(94305)
 # Which side of the cutoff does the institutional rule treat? rdrobust treats x >= c, so every
 # hand-written comparison below is `x >= CUT` and never `x > CUT`. Check yours matches before
-# running anything. The Mixtape (Cunningham, Causal Inference: The Remix, ch. 6) writes
+# running anything. Cunningham, The Mixtape, online ch. 6 sec. 6.6, writes
 # `df$dui = (df$bac1 > 0.08)` in its R code where its Stata code uses `bac1>=0.08`; this skill
 # fixes the convention here because the strict inequality moves every observation sitting
 # exactly on the cutoff to the control side, and a heaped score puts many of them there.
@@ -45,10 +45,11 @@ summary(fit, all = TRUE)          # Conventional + Bias-Corrected + Robust rows
 fit_cov <- rdrobust(y, x, c = CUT, covs = Z)
 # With clustering (cluster= requires vce = "cr1"/"cr2"/"cr3"). NEVER put the running variable,
 # or any bin or rounding of it, in cluster=: Kolesar and Rothe (2018, AER) show that the
-# confidence interval clustered on a discrete score can undercover. Cluster only on a real
-# sampling or assignment unit (customer, store, market). The Mixtape (ch. 6) records the Lee
-# (2008) and Lee and Card (2008) practice as historical; this skill bans it outright, and when you replicate or referee an older RD, expect
-# to find it and take it out.
+# confidence interval clustered on a discrete score can undercover, with coverage as low as 58
+# percent at a nominal 95 percent (p. 2279). Cluster only on a real sampling or assignment unit
+# (customer, store, market). Lee (2008) and Lee and Card (2008) recommended the practice; this
+# skill bans it outright, and when you replicate or referee an older RD, expect to find it and
+# take it out.
 # With few clusters, use vce = "cr3" first and vce = "cr2" as the cross-check (small-G rule in
 # ../../causal-design/references/shared-rules.md). rdrobust has no wild cluster restricted
 # bootstrap, so that half of the small-G default has no rdrobust implementation.

@@ -35,9 +35,8 @@ Statistics in Medicine 42(24): 4484-4513. Key: `cattaneo2023guide`.
   threshold, no multiplicity correction); first stage tested inside the bandwidth, never
   full-sample (F 698 valid vs F 1.51 failed); fuzzy-ratio balance; per-check bandwidth
   conventions (fresh per covariate for balance, original for donut, one-sided placebo cutoffs);
-  the two disqualifying red flags (off-cutoff take-up jumps, smallest-window imbalance; the
-  skill conditions the second on outcome relevance, per SKILL.md) and the refusal to estimate
-  when a design fails.
+  the two red flags (off-cutoff take-up jumps, smallest-window imbalance in a covariate that
+  affects the outcome) and the refusal to estimate when a design fails.
 - Binds when: executing any RD; every fuzzy design; deciding whether to walk away.
 - Implement: the verbatim R workflow block (reproduced in scripts/rdd_template.R); replication
   at rdpackages.github.io.
@@ -50,8 +49,10 @@ Statistics in Medicine 42(24): 4484-4513. Key: `cattaneo2023guide`.
 Robust bias-corrected inference (this canon) vs honest uniform-in-bias inference
 (Armstrong-Kolesar; Imbens-Wager; package RDHonest). The canon's critique: a data-driven
 smoothness constant destroys the uniformity, and a manual one is hand-picking the bandwidth by
-another name. Default RBC; offer RDHonest alongside on request with the M choice defended in
-text. Presented as live, not settled.
+another name. RDHonest's data-driven routes are RDSmoothnessBound() and the rule-of-thumb M
+used when M is omitted. Default RBC; offer RDHonest alongside on request with the M choice
+defended in text. The honest school's fuzzy method is Noack and Rothe 2024 (below). Presented
+as live, not settled.
 
 ## Primary papers cited through the canon
 
@@ -64,20 +65,48 @@ elections); Gelman-Imbens 2019 (against global polynomials); Calonico-Cattaneo-F
 Cattaneo-Titiunik-Vazquez-Bare 2017 (inference comparison, binomial test) and 2019 (power);
 Card-Lee-Pei-Weber 2015 (kink); Imbens-Wager 2019 and Armstrong-Kolesar (honest school);
 Kolesar-Rothe 2018 (discrete scores, and the prohibition on clustering standard errors by the
-running variable, which binds for continuous scores too); Pei-Lee-Card-Weber (polynomial order);
+running variable); Pei-Lee-Card-Weber (polynomial order);
 Cattaneo-Idrobo-Titiunik Foundations and Extensions volumes; Ludwig-Miller 2007 (placebo-outcome
 exemplar); Calonico-Cattaneo-Titiunik 2015 (RD plots); Hartman (equivalence testing).
 
-Added 2026-08-26 from the Mixtape ch. 6 pass. BibTeX is Crossref-verified and merged into causal.bib: Imbens-Kalyanaraman 2012 (`imbens2012optimal`,
-the origin of the data-driven MSE-optimal bandwidth rule this skill enforces); Lee-Card 2008
+Added 2026-08-26 from the Mixtape ch. 6 pass. BibTeX is Crossref-verified and merged into
+causal.bib: Imbens-Kalyanaraman 2012 (`imbens2012optimal`, the origin of the data-driven
+MSE-optimal bandwidth rule this skill enforces); Lee-Card 2008
 (`lee2008specification`, specification error with a discrete running variable, and the origin of
 the clustering-on-the-score practice Kolesar-Rothe overturned); Calonico-Cattaneo-Farrell-Titiunik
 2017 (`calonico2017rdrobust`, the rdrobust software paper a methods section cites for the
 implementation).
 
+Added 2026-10-09 from the tier-2 audit pass, each read at its abstract page (Crossref or arXiv):
+- Noack and Rothe 2024 (`noack2024bias`), Econometrica 92(3): 687-711. Bias-aware confidence
+  sets for fuzzy RD, built like Anderson-Rubin sets. Binds for a weak in-bandwidth first stage, a
+  discrete score, or a donut. Caveat: not on CRAN as of 2026-10-09; the authors' FRD package
+  is a Windows binary on Noack's site, not checked by us.
+- Gerard, Rokkanen, and Rothe 2020 (`gerard2020bounds`), Quantitative Economics 11(3):
+  839-870. Sharp bounds when the score is manipulated, with the extent of manipulation inferred
+  from the data. Binds after a failed or borderline density test. Code:
+  github.com/francoisgerard/rdbounds.
+- Dong and Kolesar 2023 (`dong2023measurement`), Journal of Applied Econometrics 38(5):
+  735-750. Ignoring error in the score still gives the effect for units whose observed score
+  equals the cutoff, if the observed score classifies treatment correctly and shifts outcome
+  means smoothly, possibly after donut trimming. Binds for rounded or noisily recorded scores.
+- Hsu and Shen 2024 (`hsu2024dynamic`), Quantitative Economics 15(4): 1035-1064. Dynamic RD,
+  where units face repeated RD events. Binds for repeated tier evaluations.
+- Calonico, Cattaneo, Farrell, Palomba, and Titiunik 2025 (`calonico2025heterogeneity`), arXiv
+  2503.13696, package rdhte (CRAN 0.2.0). Subgroup RD effects with robust bias-corrected
+  inference. Caveat: the paper is a preprint.
+- Cattaneo, Titiunik, and Yu 2025 (`cattaneo2025boundary`), arXiv 2505.05670, package rd2d
+  (CRAN 1.0.0). Location-based estimation and uniform inference along a boundary. Caveat: the
+  paper is a preprint.
+- Ghosh, Imbens, and Wager 2025 (`ghosh2025plrd`), arXiv 2503.09907. The PLRD estimator and a
+  simulation critique of common RD intervals. Cited in SKILL.md's dispute section only. In v3
+  (2026-08-26), rdrobust's RBC intervals undercover in some calibrated designs and at
+  n = 500 (Tables 1 and 3).
+
 ## Exemplar rows
 
-The recognition table's canonical cases, Crossref-verified and merged into causal.bib 2026-08-26. One line each, with the design shape the case is the precedent for.
+The recognition table's canonical cases, Crossref-verified and merged into causal.bib
+2026-08-26. One line each, with the design shape the case is the precedent for.
 
 - Card, Dobkin, and Maestas 2008 (`card2008impact`), the age or tenure eligibility rule, and the
   compound-treatment discipline that goes with it.
