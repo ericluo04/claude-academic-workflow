@@ -5,12 +5,11 @@ description: Triage a causal question and hand off to the owning method skill. O
 
 # Causal design triage
 
-The router of the family, grounded in a read canon of four sources
+The router of the family, grounded in a read canon of three sources
 (references/canon.md): Imbens (2024) supplies the assumption axis
 (what licenses identification), Li, Luo, and Pattabhiramaiah (2024, hereafter AMA; defined in
 references/canon.md) the marketing data-shape axis (how many treated units, how many
-pre-periods, how rich the covariates), Feder et al. (2022) the text-role axis (which role
-unstructured data plays in the graph), and Abadie, Athey, Imbens, and Wooldridge (2023) the
+pre-periods, how rich the covariates), and Abadie, Athey, Imbens, and Wooldridge (2023) the
 clustering rules the family shares. The deliverable is a
 design recommendation carrying four things: the assumption that licenses it, the estimand it
 actually identifies WITH its subpopulation named, the handoff to the owning skill, and, for
@@ -24,7 +23,7 @@ Current as of 2026-10-09; refresh per shared-rules (references/shared-rules.md,
 section "Refresh path").
 Nothing enters the canon without the user's approval.
 
-## The triage: four questions in order
+## The triage: three questions in order
 
 1. Was assignment randomized, or as good as (lottery, randomized rollout)? Yes:
    field-experiment. Two cautions at this gate. First, naive sample means from adaptive or
@@ -93,15 +92,6 @@ Nothing enters the canon without the user's approval.
      estimator. Eckert and Hohberger (2023) show that its performance deteriorates fast when
      its untestable assumptions fail. Papies, Ebbes, and van Heerde (2017) is the marketing
      chapter on endogeneity corrections.
-4. Does unstructured data (text, image, audio, video) appear anywhere in the graph, and in
-   which role: confounder, outcome, treatment, or machine-coded measurement? This question
-   is a modifier on the leaf that questions 1 to 3 reached, and that leaf keeps the design.
-   The role warnings below apply, and the measurement it rests on is settled before the
-   estimate, not after. Discovering an unknown concept, or measuring one from a model's
-   internals, is a measurement problem with its own validity argument. Intervening on a
-   model's internals to build stimuli or model-respondents is instrument practice, and the
-   design around it still routes through the questions above.
-
 ## The panel branch: routing by data shape
 
 The AMA heuristic: DiD/SC-family methods match on outcomes (pretreatment paths),
@@ -248,9 +238,6 @@ etable(pols, within)                # side by side: the gap is the unit effects 
 - Surrogate index for long-run outcomes, valid only under three assumptions: unconfoundedness
   in the experiment, surrogacy (every causal path runs through the surrogates), and
   comparability of the experimental and observational samples.
-- Text-role warnings at handoff (Feder). A machine-coded variable gets its correction first:
-  PPI for a predicted outcome, DSL or Battaglia et al. 2025 for a predicted treatment or
-  covariate.
 - Mediation has no route here. Sequential ignorability is a regime no skill carries.
 
 Full argument: references/shared-rules.md.
@@ -313,14 +300,6 @@ code runs.
 - rdd: thresholds on running variables; the design gate and falsification battery.
 - iv: instruments, shift-share, formula instruments, leniency and examiner designs;
   weak-instrument inference.
-- Any text, image, audio, or video role in the graph carries a measurement design of its own:
-  a prediction-powered correction for a machine-coded outcome, DSL or Battaglia et al. 2025 for
-  a machine-coded treatment or covariate, an internal-state adjustment where the confounder is
-  latent, and the split-sample rule throughout.
-- Unknown-concept discovery and model-internals measurement are instruments, and their
-  validity is argued before they enter a design.
-- Activation steering for stimuli and model-respondents (instrument choice, strength
-  calibration, damage audits) is instrument practice; the surrounding design stays with the
-  owning method skill.
+- Unstructured treatments, outcomes, or machine-coded variables are outside this public set.
 - Preregistration: the user writes it themselves once the design is chosen; the owning method
   skill supplies the field list (outcomes, hypotheses, sample size, analysis plan).

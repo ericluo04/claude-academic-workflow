@@ -310,9 +310,8 @@ Analysis 32(3): 329-344 (the CRT carryover test's own paper); Dafoe-Zhang-Caughe
 desirability); Goplerud-Imai-Pashley 2025, Annals of Applied Statistics 19(2): 866-888
 (heterogeneity); Train-Weeks 2005 (econ-side WTP space; user declined 2026-07-29, cite only
 via Sonnier reception); the 2e book chapters 10-11
-(read before asserting their content); Rao 2026 Applied Conjoint Analysis 2e; Goli-Singh 2024
-(LLMs as conjoint respondents; relevant if the skill ever covers simulated pretests).
-The Rao and Goli-Singh entries and the Train-Weeks declination come from the
+(read before asserting their content); Rao 2026 Applied Conjoint Analysis 2e.
+The Rao entry and the Train-Weeks declination come from the
 build-session discussion; no reading note covers them.
 
 ## Tier-2 additions (2026-10-09, approved with the audit's tier 2)
@@ -350,9 +349,3 @@ canon anchor; each supports one rule in SKILL.md or details.md.
 - Abramson, Kocak, Magazinnik, and Strezhnev, SocArXiv xjre9 (v1 2023, v3 2026),
   `abramson2023aggregation`. Role: the AKM side's sequel, the average feature choice
   probability for binary preference relations. Caveat: preprint, read from the abstract.
-- Goli and Singh (2024), Marketing Science 43(4): 709-722, `goli2024frontiers`; Wang,
-  Zhang, and Zhang (2026), Marketing Science 45(4): 728-751, `wang2026large`. Role: LLM
-  respondents, the first a warning (GPT models less patient than humans on intertemporal
-  choice), the second a consistent data-augmentation estimator that mixes LLM and human
-  conjoint data. Binds: the routing line on LLM-simulated respondents. Caveat: read from
-  abstracts.

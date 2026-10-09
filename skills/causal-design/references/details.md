@@ -123,29 +123,6 @@ references from the piece when one is needed in a paper.
   outcomes) and no hidden treatment versions; justified by "logical argumentation based on
   institutional knowledge."
 
-## Text-role warnings (Feder; detail behind the fourth triage question)
-
-- Confounder: conditional ignorability becomes "the NLP model measured all confounding
-  aspects of the text," untestable, argued from domain expertise. Positivity audit: if the
-  representation predicts treatment nearly perfectly, overlap has failed; narrow the
-  estimand or re-specify. The family's revision: the banned part of Feder's recommended
-  Veitch-style fine-tuning is the treatment-prediction loss (GPI's own deconfounder trains
-  on the outcome loss). The dispute, the replacement, and the TI-estimator carve-out belong
-  to the text-causal literature and are out of scope for this skill.
-- Outcome: consistency fails when the measurement model was trained on all the data (each
-  unit's inferred outcome then depends on other units' treatments); split-sample
-  measurement is the fix (egami2022make; this is Feder's consistency framing of the rule
-  stated authoritatively as the FPCILV). Randomizing treatment fixes ignorability and
-  positivity here, not consistency.
-- Treatment: treatment discovery vs prespecified latent aspects; disentangle the aspect
-  from correlated aspects of the same text; random assignment of texts leaves reader-side
-  confounding.
-- No real-world ground-truth causal benchmarks exist for text; semi-synthetic benchmark
-  wins never validate a real estimate.
-- Deployment shift tests (invariance: perturb what should not matter, predictions must not
-  move; sensitivity: minimal label-flipping edits, predictions must move) belong to the
-  diagnostics battery for the measurement model, run before it feeds a causal estimate.
-
 ## Package index
 
 CRAN versions re-checked 2026-10-08. The index covers the observables and plain-FE branches
