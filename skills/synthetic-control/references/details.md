@@ -9,7 +9,9 @@ DiD is the special case lambda_t = lambda (constant loadings); SC lets unobserve
 coefficients vary over time, which is why it survives visibly non-parallel pre-trends. Under
 the factor model and perfect predictor fit (X1 = X0 W*), the bias of the SC effect estimate is
 controlled by the ratio of the transitory-shock scale to T0, and it INCREASES with donor-pool
-size J and with the number of unobserved factors. Consequences the skill states as rules: poor
+size J and with the number of unobserved factors. Abadie (2021, footnote 9) qualifies the J
+part: with many pre-periods and many controls, diluted weights can recover the treated unit's
+factor loadings (Ferman 2021). Consequences the skill states as rules: poor
 fit is disqualifying (the bound assumes fit away), long T0 does not rescue bad fit, and short
 T0 or noisy outcomes plus a big pool invite overfitting on transitory shocks. Excluded
 covariates get absorbed into mu_j and raise the bound, which is why pre-outcomes-only predictor
@@ -36,15 +38,18 @@ what a referee asks about:
    vectors with bounded eigenvalues in their covariance matrix. Stronger than DiD or SC
    normally assume, which is independence with no distribution attached.
 2. Sample sizes: the number of control units N_co and the number of pre-treatment periods
-   T_pre must both be large, and ideally the product of treated units N_tr and post-treatment
-   periods T_post is large too. The design wants a balance between T_pre and N_co.
+   T_pre must both be large, and the product of treated units N_tr and post-treatment
+   periods T_post must be large too. The design wants a balance between T_pre and N_co.
 3. Systematic component: L has a limited number of large singular values.
 4. Weighting: oracle weights derived from L remove systematic differences between treated and
    control groups. This is parallel trends applied after reweighting. It asks for parallelism
    and does not require exact balance.
 
-The Mixtape (Cunningham, Causal Inference: The Remix, synthetic-control chapter) says of the
-SDID outcome model that "here we are not depending on the low matrix assumption" and then
+Scale: a levels SDID inherits the baseline-gap sensitivity of levels DiD (Winkler et al. 2026,
+carried in the did skill). The levels-versus-logs choice therefore travels with a did handoff.
+
+The Mixtape (Cunningham, The Mixtape, online ch. 11 sec. 11.5) says of the SDID outcome model
+that *"here we are not depending on the low matrix assumption"* and then
 states Assumption 3 as a limited number of large singular values, which is a low-rank
 assumption. This skill treats SDID as leaning on approximate low rank in its systematic
 component, because the difference from matrix completion is that the rank restriction is not
@@ -76,8 +81,10 @@ sentence, or a referee reading the same chapter will catch it.
   hunting significance.
 - Design-based framing: the permutation distribution conditions on the sample and benchmarks
   extremeness against uniform assignment; it is exact randomization inference only if
-  treatment were actually randomized. Firpo-Possebom: sensitivity analysis to non-uniform
-  assignment and test-inversion confidence sets.
+  treatment were actually randomized. Bottmer, Imbens, Spiess, and Warnick (2024) work this
+  out: under random assignment the standard SC estimator is generally biased, and their
+  modified estimator (MUSC) is unbiased with an exact finite-sample variance.
+  Firpo-Possebom: sensitivity analysis to non-uniform assignment and test-inversion confidence sets.
 - Model-based complements: conformal inference (Chernozhukov-Wuthrich-Zhu; exchangeability of
   residuals under the null, a different maintained assumption than the factor model, per the
   Ferman-Pinto caveat that E[u_t Y_jt] = 0 generally fails), and scpi prediction intervals
@@ -89,15 +96,21 @@ sentence, or a referee reading the same chapter will catch it.
   moderate-to-large donor pool and roughly similar outcome variances across treated and
   control groups. Divergence across the applicable procedures signals the data shape does
   not support the chosen one.
-- The Mixtape (Cunningham, Causal Inference: The Remix, synthetic-control chapter) offers
+- The Mixtape (Cunningham, The Mixtape, online ch. 11 sec. 11.5) offers
   randomization inference, jackknife, and bootstrap as equal SDID options and tells the reader
   to select one that aligns with the data's structure. This skill names the choice instead,
   because a reader with a single treated unit who follows that instruction will pick the
   jackknife and get an invalid interval: with one treated unit synthdid's placebo vcov is the
   only valid method, and the block bootstrap and jackknife need many treated units. The
-  chapter routes matrix-completion inference through a nonparametric bootstrap; gsynth's and
-  fect's parametric-bootstrap CIs are biased in both directions (Li and Sonnier 2023), so
-  prefer subsampling or the corrected inference there.
+  chapter routes matrix-completion inference through a nonparametric bootstrap.
+- The parametric bootstrap for gsynth (Xu 2017) gives biased coverage when the treated and
+  control error variances differ (Li and Sonnier 2023, pp. 457, 468). Coverage is too high
+  when the treated unit's error variance is smaller than the controls', and too low when it is
+  larger. The paper tests gsynth's bootstrap; applying the result to fect is this skill's
+  judgment. In fect, set vartype = "bootstrap" (nonparametric, over units) or "jackknife".
+  The Li-Sonnier correction has no package that this skill checked, so it needs hand coding.
+- Alvarez, Ferman, and Wüthrich (2025) survey inference with few treated units, with
+  finite-sample modifications. Read it before choosing among the procedures above.
 - Backdating doubles as a bias estimate: if biases are stable in time, subtract the
   pre-period "effect" (the DiD-flavored corrections of Arkhangelsky et al. and
   Chernozhukov-Wuthrich-Zhu).
@@ -113,8 +126,9 @@ sentence, or a referee reading the same chapter will catch it.
   adjustment on the discrepancies (equivalently SC on regression residuals; Abadie-L'Hour,
   Ben-Michael-Feller-Rothstein). augsynth's ridge augmentation is the standard
   implementation; report both raw and augmented.
-- Staggered timing across treated units: multisynth (staggered augsynth) or hand the design
-  to did.
+- Staggered timing across treated units: with few treated units, scpi's staggered prediction
+  intervals or stagsynth (rows below); with many, multisynth (staggered augsynth; Ben-Michael,
+  Feller, and Rothstein 2022) or hand the design to did.
 - Volatile outcomes: filter unit-specific noise before fitting (singular value thresholding,
   robust SC); common-factor volatility is what the SC itself absorbs.
 
@@ -127,11 +141,13 @@ sentence, or a referee reading the same chapter will catch it.
 | Imperfect pre-fit, donors sharing the treated unit's aggregate shocks | demeaned SC, centers outcomes on their pre-treatment mean to remove shared exposure to aggregate shocks; reduces bias under imperfect fit, raises variance in small samples, ships with the authors' specification test for whether it is suitable | ferman2021synthetic | demean by hand, no package |
 | Disaggregated / many treated | penalized SC | abadie2021penalized | pensynth |
 | Level gaps, stable-bias plausible | synthetic DiD | arkhangelsky2021synthetic | synthdid |
-| Staggered adoption where SDID is still the right estimator | staggered synthetic DiD | arkhangelsky2021synthetic appendix; clarke2024synthetic sec 2.3; porreca2022synthetic | no CRAN package; Porreca's code at github.com/zachporreca/staggered_adoption_synthdid |
+| Staggered adoption where SDID is still the right estimator | staggered synthetic DiD; sequential SDID (iterative imputation, earlier cohorts build later cohorts' counterfactuals) | arkhangelsky2021synthetic sec 8 of arXiv v4; clarke2024synthetic sec 2.3; porreca2022synthetic; arkhangelsky2024sequential | no CRAN package; Porreca's code at github.com/zachporreca/staggered_adoption_synthdid; no package checked for sequential SDID |
+| Staggered adoption, few treated units, SC weights | staggered SC with prediction intervals; staggered SC with placebo-in-time inference | cattaneo2025uncertainty (intervals); cattaneo2025scpi (package); cao2026synthetic | scpi (scdataMulti); stagsynth |
+| Many treated units, staggered timing | multisynth (partially pooled SC) | benmichael2022synthetic | augsynth |
 | N and T both modest-plus | IFE / generalized SC | xu2017generalized | gsynth, fect |
 | Same, nuclear-norm route | matrix completion | athey2021matrix | fect (mc), MCPanel |
 | Prediction intervals | scpi | cattaneo2021prediction | scpi |
-| Conformal / t-test inference | conformal SC | chernozhukov2021exact | scinference |
+| Conformal / t-test inference | conformal SC; cross-fit debiased t-test | chernozhukov2021exact; chernozhukov2026debiasing | scinference |
 | Single-market BSTS counterfactual | BSTS single-series counterfactual (CausalImpact; Brodersen et al. 2015) | brodersen2015inferring | CausalImpact |
 | Donor weights with shrinkage priors, posterior uncertainty | Bayesian SC (the AMA figure's 'Bayesian SC'; Kim, Lee, and Gupta 2020, JMR 57(5): 831-852; Pang, Liu, and Xu 2022, Political Analysis, a Bayesian multilevel factor-model implementation) | kim2020bayesian; pang2022bayesian | no CRAN package checked |
 | Elastic-net weights | Doudchenko-Imbens | doudchenko2016balancing | augsynth ridge or glmnet by hand |
@@ -151,7 +167,7 @@ the two.
 | Basque terrorism | Abadie and Gardeazabal 2003 | The origin. A single treated region, GDP per capita, an outcome that co-moves across Spanish regions |
 | California Prop 99 | Abadie, Diamond, and Hainmueller 2010 | Donor discipline (drop states running their own tobacco programs), the balance table, the 2x pruning rule, the RMSPE-ratio p-value |
 | German reunification | Abadie, Diamond, and Hainmueller 2015 | Restricting the pool to OECD economies, the SC-versus-regression weight table, cross-validated V, the in-time placebo |
-| Texas prison construction | Cunningham's Mixtape data exercise (`texas.dta`) | A mid-pack treated unit, the full placebo pipeline, and the excellent-fit case where augmented SC equals classic SC |
+| Texas prison construction | Cunningham, The Mixtape, online ch. 11 sec. 11.1 and 11.3 (`texas.dta`) | A mid-pack treated unit, the full placebo pipeline, and the excellent-fit case where augmented SC equals classic SC |
 | Mariel Boatlift | Card 1990; Peri and Yasenov 2019 | Why ad hoc comparison-city selection motivated the method, and what the synthetic-control redo changed |
 
 ## Marketing translations
@@ -187,16 +203,18 @@ MCPanel 0.0 @ 6b2706f (2017-11-17, unmaintained since).
 |---|---|---|---|
 | tidysynth | 0.2.1 (CRAN) | modern ADH pipeline: synthetic_control, generate_predictor/weights/control, grab_significance (RMSPE-ratio table), plot_placebos | ipop tuning args are snake_case (margin_ipop/sigf_ipop/bound_ipop); the package's OWN examples use dot-case names that fall into ... and are silently ignored; needs >= 20 donors for p < .05 |
 | Synth | 1.1-10 (CRAN, 2026-04, still maintained) | original dataprep/synth/synth.tab/path.plot/gaps.plot | unit and time variables must be numeric; time.plot defaults to the pre-period, extend it explicitly; dot-case Margin.ipop here (opposite of tidysynth); no placebo machinery of its own |
-| SCtools | 0.3.3.1 (CRAN) | in-space placebos for Synth objects: generate.placebos, mspe.test, plot_placebos, mspe.plot (post/pre MSPE ratio dotplot or histogram) | strategy = "multiprocess" deprecated (use "multisession" or "multicore"; the default is "sequential"); mspe.plot prunes nothing by default (discard.extreme = FALSE), and mspe.limit = 20 is the multiple of the treated unit's pre-MSPE applied only when discard.extreme = TRUE, against tidysynth's 2x; plot.hist = TRUE switches the dotplot to a histogram, which is what you want with many controls |
+| SCtools | 0.3.3.1 (CRAN) | in-space placebos for Synth objects: generate.placebos, mspe.test, plot_placebos, mspe.plot (post/pre MSPE ratio dotplot or histogram) | strategy = "multiprocess" errors through match.arg (use "multisession" or "multicore"; the default is "sequential"); mspe.plot prunes nothing by default (discard.extreme = FALSE), and mspe.limit = 20 is the multiple of the treated unit's pre-MSPE applied only when discard.extreme = TRUE, against tidysynth's 2x; plot.hist = TRUE switches the dotplot to a histogram, which is what you want with many controls |
 | synthdid | 0.0.9 (GitHub synth-inference, not on CRAN) | SDID: panel.matrices, synthdid_estimate, sc_estimate/did_estimate trio, vcov(placebo/jackknife/bootstrap) | single treated unit: placebo is the ONLY valid vcov method; panel.matrices matches columns by position unless named; balanced panel, block adoption only |
 | augsynth | 0.2.0 @ 7e70072 (GitHub ebenmichael, 2026-09-04, not on CRAN) | augmented SC (progfunc = "ridge"), conformal summary; multisynth for staggered many-treated | a data column literally named `unit` breaks augsynth and multisynth (rename it); since 7e70072 progfunc accepts only "ridge", "none", "gsyn", and multisynth has no n_factors argument; multisynth's plot needs ggrepel (Suggests only); current signature has t_int AFTER data (the repo README shows the old order); fixedeff default differs (FALSE single, TRUE multisynth); the slight penalty term in the weight solver leaves some weights infinitesimally positive and negative where a hard non-negativity constraint would give exact zeros, so tiny negative weights are not extrapolation; plot() takes inf_type ("conformal" default, "jackknife+", "jackknife", "permutation", "permutation_rstat", "None") and plot_type ("estimate", "outcomes", "cv", "placebo"), and the older cv = TRUE just forces plot_type = "cv" |
 | pensynth | 0.8.2 (CRAN) | penalized SC with cross-validated lambda (cv_pensynth) | Synth orientation, units in COLUMNS; Z1/Z0 hold-out outcome matrices are required for CV |
 | scpi | 4.0.1 (CRAN) | scdata/scest/scpi prediction intervals, scplot; multi-treated variants scdataMulti/scplotMulti | w.constr is a list (list(name = "simplex")), not a string; default solver is CLARABEL (ECOS tutorials stale); scpi() is simulation-heavy |
-| gsynth | 1.4.0 (CRAN) | generalized SC / IFE (Xu 2017) | estimator default is now "gsynth"; "ife" means IFE-with-EM; force default "unit" (fect's is "two-way"); GitHub README stale at 1.3.1; parametric bootstrap CIs biased in both directions (Li and Sonnier 2023, li2023statistical); prefer subsampling or the corrected inference |
-| fect | 2.4.5 (CRAN; dev at xuyiqing/fect) | counterfactual estimators suite (fe/ife/mc/gsynth/cfe), placebo and carryover tests, effective successor to gsynth | no "bspline" in 2.x; flags camelCase (placeboTest) but periods dot-case (placebo.period); CV default NULL (auto); parametric bootstrap CIs biased in both directions (Li and Sonnier 2023, li2023statistical); prefer subsampling or the corrected inference |
+| gsynth | 1.4.0 (CRAN) | generalized SC / IFE (Xu 2017) | estimator default is now "gsynth"; "ife" means IFE-with-EM; force default "unit" (fect's is "two-way"); GitHub README stale at 1.3.1; parametric bootstrap CIs have biased coverage when treated and control error variances differ (Li and Sonnier 2023, li2023statistical); see Inference details |
+| fect | 2.4.5 (CRAN; dev at xuyiqing/fect) | counterfactual estimators suite (fe/ife/mc/gsynth/cfe), placebo and carryover tests, effective successor to gsynth | no "bspline" in 2.x; flags camelCase (placeboTest) but periods dot-case (placebo.period); CV default NULL (auto); the parametric bootstrap carries the Li-Sonnier coverage problem by this skill's extension (li2023statistical), so prefer vartype = "bootstrap" or "jackknife"; see Inference details |
 | CausalImpact | 1.4.1 (CRAN) | BSTS single-series counterfactual for geo tests | response must be the first column; covariates must be unaffected by the intervention; no donor weights, so donor discipline does not transfer |
-| scinference | 0.0.0.9000 (GitHub kwuthrich, commit 567c688, 2021) | conformal and cross-fit t-test inference (Chernozhukov-Wuthrich-Zhu) | underscore argument names; default alpha 0.10; CIs need ci = TRUE (default FALSE, else lb and ub are NA) and an explicit ci_grid; research code, pin the commit |
+| scinference | 0.0.0.9000 (GitHub kwuthrich, commit 567c688, 2021) | conformal inference (Chernozhukov-Wuthrich-Zhu 2021) and the cross-fit t-test (Chernozhukov-Wuthrich-Zhu 2026, JPE) | underscore argument names; default alpha 0.10; CIs need ci = TRUE (default FALSE, else lb and ub are NA) and an explicit ci_grid; research code, pin the commit |
 | MCPanel | GitHub susanathey/MCPanel | original matrix-completion code | fect method = "mc" is the maintained route |
+| stagsynth | 0.1.0 (CRAN, 2026-04-28; Fu and Cao) | staggered SC (Cao, Lu, and Wu 2026): event-time ATT with placebo-in-time CIs and p-values | first release, one maintainer; signatures not checked in this pass |
+| GeoLift | 2.7.5 (GitHub facebookincubator/GeoLift, not on CRAN) | geo-test market selection and power by SC, then lift inference; imports augsynth | design step only in this skill (SKILL.md, "Choosing treated markets before a geo test"); signatures not checked in this pass |
 
 Stata and Python mirrors exist (Stata sdid, synth/synth_runner, allsynth; Python pysyncon, and scpi
 ships its own Python interface) but were NOT API-verified in this pass; check signatures

@@ -74,11 +74,13 @@ CausalImpact); Firpo-Possebom 2018 (sensitivity, confidence sets); Heckman-Hotz 
 "most important innovation" framing); Klossner et al. 2018 (V non-uniqueness); Liu-Wang-Xu
 2024 (counterfactual estimators guide, fect).
 
-Added 2026-08-26 from the Mixtape's synthetic-control chapter (Cunningham, Causal Inference:
-The Remix), Crossref-verified, keys merged into causal.bib: Ferman-Pinto-Possebom
+Added 2026-08-26 from the Mixtape's synthetic-control chapter (Cunningham, The Mixtape, online
+ch. 11), Crossref-verified, keys merged into causal.bib: Ferman-Pinto-Possebom
 2020 (`ferman2020cherry`, JPAM 39(2): 510-532; specification search over pre-treatment lag
-choices raises the false-positive rate, and the recommendation is to present results across
-multiple specifications); Porreca 2022 (`porreca2022synthetic`, Economics Letters 220: 110874;
+choices raises the false-positive rate. Their Recommendations subsection (p. 522) asks for
+results across many specifications, always with the all-lags specification as the benchmark.
+A test across all specifications is not valid without a combined test statistic); Porreca 2022 (`porreca2022synthetic`, Economics Letters 220:
+110874;
 SDID with staggered treatment timing, code at
 github.com/zachporreca/staggered_adoption_synthdid); Clarke-Pailanir-Athey-Imbens 2024
 (`clarke2024synthetic`, Stata Journal 24(4): 557-598; the Stata `sdid` implementation, with
@@ -86,12 +88,65 @@ the staggered-timing discussion in section 2.3). Author order on the last one: C
 the published article put Clarke first, while the Mixtape's reference list gives it as "Athey,
 Clarke, Imbens, and Pailanir"; cite the published order.
 
+## Addenda, 2026-10-09 (tier 2 audit, approved by the user)
+
+Each entry was written from the abstract page (Crossref, arXiv, or the publisher) checked on
+2026-10-09. Bodies were not read unless a section is named.
+
+- Kaul, Klößner, Pfeifer, and Schieler 2022 (`kaul2022standard`, JBES 40(3): 1362-1376). Role:
+  the published result behind the predictor rule. Settles: entering every pre-period outcome
+  as a separate predictor makes all covariates irrelevant to the weights. Binds at: the
+  predictor bullet in SKILL.md. Caveat: Ferman, Pinto, and Possebom still want the all-lags
+  fit reported as a benchmark.
+- Kim, Lee, and Gupta 2020 (`kim2020bayesian`, JMR 57(5): 831-852). Role: Bayesian SC, the
+  marketing-journal SC method paper. Settles: shrinkage priors replace the simplex constraints
+  and MCMC gives the inference; the soda-tax application finds a 5.5 to 5.8 percent sales
+  drop. Binds at: the Bayesian SC row in details.md. Caveat: this skill found no CRAN package.
+- Abadie and Vives-i-Bastida 2025 (`abadie2025synthetic`, Advances in Economics and
+  Econometrics, Twelfth World Congress, pp. 195-224; arXiv 2203.06279). Role: the originator's
+  newer practice principles. Settles: rules on overfitting bias, interpretability, and
+  validation exercises, derived from the estimator's formal properties. Binds at: the gate and
+  the diagnostics battery, as the refresh of Abadie 2021. Caveat: read from the abstract only.
+- Alvarez, Ferman, and Wüthrich 2025 (`alvarez2025inference`, arXiv 2504.19841, v3 2026).
+  Role: survey of inference with few treated units, cross-section and panel. Settles: which
+  procedures stay valid with one or a few treated units, with finite-sample modifications.
+  Binds at: the inference section. Caveat: preprint.
+- Li and Shankar 2024 (`li2024two`, Management Science 70(6): 3734-3747). Role: a formal test
+  of the SC pretrends assumption. Settles: step one tests the pretrends; step two picks the
+  estimator that trades bias against efficiency. Binds at: diagnostics item 1. Caveat: one
+  paper, not yet a field standard.
+- Chernozhukov, Wüthrich, and Zhu 2026 (`chernozhukov2026debiasing`, JPE 134(9): 2740-2777).
+  Role: debiased inference on average effects. Settles: K-fold cross-fitting removes the bias,
+  and a self-normalized t-statistic gives valid tests with stationary or non-stationary data.
+  Binds at: the scinference rows in details.md. Caveat: scinference is research code.
+- Bottmer, Imbens, Spiess, and Warnick 2024 (`bottmer2024design`, JBES 42(2): 762-773). Role:
+  the design-based reading of SC. Settles: under random assignment the standard SC estimator
+  is generally biased; MUSC is unbiased with an exact variance. Binds at: the design-based
+  framing in details.md. Caveat: the results need random assignment.
+- Ben-Michael, Feller, and Rothstein 2022 (`benmichael2022synthetic`, JRSS-B 84(2): 351-381;
+  NBER w28886, 2021). Role: the source for multisynth. Settles: partially pooled SC for
+  staggered adoption. Binds at: the staggered bullet and the multisynth rows.
+- Ferman 2021 (`ferman2021properties`, JASA 116(536): 1764-1772). Role: the large-J caveat.
+  Settles: with many pre-periods and many controls, diluted weights can recover the treated
+  unit's factor loadings, and SC is then asymptotically unbiased even under selection on
+  time-varying unobservables. Binds at: the "bigger J" gate bullet.
+
+Also cited inline from this pass: Cattaneo, Feng, Palomba, and Titiunik 2025
+(`cattaneo2025uncertainty`, REStat, DOI 10.1162/rest_a_01588, the prediction intervals for
+staggered adoption; `cattaneo2025scpi`, JSS 113(1), the scpi package); Cao, Lu, and Wu
+2026 (`cao2026synthetic`, Econometrics Journal 29(3): 323-342, implemented by stagsynth);
+Arkhangelsky and Samkov 2024 (`arkhangelsky2024sequential`, arXiv 2404.00164, sequential
+SDID); Abadie and Zhao 2026 (`abadie2026synthetic`, REStat, SC designs for choosing treated
+markets).
+
 ## Exemplar rows
 
 The recognition table's worked precedents. The three Abadie rows (Basque terrorism, California
 Prop 99, German reunification) are already in the primary-papers paragraph above as
 `abadie2003economic`, `abadie2010synthetic`, and `abadie2015comparative`, and the Texas prison row
-is the Mixtape's own data exercise with no paper behind it. The two remaining rows were Crossref-verified and merged into causal.bib 2026-08-26.
+is the Mixtape's own data exercise with no paper behind it (Cunningham, The Mixtape, online
+ch. 11 sec. 11.1). The two remaining rows were Crossref-verified and merged into causal.bib
+2026-08-26.
 
 - Card 1990 (`card1990impact`), comparison units picked by hand and defended in a footnote, the
   Mariel Boatlift design that motivated the method because no test exists on the hand-picked four.
