@@ -321,14 +321,11 @@ What to ask a vendor instead
 <section id="definition" class="slide level2">
 <h2>What a benchmark actually is</h2>
 <div class="fragment" data-fragment-index="0">
-<p>Building one is its own research problem <span class="citation" data-cites="gao2025Scaling">(<a href="#/references" role="doc-biblioref" onclick="">Gao et al. 2025</a>)</span>.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
 <div class="definition">
 <p><span class="label">Definition</span> A <em>benchmark</em> is a fixed set of <span class="math inline">\(n\)</span> items drawn from some distribution <span class="math inline">\(\mathcal{D}\)</span>, scored by a rule that returns 1 for a pass and 0 for a fail.</p>
 </div>
 </div>
-<div class="fragment" data-fragment-index="2">
+<div class="fragment" data-fragment-index="1">
 <div class="example">
 <p><span class="label">Example</span> 900 exam questions with published answer keys, graded by string match. <span class="math inline">\(\mathcal{D}\)</span> is “questions someone thought worth writing down in 2023”.</p>
 </div>
@@ -770,11 +767,6 @@ Independent items
 <p>Two graders disagreeing on 8% of items hold the honest half-width near 0.02. Past that, more items buy precision about the benchmark rather than about your own traffic.</p>
 </div>
 <div class="fragment" data-fragment-index="1">
-<div class="aside-note">
-<p>Looking inside the model instead of scoring its outputs is the other route, and it has the same measurement problem one level down <span class="citation" data-cites="cunningham2023Sparse templeton2024Scaling">(<a href="#/references" role="doc-biblioref" onclick="">Cunningham et al. 2023</a>; <a href="#/references" role="doc-biblioref" onclick="">Templeton et al. 2024</a>)</span>.</p>
-</div>
-</div>
-<div class="fragment" data-fragment-index="1">
 <div class="with-previous">
 <p><a href="#/" class="jump-btn jump-back" data-jump-back="">Back to the lecture</a>.</p>
 </div>
@@ -786,7 +778,7 @@ Independent items
 
 </div>
 </section>
-<section id="references-1" class="slide level2 references" data-refs-page="1" data-refs-pages="2">
+<section id="references-1" class="slide level2 references" data-refs-page="1" data-refs-pages="1">
 <h2>References</h2>
 <div class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-banker2024Machineassisted" class="csl-entry" role="listitem">
@@ -795,17 +787,11 @@ Banker, Sachin, Promothesh Chatterjee, Himanshu Mishra, and Arul Mishra. 2024. <
 <div id="ref-brynjolfsson2025Generative" class="csl-entry" role="listitem">
 Brynjolfsson, Erik, Danielle Li, and Lindsey Raymond. 2025. <span>“Generative <span>AI</span> at <span>Work</span>.”</span> <em>The Quarterly Journal of Economics</em> 140 (2): 889–942. <a href="https://doi.org/10.1093/qje/qjae044">https://doi.org/10.1093/qje/qjae044</a>.
 </div>
-<div id="ref-cunningham2023Sparse" class="csl-entry" role="listitem">
-Cunningham, Hoagy, Aidan Ewart, Logan Riggs, Robert Huben, and Lee Sharkey. 2023. <span>“Sparse <span>Autoencoders Find Highly Interpretable Features</span> in <span>Language Models</span>.”</span> <em>arXiv:2309.08600</em>, ahead of print. <a href="https://doi.org/10.48550/arXiv.2309.08600">https://doi.org/10.48550/arXiv.2309.08600</a>.
-</div>
 <div id="ref-dietvorst2018Overcoming" class="csl-entry" role="listitem">
 Dietvorst, Berkeley J., Joseph P. Simmons, and Cade Massey. 2018. <span>“Overcoming <span>Algorithm Aversion</span>: <span>People Will Use Imperfect Algorithms If They Can</span> (<span>Even Slightly</span>) <span>Modify Them</span>.”</span> <em>Management Science</em> 64 (3): 1155–70. <a href="https://doi.org/10.1287/mnsc.2016.2643">https://doi.org/10.1287/mnsc.2016.2643</a>.
 </div>
 <div id="ref-feng2023Marketing" class="csl-entry" role="listitem">
 Feng, Xiaohang (Flora), Shunyuan Zhang, and Kannan Srinivasan. 2023. <span>“Marketing <span>Through</span> the <span>Machine</span>’s <span>Eyes</span>: <span>Image Analytics</span> and <span>Interpretability</span>.”</span> In <em>Artificial <span>Intelligence</span> in <span>Marketing</span></em>, vol. 20. <a href="https://doi.org/10.1108/S1548-643520230000020013">https://doi.org/10.1108/S1548-643520230000020013</a>.
-</div>
-<div id="ref-gao2025Scaling" class="csl-entry" role="listitem">
-Gao, Leo, Tom Dupre la Tour, Henk Tillman, et al. 2025. <span>“Scaling and Evaluating Sparse Autoencoders.”</span> <em>The <span>Thirteenth International Conference</span> on <span>Learning Representations</span></em>.
 </div>
 <div id="ref-golder2023Learning" class="csl-entry" role="listitem">
 <span class="nocase">Golder, Peter N., Marnik G. Dekimpe, Jake T. An, Harald J. van Heerde, Darren S. U. Kim, and Joseph W. Alba</span>. 2023. <span>“Learning from <span>Data</span>: <span>An Empirics-First Approach</span> to <span>Relevant Knowledge Generation</span>.”</span> <em>Journal of Marketing</em> 87 (3): 319–36. <a href="https://doi.org/10.1177/00222429221129200">https://doi.org/10.1177/00222429221129200</a>.
@@ -815,14 +801,6 @@ Grewal, Rajdeep, Sachin Gupta, and Rebecca Hamilton. 2021. <span>“Marketing <s
 </div>
 <div id="ref-ludwig2024Machine" class="csl-entry" role="listitem">
 Ludwig, Jens, and Sendhil Mullainathan. 2024. <span>“Machine <span>Learning</span> as a <span>Tool</span> for <span>Hypothesis Generation</span>.”</span> <em>The Quarterly Journal of Economics</em>, qjad055. <a href="https://doi.org/10.1093/qje/qjad055">https://doi.org/10.1093/qje/qjad055</a>.
-</div>
-</div>
-</section>
-<section id="references-1-p2" class="slide level2 references" data-refs-page="2" data-refs-pages="2">
-<h2>References</h2>
-<div class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-templeton2024Scaling" class="csl-entry" role="listitem">
-Templeton, Adly, Tom Conerly, Jonathan Marcus, et al. 2024. <span>“Scaling <span>Monosemanticity</span>: <span>Extracting Interpretable Features</span> from <span>Claude</span> 3 <span>Sonnet</span>.”</span> <em>Transformer Circuits Thread</em>.
 </div>
 <div id="ref-wiles2025Algorithmic" class="csl-entry" role="listitem">
 Wiles, Emma, Zanele Munyikwa, and John Horton. 2025. <span>“Algorithmic <span>Writing Assistance</span> on <span>Jobseekers</span>’ <span>Resumes Increases Hires</span>.”</span> <em>Management Science</em>, ahead of print. <a href="https://doi.org/10.1287/mnsc.2024.04528">https://doi.org/10.1287/mnsc.2024.04528</a>.

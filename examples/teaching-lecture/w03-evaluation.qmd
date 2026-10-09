@@ -103,8 +103,6 @@ between these two systems on *your* traffic is not 0.04.
 
 ## What a benchmark actually is {#definition}
 
-Building one is its own research problem [@gao2025Scaling].
-
 ::: {.definition}
 [Definition]{.label}
 A *benchmark* is a fixed set of $n$ items drawn from some distribution $\D$,
@@ -491,12 +489,6 @@ floor under it that no item count clears.
 Two graders disagreeing on 8% of items hold the honest half-width near 0.02.
 Past that, more items buy precision about the benchmark rather than about your
 own traffic.
-
-::: {.aside-note}
-Looking inside the model instead of scoring its outputs is the other route, and it
-has the same measurement problem one level down [@cunningham2023Sparse;
-@templeton2024Scaling].
-:::
 
 ::: {.with-previous}
 [Back to the lecture]{.jump-back}.
