@@ -136,7 +136,7 @@ Never mix the interpretations silently.
   attribute list with the masking rationale, the averaging distribution and its source,
   K with its power basis, J, the clustering level, the correction method and its family,
   the IRR estimation method, the diagnostics to be run, and the target population with
-  the sample-matching procedure. The preregister skill drafts the document.
+  the sample-matching procedure. The user writes the preregistration from this list.
 
 ## Estimation and inference
 
@@ -377,7 +377,7 @@ validated on [h] holdout tasks.]"
   multi-factor experiment collapses arms on one dimension, the collapsed effect is an
   implicit AMCE averaged over the other factors' assignment distribution, and the full
   machinery lives here.
-- preregister: drafts the preregistration; this skill supplies the conjoint field list
+- Preregistration: the user writes it themselves; this skill supplies the conjoint field list
   (see Design defaults).
 - Text or image profiles whose treatment components are latent inside the stimulus are out of
   scope for this skill (the Fong-Grimmer boundary): randomizing the object does not randomize

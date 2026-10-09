@@ -482,5 +482,5 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
   recentered and formula instruments keep their RI machinery here.
 - Perceived-treatment designs, where an actual feature instruments the perceived feature, arrive
   here: the exclusion and weak-instrument discipline apply to them unchanged.
-- preregister: pre-specifying the instrument, specification, and weak-IV fallback before
-  outcomes are seen (experiment-first skill; adapt its structure for quasi-experimental PAPs).
+- Preregistration: the user writes it themselves; this skill supplies the instrument, specification, and weak-IV
+  fallback to pre-specify before outcomes are seen.
