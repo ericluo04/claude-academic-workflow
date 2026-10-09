@@ -55,12 +55,12 @@ reduces to a cross-sectional regression of the change in unit-level average outc
 passage answers "what is the superpopulation" when the sample is the population.
 
 Two further facts to carry. Robust standard errors are conservative rather than exact when the
-sample is a large share of the population and effects are heterogeneous (the Neyman finite-sample
-correction; `abadie2020sampling` buys the precision back if unit attributes predict the treatment
-effect). And for partially clustered assignment with large clusters, their CCV and TSCB estimators
-sit between robust and clustered and can be considerably smaller than conventional cluster
-standard errors. Neither applies under perfectly clustered assignment, and this family ships no
-implementation of either.
+sample is a large share of the population and effects are heterogeneous (`abadie2020sampling`
+buys the precision back if unit attributes predict the treatment effect). For partially
+clustered assignment with large clusters, AAIW propose the CCV and TSCB estimators, which sit
+between robust and clustered standard errors. This family ships no implementation of either.
+The Neyman correction and the CCV and TSCB detail are in canon.md (section "Abadie, Athey,
+Imbens, and Wooldridge (2023)").
 
 Scope: linear estimators only (least squares and fixed effects). Once the level is chosen,
 few-cluster inference is a separate problem with its own answer (MacKinnon, Nielsen, and Webb
@@ -134,15 +134,20 @@ Observational interference outside a panel design has no owner. Network spillove
 data, where nobody assigned treatment, are unrouted in this family, and the router says so.
 
 Designs, estimators, and diagnostics live in field-experiment. Clustered interference routes to
-two-stage randomization (Hudgens and Halloran 2008, Crepon et al. 2013). Network interference
-routes to exposure mappings (Aronow and Samii 2017) with exact tests (Athey, Eckles, and Imbens
-2018). Marketplaces and two-sided platforms route to multiple randomization designs (Bajari et al.
-2023, Johari et al. 2022).
+two-stage randomization (Hudgens and Halloran 2008, `hudgens2008toward`; Crepon et al. 2013,
+`crepon2013labor`). Network interference routes to exposure mappings (Aronow and Samii 2017,
+`aronow2017estimating`) with exact tests of the sharp null (Athey, Eckles, and Imbens 2018,
+`athey2018exact`). Marketplaces and two-sided platforms route to multiple randomization designs
+over buyer-seller pairs (Bajari et al. 2023, `bajari2023experimental`; Johari et al. 2022,
+`johari2022experimental`). The 61-million-person Facebook voting experiment (Bond et al. 2012)
+is the scale anchor for network experiments; cite it from Imbens 2024.
 
 ## Combined experimental and observational data
 
-The surrogate index gets long-run outcomes (retention, LTV) from short experiments. Athey,
-Chetty, Imbens, and Kang (2026) identify it under three assumptions. Treatment is unconfounded
+The surrogate index gets long-run outcomes (retention, LTV) from short experiments. It estimates
+the relation of the long-run outcome to the surrogates in observational data and applies it to
+the experimental surrogate movements. Athey, Chetty, Imbens, and Kang (2026,
+`athey2026surrogate`) identify it under three assumptions. Treatment is unconfounded
 in the experimental sample. Surrogacy holds: all causal paths from treatment to the long-run
 outcome pass through the surrogates. The experimental and observational samples are comparable,
 so the surrogate-to-outcome relation carries over. The authors note that comparability *"is
@@ -197,3 +202,15 @@ significant". Template:
 > Treatment [raised/lowered] [outcome] by [estimate] [units] ([95% CI]), which is [x] percent of
 > the [control mean / benchmark] of [value], or about [managerial translation]. The effect is
 > [calibration phrase].
+
+## Refresh path
+
+Stated once here on 2026-10-09 for all seven causal skills, copied from synthetic-control/SKILL.md;
+each SKILL.md keeps one line with its date.
+
+Refresh path: run litreview on the method since the canon date, then propose additions to
+references/canon.md as flagged addenda for the user's approval; nothing enters the canon without it.
+
+The method searched is the skill's own. Two skills named a different search: causal-design runs
+litreview on quasi-experimental methods in marketing, and did runs it on
+"difference-in-differences".
