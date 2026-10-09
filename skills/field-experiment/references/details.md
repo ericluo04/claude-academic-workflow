@@ -17,8 +17,9 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
   percent in the Children's Television Workshop example (4.6 vs 7.8).
 - Clustered: for the cluster-average estimand, difference in means on cluster means
   (equivalently unit-level WLS with weights 1/N_g); for the unit-average estimand,
-  unweighted unit OLS with Liang-Zeger CR (CR2 small-sample correction and Satterthwaite
-  dof), or cluster-level WLS with weights N_g. One mega-cluster can make the unit-weighted
+  unweighted unit OLS with Liang-Zeger CR (with few clusters, the family's small-G rule in
+  ../../causal-design/references/shared-rules.md: CV3 plus the wild cluster restricted
+  bootstrap first, CR2 with Satterthwaite dof as the cross-check), or cluster-level WLS with weights N_g. One mega-cluster can make the unit-weighted
   estimand essentially unlearnable.
 - Clustered sampling with unit-level randomization is a different problem: Neyman for the
   sample ATE, clustered SEs only for the population ATE (abadie2023clustering).
@@ -177,8 +178,10 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
   framing; lm_lin with the pre-period metric is the design-based version.
 - Conversion/click/churn lifts: report percentage-point risk differences, never adjusted
   odds ratios; noncollapsibility breaks cross-segment and cross-platform OR comparisons.
-- Revenue per user: skewed, zero-inflated; log-OLS imputation with second-stage
-  recalibration, never the log-coefficient-as-lift.
+- Revenue per user: skewed, zero-inflated; Poisson quasi-likelihood imputation per arm,
+  reported in levels or as a share of the control mean (Chen and Roth 2024). Log-OLS with
+  second-stage recalibration only when every value is positive. Never the
+  log-coefficient-as-lift.
 - Retention experiments: post-period behavior among survivors is the Lee case; differential
   churn is the trimming share.
 - Uplift modeling: honest forests + policy learning; report the RATE test before claiming
@@ -186,21 +189,27 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 - Geo experiments: cluster-level analysis primary, both estimands when market sizes vary;
   displacement checks before scaling a winning arm.
 
-## Package index (verified against package docs 2026-07-28)
+## Package index (versions refreshed against CRAN 2026-10-08; template run end to end on these versions)
 
 | Package | Version | Role | Traps |
 |---|---|---|---|
-| randomizr | 1.0.1 (CRAN) | complete_ra / block_ra / cluster_ra / block_and_cluster_ra, declare_ra for ri2 | block_ra has no N (inferred from blocks); per-block counts are block_m, not m_each |
-| estimatr | 1.0.6 (CRAN) | difference_in_means (auto-detects blocked/clustered/matched-pair designs), lm_robust, lm_lin, iv_robust | difference_in_means se_type is only "default"/"none" (HC/CR strings error there); lm_lin formula is Y ~ Z only, covariates in a separate one-sided formula; CR2 is the clustered default (pinned also in causal-design's details; update the two pins together on refresh) |
-| ri2 | 0.4.1 (CRAN, 2025-10, maintained) | conduct_ri Fisher tests with declared designs; custom test statistics via test_function | data argument must be named; IPW = TRUE by default |
+| randomizr | 2.0.1 (CRAN, 2026-08-27) | complete_ra / block_ra / cluster_ra / block_and_cluster_ra, declare_ra for ri2 | block_ra has no N (inferred from blocks); per-block counts are block_m, not m_each; 2.0 added declare_ra arguments before permutation_matrix, so name every argument past the first few |
+| ri2 | 0.5.0 (CRAN, 2026-07-29) | conduct_ri Fisher tests with declared designs; custom test statistics via test_function | data argument must be named; IPW = TRUE by default; versions before 0.5.0 gave anti-conservative null distributions when the assignment enters more than one formula term (y ~ z * x), so pin at least 0.5.0 |
 | DeclareDesign | 1.1.1 (CRAN) | design declaration and power by simulation (diagnose_design) | estimator method arg is .method (with dot); declare_estimand is the deprecated alias of declare_inquiry |
-| grf | 2.6.1 (CRAN) | causal_forest, average_treatment_effect, best_linear_projection, rank_average_treatment_effect, test_calibration | dot-separated args (num.trees, W.hat); pass known W.hat in experiments; RATE priorities must come from a held-out forest (man page requires, signature does not enforce) (pinned also in causal-design's details; update the two pins together on refresh) |
-| marginaleffects | 0.32.0 (CRAN) | avg_comparisons for standardization (risk difference; lnoravg for the marginal log OR) | "oravg" does not exist; use comparison = "lnoravg" with transform = exp; vcov accepts "HC2"/"HC3" strings (pinned also in causal-design's details; update the two pins together on refresh) |
 | RobinCar | 1.2.0 (CRAN) | covariate adjustment under covariate-adaptive randomization (ANOVA/ANCOVA/ANHECOVA) | strata argument is car_strata_cols; quoted column names, unlike estimatr's bare names |
+| dfadjust | 1.1.0 (CRAN, 2024-12-18) | dfadjustSE: HC2 with Imbens-Kolesar (or Bell-McCaffrey) degrees of freedom for regressions with a rare arm | takes an lm object, not an estimatr fit; the template refits the lm_lin specification with lm |
 | qte | 2.0.0 (CRAN, 2026-07) | QTE with bootstrap inference | ci.qte deprecated in 2.0.0; use unc_qte(yname, dname, xformla = ~1); all pre-2026-07 tutorials show the dead API |
 | wildrwolf | 0.7.0 (r-universe; ARCHIVED from CRAN 2024-05) | Romano-Wolf stepdown p-values | needs archived fwildclusterboot; accepts only fixest models; budget the p.adjust(holm) fallback |
 | PowerUpR | 1.1.0 (CRAN Archive; ARCHIVED 2026-03) | mdes.cra2/power.cra2/mrss.cra2 cluster-power closed forms | off CRAN; prefer hand-coding DEFF = 1 + (m-1) ICC in templates |
 | Lee bounds | none | no CRAN package implements Lee 2009 trimming bounds (checked the full index; ATbounds/bpbounds/rbounds/plausibounds are different things); vsemenova/leebounds is a replication archive, not installable, and its README example does not run against its own code | hand-roll (the template does) with a full-pipeline bootstrap |
+
+Shared with other causal skills: estimatr, grf, and marginaleffects. Versions and family-wide traps
+are in ../../causal-design/references/packages.md. Traps specific to this skill: estimatr's
+difference_in_means auto-detects blocked, clustered, and matched-pair designs, accepts only
+se_type "default" or "none" (HC and CR strings error there), and lm_lin takes Y ~ Z only, with
+covariates in a separate one-sided formula. Pass the known W.hat to grf in experiments.
+marginaleffects has no "oravg"; use comparison = "lnoravg" with transform = exp, and vcov accepts
+the "HC2" and "HC3" strings.
 
 Stata mirror: ritest (randomization inference), mhtexp (List-Shaikh-Xu), rwolf, leebounds
 (Tauchmann 2014, the standard Lee-bounds implementation with tight() and cieffect), ivdesc
