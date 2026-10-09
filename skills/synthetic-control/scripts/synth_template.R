@@ -1,8 +1,6 @@
-# Synthetic-control analysis template. Runnable end to end; every call signature verified
-# against package documentation on 2026-07-28 (tidysynth 0.2.1, Synth 1.1-10, SCtools 0.3.3.1,
-# scpi 4.0.1, pensynth 0.8.2, gsynth 1.4.0, fect 2.4.5, CausalImpact 1.4.1, all CRAN;
-# synthdid 0.0.9, augsynth 0.2.0, scinference 0.0.0.9000 from GitHub, not on CRAN).
-# Adapt the CONFIG block and run section by section.
+# Synthetic-control analysis template. Every section was run on a simulated panel on
+# 2026-10-08 under R 4.6.1; versions and GitHub pins are in references/details.md
+# (package index). Adapt the CONFIG block and run section by section.
 #
 # API traps older tutorials get wrong:
 #   - tidysynth ipop tuning args are snake_case (margin_ipop/sigf_ipop/bound_ipop); the
@@ -18,7 +16,7 @@
 ## ---- CONFIG ----------------------------------------------------------------
 df <- your_panel             # long panel: unit, year, y, covariates; balanced
 TREATED <- "California"      # treated unit
-T0      <- 1988              # last pre-treatment period (i_time = intervention year)
+T0      <- 1988              # i_time is the last pre-period; tidysynth puts it in the pre-fit window
 PRE     <- 1970:1988         # pre-period window
 set.seed(94305)
 
@@ -53,8 +51,9 @@ out |> grab_unit_weights()          # name the donors; sparsity is a feature
 out |> grab_predictor_weights()     # V; show robustness to reasonable alternatives
 
 ## ---- 3. Permutation inference (in-space placebos) ----------------------------
-out |> plot_placebos()              # prune = TRUE drops placebos with pre-RMSPE > 2x treated
-out |> plot_placebos(prune = FALSE) # report the unpruned spaghetti too
+# Namespace the call: SCtools (section 6) masks plot_placebos with a version that has no prune.
+out |> tidysynth::plot_placebos()              # prune = TRUE drops placebos with pre-RMSPE > 2x treated
+out |> tidysynth::plot_placebos(prune = FALSE) # report the unpruned spaghetti too
 out |> plot_mspe_ratio()
 out |> grab_significance()          # post/pre MSPE ratio, rank, fishers_exact_pvalue
 # The p floor is 1/(J+1): with fewer than 20 donors, p < .05 is unreachable; say so
@@ -119,8 +118,7 @@ sqrt(vcov(tau_sdid, method = "placebo"))    # single treated unit: placebo is th
 # height, default 3), so readers see which pre-years carry the counterfactual;
 # synthdid_units_plot() shows which donors do. plot(tau_sdid) dispatches to
 # synthdid_plot(). Both default to se.method = "jackknife", invalid with one treated
-# unit, so pass "placebo". Signatures read off the synthdid GitHub source (master),
-# NOT the pinned 0.0.9 build: not API-verified.
+# unit, so pass "placebo".
 synthdid_plot(tau_sdid, lambda.plot.scale = 3, se.method = "placebo")
 synthdid_units_plot(tau_sdid, se.method = "placebo")
 # The SDID intercept means the treated and synthetic series will NOT overlay, so the
@@ -132,15 +130,15 @@ synthdid_plot(tau_sdid, overlay = 1)
 # additive or convex restriction is doing work):
 tau_sc  <- sc_estimate(setup$Y, setup$N0, setup$T0)
 tau_did <- did_estimate(setup$Y, setup$N0, setup$T0)
-# Requires block adoption on a balanced panel; staggered adoption -> multisynth/fect,
-# or staggered SDID (Arkhangelsky et al. 2021 appendix; Clarke, Pailanir, Athey, and
-# Imbens 2024 sec 2.3; Porreca 2022), which has no CRAN package: Porreca's code is at
-# github.com/zachporreca/staggered_adoption_synthdid.
+# Block adoption on a balanced panel only; for staggered SDID see references/details.md.
 
 ## ---- 8. Augmented SC (imperfect fit that must stay in) -----------------------
 # devtools::install_github("ebenmichael/augsynth")       # not on CRAN
 library(augsynth)
-asyn <- augsynth(y ~ treated, unit = unit, time = year, data = df,
+# augsynth and multisynth fail ("Column `1` doesn't exist") when the unit column is
+# literally named `unit`: they call pull(quo_name(unit)) inside a data mask. Rename it.
+df_as <- dplyr::rename(df, state = unit)
+asyn <- augsynth(y ~ treated, unit = state, time = year, data = df_as,
                  progfunc = "ridge", scm = TRUE)   # t_int inferred; pass by name if set
 summary(asyn)                                      # conformal inference by default
 plot(asyn)
@@ -152,8 +150,9 @@ plot(asyn, inf_type = "jackknife+")
 plot(asyn, plot_type = "cv")
 # Report raw SC and augmented side by side; a large augmentation term means the
 # convex weights alone could not match, which is information, not decoration.
-# Staggered many-treated: multisynth(y ~ treated, unit = unit, time = year,
-#                                    data = df, n_leads = 10); plot(msyn, levels = "Average")
+# Staggered many-treated (same `unit` rename; plot needs install.packages("ggrepel")):
+# msyn <- multisynth(y ~ treated, unit = state, time = year, data = df_as, n_leads = 10)
+# plot(msyn, levels = "Average")
 # Disaggregated units / penalized SC: pensynth::cv_pensynth(X1, X0, Z1, Z0)
 # (units in COLUMNS, Synth orientation; Z1/Z0 hold-out outcomes required).
 
@@ -163,7 +162,10 @@ library(fect)
 # r = c(0, 5) is the CV search range for the number of latent factors, min then max. 5 is
 # fect's own default ceiling, so this is not a reduced quick-run setting. Read fout$r.cv
 # afterwards: if the selected count comes back at 5 the ceiling bound the search, so raise
-# the max and refit.
+# the max and refit. fect's default cv.rule = "1se" can pull r.cv below the minimum-MSPE
+# count, so report cv.rule and check r.cv under cv.rule = "min" too.
+# vartype = "bootstrap" is a nonparametric bootstrap over units, not the parametric
+# bootstrap whose CIs Li and Sonnier (2023) find biased.
 fout <- fect(y ~ treated + income, data = df, index = c("unit", "year"),
              method = "ife", CV = TRUE, r = c(0, 5),
              se = TRUE, vartype = "bootstrap", nboots = 200)
@@ -187,9 +189,12 @@ pin <- scpi(sd_, w.constr = list(name = "simplex"), sims = 200,
 scplot(pin)
 # Conformal alternative (Chernozhukov-Wuthrich-Zhu):
 # devtools::install_github("kwuthrich/scinference")  # research code, pin the commit
+# library(scinference)   # Y1: treated series; Y0: T x J donor matrix
 # scinference(Y1, Y0, T1 = 12, T0 = length(PRE),
-#             inference_method = "conformal", estimation_method = "sc")  # underscores;
-# default alpha is 0.10, and CIs need an explicit ci_grid.
+#             inference_method = "conformal", estimation_method = "sc",  # underscores
+#             ci = TRUE, ci_grid = seq(-50, 50, 0.5))
+# Default alpha is 0.10. CIs need ci = TRUE (default FALSE) AND a ci_grid in outcome
+# units; without ci = TRUE, lb and ub come back NA.
 
 ## ---- 11. CausalImpact, as comparison point only ------------------------------
 # BSTS counterfactual from the treated unit's own series plus covariates; no donor
@@ -197,12 +202,13 @@ scplot(pin)
 # unaffected by the intervention. Response must be the FIRST column.
 # library(CausalImpact); library(zoo)
 # ci <- CausalImpact(zoo(cbind(y_treated, x1, x2), years),
-#                    pre.period = c(1970, 1988), post.period = c(1989, 2000))
+#                    pre.period = c(1970, 1988), post.period = c(1989, 2000),
+#                    model.args = list(niter = 10000, prior.level.sd = 0.01))
 # plot(ci); summary(ci, "report")
+# niter defaults to 1000 MCMC draws, too few for stable tail intervals. prior.level.sd
+# (default 0.01) is the prior that moves the posterior most: rerun at 0.1 and report
+# both. bsts is a Gibbs sampler with no built-in R-hat, so inspect the draws yourself.
 
 ## ---- Session ----------------------------------------------------------------
-# Pin: tidysynth 0.2.1 (snake_case ipop args), synthdid 0.0.9 @ 70c1ce3, augsynth
-# 0.2.0 @ 7a90ea4 (t_int after data), scinference @ 567c688, fect >= 2.4.5 (no
-# bspline; camelCase test flags), gsynth >= 1.4.0 (estimator default "gsynth"),
-# scpi >= 4.0.1 (CLARABEL, list-valued w.constr).
+# Version pins and traps: references/details.md, package index.
 sessionInfo()

@@ -132,7 +132,8 @@ sentence, or a referee reading the same chapter will catch it.
 | Same, nuclear-norm route | matrix completion | athey2021matrix | fect (mc), MCPanel |
 | Prediction intervals | scpi | cattaneo2021prediction | scpi |
 | Conformal / t-test inference | conformal SC | chernozhukov2021exact | scinference |
-| Single-market BSTS counterfactual | CausalImpact (the AMA figure's 'Bayesian SC') | brodersen2015inferring | CausalImpact |
+| Single-market BSTS counterfactual | BSTS single-series counterfactual (CausalImpact; Brodersen et al. 2015) | brodersen2015inferring | CausalImpact |
+| Donor weights with shrinkage priors, posterior uncertainty | Bayesian SC (the AMA figure's 'Bayesian SC'; Kim, Lee, and Gupta 2020, JMR 57(5): 831-852; Pang, Liu, and Xu 2022, Political Analysis, a Bayesian multilevel factor-model implementation) | kim2020bayesian; pang2022bayesian | no CRAN package checked |
 | Elastic-net weights | Doudchenko-Imbens | doudchenko2016balancing | augsynth ridge or glmnet by hand |
 | Noisy outcomes | robust SC (denoise first) | amjad2018robust | (SVD thresholding by hand) |
 | Treated outcome outside the donor convex hull | augmented DiD (Li and Van den Bulte), scales the control average | li2023augmented | author replication code, no CRAN package |
@@ -177,8 +178,9 @@ Versions and GitHub pins re-checked 2026-08-26 against CRANDB and the repos: eve
 was already current, nothing moved. CRAN publication dates at that check: tidysynth 0.2.1
 (2025-03-24), Synth 1.1-10 (2026-04-29), SCtools 0.3.3.1 (2025-01-27), pensynth 0.8.2
 (2026-05-07), scpi 4.0.1 (2026-06-10), gsynth 1.4.0 (2026-03-27), fect 2.4.5 (2026-05-30),
-CausalImpact 1.4.1 (2025-09-26). GitHub HEAD at that check: augsynth 0.2.0 @ 7a90ea4
-(2026-06-03), synthdid 0.0.9 @ 70c1ce3 (2024-01-15), scinference @ 567c688 (2021-05-13),
+CausalImpact 1.4.1 (2025-09-26). Re-checked 2026-10-08: CRAN rows unchanged; augsynth HEAD
+moved to 7e70072 (2026-09-04, still 0.2.0) and the template ran against that commit. GitHub
+HEAD at the 2026-08-26 check: augsynth 0.2.0 @ 7a90ea4 (2026-06-03, superseded), synthdid 0.0.9 @ 70c1ce3 (2024-01-15), scinference @ 567c688 (2021-05-13),
 MCPanel 0.0 @ 6b2706f (2017-11-17, unmaintained since).
 
 | Package | Version | Role | Traps |
@@ -187,13 +189,13 @@ MCPanel 0.0 @ 6b2706f (2017-11-17, unmaintained since).
 | Synth | 1.1-10 (CRAN, 2026-04, still maintained) | original dataprep/synth/synth.tab/path.plot/gaps.plot | unit and time variables must be numeric; time.plot defaults to the pre-period, extend it explicitly; dot-case Margin.ipop here (opposite of tidysynth); no placebo machinery of its own |
 | SCtools | 0.3.3.1 (CRAN) | in-space placebos for Synth objects: generate.placebos, mspe.test, plot_placebos, mspe.plot (post/pre MSPE ratio dotplot or histogram) | strategy = "multiprocess" deprecated (use "multisession" or "multicore"; the default is "sequential"); mspe.plot prunes nothing by default (discard.extreme = FALSE), and mspe.limit = 20 is the multiple of the treated unit's pre-MSPE applied only when discard.extreme = TRUE, against tidysynth's 2x; plot.hist = TRUE switches the dotplot to a histogram, which is what you want with many controls |
 | synthdid | 0.0.9 (GitHub synth-inference, not on CRAN) | SDID: panel.matrices, synthdid_estimate, sc_estimate/did_estimate trio, vcov(placebo/jackknife/bootstrap) | single treated unit: placebo is the ONLY valid vcov method; panel.matrices matches columns by position unless named; balanced panel, block adoption only |
-| augsynth | 0.2.0 (GitHub ebenmichael, not on CRAN) | augmented SC (progfunc = "ridge"), conformal summary; multisynth for staggered many-treated | current signature has t_int AFTER data (the repo README shows the old order); fixedeff default differs (FALSE single, TRUE multisynth); the slight penalty term in the weight solver leaves some weights infinitesimally positive and negative where a hard non-negativity constraint would give exact zeros, so tiny negative weights are not extrapolation; plot() takes inf_type ("conformal" default, "jackknife+", "jackknife", "permutation", "permutation_rstat", "None") and plot_type ("estimate", "outcomes", "cv", "placebo"), and the older cv = TRUE just forces plot_type = "cv" |
+| augsynth | 0.2.0 @ 7e70072 (GitHub ebenmichael, 2026-09-04, not on CRAN) | augmented SC (progfunc = "ridge"), conformal summary; multisynth for staggered many-treated | a data column literally named `unit` breaks augsynth and multisynth (rename it); since 7e70072 progfunc accepts only "ridge", "none", "gsyn", and multisynth has no n_factors argument; multisynth's plot needs ggrepel (Suggests only); current signature has t_int AFTER data (the repo README shows the old order); fixedeff default differs (FALSE single, TRUE multisynth); the slight penalty term in the weight solver leaves some weights infinitesimally positive and negative where a hard non-negativity constraint would give exact zeros, so tiny negative weights are not extrapolation; plot() takes inf_type ("conformal" default, "jackknife+", "jackknife", "permutation", "permutation_rstat", "None") and plot_type ("estimate", "outcomes", "cv", "placebo"), and the older cv = TRUE just forces plot_type = "cv" |
 | pensynth | 0.8.2 (CRAN) | penalized SC with cross-validated lambda (cv_pensynth) | Synth orientation, units in COLUMNS; Z1/Z0 hold-out outcome matrices are required for CV |
 | scpi | 4.0.1 (CRAN) | scdata/scest/scpi prediction intervals, scplot; multi-treated variants scdataMulti/scplotMulti | w.constr is a list (list(name = "simplex")), not a string; default solver is CLARABEL (ECOS tutorials stale); scpi() is simulation-heavy |
 | gsynth | 1.4.0 (CRAN) | generalized SC / IFE (Xu 2017) | estimator default is now "gsynth"; "ife" means IFE-with-EM; force default "unit" (fect's is "two-way"); GitHub README stale at 1.3.1; parametric bootstrap CIs biased in both directions (Li and Sonnier 2023, li2023statistical); prefer subsampling or the corrected inference |
 | fect | 2.4.5 (CRAN; dev at xuyiqing/fect) | counterfactual estimators suite (fe/ife/mc/gsynth/cfe), placebo and carryover tests, effective successor to gsynth | no "bspline" in 2.x; flags camelCase (placeboTest) but periods dot-case (placebo.period); CV default NULL (auto); parametric bootstrap CIs biased in both directions (Li and Sonnier 2023, li2023statistical); prefer subsampling or the corrected inference |
 | CausalImpact | 1.4.1 (CRAN) | BSTS single-series counterfactual for geo tests | response must be the first column; covariates must be unaffected by the intervention; no donor weights, so donor discipline does not transfer |
-| scinference | 0.0.0.9000 (GitHub kwuthrich, commit 567c688, 2021) | conformal and cross-fit t-test inference (Chernozhukov-Wuthrich-Zhu) | underscore argument names; default alpha 0.10; CIs need an explicit ci_grid; research code, pin the commit |
+| scinference | 0.0.0.9000 (GitHub kwuthrich, commit 567c688, 2021) | conformal and cross-fit t-test inference (Chernozhukov-Wuthrich-Zhu) | underscore argument names; default alpha 0.10; CIs need ci = TRUE (default FALSE, else lb and ub are NA) and an explicit ci_grid; research code, pin the commit |
 | MCPanel | GitHub susanathey/MCPanel | original matrix-completion code | fect method = "mc" is the maintained route |
 
 Stata and Python mirrors exist (Stata sdid, synth/synth_runner, allsynth; Python pysyncon, and scpi
