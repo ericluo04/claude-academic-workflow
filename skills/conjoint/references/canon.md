@@ -311,9 +311,9 @@ FindIt's screening option and named in the paper as a method that lacks the inva
 
 Flagged-unread neighbors (NOT canon; addendum candidates needing user approval before any
 key citation): Ganter 2023 (direct-preference
-estimand); Ham-Imai-Janson 2022 (the CRT carryover test's own paper); Dafoe-Zhang-Caughey
+estimand); Ham-Imai-Janson 2024, Political Analysis 32(3): 329-344 (the CRT carryover test's own paper); Dafoe-Zhang-Caughey
 2018 (information equivalence / masking formalized); Horiuchi-Markovich-Yamamoto (social
-desirability); Goplerud-Imai-Pashley 2022 (heterogeneity); Train-Weeks 2005 (econ-side WTP
+desirability); Goplerud-Imai-Pashley 2025, Annals of Applied Statistics 19(2): 866-888 (heterogeneity); Train-Weeks 2005 (econ-side WTP
 space; user declined 2026-07-29, cite only via Sonnier reception); the 2e book chapters 10-11
 (read before asserting their content); Rao 2026 Applied Conjoint Analysis 2e; Goli-Singh 2024
 (LLMs as conjoint respondents; relevant if the skill ever covers simulated pretests).

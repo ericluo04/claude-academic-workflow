@@ -1,6 +1,6 @@
 ---
 name: conjoint
-description: Design, analyze, and write up conjoint experiments in both traditions: as randomized experiments identifying average marginal component effects, and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. TRIGGER on "conjoint", "AMCE", "marginal means", "AMIE", "choice-based conjoint", "CBC", "paired profiles", "attribute randomization", "partworth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "Sawtooth", "MaxDiff", "best-worst scaling", "vignette experiment" (fully randomized factorial vignettes only), "IRR correction", "projoint", "cjoint", "factorEx", "bayesm", "choice share simulation". Text or image profiles whose treatment components are latent inside the stimulus are out of scope: the component needs a design of its own.
+description: Design, analyze, and write up conjoint experiments in both traditions: as randomized experiments identifying average marginal component effects, and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error correction, multiple-testing correction, and a claims firewall on preference talk. TRIGGER on "conjoint", "AMCE", "marginal means", "AMIE", "choice-based conjoint", "CBC", "paired profiles", "attribute randomization", "partworth", "willingness to pay from choice data", "WTP space", "hierarchical Bayes conjoint", "pAMCE", "DCE", "mixed logit", "cjbart", "vignette experiment" (fully randomized factorial vignettes only), "IRR correction", "projoint", "cjoint", "factorEx", "bayesm", "choice share simulation". Text or image profiles whose treatment components are latent inside the stimulus are out of scope: the component needs a design of its own.
 ---
 
 # Conjoint experiments
@@ -12,7 +12,8 @@ traditions that share one instrument: political science's design-based causal tr
 preference-measurement track (Netzer et al. 2008; Agarwal et al. 2015; Rossi, Allenby,
 and Misra 2024; Sonnier, Ainslie, and Otter 2007). The deliverable is the design or
 analysis recommendation with the assumption that licenses it, R code with calls verified
-against package documentation, and a drafted methods paragraph. Bib keys live in
+against package documentation, and a drafted methods paragraph. The skill stops at the four stop points in
+../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user. Bib keys live in
 ../causal-design/references/causal.bib, the family's shared bibliography.
 
 ## The fork: what will the stakeholder do with the output?
@@ -31,7 +32,10 @@ The hard rule at the fork: adaptive questioning, utility-balanced or efficiency-
 designs, and informative priors on the design side all break the response-independent
 randomization that gives the AMCE its design-based causal reading (Netzer et al. 2008 is
 the authority for the adaptive family; Hainmueller, Hopkins, and Yamamoto 2014 for what
-it breaks). If AMCEs are a deliverable, freeze the randomization. A frozen-randomization
+it breaks). If AMCEs are a deliverable, freeze the randomization. No AMCEs are computed from
+an adaptive or utility-balanced design. Asked for them, the skill declines and says why: the
+design broke the response-independent randomization the AMCE rests on, so the data goes to the
+preference-measurement track. A frozen-randomization
 design can feed BOTH tracks from the same data; an adaptive design feeds only the second.
 Never mix the interpretations silently.
 
@@ -142,10 +146,13 @@ Never mix the interpretations silently.
 
 - One OLS of the choice indicator on all attribute dummies (reference level omitted per
   attribute) gives every AMCE at once; nonparametric despite the OLS routine. Standard
-  errors cluster by respondent, always: within-task outcomes are mechanically negatively
-  correlated and within-respondent outcomes positively correlated, so default or merely
-  heteroskedasticity-robust SEs are badly biased (Hainmueller, Hopkins, and Yamamoto
-  2014). Block bootstrap by respondent is the small-sample alternative. The template's
+  errors cluster by respondent, always. The reason is the sampling design: respondents are
+  the sampled units, and every task and profile is drawn within a respondent, so the
+  respondent is the cluster at which the sample was drawn (the design rule in
+  ../causal-design/references/shared-rules.md, section "Clustering"). Within-respondent
+  correlation in outcomes is a consequence of that design (Hainmueller, Hopkins, and
+  Yamamoto 2014 cluster by respondent as well). Block bootstrap by respondent is the
+  small-sample alternative. The template's
   hand-rolled sections run this regression on the profile-stacked HHY structure with
   clustered SEs, valid because it is the estimator HHY themselves use; choice-level
   analysis remains the skill's default for choice modeling.
@@ -165,13 +172,17 @@ Never mix the interpretations silently.
   false everywhere it has been checked.
 - Multiple testing: never report an uncorrected forest of AMCE stars. Under a global
   null at a realistic design size (41 tests), the standard pipeline yields at least one
-  significant AMCE in over 90% of experiments (Liu and Shiraito 2023). Default:
-  adaptive shrinkage (ashr) on the estimates and clustered SEs when priors about which
-  effects exist are weak; Benjamini-Hochberg at FDR .05 for exploratory work; Holm with a
-  preregistered family for confirmatory work. Corrected and uncorrected shown
-  side by side, every status change discussed. Never plain Bonferroni
-  (../causal-design/references/shared-rules.md). Plain BH and not the adaptive BKY variant,
-  deliberately: BKY's
+  significant AMCE in over 90% of experiments (Liu and Shiraito 2023). The family rule
+  applies (../causal-design/references/shared-rules.md, section "Multiplicity, staged by
+  what a false positive costs"). For
+  screening, adaptive shrinkage (ashr) on the estimates and clustered SEs when priors about
+  which effects exist are weak, or Benjamini-Hochberg at the family's FDR level, q = .10.
+  For confirmatory work with a preregistered family, Romano-Wolf stepdown with the
+  respondent block bootstrap is the default, because AMCEs estimated on the same
+  respondents are correlated tests and resampling recovers the power Holm gives up. Holm
+  is the fallback where the bootstrap is impractical. Corrected and uncorrected shown
+  side by side, every status change discussed. Never plain Bonferroni. Plain BH and not the
+  adaptive BKY variant, deliberately: BKY's
   extra power comes with an independence-flavoured guarantee, and AMCEs estimated on the same
   respondents are dependent in a way BH's positive-regression-dependence condition covers and
   BKY's does not. A screen over machine-generated candidates, where the candidates are not
@@ -264,7 +275,16 @@ When the deliverable is partworths, shares, WTP, pricing, or targeting:
   implementation is bayesm's rhierMnlRwMixture (Rossi, Allenby, and Misra 2024; bayesm
   3.1-7): hierarchical MNL with a mixture-of-normals heterogeneity distribution. The
   six-step recipe, the prior-defaults table, and the verified input formats are in
-  references/details.md; the template implements them.
+  references/details.md; the template implements them. Convergence follows Vehtari,
+  Gelman, Simpson, Carpenter, and Bürkner (2021): four chains, split rank-normalized
+  R-hat below 1.01 and bulk and tail ESS above 400 for every parameter, and rank plots.
+  bayesm runs one chain per call, so the template runs four seeded calls, stacks their
+  `betadraw` arrays, and diagnoses them with `posterior::summarise_draws()`. One chain's
+  trace plot is not a convergence check. The HMC route is cmdstanr with a hand-written
+  hierarchical conditional logit, used when the parameter count exceeds about 100 (Orme's
+  expectation, which he does not test) or a
+  referee asks for HMC diagnostics; van Horn (2024, reported by Orme) finds equal holdout
+  prediction and better R-hat and ESS for HMC than for the Gibbs sampler.
 - The sign-constraint hard rule: any run constraining a coefficient's sign (price
   negative) passes the FULL Prior explicitly, because the shipped constrained defaults
   contradict the package's own documentation in two places (verified at source level;
@@ -279,8 +299,14 @@ When the deliverable is partworths, shares, WTP, pricing, or targeting:
   tails: the partworth model priced a Taurus at $33,200 and a $499-max camera above
   $1,500 in the paper's own data (Sonnier, Ainslie, and Otter 2007). Validate on
   holdout log predictive density, never in-sample LMD or DIC (both preferred the badly
-  wrong model on simulated data with known truth). If stuck in partworth space, report
-  posterior medians of WTP and keep the posterior out of price optimizers. Caveat
+  wrong model on simulated data with known truth). In partworth space, WTP is a
+  partworth divided by the price coefficient. When the price coefficient's
+  heterogeneity distribution has density at zero (normal, or a mixture of normals),
+  that ratio has no finite mean or variance, so posterior means and sds of WTP estimate
+  nothing (Daly, Hess, and Train 2012). WTP moments exist when the price coefficient is
+  lognormal (bayesm's sign constraint) or bounded away from zero. Compute WTP draw by
+  draw for each respondent, never as a ratio of posterior means, report posterior
+  quantiles, and keep the partworth-space posterior out of price optimizers. Caveat
   carried: WTP space assumes everyone has finite WTP, an assumption when
   noncompensatory price screening is plausible. Write the rule as "prior on the
   quantity you report", not "WTP space always fits better" (the founding papers
@@ -343,6 +369,9 @@ fallbacks: references/details.md. Read it before writing any package call. The t
 every call verified against package documentation.
 
 ## Methods paragraph template
+
+Report each effect with the results sentence in ../causal-design/references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
 "We estimate average marginal component effects (Hainmueller, Hopkins, and Yamamoto
 2014) by regressing [choice / rating] on attribute indicators with standard errors

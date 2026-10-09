@@ -200,10 +200,12 @@ AMCE; mode 2. Ten-true-effects scenario: exact truth recovered 248/1,000 uncorre
 almost never misses but is most lenient; Ash between, and it also shrinks point
 estimates (smaller MSE, the only method improving magnitudes). Matched default: Ash when
 prior knowledge is weak (preregister the mixture family; insensitive at social-science
-test counts); BH at FDR .05 exploratory; BC confirmatory with the preregistered family m
+test counts); BH at the family's FDR level (q = .10, ../../causal-design/references/shared-rules.md)
+for screening; BC confirmatory with the preregistered family m
 (count attribute-level comparisons minus constraint-excluded combinations, plus subgroup,
-balance, and quality tests). BC here is Liu-Shiraito's own recommendation, and the skill
-substitutes Holm at the same alpha and the same family: Holm rejects everything BC rejects
+balance, and quality tests). BC here is Liu-Shiraito's own recommendation. The skill's
+confirmatory default is Romano-Wolf by respondent block bootstrap, with Holm as the fallback
+at the same alpha and the same family: Holm rejects everything BC rejects
 under the same assumptions, so every BC simulation number above is a bound on Holm's (the
 ~30% miss rate is a ceiling, not an estimate). Family discipline: realism-only attributes excluded from the
 family are excluded from reported findings. Always report corrected and uncorrected side
@@ -240,7 +242,16 @@ posterior-mean partworths, move to mixtures or rhierMnlDP if skewed/multimodal;
 sign-constrain price only with the full explicit Prior; (4) run rhierMnlRwMixture with
 a large R (the man page: "Large R values may be required (>20,000)"; 50,000 keep 10 is
 a sane opening), Z centered with no
-intercept; (5) converge on trace + ACF + ESS via summary()/plot(), burn-in 10% default;
+intercept; (5) judge convergence by the Vehtari, Gelman, Simpson, Carpenter, and Bürkner
+(2021, Bayesian Analysis 16(2): 667-718) standard: four chains, split rank-normalized
+R-hat below 1.01 and bulk and tail ESS above 400 for every parameter, and rank plots in
+place of trace plots. bayesm runs one chain per call, so run four calls with different
+seeds, stack each `betadraw` (respondents x variables x draws) into an iterations x
+chains x variables array, and pass it to `posterior::summarise_draws()` with `rhat`,
+`ess_bulk`, and `ess_tail` (template section 8). One chain cannot produce an R-hat. The
+`summary()` default of a 10% burn-in is a convention. The template
+discards the first half of each chain and lets R-hat and the rank plots judge it. If any
+parameter fails, raise R and rerun all four chains;
 (6) report mixture-implied population moments (nmix), individual partworths post-burn-in,
 and QUANTILES, never just posterior means and sds (the authors' explicit instruction).
 
@@ -277,7 +288,16 @@ implied to need a free Passat plus a subsidy; optimal prices $33,200 vs $25,800 
 largest shown relative difference $9,000) and >$1,500 vs ~$522 (camera, max shown $499);
 holdout LPD favors surplus in both data sets. Medians are much less prior-sensitive than
 means/sds (the Sawtooth practitioner dodge), but the median fix fails for
-decision-theoretic uses since actions depend on the whole distribution. Guardrails: the
+decision-theoretic uses since actions depend on the whole distribution. The cause of the
+exploding means: in partworth space, WTP is the ratio of a partworth to the price
+coefficient, and when the heterogeneity distribution of the price coefficient has
+density at zero (a normal, or any mixture of normals), the ratio has no finite mean or
+variance (Daly, Hess, and Train 2012, Transportation 39(1): 19-31). Posterior means and
+sds of WTP then estimate nothing. WTP moments exist when the price coefficient is
+lognormal (bayesm's sign constraint, beta = -exp(beta*)) or otherwise bounded away from
+zero. Compute WTP draw by draw, as -beta_ik^(r) / beta_i,price^(r) for each respondent
+i and draw r, never as a ratio of posterior means, and report posterior quantiles
+(template section 9). Guardrails: the
 fit ranking is contested (Train-Weeks found the reverse ordering; Scarpa-Thiene-Train
 2008 records both), so the rule is "prior on the quantity you report"; finite WTP for
 everyone is an assumption when price screening is plausible; reservation prices need a
@@ -302,21 +322,24 @@ fielded no-buy option, equalization prices do not.
   paramorphic to the true underlying decision process." Fit and prediction never license
   a process claim.
 
-## Package index (versions verified 2026-07-29/31; signature-level details in
-## conjoint_template.R comments)
+## Package index (versions verified 2026-07-29/31; projoint, factorEx, FindIt, cjoint, estimatr, ashr, CRTConjoint, bayesm, logitr, posterior, and bayesplot re-run in the template on 2026-10-08 under R 4.6.1; signature-level details in conjoint_template.R comments)
 
 | Tool | Version | Role | Traps |
 |---|---|---|---|
-| projoint | 1.1.2 (CRAN 2026-07-15) | choice-level MMs/AMCEs, IRR estimation (repeated-task + extrapolation), tau correction, corrected SEs, plots | the maintained code path for the correction; methodology = clayton2026correcting; binary forced choice only |
+| projoint | 1.1.4 (CRAN 2026-08-28) | choice-level MMs/AMCEs, IRR estimation (repeated-task + extrapolation), tau correction, corrected SEs, plots | the maintained code path for the correction; methodology = clayton2026correcting; binary forced choice only; choice level takes one contrast per call through a `set_qoi()` object (it errors without one), profile level sweeps all attributes; 1.1.4 tracks estimatr 2.0.0 |
 | factorEx | 1.1.0 (CRAN 2025-11-28) | design-based and model-based pAMCE | depends genlasso; target distributions supplied as per-factor marginals or joints |
-| FindIt | 1.3.0 (CRAN 2025-09-23, verified 2026-08-05) | CausalANOVA for AMEs and AMIEs; test.CausalANOVA, ConditionalEffect, cv.CausalANOVA | maintained by Egami, well past the paper's 1.1.x; screen=TRUE delegates to glinternet, so the invariance claim covers collapse and estimation, not screening (our reading); vcov and CI.table are returned ONLY when screen and collapse are both FALSE; AME/AMIE2 are reported against the GRAND MEAN, so they do not match dummy-regression coefficients; docs disagree on boot (Usage and the code say 100, the argument text says 50), pass it explicitly |
+| FindIt | 1.3.0 (CRAN 2025-09-23, verified 2026-08-05) | CausalANOVA for AMEs and AMIEs; test.CausalANOVA, ConditionalEffect, cv.CausalANOVA | maintained by Egami, well past the paper's 1.1.x; screen=TRUE delegates to glinternet, so the invariance claim covers collapse and estimation, not screening (our reading); vcov and CI.table are returned ONLY when screen and collapse are both FALSE (the manual writes `select`, which is not an argument; it means `screen`); AME/AMIE2 are reported against the GRAND MEAN, so they do not match dummy-regression coefficients; docs disagree on boot (Usage and the code say 100, the argument text says 50), pass it explicitly |
 | cjoint | 2.1.3 (CRAN 2026-05-19) | AMCE reference implementation (HHY lineage) | AMCE-centered, not MM-centered |
-| cregg | 0.3.7 (ARCHIVED off CRAN 2024-09-05; GitHub dormant since 2020) | mm, mm_diffs, cj_anova, amce_by_reference API as the method reference | cite, do not depend; hand-roll MMs instead |
-| estimatr | 1.0.6 | lm_robust with clusters= for AMCEs/MMs by hand | the family's experiment workhorse; shared pin with field-experiment/causal-design |
+| cregg | 0.4.0 (last CRAN release 2020-06-28; ARCHIVED off CRAN 2024-09-05; GitHub dormant since 2020) | mm, mm_diffs, cj_anova, amce_by_reference API as the method reference | cite, do not depend; hand-roll MMs instead |
+| posterior | 1.7.0 (CRAN) | summarise_draws() with rhat, ess_bulk, ess_tail on the four stacked bayesm chains | expects an iterations x chains x variables array; variable names go in the third dimension |
+| bayesplot | 1.16.0 (CRAN) | mcmc_rank_overlay() rank plots for the HB chains | takes the posterior draws_array directly |
 | ashr | 2.2-63 (CRAN 2023-08-21) | adaptive shrinkage: ash(betahat, sebetahat) on estimates + clustered SEs | composes with any estimator's output; BH/BC need only p.adjust |
 | CRTConjoint | 0.1.0 (verified 2026-07-31) | Ham-Imai-Janson carryover/profile-order randomization test | named in Clayton's appendix; signature verified in the template; re-verify at use |
 | bayesm | 3.1-7 (CRAN 2025-11-11) | rhierMnlRwMixture, rhierMnlDP, rhierLinearMixture, createX | the defaults/discrepancy traps above; unit-scale assumption; pass full Prior when sign-constrained |
 | logitr | 1.2.0 (verified 2026-07-31) | preference-space AND WTP-space MNL/mixed logit | the Sonnier rule's code path; the space switch is scalePar = "price"; re-verify at use |
+
+Shared with other causal skills: estimatr, whose lm_robust with clusters= gives AMCEs and MMs by
+hand. Version and family-wide traps are in ../../causal-design/references/packages.md.
 
 Hand-rolled MM in three lines (the cregg-independent route): per feature,
 estimatr::lm_robust(Y ~ 0 + factor(level), clusters = id) gives level MMs with
