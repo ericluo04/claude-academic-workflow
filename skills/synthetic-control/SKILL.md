@@ -9,7 +9,9 @@ An opinionated synthetic-control workflow grounded in a read canon (references/c
 current as of 2026-07-28): Abadie's JEL survey, the practice manual by the method's originator,
 with the synthetic-DiD bridge and the DiD-vs-SC boundary supplied by the Arkhangelsky-Imbens
 panel survey (shared with the did skill). Deliverable: the recommendation with its citation, the
-R estimation and diagnostics code, and a methods paragraph.
+R estimation and diagnostics code, and a methods paragraph. The skill stops at the four stop
+points in ../causal-design/references/shared-rules.md (section "Stop points") and puts each
+choice to the user.
 
 Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
@@ -84,13 +86,16 @@ regression weights in the reunification example).
 The degrees of freedom, each with a discipline:
 
 - Predictors: pre-intervention outcomes PLUS substantive covariates. Pre-outcomes alone push
-  excluded covariates into the unobserved loadings and raise the bias bound. The Mixtape
-  (Cunningham, Causal Inference: The Remix, synthetic-control chapter) reports that
-  researchers increasingly rely solely on lagged outcomes as covariates (Ben-Michael, Feller,
-  and Rothstein 2021); this skill rejects the drift because the excluded covariates are what
-  inflate Abadie's bias bound. The exception is an outcome series known to be driven by
-  strongly co-moving common factors, which is why one pre-period average sufficed for
-  reunification.
+  excluded covariates into the unobserved loadings and raise the bias bound. Including the
+  entire pre-treatment outcome path as predictors has become increasingly popular (Kaul,
+  Klößner, Pfeifer, and Schieler 2022, JBES 40(3): 1362-1376). This skill rejects the drift
+  because the excluded covariates are what inflate Abadie's bias bound. Kaul et al. also show
+  that entering every pre-period outcome as a separate predictor makes all covariates
+  irrelevant to the weights. Use a few pre-period outcome summaries (window means, selected
+  years), never all lags as the main specification. Report the all-lags fit beside it as the
+  benchmark that Ferman, Pinto, and Possebom (2020) recommend. The exception is an outcome
+  series known to be driven by strongly co-moving common factors, which is why one pre-period
+  average sufficed for reunification.
 - V: inverse-variance as the simple default; better, minimize pre-period MSPE or pick V by a
   training/validation split of the pre-period. Cross-validated V is not always unique, so show
   the estimate is stable across reasonable V choices.
@@ -103,8 +108,14 @@ The degrees of freedom, each with a discipline:
 One continuous decision path, not competing methods:
 
 - DiD is the special case of the SC factor model with constant factor loadings. If the treated
-  unit's pre-trend parallels a plausible comparison average, use did. Long pre-periods are
-  key for SC identification. DiD needs one pre-period to identify the ATT and more
+  unit's pre-trend parallels a plausible comparison average, use did, provided more than one
+  unit is treated. With one treated cluster, the cluster-level methods fail: CV1, CV3, and the
+  wild cluster bootstrap. Prefer this skill, after aggregating the micro units to the treated
+  unit, or did's Fallback B, the cluster-level Fisher randomization test. When neither is
+  feasible, use one of the two rescues on did's map: Ferman-Pinto, under its heteroskedasticity
+  restriction, or the ordinary wild restricted bootstrap with observation-level weights. Long
+  pre-periods
+  are key for SC identification. DiD needs one pre-period to identify the ATT and more
   only for credibility, so the SC pre-period gate does not transfer to a DiD routing decision.
 - When the pre-period plot shows the donor average diverging from the treated unit before
   treatment, parallel trends has already failed and SC is the tool. The sharpest known
@@ -226,6 +237,9 @@ Package index with versions, links, and traps in references/details.md.
 
 ## Methods paragraph template
 
+Report each effect with the results sentence in ../causal-design/references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
+
 > [Treatment] hit [treated unit] at [date]; no comparable unit did, so we construct a
 > synthetic control from [J] donors, excluding [units] for [own interventions / shocks /
 > spillovers] (Abadie 2021). Predictors are [pre-period outcomes and covariates]; predictor
@@ -247,8 +261,8 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
 
 ## Handoffs
 
-- did: parallel pre-trends hold, or staggered adoption with many treated units; synthetic
-  DiD lives HERE, did points back for it.
+- did: parallel pre-trends hold with two or more treated units, or staggered adoption with
+  many treated units; synthetic DiD lives HERE, did points back for it.
 - causal-design: whether any panel counterfactual is credible; the taxonomy that routes
   between did, SC, and factor models.
 - rdd: policy-date designs masquerading as RD in time arrive here when one or a few aggregate
