@@ -85,8 +85,8 @@ Use these to argue a method is accepted practice in marketing journals.
 
 | Method | Application |
 |---|---|
-| DiD | app monetization free-to-paid (Cao, Chintagunta, Li 2023 JM); nudges on purchases and returns (Ghose et al. 2024) |
-| Factor models / gsynth | physician payment disclosure and prescribing (Guo, Sriram, Manchanda 2020 MktSci); newspaper paywalls (Pattabhiramaiah, Sriram, Manchanda 2019 MktSci); advertising and earned word of mouth (Lovett, Peres, Xu 2019) |
+| DiD | no marketing exemplar in the AMA piece (it cites Cao, Chintagunta, Li 2023 JMR and Ghose et al. 2024 JMR as randomized experiments); stacked-regression sources Cengiz et al. 2019 QJE, Gormley and Matsa 2011 RFS |
+| Factor models / gsynth | physician payment disclosure and prescribing (Guo, Sriram, Manchanda 2020 MktSci); newspaper paywalls (Pattabhiramaiah, Sriram, Manchanda 2019 JM); advertising and earned word of mouth (Lovett, Peres, Xu 2019) |
 | Synthetic DiD | TV advertising and online sales (Lambrecht, Tucker, Zhang 2024); soda taxes and marketing conduct (Keller, Guyts, Grewal 2024) |
 | Matrix completion | misinformation and the brand premium (Bronnenberg, Dube, Sanders 2020) |
 | AIPW | advertising measurement at Facebook (Gordon et al. 2019 MktSci) |
@@ -149,19 +149,29 @@ Designs, estimators, and diagnostics live in field-experiment.
   move; sensitivity: minimal label-flipping edits, predictions must move) belong to the
   diagnostics battery for the measurement model, run before it feeds a causal estimate.
 
-## Package index (verified against docs/source 2026-07-28, CRAN versions re-checked 2026-08-26; the observables and plain-FE branches only, method skills carry their own)
+## Package index (CRAN versions re-checked 2026-10-08; the observables and plain-FE branches only, method skills carry their own; the version list for this skill's own packages, which scripts/unconfoundedness_template.R points to; shared packages such as grf and marginaleffects are pinned in packages.md)
 
 | Tool | Version | Role | Traps |
 |---|---|---|---|
-| grf | 2.6.1 | causal_forest + average_treatment_effect (AIPW default, TMLE binary-only option); best_linear_projection (HC3); rank_average_treatment_effect; policy scores | treatment argument is W; clusters= at FIT time is what makes ATE SEs cluster-robust; target.sample="overlap" = Li-Morgan-Zaslavsky ATO, the documented poor-overlap fallback; RATE priorities need a held-out forest; hist(cf$W.hat) is the documented overlap check (pinned also in field-experiment's details; update the two pins together on refresh) |
 | policytree | 1.2.5 | double_robust_scores(forest) -> policy_tree(X, Gamma, depth = 2) | Gamma columns = actions in order (1 control, 2 treated); predict returns the column index, not 0/1; exact search exponential in depth |
 | sensemakr | 0.1.6 | Cinelli-Hazlett sensitivity: robustness values, benchmark bounds, ovb_minimal_reporting (latex/html) | treatment looked up by coefficient name, so factor treatments FAIL (undocumented, in source): code treatment numeric 0/1; kd defaults to 1, pass kd = 1:3 for the standard table; lm objects (fixest method on GitHub) |
-| WeightIt | 2.0.0 | balancing weights, estimand = "ATO" for overlap weights (method = "glm") | ATO not available for every method (check ?method_<name>); downstream is lm_weightit/glm_weightit + marginaleffects::avg_comparisons (M-estimation SEs account for estimated weights); plain lm + vcovCL treats weights as fixed; keep.mparts=TRUE default enables the M-estimation SEs |
-| marginaleffects | 0.32.0 | g-computation/contrasts on weightit fits (native support) | no grf support; use grf's own estimators for forests (pinned also in field-experiment's details; update the two pins together on refresh) |
+| WeightIt | 2.1.0 | balancing weights, estimand = "ATO" for overlap weights (method = "glm") | ATO not available for every method (check ?method_<name>); downstream is lm_weightit/glm_weightit + marginaleffects::avg_comparisons (M-estimation SEs account for estimated weights); plain lm + vcovCL treats weights as fixed; keep.mparts=TRUE default enables the M-estimation SEs |
+| cobalt | 5.0.0 | bal.tab(w) balance table after weighting (standardized mean differences, KS) | thresholds = c(m = .1) flags imbalance at the conventional 0.1 SMD; takes the weightit object directly |
 | DoubleML | 1.0.2 | explicit double/debiased ML when nuisance-learner control is wanted (mlr3) | heavier setup; the grf route covers the default DR case |
-| MatchIt | 4.7.2 | matching as preprocessing when a matched design is wanted | same author ecosystem as WeightIt; matching never fully efficient (Imbens), prefer DR estimation after |
-| estimatr | 1.0.6 | lm_robust with HC/CR SEs (shared with field-experiment); lm_robust(y ~ d, fixed_effects = ~unit, clusters = unit, se_type = "stata") is the within fit with Stata's FE standard errors, the Mixtape's own route | design-based defaults; already the family's experiment workhorse (pinned also in field-experiment's details; update the two pins together on refresh); the argument is fixed_effectS, and the Mixtape's `fixed_effect = ~id` runs only because lm_robust has no dots and R partial-matches the name; clusters takes a BARE unquoted name while fixed_effects takes a right-sided formula; se_type = "stata" means HC1 when clusters is absent and Stata's cluster-robust variant when it is present, so it matches xtreg, fe only with clusters supplied (the default is HC2 without clusters and CR2 with) |
-| fixest | 0.14.2 | feols for the within estimator on a time-varying treatment: feols(y ~ d \| unit, cluster = ~unit); etable() prints pooled OLS and within side by side (the plain-panel-fixed-effects section of SKILL.md) | the bar separates fixed effects from regressors, so the treatment stays to its left; cluster takes a formula (~unit), unlike estimatr's bare name; units with no within variation in d are absorbed and dropped without a message, which is why that section runs the zero-variance count first |
+| MatchIt | 4.8.1 | matching as preprocessing when a matched design is wanted | same author ecosystem as WeightIt; matching never fully efficient (Imbens), prefer DR estimation after |
+
+Shared with other causal skills: grf, marginaleffects, estimatr, fixest, and sandwich. Versions
+and the family-wide traps are in packages.md. Traps specific to this skill: grf's
+target.sample = "overlap" is the Li-Morgan-Zaslavsky ATO and the documented poor-overlap
+fallback, and hist(cf$W.hat) is the documented overlap check. marginaleffects runs
+g-computation on weightit fits. estimatr's lm_robust(y ~ d, fixed_effects = ~unit,
+clusters = unit, se_type = "stata") is the within fit with Stata's FE standard errors, where
+se_type = "stata" means HC1 without clusters and Stata's cluster-robust variant with them. The
+Mixtape's own FE call has no clusters argument (only its demeaned OLS call has
+`clusters = id`), and its `fixed_effect = ~id` runs only because R partial-matches the name.
+fixest's feols(y ~ d | unit, cluster = ~unit) is the plain-FE fit, and the plain-FE section of
+SKILL.md runs the zero-variance count first because fixest keeps units with no within
+variation without a message.
 
 Docs: grf-labs.github.io/grf, grf-labs.github.io/policytree, carloscinelli.com/sensemakr,
 ngreifer.github.io/WeightIt, marginaleffects.com.
