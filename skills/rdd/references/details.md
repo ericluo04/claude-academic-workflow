@@ -2,17 +2,23 @@
 
 Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
 
-## Package index (every row re-verified against CRAN 2026-08-26; suite home rdpackages.github.io)
+## Package index (versions refreshed against CRAN 2026-10-08; suite home rdpackages.github.io)
+
+This index is the one place the skill pins versions. scripts/rdd_template.R points here and ran
+under rdrobust 4.1.1, rddensity 3.0, rdlocrand 3.0, and rdpower 3.0 on 2026-10-08. The run did
+not load rdmulti, since its section 8 is commented out.
 
 | Package | CRAN version | Role | Traps |
 |---|---|---|---|
-| rdrobust | 4.0.0 (2026-05-16) | rdrobust, rdbwselect, rdplot | `all=` removed from rdrobust(), now summary(fit, all=TRUE); cluster= needs vce="cr1/2/3" (use cr2, our default across these skills, following the small-G cluster-robust literature); masspoints="adjust" default |
-| rddensity | 3.0 (2026-05-21) | density + built-in binomial table, rdplotdensity | argument is camelCase `massPoints`; binomial via bino/binoW/binoNW; imports lpdensity (>= 2.2), so R needs no separate install where Stata does |
-| rdlocrand | 2.0 (2026-05-14) | rdwinselect, rdrandinf, rdsensitivity, rdrbounds | rdwinselect needs covariates; level=0.15 default is the loose balance threshold by design |
+| rdrobust | 4.1.1 (2026-10-07) | rdrobust, rdbwselect, rdplot | `stdvars` default flipped to TRUE in 4.1.x (was FALSE), so state the version when comparing against a 4.0.0 run (on one simulated sample the estimate and h matched to 8 digits under both settings); ginv.tol now 1e-15; 4.1.1 adds a plot.rdrobust method. Since 4.0.0: `all=` removed from rdrobust(), now summary(fit, all=TRUE); `data=` accepts bare column names and covs= a one-sided formula; cluster= needs vce="cr1/2/3" (with few clusters, vce="cr3" under the family's small-G rule in ../../causal-design/references/shared-rules.md, with vce="cr2" as the cross-check); masspoints="adjust" default. `fit$bws` is a 2 x 2 matrix (rows h, b; columns left, right), so index it by name. Passing h without b sets b = h |
+| rddensity | 3.0 (2026-05-21) | density + built-in binomial table, rdplotdensity | argument is camelCase `massPoints`; vce="jackknife" is the default; binomial via bino/binoW/binoNW; imports lpdensity (>= 2.2), so R needs no separate install where Stata does |
+| rdlocrand | 3.0 (2026-10-04) | rdwinselect, rdrandinf, rdsensitivity, rdrbounds | rdwinselect needs covariates; level=0.15 default is the loose balance threshold by design; 3.0 adds vce="HC1"/"HC2"/"HC3" (HC3 default, used when p > 0) and rdrandinf(firststage=), and deprecates obsstep; rdrandinf's fuzzy= is list(treatment, "ar" or "tsls"), with "ar" the default |
 | rdpower | 3.0 (2026-05-17) | rdpower, rdsampsi, rdmde | `rdpow` is the Stata name only; data = cbind(Y, X) |
 | rdmulti | 2.0.0 (2026-05-17) | rdmc, rdms, rdmcplot | C is an observation-level cutoff vector |
 | binsreg | 2.2 (2026-08-21) | binsreg, binsregselect, binstest: the general binscatter tool (Cattaneo, Crump, Farrell, Feng 2024) | no cutoff argument, so fit each side with subset= or by=; bins are quantile-spaced by default (binspos="qs"); rdplot with its IMSE-optimal bins stays the default RD figure |
-| RDHonest | 1.0.1 (2024-12-16) | honest-school intervals | manual smoothness constant M; the canon's critique applies; the only package here without a 2026 release, so pin it and re-check before relying on it |
+| RDHonest | 1.0.2 (2026-09-15) | honest-school intervals | manual smoothness constant M; the canon's critique applies |
+| rdhte | 0.2.0 (2026-05-26) | rdhte: conditional (subgroup) RD effects | fully interacted local linear RD with robust bias-corrected inference for heterogeneity and group-difference tests (Calonico, Cattaneo, Farrell, Palomba, Titiunik) |
+| rd2d | 1.0.0 (2026-05-28) | rd2d: boundary (geographic) RD | estimation and uniform inference along a two-dimensional boundary (Cattaneo, Titiunik, Yu) |
 
 The chapter's footnote 8 sends R users to cran.r-project.org/web/packages/rdd, which is the old
 orphaned `rdd` package and not rddensity. Do not use `rdd` or any other pre-rdpackages
@@ -88,7 +94,7 @@ methods paragraph says the estimate is local to the cutoff, full stop.
 ## Power and MDE
 
 Ex-post power from observed effects is unreliable. For nulls that matter, report minimum
-detectable effects (rdpower: rdpow, rdsampsi). For ex-ante design (choosing which threshold
+detectable effects (rdpower: rdmde() for the MDE; rdpow is the Stata name). For ex-ante design (choosing which threshold
 experiment to run), rdsampsi gives the required N near the cutoff.
 
 ## Canonical cases and what each teaches
