@@ -1,8 +1,8 @@
 # RDD canon
 
-Current as of 2026-07-28. These sources are hand-picked; nothing enters this file without
-explicit human approval. BibTeX keys point into ../../causal-design/references/causal.bib.
-Refresh: litreview on the method since the date above, results proposed as flagged addenda.
+Current as of 2026-10-09. The user picked these sources. BibTeX keys point into
+../../causal-design/references/causal.bib. Refresh: litreview on the method since the date
+above, results proposed as flagged addenda.
 
 ## Cattaneo and Titiunik (2022)
 
@@ -103,24 +103,5 @@ Added 2026-10-09 from the tier-2 audit pass, each read at its abstract page (Cro
   (2026-08-26), rdrobust's RBC intervals undercover in some calibrated designs and at
   n = 500 (Tables 1 and 3).
 
-## Exemplar rows
-
-The recognition table's canonical cases, Crossref-verified and merged into causal.bib
-2026-08-26. One line each, with the design shape the case is the precedent for.
-
-- Card, Dobkin, and Maestas 2008 (`card2008impact`), the age or tenure eligibility rule, and the
-  compound-treatment discipline that goes with it.
-- Hansen 2015 (`hansen2015punishment`), the agency-measured sharp score, breathalyzer BAC at 0.08.
-- Almond, Doyle, Kowalski, and Williams 2010 (`almond2010estimating`), the heaped or rounded score
-  at the 1500-gram very-low-birth-weight cutoff, where the density test passes and heaping biases
-  the estimate anyway.
-- Barreca, Guldi, Lindo, and Waddell 2011 (`barreca2011saving`), the donut-hole re-estimate at that
-  same cutoff, which is where the halved one-year mortality effect comes from.
-- Barreca, Lindo, and Waddell 2016 (`barreca2016heaping`), the heaping methodology behind the donut,
-  and the general case against reading a passing density test as clearance.
-- Lee, Moretti, and Butler 2004 (`lee2004voters`), a share crossing a fixed bar, and the
-  covariate-balance exhibit as bin means panel by panel.
-- Hoekstra 2009 (`hoekstra2009effect`), the admission cutoff with a fuzzy first stage, and the
-  take-up plot shown before any outcome.
-- Black 1999 (`black1999schools`), the boundary or geographic RD, and the precedent behind the
-  DMA-border translation.
+The recognition table's canonical cases and their keys are in details.md, section "Canonical
+cases and what each teaches".

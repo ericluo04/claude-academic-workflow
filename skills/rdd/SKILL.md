@@ -5,15 +5,16 @@ description: Design, estimate, validate, and write up a regression discontinuity
 
 # Regression discontinuity
 
-An opinionated RD workflow grounded in a read canon (references/canon.md, current as of
-2026-07-28): the Cattaneo-Titiunik Annual Review of Economics survey and its applied companion,
+An opinionated RD workflow grounded in a read canon (references/canon.md):
+the Cattaneo-Titiunik Annual Review of Economics survey and its applied companion,
 the Cattaneo-Keele-Titiunik guide, which includes a real failed design this skill uses as its
 refusal template. Deliverable: the recommendation with its citation, the R estimation and
 diagnostics code, and a methods paragraph. The skill stops at the four stop points in
 ../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user.
 
-Refresh path: run litreview on the method since the canon date, then propose additions to
-references/canon.md as flagged addenda.
+Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 
 ## Design shapes and the case that anchors each
 
@@ -114,10 +115,12 @@ Hard rules from the review, stated as prohibitions because that is how it states
 
 - Bandwidths must be data-driven and criterion-optimal; choosing one by hand "is discouraged."
   MSE-optimal for the point estimate, CE-optimal when the interval is the object. Distinct
-  left/right bandwidths are available when curvature differs by side. The Mixtape (online ch. 6
+  left/right bandwidths are available when curvature differs by side (Arai and Ichimura), and
+  the selectors have clustered variants. The simple RBC implementation runs inference at
+  polynomial order p+1 with the MSE-optimal bandwidth for order p. The Mixtape (online ch. 6
   sec. 6.6) replicates Hansen 2015 with hand-picked bandwidths and a rectangular kernel, which
-  is how RD was done before 2014; this skill refuses that as a primary specification and keeps it only
-  for reproducing a paper that predates the criterion-optimal machinery.
+  is how RD was done before 2014; this skill refuses that as a primary specification and keeps
+  it only for reproducing a paper that predates the criterion-optimal machinery.
 - Never cluster standard errors on the running variable. Lee 2008 and Lee and Card 2008
   recommended the practice. This skill states it as a prohibition because Kolesar and Rothe 2018
   show that the confidence interval clustered on a discrete score can undercover, with coverage
@@ -129,16 +132,15 @@ Hard rules from the review, stated as prohibitions because that is how it states
   ../causal-design/references/shared-rules.md.
 - Global polynomial fits are visualization only, never estimation (Gelman-Imbens): boundary
   behavior, counterintuitive weighting, overfitting.
-- Polynomial order: p = 1 default, p = 2 as the robustness check, never high order. Underfitting
-  biases in the other direction, and the Mixtape's cubic simulation with a true zero effect makes
-  it vivid (online ch. 6 sec. 6.3, Table 6.1): -176,368.30 from a linear fit and 61,866.33 from
-  a quadratic against 1.14 from the cubic. Curvature is handled by narrowing the window, since
+- Polynomial order: p = 1 default, p = 2 and a uniform kernel as the robustness checks, never
+  high order. A data-driven choice of order exists (Pei, Lee, Card, and Weber). Underfitting
+  biases in the other direction. Curvature is handled by narrowing the window, since
   the common MSE-optimal bandwidth shrinks as the curvature difference across the cutoff
   rises (Imbens and Kalyanaraman 2012). h_MSE
   also grows with p, so the p = 2 check runs on a wider window and a different effective sample.
-  In the Mixtape's Table 6.8 (online ch. 6 sec. 6.6) the left bandwidth goes 0.020, 0.033,
-  0.038 and the effective N 13,794, 16,774, 17,545 as the fit goes from no polynomial term to BAC
-  to BAC and BAC-squared. When p = 2 moves the estimate, check the window.
+  When p = 2 moves the estimate, check the window. The Mixtape's numbers for both points
+  (Tables 6.1 and 6.8) are in references/details.md, section "Polynomial order: the Mixtape
+  numbers".
 - Covariates are for precision only (Calonico, Cattaneo, Farrell, and Titiunik 2019); they
   cannot restore identification of the canonical RD parameter, and adjusting an invalid design
   changes the parameter rather than rescuing it. The point estimate should barely move when
@@ -179,28 +181,18 @@ monotonicity, so the iv skill's habits transfer:
 ## Falsification battery
 
 Run them in this order. Each check's bandwidth convention and what its failure means are in
-references/details.md.
+references/details.md, section "Falsification checklist with per-check conventions".
 
-1. Qualitative manipulation account, written before estimation (who computes the score, who
-   knows the cutoff).
-2. Density continuity test (rddensity, robust bias-corrected) plus the exact binomial count test
-   in small windows. A discontinuous density demands an explanation, and the sorting behind it
-   can be administrative rather than strategic. When it cannot be explained, report the
-   manipulation-robust bounds of Gerard, Rokkanen, and Rothe (2020) or walk away.
-3. Heaping: plot the raw histogram of the score at its finest granularity before any formal
-   test. The density test can pass while heaping biases the estimate, so run the donut whatever
-   the density test says (Almond et al. 2010; Barreca et al. 2011, 2016).
-4. Covariate and placebo-outcome balance: the full RD machinery with each predetermined
-   covariate as the outcome, a fresh MSE-optimal bandwidth per covariate, robust p-values. A
-   failure on a covariate that plausibly drives the outcome invalidates the design, and the
-   verdict is to walk away rather than to adjust.
-5. Placebo cutoffs, one side of the true cutoff at a time so treatment effects do not
-   contaminate the placebo.
-6. Donut hole: drop the observations at and immediately adjacent to the cutoff, keep the
-   original bandwidth, re-estimate. The donut estimate is a different parameter, local to a
-   wider neighborhood, and the write-up should describe it as one.
-7. Bandwidth and window sensitivity: instability at or below the chosen bandwidth is the warning
-   sign, failure far above it is expected by construction.
+1. Qualitative manipulation account.
+2. Density continuity test (rddensity) plus the exact binomial count test. When a density jump
+   cannot be explained, report the manipulation-robust bounds of Gerard, Rokkanen, and Rothe
+   (2020) or walk away.
+3. Heaping: the raw histogram of the score.
+4. Covariate and placebo-outcome balance. A failure on a covariate that plausibly drives the
+   outcome invalidates the design, and the verdict is to walk away rather than to adjust.
+5. Placebo cutoffs.
+6. Donut hole.
+7. Bandwidth and window sensitivity.
 
 When a null matters, report minimum detectable effects (rdpower), never ex-post power from the
 observed effect.
