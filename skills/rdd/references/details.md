@@ -1,8 +1,8 @@
 # RDD lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 
-## Package index (versions refreshed against CRAN 2026-10-08; suite home rdpackages.github.io)
+## Package index (versions from CRAN; suite home rdpackages.github.io)
 
 This index is the one place the skill pins versions. scripts/rdd_template.R points here and ran
 under rdrobust 4.1.1, rddensity 3.0, rdlocrand 3.0, and rdpower 3.0 on 2026-10-08. The run did
@@ -16,7 +16,7 @@ not load rdmulti, since its section 8 is commented out.
 | rdpower | 3.0 (2026-05-17) | rdpower, rdsampsi, rdmde | `rdpow` is the Stata name only; data = cbind(Y, X) |
 | rdmulti | 2.0.0 (2026-05-17) | rdmc, rdms, rdmcplot | C is an observation-level cutoff vector |
 | binsreg | 2.2 (2026-08-21) | binsreg, binsregselect, binstest: the general binscatter tool (Cattaneo, Crump, Farrell, Feng 2024) | no cutoff argument, so fit each side with subset= or by=; bins are quantile-spaced by default (binspos="qs"); rdplot with its IMSE-optimal bins stays the default RD figure |
-| RDHonest | 1.0.2 (2026-09-15) | RDHonest (sharp and fuzzy honest intervals), RDHonestBME (discrete scores), RDSmoothnessBound | M is the bound on the second derivative; RDSmoothnessBound() estimates a lower bound on it, and RDHonest() uses a rule-of-thumb M when M is omitted (MROT in the GitHub source). The canon's critique aims at these data-driven routes. RDHonestBME implements Kolesar-Rothe 2018 for a discrete score: sharp RD, uniform kernel, bounded misspecification error class |
+| RDHonest | 1.0.2 (2026-09-15) | RDHonest (sharp and fuzzy honest intervals), RDHonestBME (discrete scores), RDSmoothnessBound | M is the bound on the second derivative; RDSmoothnessBound() estimates a lower bound on it, and RDHonest() uses a rule-of-thumb M when M is omitted (MROT, confirmed in the 1.0.2 CRAN source). The canon's critique aims at these data-driven routes. RDHonestBME implements Kolesar-Rothe 2018 for a discrete score: sharp RD, uniform kernel, bounded misspecification error class |
 | rdhte | 0.2.0 (2026-05-26) | rdhte: conditional (subgroup) RD effects | fully interacted local linear RD with robust bias-corrected inference for heterogeneity and group-difference tests (Calonico, Cattaneo, Farrell, Palomba, Titiunik) |
 | rd2d | 1.0.0 (2026-05-28) | rd2d: boundary (geographic) RD | estimation and uniform inference along a two-dimensional boundary (Cattaneo, Titiunik, Yu) |
 
@@ -40,11 +40,11 @@ our addition and should be labeled as such.
 | Qualitative manipulation account | written before estimation | design suspect regardless of tests |
 | Density test (rddensity, RBC) | own bandwidth; show the plot | sorting (strategic or administrative); explain it, report manipulation-robust bounds (Gerard, Rokkanen, Rothe 2020; R code at github.com/francoisgerard/rdbounds, not on CRAN), or walk away |
 | Binomial count test | small windows; constant assignment probability must be sensible, so keep the window narrow (a trending density fails it mechanically) | same as density; works for discrete scores |
-| Raw histogram for heaping | finest granularity of the score, before any formal test | excess mass at round values from rounding or coarse measurement; the density test can pass anyway, so run the donut regardless |
+| Raw histogram for heaping | finest granularity of the score, before any formal test | excess mass at round values from rounding or coarse measurement; the density test can pass anyway, so run the donut regardless (Almond et al. 2010; Barreca et al. 2011, 2016) |
 | Measurement error in the score | ask how the score is recorded (rounded spend, self-reported age, noisy tenure) | Dong and Kolesar (2023): ignoring the error still identifies the effect for units whose observed score equals the cutoff, if the observed score classifies treatment correctly and shifts outcome means smoothly; a donut may be needed. If the observed score misclassifies treatment, this skill treats the design as fuzzy in the observed score (our judgment) |
-| Covariate / placebo-outcome balance | fresh MSE-optimal bandwidth PER covariate; RBC p-values; equivalence-test variant to claim balance affirmatively | invalid if the covariate plausibly drives the outcome |
-| Placebo cutoffs | one side of the true cutoff at a time | unexplained jump undermines continuity |
-| Donut hole | drop cutoff-adjacent observations, KEEP the original bandwidth | effect rides on the most manipulable observations; the surviving estimate is a different parameter, local to a wider neighborhood |
+| Covariate / placebo-outcome balance | fresh MSE-optimal bandwidth PER covariate; RBC p-values; equivalence-test variant to claim balance affirmatively | invalid if the covariate plausibly drives the outcome, and the verdict is to walk away rather than to adjust |
+| Placebo cutoffs | one side of the true cutoff at a time, so treatment effects do not contaminate the placebo | unexplained jump undermines continuity |
+| Donut hole | drop cutoff-adjacent observations, KEEP the original bandwidth | effect rides on the most manipulable observations; the surviving estimate is a different parameter, local to a wider neighborhood, and the write-up describes it as one |
 | Bandwidth sensitivity | instability at or below chosen h is the warning; failure far above is expected | curvature or manipulation, not a license to cherry-pick |
 | Take-up plot (fuzzy) | before estimation | off-cutoff jumps = soft rule = likely fatal |
 
@@ -58,16 +58,6 @@ p-value across covariates. Expect the window to be much narrower than the contin
 a local-randomization null next to a significant continuity estimate can be power, not
 contradiction (ART: 121 vs 2,593 observations).
 
-## Fuzzy diagnostics
-
-- First stage inside the bandwidth/window only. Anchors: F about 698 (valid ART design) vs
-  F = 1.51 (failed chemotherapy design, first-stage effect 0.15 with Fisherian p = 0.32).
-- Fuzzy-ratio balance tests: instrument strength amplifies covariate bias.
-- One MSE-optimal bandwidth for the ratio, not separate numerator/denominator bandwidths.
-- Exclusion argued concretely: crossing the cutoff must move the outcome only through
-  treatment. Marketing example that fails it: a churn-score threshold that triggers both the
-  retention offer under study and a separate priority-support flag.
-
 ## Discrete scores
 
 Roughly 30 or fewer distinct values: treat as discrete. Local randomization applies as-is; RD
@@ -78,16 +68,14 @@ kernel). A fuzzy design with a discrete score goes to local randomization or to 
 (2024). Marketing norm, not exception: weeks of tenure, order counts, months
 since signup, integer spend tiers.
 
-## Estimation defaults and their citations
+## Polynomial order: the Mixtape numbers
 
-- Local linear (p=1), triangular kernel, MSE-optimal bandwidth, RBC intervals: the consensus
-  recipe. p=2 and uniform kernel as robustness. Data-driven polynomial-order choice exists
-  (Pei-Lee-Card-Weber).
-- CE-optimal bandwidth when the interval is the object; separate left/right bandwidths when
-  curvature differs (Arai-Ichimura); clustered variants exist.
-- The 95-to-80 percent coverage fact is the one-line justification for RBC.
-- Simple RBC implementation detail: inference at polynomial order p+1 with the MSE-optimal
-  bandwidth for order p.
+The underfitting example behind SKILL.md's polynomial-order rule: the Mixtape's cubic
+simulation with a true zero effect makes it vivid (online ch. 6 sec. 6.3, Table 6.1):
+-176,368.30 from a linear fit and 61,866.33 from a quadratic against 1.14 from the cubic.
+How h_MSE grows with p: in the Mixtape's Table 6.8 (online ch. 6 sec. 6.6) the left bandwidth
+goes 0.020, 0.033, 0.038 and the effective N 13,794, 16,774, 17,545 as the fit goes from no
+polynomial term to BAC to BAC and BAC-squared.
 
 ## Extrapolation menu (claims away from the cutoff need one of these)
 
@@ -107,30 +95,36 @@ cutoff.
 The long form of the recognition table in SKILL.md. Cunningham, The Mixtape, online ch. 6 works
 four of the six: Card-Dobkin-Maestas (sec. 6.5), Hansen (sec. 6.6), Almond and Barreca
 (sec. 6.4), and Lee-Moretti-Butler (sec. 6.4). Hoekstra gets the take-up point in sec. 6.7, and
-Black gets one historical sentence in sec. 6.1.
+Black gets one historical sentence in sec. 6.1. Bib keys (Crossref-verified and merged into
+causal.bib 2026-08-26) follow each venue in parentheses.
 
-- Card, Dobkin, and Maestas 2008 (AER 98(5)), Medicare at 65. The compound-treatment discipline.
-  Retirement also happens at 65, so the authors brought in a third dataset on the same running
-  variable (the pooled March CPS 1996-2004, pp. 2247-2248) and showed employment does not jump
-  there. That is the move when the confounder you need to rule out is absent from your own data.
-- Hansen 2015 (AER 105(4)), the 0.08 BAC threshold for a DUI charge in Washington State. The
-  end-to-end workflow: histogram, density test, covariate balance as both table and figure,
-  linear and quadratic outcome plots, then rdrobust. The score is measured by the arresting
-  agency with a breathalyzer, which is what makes it resistant to manipulation.
-- Almond, Doyle, Kowalski, and Williams 2010 (QJE 125(2)) with Barreca, Guldi, Lindo, and
-  Waddell 2011 (QJE 126(4)) and Barreca, Lindo, and Waddell 2016 (Economic Inquiry 54(1)), the
-  1500-gram very-low-birth-weight cutoff. The one published RD the
+- Card, Dobkin, and Maestas 2008 (AER 98(5); `card2008impact`), Medicare at 65. The
+  compound-treatment discipline. Retirement also happens at 65, so the authors brought in a
+  third dataset on the same running variable (the pooled March CPS 1996-2004, pp. 2247-2248)
+  and showed employment does not jump there. That is the move when the confounder you need to
+  rule out is absent from your own data.
+- Hansen 2015 (AER 105(4); `hansen2015punishment`), the 0.08 BAC threshold for a DUI charge
+  in Washington State. The end-to-end workflow: histogram, density test, covariate balance as
+  both table and figure, linear and quadratic outcome plots, then rdrobust. The score is
+  measured by the arresting agency with a breathalyzer, which is what makes it resistant to
+  manipulation.
+- Almond, Doyle, Kowalski, and Williams 2010 (QJE 125(2); `almond2010estimating`) with Barreca,
+  Guldi, Lindo, and Waddell 2011 (QJE 126(4); `barreca2011saving`, the donut-hole re-estimate)
+  and Barreca, Lindo, and Waddell 2016 (Economic Inquiry 54(1); `barreca2016heaping`, the
+  heaping methodology), the 1500-gram very-low-birth-weight cutoff. The one published RD the
   chapter overturns. The density test found no sorting, heaping at round gram values biased the
   estimate anyway, and the donut cut the one-year mortality effect by about half while dropping
   2 percent of the sample.
-- Lee, Moretti, and Butler 2004 (QJE 119(3)), US House Democratic vote share at 50 percent. The
-  covariate-balance exhibit: predetermined district characteristics as bin means across the
-  cutoff, one panel each.
-- Hoekstra 2009 (REStat 91(4)), flagship-university admission test score. The take-up plot as the
-  gate before estimation. He shows the jump in the probability of attending before he shows
-  anything about earnings (Figure 1, enrollment, before Figure 2, log earnings; pp. 720-721).
-- Black 1999 (QJE 114(2)), school-district zoning boundaries. The origin of the spatial RD, and
-  the precedent behind the DMA-border translation below, which otherwise cites nobody.
+- Lee, Moretti, and Butler 2004 (QJE 119(3); `lee2004voters`), US House Democratic vote share
+  at 50 percent. The covariate-balance exhibit: predetermined district characteristics as bin
+  means across the cutoff, one panel each.
+- Hoekstra 2009 (REStat 91(4); `hoekstra2009effect`), flagship-university admission test
+  score. The take-up plot as the gate before estimation. He shows the jump in the probability
+  of attending before he shows anything about earnings (Figure 1, enrollment, before Figure 2,
+  log earnings; pp. 720-721).
+- Black 1999 (QJE 114(2); `black1999schools`), school-district zoning boundaries. The origin
+  of the spatial RD, and the precedent behind the DMA-border translation below, which
+  otherwise cites nobody.
 
 ## Marketing translations (from the medical guide, adapted)
 
