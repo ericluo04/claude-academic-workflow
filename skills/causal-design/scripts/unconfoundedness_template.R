@@ -1,32 +1,15 @@
-# Selection-on-observables template (the branch causal-design owns). Every call verified
-# against package documentation and source on 2026-07-28 (grf 2.6.1, policytree 1.2.4,
-# sensemakr 0.1.6, WeightIt 1.7.0, marginaleffects 0.32.0). Adapt and run section by
-# section.
-#
-# API traps verified against docs/source:
-#   - sensemakr looks the treatment up by COEFFICIENT NAME: a factor treatment fails with
-#     "Variables not found in model" (undocumented; source check_covariates). Code the
-#     treatment as numeric 0/1. kd defaults to 1; pass kd = 1:3 explicitly for the
-#     standard 1x/2x/3x benchmark table.
-#   - WeightIt: estimand = "ATO" is valid for method = "glm" (binary and multi-category)
-#     but NOT for every method; re-check ?method_<name> if you swap methods. The
-#     recommended downstream is now lm_weightit()/glm_weightit() (M-estimation SEs that
-#     account for the weights being ESTIMATED) + marginaleffects::avg_comparisons();
-#     plain lm + vcovCL treats weights as fixed.
-#   - policytree double_robust_scores returns N x d with columns = actions IN ORDER:
-#     column 1 = control, column 2 = treated; predict() returns that column index
-#     (1 = assign control, 2 = assign treated), not a 0/1 treatment.
-#   - grf: cluster-robust ATE standard errors come from passing clusters= AT FIT TIME
-#     (DR scores are aggregated by cluster downstream); there is no cluster argument in
-#     average_treatment_effect(). rank_average_treatment_effect() priorities must come
-#     from a forest trained on a held-out split, or the RATE is spuriously inflated.
+# Selection-on-observables template (the branch causal-design owns). Adapt and run
+# section by section. Ran end to end on simulated data on 2026-10-08 under the versions
+# listed in ../references/details.md (package index), which also carries the API traps
+# for every package used here. Version pins live only in that index and in
+# ../references/packages.md (grf, marginaleffects, and the other shared packages).
 
-library(grf)             # 2.6.1
-library(policytree)      # 1.2.4
-library(sensemakr)       # 0.1.6
-library(WeightIt)        # 1.7.0
-library(marginaleffects) # 0.32.0
-# Package index with versions, links, and traps in ../references/details.md.
+library(grf)
+library(policytree)
+library(sensemakr)
+library(WeightIt)
+library(marginaleffects)
+library(cobalt)          # balance tables after weighting (section 4)
 
 ## df: one row per unit. y outcome; d treatment CODED NUMERIC 0/1; x1..xK PRETREATMENT
 ## covariates; cl cluster id at the level treatment was ASSIGNED (drop clusters= below if
@@ -48,7 +31,10 @@ hist(cf$W.hat, xlim = c(0, 1))                 # grf's documented overlap check:
 mean(cf$W.hat < 0.10 | cf$W.hat > 0.90)        # share outside the Crump rule of thumb
 # Poor overlap, two exits, both re-declare WHO the estimate is about:
 #  (a) trim to W.hat in [0.10, 0.90] (crump2009dealing approximation of the
-#      variance-minimizing rule), refit, and report the retained population;
+#      variance-minimizing rule), refit, and report the retained population.
+#      Trimming breaks double robustness: the trimmed estimator is consistent only if
+#      the outcome model is correct (Ma, Sant'Anna, Sasaki, and Ura, arXiv 2304.08974).
+#      Prefer (b) when you do not trust the outcome model;
 #  (b) target.sample = "overlap" below (Li-Morgan-Zaslavsky ATO): no division by
 #      estimated propensities, weights concentrate on units that could get either arm.
 
@@ -66,11 +52,15 @@ tau <- predict(cf, estimate.variance = TRUE)   # $predictions = OOB CATEs;
 best_linear_projection(cf, A = X[, c("x1", "x2")])   # doubly robust CATE projection,
                                                      # HC3 SEs; the reportable summary
 # Targeting evidence needs the split discipline (priorities independent of evaluation).
-# Equal halves keep both the priority and evaluation forests adequately powered; any
-# held-out split satisfies the grf requirement:
-tr <- sample(nrow(X), nrow(X) / 2)
-cf_tr <- causal_forest(X[tr, ],  df$y[tr],  df$d[tr],  seed = 42)
-cf_ev <- causal_forest(X[-tr, ], df$y[-tr], df$d[-tr], seed = 42)
+# Equal halves keep both the priority and evaluation forests adequately powered. Split
+# by CLUSTER, not by unit: when treatment was assigned by cluster, a unit-level split puts
+# members of one cluster in both halves, so the halves are not independent and the RATE
+# standard errors are not cluster-robust. Both forests get clusters= for the same reason.
+# Unit-level assignment: split units at random and drop clusters= from both fits.
+cl_ids <- unique(df$cl)
+tr <- which(df$cl %in% sample(cl_ids, length(cl_ids) / 2))
+cf_tr <- causal_forest(X[tr, ],  df$y[tr],  df$d[tr],  clusters = df$cl[tr],  seed = 42)
+cf_ev <- causal_forest(X[-tr, ], df$y[-tr], df$d[-tr], clusters = df$cl[-tr], seed = 42)
 rank_average_treatment_effect(cf_ev,
                               priorities = predict(cf_tr, X[-tr, ])$predictions)
 # Deciding WHO to treat is policy learning (athey2021policy), not a CATE map:
@@ -82,14 +72,24 @@ predict(pt, X)                                 # against fit; deepen only if the
 
 ## ---- 4. Overlap weights with weight-aware inference (the ATO route) -------------------
 w <- weightit(d ~ x1 + x2 + x3, data = df, method = "glm", estimand = "ATO")
-fit <- lm_weightit(y ~ d * (x1 + x2 + x3), data = df, weightit = w)
+bal.tab(w, stats = c("m", "ks"), thresholds = c(m = .1))  # balance after weighting:
+                                               # report standardized mean differences
+fit <- lm_weightit(y ~ d * (x1 + x2 + x3), data = df, weightit = w,
+                   cluster = ~ cl)             # drop cluster= if assignment was by unit
 avg_comparisons(fit, variables = "d", wts = w$weights)
 # vcov = "asympt" M-estimation SEs account for the weights being estimated (the docs'
-# recommended pipeline). Fixed-weight fallback, clustered:
+# recommended pipeline); with cluster= they are also cluster-robust. Fixed-weight
+# fallback, clustered:
 #   f2 <- lm(y ~ d, data = df, weights = w$weights)
 #   lmtest::coeftest(f2, vcov = sandwich::vcovCL(f2, cluster = ~ cl))
 
 ## ---- 5. Sensitivity analysis (MANDATORY: unconfoundedness is untestable) ---------------
+# The robustness value below belongs to a linear OLS proxy with no clustering, not to the
+# forest AIPW estimate in section 2. Say so in the methods paragraph ("the robustness
+# value benchmarks a linear proxy of the AIPW specification"). The sensitivity analysis
+# for the DR estimand itself is Chernozhukov, Cinelli, Newey, Sharma, and Syrgkanis
+# ("Long Story Short", NBER w30302), implemented as sensitivity_analysis() in Python
+# DoubleML; R DoubleML 1.0.2 has no equivalent, so use it as the upgrade path.
 ols <- lm(y ~ d + x1 + x2 + x3, data = df)     # d numeric 0/1 (the sensemakr trap)
 sens <- sensemakr(model = ols, treatment = "d",
                   benchmark_covariates = "x1",  # the strongest observed confounder,
@@ -103,8 +103,5 @@ ovb_minimal_reporting(sens, format = "latex")  # the Cinelli-Hazlett reporting t
 # rosenbaum2002observational design sensitivity for matched designs.
 
 ## ---- Session ---------------------------------------------------------------------------
-# Pin: grf 2.6.1 (seed set; honesty on by default), policytree 1.2.4, sensemakr 0.1.6,
-# WeightIt 1.7.0 (keep.mparts default TRUE is what makes lm_weightit's M-estimation SEs
-# possible), marginaleffects 0.32.0 (WeightIt supported natively; grf is NOT, use grf's
-# own estimators for forest effects).
+# Versions and traps: ../references/details.md (package index). Record them here.
 sessionInfo()

@@ -15,9 +15,10 @@ family shares. The deliverable is a design
 recommendation carrying four things: the assumption that licenses it, the estimand it
 actually identifies WITH its subpopulation named, the handoff to the owning skill, and, for
 the one branch no method skill owns (selection on observables), estimation code and a methods
-paragraph. Marketing's framing throughout: randomization is the gold standard, and
-quasi-experimental work substitutes statistical rigor for design rigor (AMA); a design that
-fails its gate is a verdict, not an obstacle.
+paragraph. The skill stops at the four stop points in references/shared-rules.md (section
+"Stop points") and puts each choice to the user. Marketing's framing throughout: randomization is
+the gold standard, and quasi-experimental work substitutes statistical rigor for design rigor
+(AMA); a design that fails its gate is a verdict, not an obstacle.
 
 Refresh path: run litreview on quasi-experimental methods in marketing since the canon date,
 then propose additions to references/canon.md as flagged addenda.
@@ -43,7 +44,9 @@ then propose additions to references/canon.md as flagged addenda.
    case, question 3, not this branch; the observables branch needs probabilistic
    assignment, since a deterministic rule makes every propensity 0 or 1 and leaves no
    overlap to estimate on. Yes: the selection-on-observables branch below, owned by this
-   skill.
+   skill. A panel with pre-periods and an adoption date goes to did first, and the
+   selection-on-observables estimate is the second column of the bracketing pair (did's
+   Covariates section, the bracketing result).
 3. If unconfoundedness is not plausible, look for structure in assignment:
    - An incentive or cost shifter moves treatment with no direct path to the outcome: iv.
      It identifies the LATE for compliers only; the ATE needs substantially stronger
@@ -94,9 +97,10 @@ taxonomy (data type, frame shape, assignment mechanism; did skill):
   strict exogeneity and backfires under selection on recent shocks, and
   synthetic-control's fuller feasibility gate (pre-fit quality, T0 length, overfitting
   screens) controls the final verdict.
-- The routing result between them: under selection on lagged outcomes with autocorrelated
-  errors, DiD is inconsistent while SC is consistent (Arkhangelsky-Hirshberg, via the
-  panel survey, Arkhangelsky and Imbens 2024). The DiD-to-SC-to-SDID decision path lives
+- The routing result between them: in a two-way model where assignment depends on both the
+  permanent and the time-varying parts of past outcomes, DiD is inconsistent while SC is
+  consistent and asymptotically normal once the pre-period is long (Arkhangelsky and
+  Hirshberg 2023, arXiv 2311.13575, Section 1). The DiD-to-SC-to-SDID decision path lives
   in did and synthetic-control.
 - Data-shape fan-out when neither default fits (estimator details in synthetic-control's
   extensions map): treated outcome outside the donor convex hull: augmented DiD (Li and
@@ -135,9 +139,13 @@ constant-effects scope it assumes, and the estimators that stay out).
 ```r
 library(fixest)                     # panel: one row per unit-period, unit = the panel id
 ## Within-variation check first: units with no variation in d contribute nothing to the
-## within estimate and every FE routine drops them silently (singletons return NA here).
+## within estimate of delta. fixest keeps them in the sample, the FE count, and the R2
+## without a message, so count them here (singletons return NA).
 nv <- tapply(panel$d, panel$unit, function(z) var(z, na.rm = TRUE))
 c(no_within_variation = sum(is.na(nv) | nv == 0), units = length(nv))
+## cluster = ~unit only when the design justifies it: panel units are the sampled clusters
+## or treatment was assigned by unit (abadie2023clustering). Within-unit correlation of the
+## errors alone is not a reason; drop the argument otherwise.
 pols   <- feols(y ~ d, data = panel, cluster = ~unit)   # u_i left in the composite error
 within <- feols(y ~ d | unit, data = panel, cluster = ~unit)
 etable(pols, within)                # side by side: the gap is the unit effects at work, and
@@ -152,7 +160,9 @@ etable(pols, within)                # side by side: the gap is the unit effects 
 - Overlap before estimation, always: estimate the propensity score and look at its
   distribution by arm. Violations move the ESTIMAND, not just the estimator: trim with the
   variance-minimizing rule of Crump et al. (2009) (the 0.1/0.9 rule of thumb is its common
-  approximation) and report the retained population, or switch to overlap weights
+  approximation) and report the retained population. Trimming breaks double robustness: the
+  trimmed estimator is consistent only if the outcome model is correct (Ma, Sant'Anna, Sasaki,
+  and Ura, arXiv 2304.08974). When you do not trust the outcome model, switch to overlap weights
   e(x)(1-e(x)) (Li, Morgan, and Zaslavsky 2018), which target the population that could
   plausibly receive either treatment.
 - Estimator default: doubly robust (AIPW; Bang and Robins 2005), "the most attractive" under
@@ -183,9 +193,12 @@ etable(pols, within)                # side by side: the gap is the unit effects 
 - Estimand first, with the subpopulation named: complier, ATT, or overlap population.
 - Cluster where treatment was assigned or the sample was drawn, and say which of the two.
 - Multiplicity staged by cost: FDR to screen, resampling FWER to confirm, gatekeeping by stage.
-- Interference routes to field-experiment by structure: clustered, network, or marketplace.
+- Interference in prospective designs routes to field-experiment by structure: clustered,
+  network, or marketplace. Observational fixes live in did and synthetic-control.
 - Surrogate index for long-run outcomes, valid only if every causal path runs through it.
-- Text-role warnings at handoff (Feder). Machine-coded variables get PPI first.
+- Text-role warnings at handoff (Feder). A machine-coded variable gets its correction first:
+  PPI for a predicted outcome, DSL or Battaglia et al. 2025 for a predicted treatment or
+  covariate.
 - Mediation has no route here. Sequential ignorability is a regime no skill carries.
 
 Full argument: references/shared-rules.md.
@@ -195,7 +208,8 @@ Full argument: references/shared-rules.md.
 scripts/unconfoundedness_template.R is the runnable path for the branch this skill owns
 (overlap diagnostics and trimming, grf AIPW, CATE and policy learning, sensemakr
 sensitivity reporting), verified against package documentation. Package index with
-versions, links, and traps in references/details.md. Every other branch's code lives in
+versions, links, and traps in references/details.md, and references/packages.md for
+shared packages. Every other branch's code lives in
 the owning skill's template.
 
 ## Methods paragraph template
@@ -211,6 +225,9 @@ the owning skill's template.
 > Given [T treated units, K pre-periods], we use [method] per the data-shape criteria in
 > Li, Luo, and Pattabhiramaiah (2024). A limitation I accept: [the identifying assumption
 > this design rests on], stated where the choice is made, with its price named.
+
+Report each effect with the results sentence in references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
 Every claim traces to references/canon.md; keys live in references/causal.bib.
 
@@ -228,8 +245,9 @@ Every claim traces to references/canon.md; keys live in references/causal.bib.
 - iv: instruments, shift-share, formula instruments, leniency and examiner designs;
   weak-instrument inference.
 - Any text, image, audio, or video role in the graph carries a measurement design of its own:
-  a prediction-powered correction for machine-coded variables, an internal-state adjustment
-  where the confounder is latent, and the split-sample rule throughout.
+  a prediction-powered correction for a machine-coded outcome, DSL or Battaglia et al. 2025 for
+  a machine-coded treatment or covariate, an internal-state adjustment where the confounder is
+  latent, and the split-sample rule throughout.
 - Unknown-concept discovery and model-internals measurement are instruments, and their
   validity is argued before they enter a design.
 - Activation steering for stimuli and model-respondents (instrument choice, strength
