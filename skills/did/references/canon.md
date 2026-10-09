@@ -1,8 +1,8 @@
 # DiD canon
 
-Current as of 2026-08-26. These sources are hand-picked; nothing enters this file without
-explicit human approval. BibTeX keys point into ../../causal-design/references/causal.bib.
-Refresh: litreview on the method since the date above, results proposed as flagged addenda.
+Current as of 2026-10-09. The user picked these sources; nothing enters this file without their
+approval. BibTeX keys point into ../../causal-design/references/causal.bib. Refresh: litreview
+on the method since the date above, results proposed as flagged addenda.
 
 ## Roth, Sant'Anna, Bilinski, and Poe (2023)
 
@@ -88,20 +88,12 @@ Journal of Econometrics 232(2): 272-299. Key: `mackinnon2023cluster`.
   battery, its diagnostics, and the failure signatures.
 - Settles: there is no safe G ("In very favorable cases, inference based on CV1 and the t(G-1)
   distribution can be fairly reliable when G = 20, but in unfavorable ones it can be unreliable
-  even when G = 200 or more"; score heterogeneity, cluster-size variation, and leverage decide);
-  CV3, the cluster jackknife, is the most reliable CRVE and runs with t(G-1) as first line,
-  cheap even for huge samples; cluster at the assignment level or coarser, largest-SE rule of
-  thumb, and picking the level by test is pre-testing; cluster FEs do not remove intra-cluster
-  dependence outside pure random effects; few treated clusters is a distinct failure ("the CV1
-  standard error of this coefficient can easily be too small by a factor of five or more" at
-  G1 = 1, and CV3 helps but still fails when G1 is very small) while WCR fails the other way
-  (under-rejection, bimodal bootstrap distribution as the tell, ordinary WR bootstrap as the
-  rescue); RI-t over RI-beta under cluster-size heterogeneity, with the Section 6.2 caveat that
-  neither works well when treated clusters are systematically larger or smaller, and RI-t may
-  need a much larger G than WCR; the five concern zones (G <= 12;
-  G1 <= 6 or G - G1 <= 6; seriously unbalanced sizes; atypical treated clusters; leverage
-  concentration); reporting G, cluster sizes, leverage, partial leverage, and effective
-  clusters is part of the method.
+  even when G = 200 or more"); CV3 with t(G-1) as the first line, run beside CV1 and a WCR
+  bootstrap; few treated clusters is a distinct failure ("the CV1 standard error of this
+  coefficient can easily be too small by a factor of five or more" at G1 = 1) while WCR
+  under-rejects, with the ordinary WR bootstrap as the rescue; the five concern zones and the
+  reporting of G, cluster sizes, and leverage. The rest is in details.md, sections "Few-clusters
+  map" and "Few-clusters battery".
 - Binds when: any clustered inference on a CRVE; choosing the clustering level; any of the five
   concern zones fires; before reaching for the few-clusters map.
 - Implement: Stata boottest, summclust, edfreg, randcmd (the paper's own stack); in R,
@@ -128,15 +120,11 @@ Quantitative Marketing and Economics 24: article 10. Key: `winkler2026tiktok`.
 - Settles: three estimands (typical-unit % = ΔΔE[log Y], population-total % = ΔΔ log E[Y],
   level = ΔΔE[Y]) that differ in sign on the same clean design (log OLS +0.0063, PPML -0.0310,
   weighted log OLS -0.0286); estimand from the question, then estimator; PPML as the default
-  for population-total % under heavy tails, consistent for any nonnegative Y with
-  equidispersion an efficiency condition only; implicit weighting as a separate estimand
-  choice (Solon-Haider-Wooldridge); the second log-OLS failure (treatment-induced Var(log Y)
-  shift, the cumulant expansion in fn. 18, the Ciani-Fisher squared-residual diagnostic, a
-  calibrated simulation with a spurious positive under a true null); levels TWFE sign-unstable
-  under proportional growth with baseline gaps; matching on baseline as a special case, not a
-  general fix; the SDID caveat; concentration diagnostics (Lorenz, Gini, top-decile share)
-  before anything; PT stated on a named scale; interference can belong to the estimand under
-  share-based payouts.
+  for population-total % under heavy tails; implicit weighting as a separate estimand choice
+  (Solon-Haider-Wooldridge); the Var(log Y) shift and the Ciani-Fisher diagnostic; levels TWFE
+  sign-unstable under proportional growth with baseline gaps, matching as a special case, and
+  the SDID caveat; PT stated on a named scale. The mechanics are in details.md, section
+  "Estimand and estimator under heavy tails".
 - Binds when: the outcome is revenue, streams, sales, views, engagement, or anything
   heavy-tailed; a log outcome is proposed; levels and logs disagree; a referee asks for
   "functional-form robustness".
@@ -154,21 +142,13 @@ AEA Papers and Proceedings 116: 75-80. Key: `wooldridge2026nonlinear`.
 - Role: the nonlinear recipe for repeated cross sections, extending Wooldridge (2023,
   `wooldridge2023simple`) from panels; the repeated-cross-section case of the estimator etwfe
   and jwdid implement (both predate the paper and coincide with it once unit FEs are dropped).
-- Settles: PT on the index G^{-1}(E[Y_t(∞) | D, X_t]) (log odds under logit, log mean under
-  the exponential mean) with the explicit statement that CS, BJS, and DNWZ state PT in levels,
-  and that index PT holds in levels only under no selection (β_g = η_g = 0) or a stationarity
-  restriction; one pooled QMLE in the LEF with the canonical link on all observations, cohort
-  dummies in place of unit FEs, covariates centered within cohort-period cells and interacted
-  with cohort, time, and treatment; robustness to distributional misspecification (only the
-  conditional mean must be right); pooled QMLE equals imputation under canonical links and
-  avoids the two-step SE problem; ATT(g,t) as APEs of the binary treatment dummy, aggregated
-  by exposure time with N_gt weights; the PT-diagnostic event study on the index scale, not
-  the mean; lags-only and leads-and-lags both reported, unrankable on bias or efficiency;
-  cohort-specific trends as a contamination-free pretest when covariates enter flexibly, at a
-  precision cost; collapse thin cohort cells to exposure-time or constant effects so the
-  inference can be trusted; cluster at the assignment level (AAIW) even under independent
-  sampling, and at the sampling cluster under cluster sampling; a never-treated group is
-  assumed, relaxable per Wooldridge (2023).
+- Settles: PT on the index G^{-1}(E[Y_t(∞) | D, X_t]), which holds in levels only under no
+  selection or a stationarity restriction, while CS, BJS, and DNWZ state PT in levels; one
+  pooled QMLE with the canonical link, cohort dummies in place of unit FEs, and covariates
+  centered within cohort-period cells; pooled QMLE equals imputation under canonical links; the
+  PT-diagnostic event study on the index scale, with lags-only and leads-and-lags both reported;
+  collapse thin cohort cells; cluster at the assignment level (AAIW). The recipe is in
+  details.md, section "Nonlinear DiD with repeated cross sections".
 - Binds when: the outcome is binary, fractional, or a count; units are seen once (surveys,
   trackers, transactions); staggered adoption in a repeated cross section; a linear
   probability DiD is on the table (he compares logit against a DNWZ-style LPM).
@@ -324,25 +304,31 @@ NBER abstract page on that date:
 
 ## Exemplar rows
 
-The recognition table's canonical cases. New keys were Crossref-verified and merged into causal.bib 2026-08-26. One
-line each, with the design shape the case is the precedent for.
+The recognition table's canonical cases and what each one teaches. New keys were
+Crossref-verified and merged into causal.bib 2026-08-26. Baker et al. (2026) and Winkler et al.
+(2026) have their own canon sections above.
 
-- Miller, Johnson, and Wherry 2021 (`miller2021medicaid`), the never-treated comparison with the
-  full evidence battery, and the model of a complete DiD paper: bite three ways, event studies, a
-  same-outcome-alternative-group falsification, and a mechanism.
-- Braghieri, Levy, and Makarin 2022 (`braghieri2022social`), the staggered rollout across
-  institutions with adoption dates rebuilt from an archive, TheFacebook by way of the Wayback
-  Machine.
-- Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna 2026 (`baker2026did`), forward
-  engineering from estimand to estimator, with the Medicaid application as the working template.
-  Key already resolves in causal.bib, and the paper has its own canon section above.
-- Winkler, Hotz-Behofsits, Wlomert, Papies, and Liaukonyte 2026 (`winkler2026tiktok`), estimand
-  first on a heavy-tailed outcome, the UMG-TikTok withdrawal. Key already resolves in causal.bib,
-  and the paper has its own canon section above.
-- Hong 2013 (`hong2013napster`), compositional change in repeated cross-sections, Napster and
-  music spending in the Consumer Expenditure Survey. Key merged into causal.bib with the Mixtape
-  gap-analysis batch.
-- Gruber 1994 (`gruber1994incidence`), triple differences, and the origin of the design, with the
-  ineligible group sitting inside the same treated states.
-- Card and Krueger 1994 (`card1994minimum`), the idea rather than the inference: the DiD
-  exemplar and the bite figure, but G = 2 with one treated cluster, so not an inference template.
+- Miller, Johnson, and Wherry (2021) `miller2021medicaid`, ACA Medicaid expansion and
+  near-elderly mortality. The Mixtape's model of a complete DiD paper (Cunningham, The Mixtape,
+  online ch. 9 sec. 9.7): bite shown three ways (eligibility, enrollment, and the share
+  uninsured, the last of which shows some enrollment came from people with no coverage at all),
+  event studies, a same-outcome-alternative-group falsification on the 65-and-over population,
+  main results (0.13pp, 9.3% of the sample mean; these two numbers are not on the Mixtape site
+  and are unconfirmed against the paper), and a mechanism. Never-treated comparison states.
+- Braghieri, Levy, and Makarin (2022) `braghieri2022social`, the staggered rollout of
+  TheFacebook across colleges and student mental health. The staggered exemplar: treatment dates
+  built from the Wayback Machine (the platform announced each new school on its front page) and
+  linked to an existing repeated-cross-section student survey, with the outcome z-scored so
+  effects read in standard deviations. Also the Mixtape's instance of the multi-estimator plot
+  it argues against (Cunningham, The Mixtape, online ch. 10 sec. 10.13, Figure 10.13).
+- Hong (2013) `hong2013napster`, Napster and music spending in the Consumer Expenditure Survey.
+  Compositional change in a repeated cross-section: internet users got older, poorer, and less
+  likely to hold a college degree between 1997 and 2000, and those covariates predict Y(0), so
+  who is sampled breaks parallel trends without anyone being mistreated.
+- Gruber (1994) `gruber1994incidence`, state-mandated maternity benefits. The origin of triple
+  differences, with the ineligible group (single men aged 20-40 and older workers) inside the
+  same states.
+- Card and Krueger (1994) `card1994minimum`, NJ versus PA fast food. The exemplar of the DiD
+  idea, the bite figure (mass at the new minimum), and primary data the authors collected twice
+  themselves. Not an inference template: at the assignment level it is G = 2 with one treated
+  cluster.

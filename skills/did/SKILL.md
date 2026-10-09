@@ -5,20 +5,21 @@ description: Design, estimate, validate, and write up a difference-in-difference
 
 # Difference-in-differences
 
-An opinionated DiD workflow grounded in a read canon (references/canon.md, current as of
-2026-08-26). Deliverable: the recommendation with its citation, the R estimation and diagnostics
+An opinionated DiD workflow grounded in a read canon (references/canon.md).
+Deliverable: the recommendation with its citation, the R estimation and diagnostics
 code, and a methods paragraph. The skill stops at the four stop points in
 ../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user.
 Where the literature is unsettled the skill names a default and the condition that moves you off
 it, and where the canon genuinely disagrees it says so instead of faking consensus.
 
-Refresh path: run litreview on "difference-in-differences" since the canon date, then propose
-additions to references/canon.md as flagged addenda.
+Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 
 ## Exemplar designs
 
 Seven shapes worth recognizing on sight. Find the one your data looks like before writing a
-specification; what each one teaches is in references/details.md.
+specification; what each one teaches is in references/canon.md, section "Exemplar rows".
 
 | Design shape | Canonical case | Marketing analogue | What kills it |
 |---|---|---|---|
@@ -60,21 +61,20 @@ literature:
 Two exits from DiD entirely, both routed to the synthetic-control skill: only one or a handful
 of treated units, or selection on lagged outcomes with autocorrelated errors, where DiD is
 inconsistent even as pre-periods grow while SC is consistent (Arkhangelsky and Hirshberg 2023,
-arXiv 2311.13575; Section 7.3.4 of the Arkhangelsky and Imbens 2024 survey relays it).
-Synthetic DiD also lives there. A few treated aggregate units with staggered timing go to
-synthetic-control, which tries scpi first (Cattaneo, Feng, Palomba, and Titiunik 2025,
-`cattaneo2025uncertainty`, for the intervals; `cattaneo2025scpi` for the package) or
-stagsynth (Cao, Lu, and Wu 2026, `cao2026synthetic`). Few treated aggregate UNITS with failed
-pretrends exit to synthetic-control; few treated CLUSTERS of micro units with plausible
-parallel trends stay here
-on the few-clusters inference map (references/details.md), down to two treated clusters. With
-one treated cluster, the cluster-level methods fail: CV1, CV3, and the wild cluster bootstrap.
-Prefer synthetic-control, after aggregating the micro units to the treated unit, or Fallback B,
-the cluster-level Fisher randomization test. When neither is feasible, use one of the two
-rescues on the map: Ferman-Pinto, under its heteroskedasticity restriction, or the ordinary
-wild restricted bootstrap with observation-level weights. If treatment timing is quasi-random,
-DiD is valid but inefficient. Use the efficient random-timing estimators of Roth and Sant'Anna
-(2023, `roth2023efficient`), in the R package staggered.
+arXiv 2311.13575; Section 7.3.4 of the Arkhangelsky and Imbens 2024 survey relays it). A few
+treated aggregate units with staggered timing go to synthetic-control, which tries scpi first
+(Cattaneo, Feng, Palomba, and Titiunik 2025, `cattaneo2025uncertainty`, for the intervals;
+`cattaneo2025scpi` for the package) or stagsynth (Cao, Lu, and Wu 2026, `cao2026synthetic`). Few
+treated aggregate UNITS with failed pretrends exit to synthetic-control; few treated CLUSTERS of
+micro units with plausible parallel trends stay here on the few-clusters inference map
+(references/details.md), down to two treated clusters. With one treated cluster, the
+cluster-level methods fail: CV1, CV3, and the wild cluster bootstrap. Prefer synthetic-control,
+after aggregating the micro units to the treated unit, or Fallback B, the cluster-level Fisher
+randomization test. When neither is feasible, use one of the two rescues on the map:
+Ferman-Pinto, under its heteroskedasticity restriction, or the ordinary wild restricted
+bootstrap with observation-level weights. If treatment timing is quasi-random, DiD is valid but
+inefficient. Use the efficient random-timing estimators of Roth and Sant'Anna (2023,
+`roth2023efficient`), in the R package staggered.
 
 Refusal list. In five cases the skill declines the design and routes back to causal-design. A
 failed gate is a verdict.
@@ -89,21 +89,35 @@ failed gate is a verdict.
 5. Parallel trends fails on every candidate scale (levels, logs, the nonlinear index), and the
    synthetic-control exit is infeasible (no credible donors, short pre-period).
 
+## The design stage, before you look at the outcome
+
+In order, each finished before the next. Nothing before the last step needs the outcome, and
+that deferral is the discipline (Rubin 2008, `rubin2008objective`: design trumps analysis).
+
+1. Write the target parameter in potential outcomes: which population, which weights.
+2. Count units per cohort, including never-treated and always-treated, with cohort shares. A
+   cohort holding a sixth of the treated units dominates every aggregation, and always-treated
+   units have to be found and dropped before anything else runs.
+3. Plot the treatment rollout, unit by period (`panelView`, Mou, Liu, and Xu 2023).
+4. Choose the control group and commit before results exist. The more random the assignment, the
+   less the choice matters; the less random, the more selection drives it.
+5. Choose unconditional or conditional parallel trends.
+6. Check covariate balance and overlap.
+7. Only now plot average outcomes by cohort.
+
 ## Assumptions and treatment dating
 
 Parallel trends is the assumption this skill argues about. Two others get stated and forgotten,
 and both fail silently.
 
 No anticipation: the treated group's outcome is Y(0) until treatment happens. An already-treated
-baseline attenuates the estimate and nothing in the diagnostics battery flags it. In the
-Mixtape's simulation (Cunningham, The Mixtape, online ch. 9 sec. 9.3, Table 9.11) a
-contaminated baseline returns 0.017 against a true ATT of 10 under constant effects. It returns
-15.017 against a true 20 under dynamic effects. Make the baseline clean. When announcement
-precedes enforcement and behavior
-can respond (pre-announced price changes, regulatory effective dates published
-months ahead), date treatment to the announcement and state the two prices: the
-ATT now averages over a longer post window including announced-but-unenforced periods, and
-parallel trends is now stated against a different baseline.
+baseline attenuates the estimate and nothing in the diagnostics battery flags it. The Mixtape's
+simulation numbers are in references/details.md, section "Anticipation: the Mixtape simulation".
+Make the baseline clean. When announcement precedes enforcement and behavior can respond
+(pre-announced price changes, regulatory effective dates published months ahead), date treatment
+to the announcement and state the two prices: the ATT now averages over a longer post window
+including announced-but-unenforced periods, and parallel trends is now stated against a
+different baseline.
 
 SUTVA: no interference between units, and the treatment is the same thing for every treated
 unit. Panel threats are spillover to adjacent control markets, substitution across one firm's
@@ -201,51 +215,19 @@ treated, `y ~ treat | unit + period` is a DiD and the assumption is parallel tre
 treatment that varies within unit over time and no comparison group at all, the identical
 regression is the within estimator and the assumption is strict exogeneity conditional on the
 unit effect, non-nested with parallel trends and failing differently (feedback from past
-outcomes to current treatment). The Mixtape calls within, fixed effects, and two-way fixed
-effects *"the same thing"* (Cunningham, The Mixtape, online ch. 8 sec. 8.1). Section 9.2 adds
-that DiD and TWFE were long *"thought to be the same thing"*. That is true as algebra and false
-as design. Route the second case
-to causal-design's plain-panel-fixed-effects section; nothing below applies to it. For a binary
-treatment that switches on and off, plain FE applies when all units switch together, so no
-period has both treated and untreated units. Otherwise the treatment stays here, on the dCDH
-route (section "Beyond the absorbing binary treatment").
+outcomes to current treatment). Route the second case to causal-design's
+plain-panel-fixed-effects section; nothing below applies to it. For a binary treatment that
+switches on and off, plain FE applies when all units switch together, so no period has both
+treated and untreated units. Otherwise the treatment stays here, on the dCDH route (section
+"Beyond the absorbing binary treatment").
 
-For the first case the canon disagrees, and the skill's position is a default with named dissent:
-
-- Baker et al. (2026): TWFE under staggered adoption has "well-understood, potentially serious,
-  and easily remedied problems, and we do not recommend using it."
-- Arkhangelsky and Imbens (2024): "we recommend against the current routine use of the standard
-  TWFE estimator or related estimators," though under block assignment TWFE still estimates the
-  ATT, and they think negative-weight concerns "have perhaps been exaggerated."
-- Abadie, Angrist, Frandsen, and Pischke (2025): the pathologies "are unlikely to derail DD or
-  event-study designs in practice"; in the divorce data BJS and TWFE match. Their prescription
-  is TWFE event studies with BJS as a check.
+For the first case the canon disagrees, and the skill's position is a default with named dissent
+(the dissent, the Goodman-Bacon weights, and the rule against stacking estimators on one plot
+are in references/details.md, section "The TWFE question in full").
 
 Default here: estimate the robust estimator as the headline number and report TWFE alongside it.
 Agreement is affirmative evidence the simple model suffices (AAFP); divergence means
-heterogeneity is doing real work and the robust estimate stands. The only way to know TWFE would
-have been fine is to run the robust estimator anyway, at which point you report it (Baker et
-al.). Run the building-block heterogeneity scan (2x2 DiDs by cohort, gap, and time since
-adoption, Arkhangelsky-Imbens) rather than trusting any single robust estimator blindly.
-
-The weights do something the negative-weight framing hides. Goodman-Bacon weights combine a
-sample share and the treatment-timing variance Dbar(1 - Dbar), which peaks at 0.25 for a cohort
-treated at the panel midpoint, so TWFE upweights mid-panel cohorts and extending or truncating
-the panel moves the estimate through the weights alone. With effects that differ across units
-but not over time, TWFE identifies the variance-weighted ATT, which differs from the simple ATT
-(Goodman-Bacon 2021). That also reconciles bacondecomp's
-all-positive weights, which sit on 2x2 comparisons, with TwoWayFEWeights' negative ones, which
-sit on unit-level treatment effects: both are right, and all-positive Bacon weights do not
-license TWFE.
-
-The Mixtape rejects stacking estimators on one event-study plot: *"These estimators all
-have slightly different assumptions and should not be considered robustness checks for one
-another"* (Cunningham, The Mixtape, online ch. 10 sec. 10.13). Two practices are in play.
-Reporting TWFE beside one robust estimator is asymmetric, because TWFE is the estimator whose
-bias the exercise bounds, so agreement or divergence is
-information about heterogeneity. Stacking four heterogeneity-robust estimators is symmetric,
-they impose different PT variants and use different comparison groups, and the objection lands
-there: choose ex ante by design, and if you genuinely cannot, pre-commit to reporting all.
+heterogeneity is doing real work and the robust estimate stands.
 
 ## Event-study mechanics
 
@@ -297,100 +279,36 @@ Hard rules, mostly from Abadie, Angrist, Frandsen, and Pischke (2025):
 
 ## Pre-trends and honest sensitivity
 
-Pre-trend tests are underpowered. Roth (2022, `roth2022pretest`) calibrates simulations to
-papers in three top journals. There, linear violations that the pretest detects only 50% of the
-time can produce bias larger than the estimated effect in the extreme case. The nominal 95%
-confidence interval then covers the true effect only 24% of the time. The figure of a spurious
-significant effect about half the time is different: it comes from his stylized one-lead,
-one-lag, equal-variance example (p. 318), not from the calibration. Quote from Roth et al.
-(2023): "the lack of a significant pre-trend does not necessarily imply the validity of the
-parallel trends assumption." Also the converse (Kahn-Lang and Lang's bar mitzvah example):
-parallel pre-trends do not imply parallel post-trends.
+Pre-trend tests are underpowered, and a pass is weak, suggestive evidence that does not establish
+parallel trends (Roth 2022, `roth2022pretest`). Ghanem, Sant'Anna, and Wüthrich (2026,
+`ghanem2026when`) show that a pretest can be uninformative about PT unless selection into
+treatment meets specific restrictions. Reading a pretest therefore needs the assignment argument
+in the next section. Run the sup-t pretest and report its power (pretrends), but never let a pass
+replace the sensitivity analysis.
 
-Ghanem, Sant'Anna, and Wüthrich (2026, `ghanem2026when`) derive necessary and sufficient
-conditions for pre-trends and post-treatment trends to be parallel, with and without covariates.
-Even with no structural break, a pretest can be uninformative about parallel trends unless
-selection into treatment meets specific restrictions. Reading a pretest therefore needs an
-argument about how units selected into treatment (next section), and the pretest cannot replace
-the economic argument for PT. They flag further problems when the specification controls for
-pre-treatment values of time-varying covariates.
-
-The canon splits on pretesting itself. Roth (2022) shows conditioning on passing adds selection
-bias; AAFP's cost-benefit analysis concludes "the bias-mitigation benefits of pretesting are
-likely to outweigh the risks" and prescribes a sup-t joint test of the leads. The Mixtape is a
-third position, nearer Roth than AAFP in this skill's reading: *"event studies were always only
-falsifications. They weren't true tests"* (Cunningham, The Mixtape, online ch. 10 sec. 10.13).
-Parallel trends is untestable, and honest DiD *"is not a test of whether parallel trends is
-violated"* either (sec. 10.14). Default here: run the sup-t pretest and report it, but never
-let a pass substitute for the sensitivity analysis, and report the test's power against
-economically relevant violations
-(R package pretrends). That pretest is not a claim that parallel trends is testable. It is a
-claim that a joint test with a reported power curve is a better-calibrated version of the
-eyeball heuristic everyone runs anyway.
-
-Mandatory companion to every event study: Rambachan-Roth honest inference (HonestDiD), in one
-or both of its restrictions, a universality that is this family's own hardening of the canon's
-best-practice endorsement (cheap to run, against a low-powered pretest). Relative magnitudes
-bounds post-treatment violations by M-bar times
-the largest pre-treatment violation; use it when the worry is shocks like those already seen
-pre-treatment. Smoothness bounds deviations from a linear extrapolation of the pre-trend by M;
-use it when the worry is a smoothly evolving confound. Report the identified set, the robust CI,
-and the breakdown value at which the conclusion dies, then read it economically: robustness to
-M-bar = 2 is strong in a calm period and weak if treatment coincided with a shock larger than
-anything pre-treatment. Worked template numbers (Baker et al.): largest one-period pre-trend 4,
-identified set -2.6 +/- 4 = [-6.6, 1.4], robust CI [-11.1, 5.1].
-
-Scope of the mandate, this skill's judgment. It covers event studies on a universal baseline:
-Callaway-Sant'Anna (the template's adapter), TWFE in a common-timing design, and Sun-Abraham.
-Imputation pre-period coefficients are not comparable to CS ones (Roth 2026). For a BJS or
-Gardner headline, run HonestDiD on the CS event study of the same data and say so. The
-nonlinear etwfe event study on the index scale has no HonestDiD adapter. Report its leads in
-both the lags-only and the leads-and-lags versions, and pair them with HonestDiD on the linear
-CS fit, naming the scale of each.
-
-The template runs HonestDiD on the event study aggregated across cohorts. Liu (2025, arXiv
-2509.01829, `liu2025cohort`) shows this can mislead when pre-trends differ across cohorts,
-because the mix of cohorts changes across event times. His cohort-anchored version imposes the
-restrictions on each cohort's bias relative to its fixed initial control group. Run it as a check
-when there are many cohorts, each precisely estimated, with visibly different pre-trends.
+Mandatory companion to every event study: Rambachan-Roth honest inference (HonestDiD), this
+family's hardening of the canon's best-practice advice. Use relative magnitudes when the worry is
+shocks like those seen pre-treatment, and smoothness when it is a smoothly evolving confound.
+Report the identified set, the robust CI, and the breakdown value, and read them economically.
+Scope: event studies on a universal baseline (Callaway-Sant'Anna, common-timing TWFE,
+Sun-Abraham). For a BJS or Gardner headline, run HonestDiD on the CS event study of the same data.
+For the nonlinear etwfe event study, report both lead versions and pair them with HonestDiD on the
+linear CS fit. With many cohorts, each precisely estimated, with visibly different pre-trends,
+run the cohort-anchored version of Liu (2025, `liu2025cohort`) as a check. The full section is in
+references/details.md, section "Pre-trends and honest sensitivity in full".
 
 ## Why these units were treated
 
-Answer that before reading the pre-trend picture. The assignment mechanism is learned outside
-the dataset, from institutional detail, and it decides how the picture should be read (Ghanem,
-Sant'Anna, and Wüthrich, `ghanem2022selection`; Marx, Tamer, and Tang 2024, `marx2024parallel`).
-Five mechanisms are
-compatible with parallel trends: a common constant trend in Y(0), under which PT cannot be
-violated however units were selected; selection on baseline Y(0), but only under the martingale
-condition of Ghanem, Sant'Anna, and Wüthrich (Corollary 3.3, below); selection on fixed effects;
-selection on observables, which is conditional PT and sends you to Covariates below; and
-selection under imperfect foresight. One breaks PT: selection on realized gains, where units
-take the treatment because they correctly infer it will help them. The table in
-references/details.md separates what each does to pre-trends from what it does to PT.
-
-Selection on baseline Y(0) is the case that misleads, and whether it breaks PT depends on how
-untreated outcomes evolve. Ghanem, Sant'Anna, and Wüthrich (arXiv 2203.09001, Corollary 3.3)
-show that PT survives selection on baseline Y(0) only under a martingale condition. Their 2026
-note (AEA Papers and Proceedings 116: 64-69) covers when pre-trends should be parallel. Under
-the martingale condition, the expected next-period Y(0), given the unit effect and the baseline
-shock, equals the baseline Y(0). That is a unit-root restriction on the idiosyncratic shocks.
-When it holds, enrolling everyone below a threshold on baseline Y leaves PT intact and still
-breaks pre-trends mechanically, because the baseline is both the selection point and the omitted
-category. That manufactures a dip for the treated group at t = -1. In this case there is nothing
-to fix, and re-basing to t = -2 to make the picture look right breaks PT, which held from the
-original baseline. When Y(0) mean-reverts, the same selection rule is the Ashenfelter dip. PT
-then fails after treatment as well as before, and the dip is a real violation (see the
-Daw-Hatfield discussion below). Argue the random-walk case from the outcome's time-series
-behavior before dismissing a dip as mechanical.
-
-That collides with the HonestDiD mandate, and the resolution here is the skill's own judgment.
-Relative magnitudes bounds post-treatment violations by M-bar times the largest pre-treatment
-violation, so under a documented selection-on-baseline-outcome mechanism that satisfies the
-martingale condition above the anchor is inflated
-by an artifact of the assignment rule and the skill would otherwise drive you to call a valid
-design fragile. Prefer the smoothness restriction there, or compute the anchor from the
-pre-treatment periods excluding the selection period, and say which you did. The reverse case is
-worse: under selection on realized gains, clean pre-trends are no comfort at all.
+Answer that before reading the pre-trend picture, from institutional detail (Ghanem, Sant'Anna,
+and Wüthrich, `ghanem2022selection`; Marx, Tamer, and Tang 2024, `marx2024parallel`). Selection
+on realized gains breaks PT, and clean pre-trends are no defense. Selection on baseline Y(0)
+leaves PT intact only under the martingale condition (Corollary 3.3), a unit-root restriction on
+the shocks. Then the dip at t = -1 is mechanical: do not re-base to t = -2, and prefer the
+smoothness restriction or an anchor that excludes the selection period, and say which you did.
+When Y(0) mean-reverts, the dip is the Ashenfelter dip and a real PT violation. Argue the
+random-walk case from the outcome's time-series behavior before dismissing a dip as mechanical.
+The mechanism table is in references/details.md, section "Selection mechanisms and parallel
+trends", and the full argument in section "Why these units were treated in full".
 
 ## Covariates
 
@@ -435,96 +353,38 @@ Report both estimates and say which selection story you believe.
 
 ## Triple differences
 
-A design, not a falsification. DDD identifies the ATT when the non-parallel-trends bias of the
-main DiD equals that of the placebo-group DiD (Olden and Møen 2022). Two consequences change
-practice: the placebo DiD does not have to be zero, so a nonzero one is no reason to discard the
-design; and if it is zero the main DiD was unbiased all along, DDD was never needed, and
-presenting the placebo DiD as a same-outcome-alternative-group falsification is the stronger
-paper (Miller, Johnson, and Wherry 2021 is the Mixtape's instance; Cunningham, The Mixtape,
-online ch. 10 sec. 10.2).
-
-With common timing and no covariates, estimate it as the saturated OLS three-way interaction or
-its event-study form with group-by-year, unit-by-year, and group-by-unit fixed effects and the
-triple interaction with year dummies (both in references/details.md), clustered at the level
-treatment was applied. Once covariates or staggered adoption enter, DDD is not simply the
-difference of two DiDs and the saturated OLS is invalid (Ortiz-Villavicencio and Sant'Anna 2025,
-arXiv 2505.09942, `ortizvillavicencio2025better`; relayed by Baker et al. 2026). Pooling
-not-yet-treated units in a staggered DDD adds bias too. Use the doubly robust
-`triplediff::ddd()` and `agg_ddd()` there (template section 8c).
+DDD is a design, not a falsification, and the placebo DiD need not be zero (Olden and Møen 2022).
+Use the saturated OLS only with common timing and no covariates. Once covariates or staggered
+adoption enter, use `triplediff::ddd()` and `agg_ddd()` (Ortiz-Villavicencio and Sant'Anna 2025,
+`ortizvillavicencio2025better`; template section 8c). The full section is in
+references/details.md, section "Triple differences in full".
 
 ## Functional form and nonlinear outcomes
 
-Parallel trends generally cannot hold in both logs and levels. Roth and Sant'Anna (2023,
-`roth2023functional`) show PT is insensitive to functional form only under restrictive
-conditions. Roughly, treatment must be as good as randomly assigned, or the distribution of
-Y(0) must be stable over time, or a mix of the two must hold. Choose the transformation on
-substantive grounds and own it: "DD identification strategies are inherently
-transformation-dependent" (AAFP 2025), and "the data cannot tell you which holds" (Winkler et
-al. 2026, after Roth-Sant'Anna). State PT on a named scale: additive in E[Y] for levels OLS,
-multiplicative in the geometric mean for log OLS, multiplicative in the arithmetic mean (the
-log-link index) for PPML. Do shocks add a fixed amount or scale with baseline size? Under heavy
-tails the answer is typically scale (Winkler et al. 2026, whose argument for streams is that
-recommendation and playlist boosts multiply a song's existing reach). Carrying that to sales,
-views, and engagement counts is this skill's judgment, so state it as yours in the paper. Run the
-Roth-Sant'Anna falsification test of insensitivity to functional form when the choice is
-contestable, and plot pre-trends on both scales. Apparent transformation-robustness achieved
-through rich time-varying controls usually means the controls, not the fixed effects, are
-identifying the effect, which is regression conditioning, and some such controls are bad
-controls.
+Parallel trends generally cannot hold in both logs and levels (Roth and Sant'Anna 2023,
+`roth2023functional`). Choose the scale on substantive grounds and state PT on that named scale.
+Pick the estimand from the question, then the estimator (Winkler et al. 2026). Under heavy tails
+shocks typically scale with baseline size. Carrying that from streams to sales, views, and
+engagement is this skill's judgment, so state it as yours. The full argument, the simulations, and
+the Wooldridge recipe are in references/details.md, section "Functional form and nonlinear
+outcomes in full".
 
-Before choosing, diagnose concentration: Lorenz curve, Gini, or top-decile share of Y (in the
-TikTok data the top 10% of songs carry 76% of streams). Under heavy tails the estimator's
-implicit weighting often matters more than the transformation: log OLS weights observations equally
-so the long tail decides, levels OLS and PPML weight by size so the head decides. Explicit
-weights are a separate estimand choice and must be predetermined and tied to the target
-(Solon-Haider-Wooldridge).
-
-Default for heavy-tailed nonnegative outcomes when the question is population-total: PPML with a
-log link (`fixest::fepois`, Stata `ppmlhdfe`). It is consistent for any nonnegative Y, count or
-continuous, under a correct conditional mean (Gourieroux, Monfort, and Trognon 1984,
-`gourieroux1984pseudo`). Equidispersion matters only for efficiency (Santos Silva-Tenreyro
-2006), so pair it with cluster-robust SEs. It handles zeros
-natively. Log OLS fails twice. First, zeros: log(1+y) and asinh conclusions are unit-dependent
-(Chen-Roth), and with many zeros the typical-unit estimand is gone, so PPML is the practical choice
-even though it targets population-total. Second, variance shifts: E[log Y] = log E[Y] - Var(log
-Y)/2 - higher cumulants, so treatment that compresses Var(log Y) pushes the mean-log DiD up by
--ΔΔVar(log Y)/2, and log OLS returns a positive significant coefficient under a true null on the
-mean even with no zeros anywhere (Winkler et al. 2026, calibrated simulation). Diagnose it with the
-Ciani-Fisher regression of squared log-OLS residuals on treat x post with the fixed effects. A
-significant coefficient rules out log OLS for the population-total estimand. Weighted log OLS with
-predetermined pre-period share weights is the transparency check on PPML when Y > 0 and log
-variance is stable.
-
-Levels OLS is sign-unstable when untreated outcomes grow proportionally and treated and control
-baselines differ: the bias grows in the baseline gap and the growth rate and flips sign in a
-calibrated grid (Winkler et al. 2026). Matching on baseline levels closes the gap, which is why
-levels, logs, and PPML agree in matched samples. That agreement is a special case the design
-created, evidence about the design and never proof the specifications are interchangeable. The
-matching defense does not transport to synthetic DiD, which balances pre-period outcomes but allows
-an intercept shift, so a levels SDID inherits the same baseline-gap sensitivity.
-
-Binary and count outcomes (and fractional ones, Wooldridge 2023) get the Wooldridge nonlinear
-recipe (2023 for panels, 2026 for repeated cross sections): one pooled QMLE in the linear
-exponential family with the canonical link (Bernoulli-logit, Poisson-log; normal-identity is the
-linear special case), cohort dummies, time dummies, covariates centered within cohort-period cells
-and interacted with cohort, time, and treatment, and treatment dummies by cohort and period. PT is
-imposed on the index G^{-1}(E[Y_t(0) | D, X]), the log odds or the log mean, and Wooldridge is
-explicit that Callaway-Sant'Anna, BJS, and DNWZ state PT in levels. Index PT holds in levels only
-under no selection (cohort effects and their covariate interactions all zero) or a stationarity
-restriction, so the linear and nonlinear answers rest on different assumptions. Wooldridge
-recommends fitting both and comparing them, with a divergence read as evidence about the PT scale.
-Only the conditional mean has to be right. The estimator is robust to distributional
-misspecification, and with a canonical link pooled QMLE equals imputation without the two-step
-standard-error problem. ATT(g,t) are average partial effects of the treatment dummy on the response
-scale, aggregated by exposure time with cell-size weights. The event study used to diagnose PT is
-aggregated on the index scale (log odds, log mean), where the assumption lives. Report both the
-lags-only and the leads-and-lags versions: they have different sensitivities to PT violations and
-cannot be ranked on bias or efficiency. Cohort-specific linear trends are a contamination-free
-pre-trend test when covariates enter flexibly, at a precision cost. When a cohort cell is thin,
-collapse the cohort-by-period dummies to exposure-time dummies, or in the limit a single treatment
-indicator, and compare with the flexible aggregate. R: etwfe (`family = "poisson"` or `"logit"`,
-which makes it drop unit fixed effects and enter cohort and period as explicit dummies, then `emfx`
-for the APEs). Stata: jwdid with `method(poisson)` or `method(logit)`.
+1. Diagnose concentration first: Lorenz curve, Gini, or top-decile share of Y.
+2. Population-total estimand on a heavy-tailed nonnegative outcome: PPML with a log link
+   (`fixest::fepois`, Stata `ppmlhdfe`) and cluster-robust SEs. It is consistent under a correct
+   conditional mean (`gourieroux1984pseudo`). With many zeros use PPML too, because log(1+y) and
+   asinh conclusions are unit-dependent (Chen-Roth).
+3. A log outcome is reported: run the Ciani-Fisher variance-shift regression. A significant
+   coefficient rules out log OLS for the population-total estimand.
+4. Levels OLS is sign-unstable under proportional growth with a treated-control baseline gap.
+   Agreement across scales in a matched sample is a special case, and a levels SDID inherits the
+   gap.
+5. Binary, count, or fractional outcome: the Wooldridge nonlinear recipe, one pooled QMLE with the
+   canonical link and PT on the index scale. Fit the linear and the nonlinear model and compare
+   them as assumptions. Report the lags-only and the leads-and-lags event studies on the index
+   scale. R: etwfe. Stata: jwdid with `method(poisson)` or `method(logit)`.
+6. Contestable transformation: run the Roth-Sant'Anna falsification test and plot pre-trends on
+   both scales. Explicit weights are predetermined and tied to the target.
 
 ## Inference
 
@@ -537,16 +397,8 @@ cluster shock into the HonestDiD violation bound, or a cluster-level Fisher rand
 exact under the sharp null when timing is as good as random.
 Full argument: ../causal-design/references/shared-rules.md.
 
-Two Mixtape rules to disarm. Chapter 9 reads Card and Krueger's two-state minimum wage design off
-a t-statistic of about 2 and calls it significant (Cunningham, The Mixtape, online ch. 9 sec.
-9.4); at the assignment level that is G = 2 with one
-treated cluster, every MacKinnon-Nielsen-Webb concern zone firing at once and a CV1 standard
-error that can be too small by a factor of five or more. It is the canonical exemplar of the DiD
-idea and not a template for inference, and a modern version of it lands on the few-clusters map
-or the synthetic-control handoff. Chapter 8's rule of thumb, fewer than 30 clusters too small and
-30 to 40 probably enough (online ch. 8, footnote 5), is unsafe in both directions: CV1 can
-be reliable at G = 20 in favorable cases and unreliable at G = 200 in unfavorable ones. Run
-the battery instead of
+The Mixtape's Card-Krueger significance reading and its 30-cluster rule of thumb are both unsafe
+(references/details.md, section "Two Mixtape rules to disarm"). Run the battery instead of
 counting clusters.
 
 ## Beyond the absorbing binary treatment
@@ -560,37 +412,15 @@ counting clusters.
   coefficient is an average marginal effect, roughly kappa + 2 phi E[M], not E[tau_s]; add the
   squared-exposure interaction when heterogeneity is plausible and report both (AAFP 2025).
 - Repeated cross-sections (brand trackers, surveys, transaction data with one row per unit):
-  fine without covariates; with covariates, test compositional stability (Sant'Anna-Xu
-  Hausman-type check) before pooling. The failure is compositional change: who is sampled moves
-  with treatment timing in a way correlated with Y(0), so PT breaks with nobody mistreated (Hong
-  2013 on Napster, where internet users got older, poorer, and less likely to hold a degree as
-  the treatment spread). Two diagnostics: covariate means across periods by group, and a DiD run
-  with each strictly exogenous covariate as the outcome, where a significant interaction is
-  differential compositional drift. Hong's fix is two period-specific propensity scores, one pre
-  and one post, as inverse probability weights in a WLS DiD; Sant'Anna-Xu is the modern test.
-  Unit fixed effects are unavailable, so the Wooldridge
-  (2026) design puts cohort dummies in their place with covariates centered within
-  cohort-period cells; it covers staggered adoption and nonlinear outcomes in one pooled QMLE,
-  weights ATT(g,t) by the cell sizes N_gt when aggregating, and clusters at the assignment
-  level (census tract, DMA) even under independent sampling (AAIW). Cell sizes govern whether
-  the SEs are believable, so collapse thin cohorts to exposure-time effects. You cannot verify
-  that covariates are time-invariant when each unit is seen once. Say so.
+  fine without covariates. The failure is compositional change: who is sampled moves with
+  treatment timing in a way correlated with Y(0) (Hong 2013). With covariates, run the Sant'Anna-Xu
+  Hausman-type test before pooling. Without unit fixed effects, use the Wooldridge (2026) design,
+  clustered at the assignment level. You cannot verify that covariates are time-invariant when each
+  unit is seen once. Say so. Full item: references/details.md, section "Repeated cross-sections
+  in full".
 
-## The design stage, before you look at the outcome
-
-In order, each finished before the next. Nothing before the last step needs the outcome, and
-that deferral is the discipline (Rubin 2008, `rubin2008objective`: design trumps analysis).
-
-1. Write the target parameter in potential outcomes: which population, which weights.
-2. Count units per cohort, including never-treated and always-treated, with cohort shares. A
-   cohort holding a sixth of the treated units dominates every aggregation, and always-treated
-   units have to be found and dropped before anything else runs.
-3. Plot the treatment rollout, unit by period (`panelView`, Mou, Liu, and Xu 2023).
-4. Choose the control group and commit before results exist. The more random the assignment, the
-   less the choice matters; the less random, the more selection drives it.
-5. Choose unconditional or conditional parallel trends.
-6. Check covariate balance and overlap.
-7. Only now plot average outcomes by cohort.
+The full items are in references/details.md, section "Beyond the absorbing binary treatment in
+full".
 
 ## Diagnostics battery
 
@@ -619,32 +449,15 @@ pattern, and 11 runs before any of the rest:
     is reported; the Roth-Sant'Anna functional-form check when the transformation is
     contestable; for nonlinear models, the event study on the index scale.
 11. Bite: evidence that the treatment changed the thing it was supposed to change.
-12. Falsifications, both families, read by the rule below.
+12. Falsifications, both families, read by the rule in references/details.md, section
+    "The evidence battery".
 13. Mechanism: why the effect happened, and evidence consistent with that story.
 
-## The evidence battery
-
-Bite comes first in time and is the cheapest thing in this file. Before estimating effects on the
-outcome you care about, show the treatment changed what it was supposed to change: take-up,
-exposure, eligibility, enrollment, price paid, impressions delivered. With no first stage there
-is no reason to expect a reduced form, and the project can die here before the expensive
-machinery runs. Snow tested the salt content of tap water himself when households did not know
-their supplier: measure the treatment yourself and do not trust the merge.
-
-Falsification has two families, the same outcome on an alternative group your treatment cannot
-have touched and the same group on an alternative outcome your treatment cannot move. Read a
-null as suggestive evidence for parallel trends, of the same evidentiary class as a clean
-pre-trend; a rejection does not prove the main result spurious, it revives a rival explanation
-you now have to answer. Mechanism is the third item: say why the effect happened and show
-something consistent with it.
-
-Falsifications and event studies answer different questions. The Mixtape (Cunningham, The
-Mixtape, online ch. 9 sec. 9.6) calls both suggestive evidence and ranks neither higher.
-Section 9.8 adds only that falsifications *"might be more valuable"* when selection on
-baseline Y(0) breaks the pre-trends.
-The event study plus HonestDiD bounds how
-large a PT violation the conclusion survives; a falsification tests whether one named rival
-explanation makes a prediction that fails. Run both.
+Bite comes first in time. A falsification null is weak, suggestive evidence of the same class as
+a clean pre-trend, and a pretest pass can be uninformative about PT (Ghanem, Sant'Anna, and
+Wüthrich 2026). A rejection revives a rival explanation without proving the main result
+spurious. Run falsifications and the event study with HonestDiD both, since they answer
+different questions.
 
 ## R implementation
 
@@ -691,14 +504,8 @@ ll <- etwfe(fml = y ~ 0, tvar = period, gvar = first_treated, data = df,
 emfx(ll, type = "event", predict = "link")     # leads and lags on the index scale
 ```
 
-etwfe takes as never-treated any cohort value above max(period), else below min(period), so
-the did-style 0 works when periods start at 1. With `cgroup = "never"` an in-range value
-errors. Leads exist only under `cgroup = "never"` (`"notyet"` sets them to zero mechanically,
-and `post_only` is read only for `"notyet"` fits). etwfe demeans controls by cohort, the
-Wooldridge 2023 panel form; the 2026 cohort-period centering changes only the raw index
-coefficients, never the ATTs. Above 500,000 rows emfx compresses to cohort-period cells
-(`compress = "auto"`), exact for `y ~ 0` and an approximation once controls enter, so set
-`compress = FALSE` then.
+etwfe's never-treated coding, its lead rules, and the `compress` trap are in references/details.md,
+section "etwfe behavior".
 
 Stata equivalents on request: csdid, did_imputation, eventstudyinteract, jwdid, honestdid, boottest
 for wild bootstrap, ppmlhdfe for PPML, and jwdid with `method(poisson|logit)` for the nonlinear
