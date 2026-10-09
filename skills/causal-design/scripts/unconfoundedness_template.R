@@ -88,7 +88,7 @@ avg_comparisons(fit, variables = "d", wts = w$weights)
 # forest AIPW estimate in section 2. Say so in the methods paragraph ("the robustness
 # value benchmarks a linear proxy of the AIPW specification"). The sensitivity analysis
 # for the DR estimand itself is Chernozhukov, Cinelli, Newey, Sharma, and Syrgkanis
-# ("Long Story Short", NBER w30302), implemented as sensitivity_analysis() in Python
+# ("Long Story Short", REStat 2026, chernozhukov2026long), implemented as sensitivity_analysis() in Python
 # DoubleML; R DoubleML 1.0.2 has no equivalent, so use it as the upgrade path.
 ols <- lm(y ~ d + x1 + x2 + x3, data = df)     # d numeric 0/1 (the sensemakr trap)
 sens <- sensemakr(model = ols, treatment = "d",
@@ -98,9 +98,9 @@ summary(sens); plot(sens)
 ovb_minimal_reporting(sens, format = "latex")  # the Cinelli-Hazlett reporting table
 # Read the verdict on the DESIGN: an estimate that flips under a confounder 1-3x as
 # strong as the best observed covariate indicts the identification, not the estimator.
-# Ladder alternatives in ../references/details.md: Manski bounds (assumption-free),
-# oster2019unobservable (state its proportional-selection and R2-target assumptions),
-# rosenbaum2002observational design sensitivity for matched designs.
+# Ladder alternatives in ../references/details.md: Manski bounds (assumption-free) and
+# Rosenbaum sensitivity bounds (rosenbaum2002observational, ch. 4) for matched designs.
+# Oster's delta is dropped (details.md).
 
 ## ---- Session ---------------------------------------------------------------------------
 # Versions and traps: ../references/details.md (package index). Record them here.

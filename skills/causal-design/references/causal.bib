@@ -3890,30 +3890,30 @@
 }
 
 % The Crossref record for this DOI registers no volume, issue, or pages, and the
-% OpenAlex record for the same DOI is empty on all three. The three lines flagged
-% below come from the Mixtape's reference list and are not resolver-verified.
+% OpenAlex record for the same DOI is empty on all three. Volume, number, and pages
+% come from the Mixtape's reference list and are not resolver-verified (unverified).
 
 @article{stevenson2018distortion,
   author  = {Stevenson, Megan T.},
   title   = {Distortion of Justice: How the Inability to Pay Bail Affects Case Outcomes},
   journal = {The Journal of Law, Economics, and Organization},
   year    = {2018},
-  volume  = {34},   % unverified
-  number  = {4},    % unverified
-  pages   = {511--542},  % unverified
+  volume  = {34},
+  number  = {4},
+  pages   = {511--542},
   doi     = {10.1093/jleo/ewy019}
 }
 
 % Crossref has no record for the 1928 book itself. Author and title are confirmed by
 % the Crossref record for Alsberg's 1930 review of it in the Journal of Political
 % Economy (10.1086/254144), which prints the byline as Philip G. Wright. Publisher
-% and year come from the Mixtape's reference list.
+% and year come from the Mixtape's reference list (unverified).
 
 @book{wright1928tariff,
   author    = {Wright, Philip G.},
   title     = {The Tariff on Animal and Vegetable Oils},
-  publisher = {The Macmillan Company},  % unverified
-  year      = {1928}   % unverified
+  publisher = {The Macmillan Company},
+  year      = {1928}
 }
 
 % "Markets:" is the JEP feature-series prefix and part of the registered title.
@@ -3935,7 +3935,7 @@
 % full title come from the Crossref record for the Survey of Anesthesiology reprint
 % (10.1097/00132586-199506000-00003). Neither resolver expands McNeil's or Newhouse's
 % given names on this article, so the initials stand. Crossref and OpenAlex both give
-% 859 as the only page.
+% 859 as the only page, so the end page is unverified.
 
 @article{mcclellan1994intensive,
   author  = {McClellan, Mark and McNeil, B. J. and Newhouse, J. P.},
@@ -3944,7 +3944,7 @@
   year    = {1994},
   volume  = {272},
   number  = {11},
-  pages   = {859},   % unverified end page; both resolvers give 859 as first and last
+  pages   = {859},
   doi     = {10.1001/jama.1994.03520110039026}
 }
 
@@ -4099,16 +4099,16 @@
 % (10.1257/aer.90.5.1397), both of which append a subtitle to this exact string. The
 % NBER working paper (10.3386/w4509) confirms the authorship with "Fast Food"
 % unhyphenated. Journal, volume, and pages come from the Mixtape's reference list and
-% are flagged below. The Mixtape gives no issue number and no resolver supplies one,
+% are unverified. The Mixtape gives no issue number and no resolver supplies one,
 % so the number field is omitted rather than guessed.
 
 @article{card1994minimum,
   author  = {Card, David and Krueger, Alan B.},
   title   = {Minimum Wages and Employment: A Case Study of the Fast-Food Industry in {New Jersey} and {Pennsylvania}},
-  journal = {American Economic Review},  % unverified
+  journal = {American Economic Review},
   year    = {1994},
-  volume  = {84},        % unverified
-  pages   = {772--793}   % unverified
+  volume  = {84},
+  pages   = {772--793}
 }
 
 @article{ferman2020cherry,
@@ -4795,4 +4795,1604 @@
   archiveprefix = {arXiv},
   primaryclass  = {econ.EM},
   url           = {https://arxiv.org/abs/2304.08974}
+}
+
+% ---- iv, tier-2 additions (2026-10-09) ----
+
+% Crossref-verified 2026-10-09 (title, authors, journal, volume, article number, April 2024).
+% Preprint arXiv:2108.13707 (v5 January 2024) carries the title "Wild Bootstrap for
+% Instrumental Variables Regressions with Weak and Few Clusters".
+@article{wang2024wild,
+  author  = {Wang, Wenjie and Zhang, Yichong},
+  title   = {Wild Bootstrap Inference for Instrumental Variables Regressions with Weak and Few Clusters},
+  journal = {Journal of Econometrics},
+  year    = {2024},
+  volume  = {241},
+  pages   = {105727},
+  doi     = {10.1016/j.jeconom.2024.105727}
+}
+
+% PREPRINT. NBER record from Crossref (May 2024); arXiv:2405.06156 v2 November 2025.
+% No journal version found 2026-10-09.
+@techreport{coulibaly2024sharp,
+  author      = {Coulibaly, Mohamed and Hsu, Yu-Chin and Mourifi{\'e}, Ismael and Wan, Yuanyuan},
+  title       = {A Sharp Test for the Judge Leniency Design},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {32456},
+  year        = {2024},
+  doi         = {10.3386/w32456},
+  note        = {arXiv:2405.06156}
+}
+
+% PREPRINT. arXiv API checked 2026-10-09: v1 May 2026, v2 July 2026; no journal version.
+@misc{sloczynski2026practical,
+  author        = {S{\l}oczy{\'n}ski, Tymon and Sun, Liyang and Uysal, S. Derya},
+  title         = {A Practical Guide to Instrumental Variables Methods with Heterogeneous Treatment Effects},
+  year          = {2026},
+  note          = {arXiv:2605.15115},
+  eprint        = {2605.15115},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  doi           = {10.48550/arXiv.2605.15115}
+}
+
+% Crossref-verified 2026-10-09 (title, authors, journal, volume, issue, pages, August 2023).
+@article{chao2023jackknife,
+  author  = {Chao, John C. and Swanson, Norman R. and Woutersen, Tiemen},
+  title   = {Jackknife Estimation of a Cluster-Sample {IV} Regression Model with Many Weak Instruments},
+  journal = {Journal of Econometrics},
+  year    = {2023},
+  volume  = {235},
+  number  = {2},
+  pages   = {1747--1769},
+  doi     = {10.1016/j.jeconom.2022.12.011}
+}
+
+% Crossref record for the NBER DOI checked 2026-10-09 (title, authors, September 2024).
+% Handbook chapter per the NBER abstract; the handbook volume is not recorded here.
+@techreport{mogstad2024instrumental,
+  author      = {Mogstad, Magne and Torgovitsky, Alexander},
+  title       = {Instrumental Variables with Unobserved Heterogeneity in Treatment Effects},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {32927},
+  year        = {2024},
+  doi         = {10.3386/w32927}
+}
+
+% PREPRINT. arXiv API checked 2026-10-09: v1 November 2020, v8 April 2026 (the year
+% follows v8). The v8 acknowledgments thank an editor and referees; no venue found.
+@misc{sloczynski2026when,
+  author        = {S{\l}oczy{\'n}ski, Tymon},
+  title         = {When Should We (Not) Interpret Linear {IV} Estimands as {LATE}?},
+  year          = {2026},
+  note          = {arXiv:2011.06695; v1 November 2020, v8 April 2026},
+  eprint        = {2011.06695},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  doi           = {10.48550/arXiv.2011.06695}
+}
+
+% PREPRINT. arXiv API checked 2026-10-09: v1 March 2026.
+@misc{ferman2026design,
+  author        = {Ferman, Bruno},
+  title         = {On the Use of Design-Based Simulations},
+  year          = {2026},
+  note          = {arXiv:2603.11381},
+  eprint        = {2603.11381},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  doi           = {10.48550/arXiv.2603.11381}
+}
+
+% UNCONFIRMED. Not in Crossref or OpenAlex 2026-10-09. Title, authors, and date
+% (2024-10-01) read from the PDF at economics.ucr.edu/repec/ucr/wpaper/202405.pdf; the
+% series number rests on that file name.
+@techreport{hahn2024econometric,
+  author      = {Hahn, Jinyong and Liao, Zhipeng and Liu, Nan and Shi, Ruoyao},
+  title       = {Econometric Inference Using {Hausman} Instruments},
+  institution = {Department of Economics, University of California, Riverside},
+  type        = {Working Paper},
+  number      = {202405},
+  year        = {2024},
+  url         = {https://economics.ucr.edu/repec/ucr/wpaper/202405.pdf}
+}
+
+% did tier 2, 2026-10-09. NBER abstract page and Crossref (10.3386/w34331, dated October 2025)
+% checked that day. Preprint.
+@techreport{deb2025aggregating,
+  author      = {Deb, Partha and Norton, Edward C. and Wooldridge, Jeffrey M. and Zabel, Jeffrey E.},
+  title       = {Aggregating Average Treatment Effects on the Treated in Difference-in-Differences Models},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {34331},
+  year        = {2025},
+  month       = {10},
+  doi         = {10.3386/w34331}
+}
+
+% did tier 2, 2026-10-09. arXiv API record checked that day: v1 2025-09-01, revised 2025-09-28.
+@misc{liu2025cohort,
+  author        = {Liu, Ziyi},
+  title         = {Cohort-Anchored Robust Inference for Event-Study with Staggered Adoption},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2509.01829},
+  eprint        = {2509.01829},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2509.01829}
+}
+
+% did tier 2, 2026-10-09. arXiv API record checked that day: v1 2026-08-04, revised 2026-09-02.
+% R package badcontrols 1.0.1 on CRAN (2026-09-12).
+@misc{caetano2026bad,
+  author        = {Caetano, Carolina and Callaway, Brantly and Payne, Stroud and {Sant'Anna}, Hugo},
+  title         = {Difference-in-Differences with ``Bad Controls''},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2608.03881},
+  eprint        = {2608.03881},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2608.03881}
+}
+
+% did tier 2, 2026-10-09. Crossref checked that day.
+@article{daw2018matching,
+  author  = {Daw, Jamie R. and Hatfield, Laura A.},
+  title   = {Matching and Regression to the Mean in Difference-in-Differences Analysis},
+  journal = {Health Services Research},
+  year    = {2018},
+  volume  = {53},
+  number  = {6},
+  pages   = {4138--4156},
+  doi     = {10.1111/1475-6773.12993}
+}
+
+% did tier 2, 2026-10-09. Crossref checked that day (online 2017, print 2018).
+@article{pustejovsky2018small,
+  author  = {Pustejovsky, James E. and Tipton, Elizabeth},
+  title   = {Small-Sample Methods for Cluster-Robust Variance Estimation and Hypothesis Testing in Fixed Effects Models},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2018},
+  volume  = {36},
+  number  = {4},
+  pages   = {672--683},
+  doi     = {10.1080/07350015.2016.1247004}
+}
+
+% did tier 2, 2026-10-09. Crossref and OpenAlex give first page 681 only. End page 700 is
+% inferred from the companion Poisson paper starting at 701 (Crossref); bibcheck should confirm.
+@article{gourieroux1984pseudo,
+  author  = {Gouri{\'e}roux, Christian and Monfort, Alain and Trognon, Alain},
+  title   = {Pseudo Maximum Likelihood Methods: Theory},
+  journal = {Econometrica},
+  year    = {1984},
+  volume  = {52},
+  number  = {3},
+  pages   = {681--700},
+  doi     = {10.2307/1913471}
+}
+
+% did tier 2, 2026-10-09. Crossref checked that day (volume dated 2025; online 2024).
+% R package cdid on CRAN.
+@article{bellego2025chained,
+  author  = {Bell{\'e}go, Christophe and Benatia, David and Dortet-Bernadet, Vincent},
+  title   = {The Chained Difference-in-Differences},
+  journal = {Journal of Econometrics},
+  year    = {2025},
+  volume  = {248},
+  pages   = {105783},
+  doi     = {10.1016/j.jeconom.2024.105783}
+}
+
+% did tier 2, 2026-10-09. Crossref checked that day. Supersedes NBER WP 31184.
+@article{dube2025local,
+  author  = {Dube, Arindrajit and Girardi, Daniele and Jord{\`a}, {\`O}scar and Taylor, Alan M.},
+  title   = {A Local Projections Approach to Difference-in-Differences},
+  journal = {Journal of Applied Econometrics},
+  year    = {2025},
+  volume  = {40},
+  number  = {7},
+  pages   = {741--758},
+  doi     = {10.1002/jae.70000}
+}
+
+% did tier 2, 2026-10-09. Crossref checked that day.
+@article{mackinnon2020randomization,
+  author  = {MacKinnon, James G. and Webb, Matthew D.},
+  title   = {Randomization Inference for Difference-in-Differences with Few Treated Clusters},
+  journal = {Journal of Econometrics},
+  year    = {2020},
+  volume  = {218},
+  number  = {2},
+  pages   = {435--450},
+  doi     = {10.1016/j.jeconom.2020.04.024}
+}
+
+% did tier 2, 2026-10-09. Crossref and OpenAlex carry no page range; 808-840 is unconfirmed
+% and bibcheck should confirm it.
+@article{rubin2008objective,
+  author  = {Rubin, Donald B.},
+  title   = {For Objective Causal Inference, Design Trumps Analysis},
+  journal = {The Annals of Applied Statistics},
+  year    = {2008},
+  volume  = {2},
+  number  = {3},
+  pages   = {808--840},
+  doi     = {10.1214/08-AOAS187}
+}
+
+% ---- unstructured data as treatment, outcome, or confounder, tier-2 additions 2026-10-09 (abstract pages read 2026-10-09) ----
+
+% PREPRINT. arXiv v1 9 October 2025, the only version; no journal ref on the page.
+@misc{tierney2025design,
+  author        = {Tierney, Graham and Katta, Srikar and Bail, Christopher and Hillygus, Sunshine and Volfovsky, Alexander},
+  title         = {A Design-based Solution for Causal Inference with Text: Can a Language Model Be Too Large?},
+  year          = {2025},
+  eprint        = {2510.08758},
+  archiveprefix = {arXiv},
+  primaryclass  = {stat.ME},
+  doi           = {10.48550/arXiv.2510.08758}
+}
+
+% PREPRINT. arXiv v1 18 August 2026, v2 1 September 2026; no journal ref.
+@misc{egami2026debiased,
+  author        = {Egami, Naoki and Shin, Sooahn},
+  title         = {Debiased Inference for {AI}-Generated Data without Gold-Standard Labels: Identification via Multiple Imperfect Measurements},
+  year          = {2026},
+  eprint        = {2608.18294},
+  archiveprefix = {arXiv},
+  primaryclass  = {stat.ME},
+  doi           = {10.48550/arXiv.2608.18294}
+}
+
+% PREPRINT. arXiv v1 10 September 2025, v2 6 October 2025; no journal ref.
+@misc{baumann2025large,
+  author        = {Baumann, Joachim and R{\"o}ttger, Paul and Urman, Aleksandra and Wendsj{\"o}, Albert and Plaza-del-Arco, Flor Miriam and Gruber, Johannes B. and Hovy, Dirk},
+  title         = {Large Language Model Hacking: Quantifying the Hidden Risks of Using {LLMs} for Text Annotation},
+  year          = {2025},
+  eprint        = {2509.08825},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  doi           = {10.48550/arXiv.2509.08825}
+}
+
+% PREPRINT. arXiv v1 16 July 2026; no journal ref.
+@misc{chew2026design,
+  author        = {Chew, Robert and Williams, Matthew R.},
+  title         = {Design-Based Supervised Learning with Noisy Human Labels},
+  year          = {2026},
+  eprint        = {2607.15455},
+  archiveprefix = {arXiv},
+  primaryclass  = {stat.ML},
+  doi           = {10.48550/arXiv.2607.15455}
+}
+
+% WORKING PAPER. Title and authors from the SMU Cox research page (2026-01-26), which calls it
+% under review. The SSRN id 5494548 comes from the 2026-10-08 audit. The bibcheck pass of
+% 2026-10-09 confirmed it: Crossref 10.2139/ssrn.5494548 gives this title, the three authors,
+% and 2025.
+@unpublished{overgoor2025mismeasuring,
+  author = {Overgoor, Gijs and Knight, Samsun and Bart, Yakov},
+  title  = {({Mis}){Measuring} the Drivers of Ad Performance},
+  year   = {2025},
+  note   = {Working paper, SSRN 5494548},
+  doi    = {10.2139/ssrn.5494548}
+}
+
+% PREPRINT. arXiv v1 2 March 2025, the only version; no journal ref.
+@misc{modarressi2025causal,
+  author        = {Modarressi, Iman and Spiess, Jann and Venugopal, Amar},
+  title         = {Causal Inference on Outcomes Learned from Text},
+  year          = {2025},
+  eprint        = {2503.00725},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  doi           = {10.48550/arXiv.2503.00725}
+}
+
+% Crossref-verified 2026-10-09 (issued July 2026). Preprint arXiv:2412.19363.
+@article{wang2026large,
+  author  = {Wang, Mengxin and Zhang, Dennis J. and Zhang, Heng},
+  title   = {Large Language Models for Market Research: A Data-Augmentation Approach},
+  journal = {Marketing Science},
+  year    = {2026},
+  volume  = {45},
+  number  = {4},
+  pages   = {728--751},
+  doi     = {10.1287/mksc.2025.0009}
+}
+
+% Crossref-verified 2026-10-09 (online 9 January 2025).
+@article{arora2025ai,
+  author  = {Arora, Neeraj and Chakraborty, Ishita and Nishimura, Yohei},
+  title   = {{AI}--Human Hybrids for Marketing Research: Leveraging Large Language Models ({LLMs}) as Collaborators},
+  journal = {Journal of Marketing},
+  year    = {2025},
+  volume  = {89},
+  number  = {2},
+  pages   = {43--70},
+  doi     = {10.1177/00222429241276529}
+}
+
+% PREPRINT. arXiv v1 29 November 2024, v7 19 January 2026 (the year follows v7); no journal ref.
+@misc{gronsbell2026another,
+  author        = {Gronsbell, Jessica and Gao, Jianhui and McCaw, Zachary R. and Shi, Yaqi and Cheng, David},
+  title         = {Another Look at Statistical Inference with Machine Learning-Imputed Data},
+  year          = {2026},
+  eprint        = {2411.19908},
+  archiveprefix = {arXiv},
+  primaryclass  = {stat.ME},
+  doi           = {10.48550/arXiv.2411.19908}
+}
+
+% JMLR listing checked 2026-10-09 via search (jmlr.org/papers/v26/24-0056). Preprint arXiv:2311.14220.
+@article{miao2025assumption,
+  author  = {Miao, Jiacheng and Miao, Xinran and Wu, Yixuan and Zhao, Jiwei and Lu, Qiongshi},
+  title   = {Assumption-Lean and Data-Adaptive Post-Prediction Inference},
+  journal = {Journal of Machine Learning Research},
+  year    = {2025},
+  volume  = {26},
+  number  = {179},
+  pages   = {1--31},
+  url     = {https://jmlr.org/papers/v26/24-0056.html}
+}
+
+% Crossref-verified 2026-10-09 (online 9 July 2025). Cited through hullman2026validating for the
+% 83 percent figure; not read.
+@article{cui2025large,
+  author  = {Cui, Ziyan and Li, Ning and Zhou, Huaikang},
+  title   = {A Large-Scale Replication of Scenario-Based Experiments in Psychology and Management Using Large Language Models},
+  journal = {Nature Computational Science},
+  year    = {2025},
+  volume  = {5},
+  number  = {8},
+  pages   = {627--634},
+  doi     = {10.1038/s43588-025-00840-7}
+}
+
+% ICML 2025 position paper per the arXiv comment (v2 5 June 2025); proceedings pages not checked.
+% Cited through hullman2026validating for the 53-study sample; not read.
+@inproceedings{anthis2025llm,
+  author        = {Anthis, Jacy Reese and Liu, Ryan and Richardson, Sean M. and Kozlowski, Austin C. and Koch, Bernard and Evans, James and Brynjolfsson, Erik and Bernstein, Michael},
+  title         = {{LLM} Social Simulations Are a Promising Research Method},
+  booktitle     = {Proceedings of the 42nd International Conference on Machine Learning (ICML)},
+  year          = {2025},
+  eprint        = {2504.02234},
+  archiveprefix = {arXiv},
+  doi           = {10.48550/arXiv.2504.02234}
+}
+
+% arXiv abstract and HTML checked 2026-10-09 (image-generator interpretability, tier 2). One version, 15 Feb 2026.
+% The PDF keyword block reads "Machine Learning, ICML"; no venue confirmed, so kept as a preprint.
+@misc{korznikov2026sanity,
+  author        = {Korznikov, Anton and Galichin, Andrey and Dontsov, Alexey and Rogov, Oleg and Oseledets, Ivan and Tutubalina, Elena},
+  title         = {Sanity Checks for Sparse Autoencoders: Do {SAEs} Beat Random Baselines?},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2602.14111},
+  eprint        = {2602.14111},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2602.14111}
+}
+
+% arXiv abstract checked 2026-10-09 (image-generator interpretability, tier 2). Comment: "Oral Presentation at ICML 2025,
+% Best Paper Award at CVPR Workshop on Visual Concepts". PMLR volume and pages not checked.
+@inproceedings{helbling2025conceptattention,
+  author        = {Helbling, Alec and Meral, Tuna Han Salih and Hoover, Ben and Yanardag, Pinar and Chau, Duen Horng},
+  title         = {{ConceptAttention}: Diffusion Transformers Learn Highly Interpretable Features},
+  booktitle     = {Proceedings of the 42nd International Conference on Machine Learning (ICML)},
+  year          = {2025},
+  note          = {Oral. arXiv:2502.04320},
+  eprint        = {2502.04320},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV}
+}
+
+% arXiv abstract and HTML checked 2026-10-09 (image-generator interpretability, tier 2). v3, 17 May 2026; no venue.
+% Code at github.com/ouns972/decoder-only-ssae.
+@misc{elharzli2026supervised,
+  author        = {El Harzli, Ouns and Wallner, Hugo and Nam, Yoonsoo and Tao, Haixuan Xavier},
+  title         = {Supervised Sparse Auto-Encoders for Interpretable and Compositional Representations},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2602.00924},
+  eprint        = {2602.00924},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2602.00924}
+}
+
+% ---- rdd tier 2 (2026-10-09) ----
+% Journal entries from Crossref records fetched 2026-10-09; preprints from arXiv abstract pages.
+@article{noack2024bias,
+  author  = {Noack, Claudia and Rothe, Christoph},
+  title   = {Bias-Aware Inference in Fuzzy Regression Discontinuity Designs},
+  journal = {Econometrica},
+  year    = {2024},
+  volume  = {92},
+  number  = {3},
+  pages   = {687--711},
+  doi     = {10.3982/ECTA19466}
+}
+
+@article{gerard2020bounds,
+  author  = {Gerard, Fran{\c{c}}ois and Rokkanen, Miikka and Rothe, Christoph},
+  title   = {Bounds on Treatment Effects in Regression Discontinuity Designs with a Manipulated Running Variable},
+  journal = {Quantitative Economics},
+  year    = {2020},
+  volume  = {11},
+  number  = {3},
+  pages   = {839--870},
+  doi     = {10.3982/QE1079}
+}
+
+@article{dong2023measurement,
+  author  = {Dong, Yingying and Koles{\'a}r, Michal},
+  title   = {When Can We Ignore Measurement Error in the Running Variable?},
+  journal = {Journal of Applied Econometrics},
+  year    = {2023},
+  volume  = {38},
+  number  = {5},
+  pages   = {735--750},
+  doi     = {10.1002/jae.2974}
+}
+
+@article{hsu2024dynamic,
+  author  = {Hsu, Yu-Chin and Shen, Shu},
+  title   = {Dynamic Regression Discontinuity under Treatment Effect Heterogeneity},
+  journal = {Quantitative Economics},
+  year    = {2024},
+  volume  = {15},
+  number  = {4},
+  pages   = {1035--1064},
+  doi     = {10.3982/QE2150}
+}
+
+@misc{calonico2025heterogeneity,
+  author        = {Calonico, Sebastian and Cattaneo, Matias D. and Farrell, Max H. and Palomba, Filippo and Titiunik, Rocio},
+  title         = {Treatment Effect Heterogeneity in Regression Discontinuity Designs},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2503.13696},
+  eprint        = {2503.13696},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2503.13696},
+  note          = {R package rdhte}
+}
+
+@misc{cattaneo2025boundary,
+  author        = {Cattaneo, Matias D. and Titiunik, Rocio and Yu, Ruiqi Rae},
+  title         = {Estimation and Inference in Boundary Discontinuity Designs: Location-Based Methods},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2505.05670},
+  eprint        = {2505.05670},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2505.05670},
+  note          = {R package rd2d}
+}
+
+@misc{ghosh2025plrd,
+  author        = {Ghosh, Aditya and Imbens, Guido and Wager, Stefan},
+  title         = {{PLRD}: Partially Linear Regression Discontinuity Inference},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2503.09907},
+  eprint        = {2503.09907},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2503.09907}
+}
+
+% synthetic-control tier 2 additions, 2026-10-09. Metadata from Crossref (journal and chapter
+% entries) or the arXiv abstract page (preprints), checked 2026-10-09.
+@incollection{abadie2025synthetic,
+  author    = {Abadie, Alberto and Vives-i-Bastida, Jaume},
+  title     = {Synthetic Controls in Action},
+  booktitle = {Advances in Economics and Econometrics: Twelfth World Congress},
+  publisher = {Cambridge University Press},
+  year      = {2025},
+  pages     = {195--224},
+  doi       = {10.1017/9781009589727.010},
+  note      = {arXiv:2203.06279}
+}
+
+% arXiv v3 is 20 May 2026; v1 is 28 April 2025, and the key keeps the v1 year.
+@misc{alvarez2025inference,
+  author        = {Alvarez, Luis and Ferman, Bruno and W{\"u}thrich, Kaspar},
+  title         = {Inference with Few Treated Units},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2504.19841},
+  eprint        = {2504.19841},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2504.19841}
+}
+
+@article{li2024two,
+  author  = {Li, Kathleen T. and Shankar, Venkatesh},
+  title   = {A Two-Step Synthetic Control Approach for Estimating Causal Effects of Marketing Events},
+  journal = {Management Science},
+  year    = {2024},
+  volume  = {70},
+  number  = {6},
+  pages   = {3734--3747},
+  doi     = {10.1287/mnsc.2023.4878}
+}
+
+@article{chernozhukov2026debiasing,
+  author  = {Chernozhukov, Victor and W{\"u}thrich, Kaspar and Zhu, Yinchu},
+  title   = {Debiasing and t-Tests for Synthetic Control Inference on Average Causal Effects},
+  journal = {Journal of Political Economy},
+  year    = {2026},
+  volume  = {134},
+  number  = {9},
+  pages   = {2740--2777},
+  doi     = {10.1086/742424}
+}
+
+% Online 2023-09-21; printed in volume 42 (2024).
+@article{bottmer2024design,
+  author  = {Bottmer, Lea and Imbens, Guido W. and Spiess, Jann and Warnick, Merrill},
+  title   = {A Design-Based Perspective on Synthetic Control Methods},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2024},
+  volume  = {42},
+  number  = {2},
+  pages   = {762--773},
+  doi     = {10.1080/07350015.2023.2238788}
+}
+
+% NBER working paper w28886 (2021, doi 10.3386/w28886); online at JRSS-B 2021-12-07.
+@article{benmichael2022synthetic,
+  author  = {Ben-Michael, Eli and Feller, Avi and Rothstein, Jesse},
+  title   = {Synthetic Controls with Staggered Adoption},
+  journal = {Journal of the Royal Statistical Society Series B: Statistical Methodology},
+  year    = {2022},
+  volume  = {84},
+  number  = {2},
+  pages   = {351--381},
+  doi     = {10.1111/rssb.12448}
+}
+
+@article{ferman2021properties,
+  author  = {Ferman, Bruno},
+  title   = {On the Properties of the Synthetic Control Estimator with Many Periods and Many Controls},
+  journal = {Journal of the American Statistical Association},
+  year    = {2021},
+  volume  = {116},
+  number  = {536},
+  pages   = {1764--1772},
+  doi     = {10.1080/01621459.2021.1965613}
+}
+
+@article{cattaneo2025scpi,
+  author  = {Cattaneo, Matias D. and Feng, Yingjie and Palomba, Filippo and Titiunik, Roc{\'i}o},
+  title   = {scpi: Uncertainty Quantification for Synthetic Control Methods},
+  journal = {Journal of Statistical Software},
+  year    = {2025},
+  volume  = {113},
+  number  = {1},
+  doi     = {10.18637/jss.v113.i01}
+}
+
+@article{cao2026synthetic,
+  author  = {Cao, Jianfei and Lu, Shirley and Wu, Hang},
+  title   = {Synthetic Control Inference for Staggered Adoption},
+  journal = {The Econometrics Journal},
+  year    = {2026},
+  volume  = {29},
+  number  = {3},
+  pages   = {323--342},
+  doi     = {10.1093/ectj/utag015}
+}
+
+% arXiv v2 is 18 June 2025; v1 is 29 March 2024, and the key keeps the v1 year.
+@misc{arkhangelsky2024sequential,
+  author        = {Arkhangelsky, Dmitry and Samkov, Aleksei},
+  title         = {Sequential Synthetic Difference in Differences},
+  year          = {2024},
+  howpublished  = {arXiv preprint arXiv:2404.00164},
+  eprint        = {2404.00164},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2404.00164}
+}
+
+% Crossref lists the article online 2026-07-21 with pages 1-39; no volume yet.
+@article{abadie2026synthetic,
+  author  = {Abadie, Alberto and Zhao, Jinglong},
+  title   = {Synthetic Controls for Experimental Design},
+  journal = {Review of Economics and Statistics},
+  year    = {2026},
+  pages   = {1--39},
+  doi     = {10.1162/rest.a.1837}
+}
+
+% ---- field-experiment tier 2 additions (2026-10-09). Each entry checked against Crossref
+% on 2026-10-09; non-Crossref fields are named in the comment above the entry.
+
+% Crossref-verified 2026-10-09; second author is Koomen (Crossref). Distinct from
+% johari2022experimental (two-sided platforms).
+@article{johari2022always,
+  author  = {Johari, Ramesh and Koomen, Pete and Pekelis, Leonid and Walsh, David},
+  title   = {Always Valid Inference: Continuous Monitoring of A/B Tests},
+  journal = {Operations Research},
+  year    = {2022},
+  volume  = {70},
+  number  = {3},
+  pages   = {1806--1821},
+  doi     = {10.1287/opre.2021.2135}
+}
+
+% Crossref-verified 2026-10-09; Crossref lists no volume, issue, or pages (online 2026-08-10).
+@article{ham2026design,
+  author  = {Ham, Dae Woong and Lindon, Michael and Tingley, Martin and Bojinov, Iavor},
+  title   = {Design-Based Confidence Sequences: A General Approach to Risk Mitigation in Panel Experiments},
+  journal = {Management Science},
+  year    = {2026},
+  doi     = {10.1287/mnsc.2024.08235}
+}
+
+% Crossref-verified 2026-10-09.
+@article{waudbysmith2024time,
+  author  = {Waudby-Smith, Ian and Arbour, David and Sinha, Ritwik and Kennedy, Edward H. and Ramdas, Aaditya},
+  title   = {Time-Uniform Central Limit Theory and Asymptotic Confidence Sequences},
+  journal = {The Annals of Statistics},
+  year    = {2024},
+  volume  = {52},
+  number  = {6},
+  pages   = {2613--2640},
+  doi     = {10.1214/24-AOS2408}
+}
+
+% Crossref-verified 2026-10-09; article number e2014602118 in place of pages.
+@article{hadad2021confidence,
+  author  = {Hadad, Vitor and Hirshberg, David A. and Zhan, Ruohan and Wager, Stefan and Athey, Susan},
+  title   = {Confidence Intervals for Policy Evaluation in Adaptive Experiments},
+  journal = {Proceedings of the National Academy of Sciences},
+  year    = {2021},
+  volume  = {118},
+  number  = {15},
+  pages   = {e2014602118},
+  doi     = {10.1073/pnas.2014602118}
+}
+
+% Crossref-verified 2026-10-09.
+@inproceedings{deng2013improving,
+  author    = {Deng, Alex and Xu, Ya and Kohavi, Ron and Walker, Toby},
+  title     = {Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data},
+  booktitle = {Proceedings of the Sixth ACM International Conference on Web Search and Data Mining},
+  year      = {2013},
+  pages     = {123--132},
+  doi       = {10.1145/2433396.2433413}
+}
+
+% Crossref-verified 2026-10-09; subtitle from arXiv 1803.06336 (Crossref title lacks it).
+@inproceedings{deng2018applying,
+  author    = {Deng, Alex and Knoblich, Ulf and Lu, Jiannan},
+  title     = {Applying the Delta Method in Metric Analytics: A Practical Guide with Novel Ideas},
+  booktitle = {Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining},
+  year      = {2018},
+  pages     = {233--242},
+  doi       = {10.1145/3219819.3219919}
+}
+
+% Crossref-verified 2026-10-09; Crossref "issued" is 2021 (online first), year is the print issue.
+@article{bai2022inference,
+  author  = {Bai, Yuehao and Romano, Joseph P. and Shaikh, Azeem M.},
+  title   = {Inference in Experiments With Matched Pairs},
+  journal = {Journal of the American Statistical Association},
+  year    = {2022},
+  volume  = {117},
+  number  = {540},
+  pages   = {1726--1737},
+  doi     = {10.1080/01621459.2021.1883437}
+}
+
+% Crossref-verified 2026-10-09; pages from the journal header on arXiv 0803.3757. Key avoids
+% freedman2008regression, which is the two-arm Advances in Applied Mathematics paper.
+@article{freedman2008several,
+  author  = {Freedman, David A.},
+  title   = {On Regression Adjustments in Experiments with Several Treatments},
+  journal = {The Annals of Applied Statistics},
+  year    = {2008},
+  volume  = {2},
+  number  = {1},
+  pages   = {176--196},
+  doi     = {10.1214/07-AOAS143}
+}
+
+% Crossref-verified 2026-10-09; Crossref "issued" is 2020 (online first), year is the print issue.
+@article{negi2021revisiting,
+  author  = {Negi, Akanksha and Wooldridge, Jeffrey M.},
+  title   = {Revisiting Regression Adjustment in Experiments with Heterogeneous Treatment Effects},
+  journal = {Econometric Reviews},
+  year    = {2021},
+  volume  = {40},
+  number  = {5},
+  pages   = {504--534},
+  doi     = {10.1080/07474938.2020.1824732}
+}
+
+% Crossref-verified 2026-10-09 (online 2024-10-08, issue 43(2) dated 2025); arXiv 2010.01800.
+% The multi-arm companion of negi2021revisiting.
+@article{negi2025robust,
+  author  = {Negi, Akanksha and Wooldridge, Jeffrey M.},
+  title   = {Robust and Efficient Estimation of Potential Outcome Means Under Random Assignment},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2025},
+  volume  = {43},
+  number  = {2},
+  pages   = {454--467},
+  doi     = {10.1080/07350015.2024.2394576}
+}
+
+% Crossref-verified 2026-10-09; pages from the journal header on arXiv 1207.5625.
+@article{morgan2012rerandomization,
+  author  = {Morgan, Kari Lock and Rubin, Donald B.},
+  title   = {Rerandomization to Improve Covariate Balance in Experiments},
+  journal = {The Annals of Statistics},
+  year    = {2012},
+  volume  = {40},
+  number  = {2},
+  pages   = {1263--1282},
+  doi     = {10.1214/12-AOS1008}
+}
+
+% Crossref-verified 2026-10-09.
+@article{li2018asymptotic,
+  author  = {Li, Xinran and Ding, Peng and Rubin, Donald B.},
+  title   = {Asymptotic Theory of Rerandomization in Treatment--Control Experiments},
+  journal = {Proceedings of the National Academy of Sciences},
+  year    = {2018},
+  volume  = {115},
+  number  = {37},
+  pages   = {9157--9162},
+  doi     = {10.1073/pnas.1808191115}
+}
+
+% Crossref-verified 2026-10-09.
+@article{su2021modelassisted,
+  author  = {Su, Fangzhou and Ding, Peng},
+  title   = {Model-Assisted Analyses of Cluster-Randomized Experiments},
+  journal = {Journal of the Royal Statistical Society Series B: Statistical Methodology},
+  year    = {2021},
+  volume  = {83},
+  number  = {5},
+  pages   = {994--1015},
+  doi     = {10.1111/rssb.12468}
+}
+
+% Crossref-verified 2026-10-09; online 2023-08-11, print March 2026.
+@article{ghanem2026testing,
+  author  = {Ghanem, Dalia and Hirshleifer, Sarojini and Ortiz-Becerra, Karen},
+  title   = {Testing Attrition Bias in Field Experiments},
+  journal = {Journal of Human Resources},
+  year    = {2026},
+  volume  = {61},
+  number  = {2},
+  pages   = {690--731},
+  doi     = {10.3368/jhr.0920-11190R2}
+}
+
+% Crossref-verified 2026-10-09.
+@article{chernozhukov2025fisher,
+  author  = {Chernozhukov, Victor and Demirer, Mert and Duflo, Esther and Fern{\'a}ndez-Val, Iv{\'a}n},
+  title   = {Fisher--Schultz Lecture: Generic Machine Learning Inference on Heterogeneous Treatment Effects in Randomized Experiments, With an Application to Immunization in India},
+  journal = {Econometrica},
+  year    = {2025},
+  volume  = {93},
+  number  = {4},
+  pages   = {1121--1164},
+  doi     = {10.3982/ECTA19303}
+}
+
+% Crossref-verified 2026-10-09 (DOI by Crossref title query); online 2024-10-11, issue 549 dated 2025.
+@article{yadlowsky2025evaluating,
+  author  = {Yadlowsky, Steve and Fleming, Scott and Shah, Nigam and Brunskill, Emma and Wager, Stefan},
+  title   = {Evaluating Treatment Prioritization Rules via Rank-Weighted Average Treatment Effects},
+  journal = {Journal of the American Statistical Association},
+  year    = {2025},
+  volume  = {120},
+  number  = {549},
+  pages   = {38--51},
+  doi     = {10.1080/01621459.2024.2393466}
+}
+
+% Crossref-verified 2026-10-09. Distinct from crump2009dealing (limited overlap).
+@article{crump2008nonparametric,
+  author  = {Crump, Richard K. and Hotz, V. Joseph and Imbens, Guido W. and Mitnik, Oscar A.},
+  title   = {Nonparametric Tests for Treatment Effect Heterogeneity},
+  journal = {Review of Economics and Statistics},
+  year    = {2008},
+  volume  = {90},
+  number  = {3},
+  pages   = {389--405},
+  doi     = {10.1162/rest.90.3.389}
+}
+
+% Crossref-verified 2026-10-09; online 2019-04-02, print 2020.
+@article{bertanha2020external,
+  author  = {Bertanha, Marinho and Imbens, Guido W.},
+  title   = {External Validity in Fuzzy Regression Discontinuity Designs},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2020},
+  volume  = {38},
+  number  = {3},
+  pages   = {593--612},
+  doi     = {10.1080/07350015.2018.1546590}
+}
+
+% Crossref-verified 2026-10-09.
+@article{baird2018optimal,
+  author  = {Baird, Sarah and Bohren, J. Aislinn and McIntosh, Craig and {\"O}zler, Berk},
+  title   = {Optimal Design of Experiments in the Presence of Interference},
+  journal = {Review of Economics and Statistics},
+  year    = {2018},
+  volume  = {100},
+  number  = {5},
+  pages   = {844--860},
+  doi     = {10.1162/rest_a_00716}
+}
+
+% Crossref-verified 2026-10-09.
+@article{johnson2017ghost,
+  author  = {Johnson, Garrett A. and Lewis, Randall A. and Nubbemeyer, Elmar I.},
+  title   = {Ghost Ads: Improving the Economics of Measuring Online Ad Effectiveness},
+  journal = {Journal of Marketing Research},
+  year    = {2017},
+  volume  = {54},
+  number  = {6},
+  pages   = {867--884},
+  doi     = {10.1509/jmr.15.0297}
+}
+
+% Crossref-verified 2026-10-09.
+@article{bojinov2023design,
+  author  = {Bojinov, Iavor and Simchi-Levi, David and Zhao, Jinglong},
+  title   = {Design and Analysis of Switchback Experiments},
+  journal = {Management Science},
+  year    = {2023},
+  volume  = {69},
+  number  = {7},
+  pages   = {3759--3777},
+  doi     = {10.1287/mnsc.2022.4583}
+}
+
+% Crossref-verified 2026-10-09.
+@article{leung2022causal,
+  author  = {Leung, Michael P.},
+  title   = {Causal Inference Under Approximate Neighborhood Interference},
+  journal = {Econometrica},
+  year    = {2022},
+  volume  = {90},
+  number  = {1},
+  pages   = {267--293},
+  doi     = {10.3982/ECTA17841}
+}
+
+% Crossref-verified 2026-10-09.
+@article{savje2021average,
+  author  = {S{\"a}vje, Fredrik and Aronow, Peter M. and Hudgens, Michael G.},
+  title   = {Average Treatment Effects in the Presence of Unknown Interference},
+  journal = {The Annals of Statistics},
+  year    = {2021},
+  volume  = {49},
+  number  = {2},
+  pages   = {673--701},
+  doi     = {10.1214/20-AOS1973}
+}
+
+% Crossref-verified 2026-10-09; author missing from Crossref, taken from the Econometric
+% Society landing page.
+@article{stoye2009more,
+  author  = {Stoye, J{\"o}rg},
+  title   = {More on Confidence Intervals for Partially Identified Parameters},
+  journal = {Econometrica},
+  year    = {2009},
+  volume  = {77},
+  number  = {4},
+  pages   = {1299--1315},
+  doi     = {10.3982/ECTA7347}
+}
+
+% ---- sparse autoencoders and model-internals measurement, tier 2 additions, 2026-10-09 (index records fetched by delegated workers) ----
+
+% PREPRINT. v1 2026-02-16, v2 2026-07-13; no venue stated.
+@misc{chanin2026synthsaebench,
+  author        = {Chanin, David and Garriga-Alonso, Adri{\`a}},
+  title         = {{SynthSAEBench}: Evaluating Sparse Autoencoders on Scalable Realistic Synthetic Data},
+  year          = {2026},
+  note          = {arXiv:2602.14687},
+  eprint        = {2602.14687},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2602.14687}
+}
+
+% Workshop poster (non-archival), icml.cc/virtual/2026/79308; arXiv v1 2026-06-10.
+@misc{gerasimov2026unstable,
+  author        = {Gerasimov, Gleb and Rusalev, Timofei and Balagansky, Nikita and Laptev, Daniil and Kurochkin, Vadim and Gavrilov, Daniil},
+  title         = {Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders},
+  year          = {2026},
+  howpublished  = {ICML 2026 Workshop on Mechanistic Interpretability, poster},
+  note          = {arXiv:2606.12138},
+  eprint        = {2606.12138},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2606.12138}
+}
+
+% Venue from the arXiv comment only ("Accepted by ICML 2026"); PMLR volume and pages unchecked.
+@inproceedings{jin2026c2r,
+  author        = {Jin, Haoran and Wang, Xiting and Ren, Shijie and Xie, Hong and Lian, Defu},
+  title         = {{C$^{2}$R}: Cross-sample Consistency Regularization Mitigates Feature Splitting and Absorption in Sparse Autoencoders},
+  booktitle     = {Proceedings of the 43rd International Conference on Machine Learning (ICML)},
+  year          = {2026},
+  note          = {arXiv:2606.30609},
+  eprint        = {2606.30609},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2606.30609}
+}
+
+% arXiv v1 2025-12-31. Workshop poster (non-archival) at the ICML 2026 Workshop on Mechanistic
+% Interpretability under the title "Iterative Distillation for Feature-Consistent Sparse Autoencoders".
+@misc{martinlinares2025attribution,
+  author        = {Martin-Linares, Cristina P. and Ling, Jonathan P.},
+  title         = {Attribution-Guided Distillation of {Matryoshka} Sparse Autoencoders},
+  year          = {2025},
+  note          = {arXiv:2512.24975},
+  eprint        = {2512.24975},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2512.24975}
+}
+
+% ICLR 2026 poster (iclr.cc/virtual/2026/poster/10009623); OpenReview forum blocked (403),
+% so the camera-ready author list is unconfirmed. Authors from arXiv v1 (2025-10-04).
+@inproceedings{wang2026higher,
+  author        = {Wang, Xu and Hu, Yan and Wang, Benyou and Zou, Difan},
+  title         = {Does Higher Interpretability Imply Better Utility? A Pairwise Analysis on Sparse Autoencoders},
+  booktitle     = {International Conference on Learning Representations (ICLR)},
+  year          = {2026},
+  url           = {https://openreview.net/forum?id=Q4ooLNOFeR},
+  note          = {arXiv:2510.03659},
+  eprint        = {2510.03659},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG}
+}
+
+@inproceedings{girrbach2026sparse,
+  author        = {Girrbach, Leander and Akata, Zeynep},
+  title         = {Sparse Autoencoders are Topic Models},
+  booktitle     = {Proceedings of the 43rd International Conference on Machine Learning},
+  series        = {Proceedings of Machine Learning Research},
+  volume        = {306},
+  pages         = {35154--35175},
+  publisher     = {PMLR},
+  year          = {2026},
+  url           = {https://proceedings.mlr.press/v306/girrbach26a.html},
+  note          = {arXiv:2511.16309},
+  eprint        = {2511.16309},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV}
+}
+
+% Workshop poster (non-archival), icml.cc/virtual/2026/80023; no arXiv version found.
+@misc{khera2026anytime,
+  author       = {Khera, Rudransh},
+  title        = {Anytime-Valid Hypothesis Testing for Sparse Autoencoder Feature Validation},
+  year         = {2026},
+  howpublished = {ICML 2026 Hypothesis Testing Workshop, poster},
+  url          = {https://icml.cc/virtual/2026/80023}
+}
+
+% PREPRINT, single version 2025-11-12. Sole author (not Khera).
+@misc{enkhbayar2025which,
+  author        = {Enkhbayar, Tsogt-Ochir},
+  title         = {Which Sparse Autoencoder Features Are Real? {Model-X} Knockoffs for False Discovery Rate Control},
+  year          = {2025},
+  note          = {arXiv:2511.11711},
+  eprint        = {2511.11711},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2511.11711}
+}
+
+% Crossref: DOI 10.1111/rssb.12489 (not 10.1093/jrsssb/qkac010, which is another paper).
+@article{wang2022false,
+  author  = {Wang, Ruodu and Ramdas, Aaditya},
+  title   = {False Discovery Rate Control with E-values},
+  journal = {Journal of the Royal Statistical Society Series B: Statistical Methodology},
+  volume  = {84},
+  number  = {3},
+  pages   = {822--852},
+  year    = {2022},
+  doi     = {10.1111/rssb.12489}
+}
+
+@article{reiss2012paradoxical,
+  author  = {Reiss, Philip T. and Schwartzman, Armin and Lu, Feihan and Huang, Lei and Proal, Erika},
+  title   = {Paradoxical Results of Adaptive False Discovery Rate Procedures in Neuroimaging Studies},
+  journal = {NeuroImage},
+  volume  = {63},
+  number  = {4},
+  pages   = {1833--1840},
+  year    = {2012},
+  doi     = {10.1016/j.neuroimage.2012.07.040}
+}
+
+% PREPRINT, v1 2026-05-12.
+@misc{deng2026qwenscope,
+  author        = {Deng, Boyi and Wang, Xu and Wang, Yaoning and Wan, Yu and Ma, Yubo and Yang, Baosong and Wei, Haoran and Tang, Jialong and Lin, Huan and Gao, Ruize and Li, Tianhao and Cao, Qian and Ren, Xuancheng and Deng, Xiaodong and Yang, An and Huang, Fei and Liu, Dayiheng and Zhou, Jingren},
+  title         = {{Qwen-Scope}: Turning Sparse Features into Development Tools for Large Language Models},
+  year          = {2026},
+  note          = {arXiv:2605.11887},
+  eprint        = {2605.11887},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  doi           = {10.48550/arXiv.2605.11887}
+}
+
+% No index record. Page 1 prints 2025-09-16; PDF created and HF repo google/gemma-scope-2
+% released December 2025.
+@techreport{mcdougall2025gemma,
+  author      = {McDougall, Callum and Conmy, Arthur and Kram{\'a}r, J{\'a}nos and Lieberum, Tom and Rajamanoharan, Senthooran and Nanda, Neel},
+  title       = {{Gemma Scope 2}: Technical Paper},
+  institution = {Google DeepMind},
+  year        = {2025},
+  month       = {12},
+  url         = {https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/gemma-scope-2-helping-the-ai-safety-community-deepen-understanding-of-complex-language-model-behavior/Gemma_Scope_2_Technical_Paper.pdf},
+  urldate     = {2026-10-09},
+  note        = {Paper dated 2025-09-16; released December 2025}
+}
+
+% Blog post, no index record. Byline: Georg Lange (poster), RGRGRG (pseudonym), Kat Dearstyne,
+% Kamal Maher. Posted 2026-02-02. An ICML 2026 listing was seen in search and is unconfirmed.
+@misc{lange2026crosslayer,
+  author       = {Lange, Georg and {RGRGRG} and Dearstyne, Kat and Maher, Kamal},
+  title        = {Cross-Layer Transcoders are Incentivized to Learn Unfaithful Circuits},
+  howpublished = {LessWrong},
+  year         = {2026},
+  month        = {2},
+  url          = {https://www.lesswrong.com/posts/6CS2NDmoLCFcEJMor/cross-layer-transcoders-are-incentivized-to-learn-unfaithful},
+  urldate      = {2026-10-09}
+}
+
+% PREPRINT, v1 2026-03-22.
+@misc{draye2026cltforge,
+  author        = {Draye, Florent and Palit, Vedant and Harrasse, Abir and Wu, Tung-Yu and Liu, Jiarui and Pandey, Punya Syon and Wu, Roderick and Hsu, Chih-Hao and Zhang, Terry Jingchen and Jin, Zhijing and Sch{\"o}lkopf, Bernhard},
+  title         = {{CLT-Forge}: A Scalable Library for Cross-Layer Transcoders and Attribution Graphs},
+  year          = {2026},
+  note          = {arXiv:2603.21014},
+  eprint        = {2603.21014},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2603.21014}
+}
+
+% Blog post, no index record. Medium post 2025-03-26 (RSS date); the exact Medium title is
+% truncated in the feed and unconfirmed. Longer version on the AI Alignment Forum,
+% posts/4uXCAJNuPKtKBsi28 ("GDM Mech Interp Team Progress Update #2").
+@misc{smith2025negative,
+  author       = {Smith, Lewis and Rajamanoharan, Senthooran and Conmy, Arthur and McDougall, Callum and Kram{\'a}r, J{\'a}nos and Lieberum, Tom and Shah, Rohin and Nanda, Neel},
+  title        = {Negative Results for Sparse Autoencoders On Downstream Tasks and Deprioritising {SAE} Research},
+  howpublished = {DeepMind Safety Research, Medium},
+  year         = {2025},
+  month        = {3},
+  url          = {https://deepmindsafetyresearch.medium.com/negative-results-for-sparse-autoencoders-on-downstream-tasks-and-deprioritising-sae-research-6cadcfc125b9},
+  urldate      = {2026-10-09}
+}
+
+% ---- conjoint tier 2 (2026-10-09) ----
+
+% Crossref-verified 2026-10-09 (issue April 2024).
+@article{robinson2024how,
+  author  = {Robinson, Thomas S. and Duch, Raymond M.},
+  title   = {How to Detect Heterogeneity in Conjoint Experiments},
+  journal = {The Journal of Politics},
+  year    = {2024},
+  volume  = {86},
+  number  = {2},
+  pages   = {412--427},
+  doi     = {10.1086/727597}
+}
+
+% Crossref-verified 2026-10-09 (online 9 March 2021, issue April 2022).
+@article{zhirkov2022estimating,
+  author  = {Zhirkov, Kirill},
+  title   = {Estimating and Using Individual Marginal Component Effects from Conjoint Experiments},
+  journal = {Political Analysis},
+  year    = {2022},
+  volume  = {30},
+  number  = {2},
+  pages   = {236--249},
+  doi     = {10.1017/pan.2021.4}
+}
+
+% Crossref-verified 2026-10-09 (online 17 February 2025, issue October 2025).
+@article{bansak2025odd,
+  author  = {Bansak, Kirk and Jenke, Libby},
+  title   = {Odd Profiles in Conjoint Experimental Designs: Effects on Survey-Taking Attention and Behavior},
+  journal = {Political Analysis},
+  year    = {2025},
+  volume  = {33},
+  number  = {4},
+  pages   = {315--338},
+  doi     = {10.1017/pan.2025.1}
+}
+
+% PREPRINT, not peer reviewed. OSF API checked 2026-10-09: v1 13 April 2023, v3 28 July
+% 2026. The key keeps the v1 year.
+@misc{abramson2023aggregation,
+  author       = {Abramson, Scott F. and Kocak, Korhan and Magazinnik, Asya and Strezhnev, Anton},
+  title        = {Aggregation, Interpretation, and Estimation of Preferences in Conjoint Experiments},
+  year         = {2026},
+  howpublished = {SocArXiv preprint xjre9, version 3},
+  doi          = {10.31235/osf.io/xjre9_v3},
+  url          = {https://osf.io/preprints/socarxiv/xjre9_v3}
+}
+
+% Crossref-verified 2026-10-09 (issue July 2024). Preprint arXiv:2305.02531.
+@article{goli2024frontiers,
+  author  = {Goli, Ali and Singh, Amandeep},
+  title   = {Frontiers: Can Large Language Models Capture Human Preferences?},
+  journal = {Marketing Science},
+  year    = {2024},
+  volume  = {43},
+  number  = {4},
+  pages   = {709--722},
+  doi     = {10.1287/mksc.2023.0306}
+}
+
+% Crossref-verified 2026-10-09 (issue October 2009).
+@article{lewandowski2009generating,
+  author  = {Lewandowski, Daniel and Kurowicka, Dorota and Joe, Harry},
+  title   = {Generating Random Correlation Matrices Based on Vines and Extended Onion Method},
+  journal = {Journal of Multivariate Analysis},
+  year    = {2009},
+  volume  = {100},
+  number  = {9},
+  pages   = {1989--2001},
+  doi     = {10.1016/j.jmva.2009.04.008}
+}
+
+% Software manual, no index record. Version 2.40 released 16 September 2026 (stan-dev/docs
+% GitHub release); page read 2026-10-09.
+@manual{standevelopmentteam2026stan,
+  author       = {{Stan Development Team}},
+  title        = {Stan User's Guide, Version 2.40},
+  year         = {2026},
+  url          = {https://mc-stan.org/docs/stan-users-guide/},
+  urldate      = {2026-10-09}
+}
+
+
+% arXiv abstract page checked 2026-10-09. arXiv comment: presented at the ICLR 2025 Workshop on Foundation Models in the Wild (non-archival).
+@misc{braun2025understanding,
+  author        = {Braun, Joschka and Eickhoff, Carsten and Krueger, David and Bahrainian, Seyed Ali and Krasheninnikov, Dmitrii},
+  title         = {Understanding (Un)Reliability of Steering Vectors in Language Models},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2505.22637},
+  eprint        = {2505.22637},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2505.22637}
+}
+
+% arXiv abstract page checked 2026-10-09. arXiv comment: ICLR 2026 Workshops (Sci4DL, Re-Align).
+@misc{mishra2026steered,
+  author        = {Mishra, Aayush and Khashabi, Daniel and Liu, Anqi},
+  title         = {Steered {LLM} Activations are Non-Surjective},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2604.09839},
+  eprint        = {2604.09839},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2604.09839}
+}
+
+% arXiv abstract page checked 2026-10-09. arXiv comment: accepted at ICML 2026; no PMLR record found on 2026-10-09.
+@misc{taimeskhanov2026towards,
+  author        = {Taimeskhanov, Magamed and Vaiter, Samuel and Garreau, Damien},
+  title         = {Towards Understanding Steering Strength},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2602.02712},
+  note          = {Accepted at ICML 2026},
+  eprint        = {2602.02712},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2602.02712}
+}
+
+% Crossref DOI record and ACL Anthology page checked 2026-10-09.
+@inproceedings{xu2026controllable,
+  author        = {Xu, Ziwen and Xu, Kewei and Xu, Haoming and Hong, Haiwen and Huang, Longtao and Xue, Hui and Zhang, Ningyu and Shen, Yongliang and Zheng, Guozhou and Chen, Huajun and Deng, Shumin},
+  title         = {How Controllable Are Large Language Models? A Unified Evaluation across Behavioral Granularities},
+  booktitle     = {Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  year          = {2026},
+  pages         = {31269--31299},
+  publisher     = {Association for Computational Linguistics},
+  doi           = {10.18653/v1/2026.acl-long.1443},
+  eprint        = {2603.02578},
+  archiveprefix = {arXiv},
+  url           = {https://aclanthology.org/2026.acl-long.1443/}
+}
+
+% arXiv abstract page checked 2026-10-09. No venue listed.
+@misc{bas2025what,
+  author        = {Bas, Tetiana and Novak, Krystian},
+  title         = {What Can We Actually Steer? A Multi-Behavior Study of Activation Control},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2511.18284},
+  eprint        = {2511.18284},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2511.18284}
+}
+
+% Crossref DOI record checked 2026-10-09.
+@inproceedings{ostermann2026weights,
+  author        = {Ostermann, Simon and Gurgurov, Daniil and Baeumel, Tanja and Hedderich, Michael A. and Lapuschkin, Sebastian and Samek, Wojciech and Schmitt, Vera},
+  title         = {From Weights to Activations: Is Steering the Next Frontier of Adaptation?},
+  booktitle     = {Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  year          = {2026},
+  pages         = {29854--29879},
+  publisher     = {Association for Computational Linguistics},
+  doi           = {10.18653/v1/2026.acl-long.1377},
+  eprint        = {2604.14090},
+  archiveprefix = {arXiv},
+  url           = {https://doi.org/10.18653/v1/2026.acl-long.1377}
+}
+
+% arXiv abstract page checked 2026-10-09.
+@misc{ong2026forecasting,
+  author        = {Ong, Chong Yong and Sim, Alson Wei Jie and Zhang, Peixin and Sun, Jun},
+  title         = {Forecasting Side Effects of Activation Steering},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2608.11227},
+  eprint        = {2608.11227},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2608.11227}
+}
+
+% arXiv abstract page checked 2026-10-09. OpenReview lists an ICLR 2026 submission as rejected; no accepted venue found.
+@misc{chen2025persona,
+  author        = {Chen, Runjin and Arditi, Andy and Sleight, Henry and Evans, Owain and Lindsey, Jack},
+  title         = {Persona Vectors: Monitoring and Controlling Character Traits in Language Models},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2507.21509},
+  eprint        = {2507.21509},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2507.21509}
+}
+
+% Crossref record for DOI 10.18653/v1/2026.findings-acl.544 checked 2026-10-09; arXiv version 2603.24543.
+@inproceedings{li2026analysing,
+  author        = {Li, Yuxiao and Fastowski, Alina and Zaradoukas, Efstratios and Prenkaj, Bardh and Kasneci, Gjergji},
+  title         = {Analysing the Safety Pitfalls of Steering Vectors},
+  booktitle     = {Findings of the Association for Computational Linguistics: ACL 2026},
+  pages         = {11182--11204},
+  year          = {2026},
+  publisher     = {Association for Computational Linguistics},
+  doi           = {10.18653/v1/2026.findings-acl.544},
+  eprint        = {2603.24543},
+  archiveprefix = {arXiv},
+  url           = {https://aclanthology.org/2026.findings-acl.544/}
+}
+
+% arXiv abstract page checked 2026-10-09. OpenReview: ICLR 2026 Trustworthy AI workshop; ICLR 2026 main-track submission listed as rejected.
+@misc{korznikov2025rogue,
+  author        = {Korznikov, Anton and Galichin, Andrey and Dontsov, Alexey and Rogov, Oleg Y. and Oseledets, Ivan and Tutubalina, Elena},
+  title         = {The Rogue Scalpel: Activation Steering Compromises {LLM} Safety},
+  year          = {2025},
+  howpublished  = {arXiv preprint arXiv:2509.22067},
+  eprint        = {2509.22067},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2509.22067}
+}
+
+% arXiv abstract page checked 2026-10-09. icml.cc lists it only as a poster at three ICML 2026 workshops, not the main conference.
+@misc{xiong2026steering,
+  author        = {Xiong, Chen and He, Zhiyuan and Chen, Pin-Yu and Ko, Ching-Yun and Ho, Tsung-Yi},
+  title         = {Steering Externalities: Benign Activation Steering Unintentionally Increases Jailbreak Risk for Large Language Models},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2602.04896},
+  eprint        = {2602.04896},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CR},
+  url           = {https://arxiv.org/abs/2602.04896}
+}
+
+% Crossref record for DOI 10.18653/v1/2025.emnlp-main.519 checked 2026-10-09; arXiv version 2505.20063.
+@inproceedings{arad2025saes,
+  author        = {Arad, Dana and Mueller, Aaron and Belinkov, Yonatan},
+  title         = {{SAEs} Are Good for Steering -- If You Select the Right Features},
+  booktitle     = {Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing},
+  pages         = {10252--10270},
+  year          = {2025},
+  publisher     = {Association for Computational Linguistics},
+  doi           = {10.18653/v1/2025.emnlp-main.519},
+  eprint        = {2505.20063},
+  archiveprefix = {arXiv},
+  url           = {https://aclanthology.org/2025.emnlp-main.519/}
+}
+
+% arXiv abstract page checked 2026-10-09.
+@misc{chalnev2024improving,
+  author        = {Chalnev, Sviatoslav and Siu, Matthew and Conmy, Arthur},
+  title         = {Improving Steering Vectors by Targeting Sparse Autoencoder Features},
+  year          = {2024},
+  howpublished  = {arXiv preprint arXiv:2411.02193},
+  eprint        = {2411.02193},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2411.02193}
+}
+
+% Crossref record checked 2026-10-09.
+@article{li2024frontiers,
+  author  = {Li, Peiyao and Castelo, Noah and Katona, Zsolt and Sarvary, Miklos},
+  title   = {Frontiers: Determining the Validity of Large Language Models for Automated Perceptual Analysis},
+  journal = {Marketing Science},
+  year    = {2024},
+  volume  = {43},
+  number  = {2},
+  pages   = {254--266},
+  doi     = {10.1287/mksc.2023.0454}
+}
+
+% Crossref record checked 2026-10-09. Version of record is a Database Report in Marketing Science; preprint is arXiv:2505.17479.
+@article{toubia2025twin,
+  author  = {Toubia, Olivier and Gui, George Z. and Peng, Tianyi and Merlau, Daniel J. and Li, Ang and Chen, Haozhe},
+  title   = {Database Report: {Twin-2K-500}: A Data Set for Building Digital Twins of over 2,000 People Based on Their Answers to over 500 Questions},
+  journal = {Marketing Science},
+  year    = {2025},
+  volume  = {44},
+  number  = {6},
+  pages   = {1446--1455},
+  doi     = {10.1287/mksc.2025.0262}
+}
+
+% Crossref record checked 2026-10-09.
+@article{sarstedt2024using,
+  author  = {Sarstedt, Marko and Adler, Susanne J. and Rau, Lea and Schmitt, Bernd},
+  title   = {Using Large Language Models to Generate Silicon Samples in Consumer and Marketing Research: Challenges, Opportunities, and Guidelines},
+  journal = {Psychology \& Marketing},
+  year    = {2024},
+  volume  = {41},
+  number  = {6},
+  pages   = {1254--1270},
+  doi     = {10.1002/mar.21982}
+}
+
+% Crossref record checked 2026-10-09.
+@article{bisbee2024synthetic,
+  author  = {Bisbee, James and Clinton, Joshua D. and Dorff, Cassy and Kenkel, Brenton and Larson, Jennifer M.},
+  title   = {Synthetic Replacements for Human Survey Data? The Perils of Large Language Models},
+  journal = {Political Analysis},
+  year    = {2024},
+  volume  = {32},
+  number  = {4},
+  pages   = {401--416},
+  doi     = {10.1017/pan.2024.5}
+}
+
+% ---- causal-design tier 2 (2026-10-09); every entry from the Crossref or arXiv record ----
+
+% Crossref record checked 2026-10-09. The AIPW estimator; bang2005doubly named the property.
+@article{robins1994estimation,
+  author  = {Robins, James M. and Rotnitzky, Andrea and Zhao, Lue Ping},
+  title   = {Estimation of Regression Coefficients When Some Regressors Are Not Always Observed},
+  journal = {Journal of the American Statistical Association},
+  year    = {1994},
+  volume  = {89},
+  number  = {427},
+  pages   = {846--866},
+  doi     = {10.1080/01621459.1994.10476818}
+}
+
+% Crossref record checked 2026-10-09.
+@article{abadie2006large,
+  author  = {Abadie, Alberto and Imbens, Guido W.},
+  title   = {Large Sample Properties of Matching Estimators for Average Treatment Effects},
+  journal = {Econometrica},
+  year    = {2006},
+  volume  = {74},
+  number  = {1},
+  pages   = {235--267},
+  doi     = {10.1111/j.1468-0262.2006.00655.x}
+}
+
+% Crossref record checked 2026-10-09.
+@article{rosenbaum2004design,
+  author  = {Rosenbaum, Paul R.},
+  title   = {Design Sensitivity in Observational Studies},
+  journal = {Biometrika},
+  year    = {2004},
+  volume  = {91},
+  number  = {1},
+  pages   = {153--164},
+  doi     = {10.1093/biomet/91.1.153}
+}
+
+% Crossref record checked 2026-10-09 (issued 2026-07-01).
+@article{masten2026effect,
+  author  = {Masten, Matthew A. and Poirier, Alexandre},
+  title   = {The Effect of Omitted Variables on the Sign of Regression Coefficients},
+  journal = {American Economic Review},
+  year    = {2026},
+  volume  = {116},
+  number  = {7},
+  pages   = {2685--2710},
+  doi     = {10.1257/aer.20230242}
+}
+
+% arXiv abstract page checked 2026-10-09. v1 2022-06-06, v6 2026-02-04; no journal reference.
+@misc{diegert2022assessing,
+  author        = {Diegert, Paul and Masten, Matthew A. and Poirier, Alexandre},
+  title         = {Assessing Omitted Variable Bias when the Controls are Endogenous},
+  year          = {2022},
+  howpublished  = {arXiv preprint arXiv:2206.02303},
+  eprint        = {2206.02303},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.EM},
+  url           = {https://arxiv.org/abs/2206.02303}
+}
+
+% Crossref record checked 2026-10-09: REStat online 2026-02-04, pages 1-45 (advance article,
+% no volume yet). arXiv 2112.13398 and NBER w30302 are the earlier versions.
+@article{chernozhukov2026long,
+  author  = {Chernozhukov, Victor and Cinelli, Carlos and Newey, Whitney K. and Sharma, Amit and Syrgkanis, Vasilis},
+  title   = {Long Story Short: Omitted Variable Bias in Causal Machine Learning},
+  journal = {The Review of Economics and Statistics},
+  year    = {2026},
+  pages   = {1--45},
+  doi     = {10.1162/rest.a.1705}
+}
+
+% Crossref record checked 2026-10-09 (online April 2022, print May 2022).
+@article{goldfarb2022conducting,
+  author  = {Goldfarb, Avi and Tucker, Catherine and Wang, Yanwen},
+  title   = {Conducting Research in Marketing with Quasi-Experiments},
+  journal = {Journal of Marketing},
+  year    = {2022},
+  volume  = {86},
+  number  = {3},
+  pages   = {1--20},
+  doi     = {10.1177/00222429221082977}
+}
+
+% Crossref record checked 2026-10-09. Issue 4 (November 2025); the audit gave issue 2.
+@article{imbens2025comparing,
+  author  = {Imbens, Guido W. and Xu, Yiqing},
+  title   = {Comparing Experimental and Nonexperimental Methods: What Lessons Have We Learned Four Decades after {LaLonde} (1986)?},
+  journal = {Journal of Economic Perspectives},
+  year    = {2025},
+  volume  = {39},
+  number  = {4},
+  pages   = {173--201},
+  doi     = {10.1257/jep.20251440}
+}
+
+% arXiv abstract page checked 2026-10-09. v1 2026-02-02; no journal reference.
+@misc{yang2026demystify,
+  author        = {Yang, Chengxin and Thomas, Laine E. and Li, Fan},
+  title         = {Demystify Doubly-Robust Estimation: The Role of Overlap},
+  year          = {2026},
+  howpublished  = {arXiv preprint arXiv:2602.01648},
+  eprint        = {2602.01648},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2602.01648}
+}
+
+% Crossref record checked 2026-10-09. Online 2021-10-11; print volume 50 is 2022.
+@article{becker2022revisiting,
+  author  = {Becker, Jan-Michael and Proksch, Dorian and Ringle, Christian M.},
+  title   = {Revisiting {G}aussian Copulas to Handle Endogenous Regressors},
+  journal = {Journal of the Academy of Marketing Science},
+  year    = {2022},
+  volume  = {50},
+  number  = {1},
+  pages   = {46--66},
+  doi     = {10.1007/s11747-021-00805-y}
+}
+
+% Crossref record checked 2026-10-09. Online 2024-10-30; print volume 53 is 2025.
+@article{liengaard2025dealing,
+  author  = {Liengaard, Benjamin D. and Becker, Jan-Michael and Bennedsen, Mikkel and Heiler, Phillip and Taylor, Luke N. and Ringle, Christian M.},
+  title   = {Dealing with Regression Models' Endogeneity by Means of an Adjusted Estimator for the {G}aussian Copula Approach},
+  journal = {Journal of the Academy of Marketing Science},
+  year    = {2025},
+  volume  = {53},
+  number  = {1},
+  pages   = {279--299},
+  doi     = {10.1007/s11747-024-01055-4}
+}
+
+% Crossref record checked 2026-10-09. Online 2022-03-28; print volume 49 is 2023.
+@article{eckert2023addressing,
+  author  = {Eckert, Christine and Hohberger, Jan},
+  title   = {Addressing Endogeneity Without Instrumental Variables: An Evaluation of the {G}aussian Copula Approach for Management Research},
+  journal = {Journal of Management},
+  year    = {2023},
+  volume  = {49},
+  number  = {4},
+  pages   = {1460--1495},
+  doi     = {10.1177/01492063221085913}
+}
+
+% Crossref record checked 2026-10-09. Book chapter; editors not in the Crossref record.
+@incollection{papies2017addressing,
+  author    = {Papies, Dominik and Ebbes, Peter and van Heerde, Harald J.},
+  title     = {Addressing Endogeneity in Marketing Models},
+  booktitle = {Advanced Methods for Modeling Markets},
+  series    = {International Series in Quantitative Marketing},
+  publisher = {Springer},
+  year      = {2017},
+  pages     = {581--627},
+  doi       = {10.1007/978-3-319-53469-5_18}
+}
+
+% Crossref record checked 2026-10-09 (title stored in capitals there; title case restored).
+@article{cornwell1997unobservable,
+  author  = {Cornwell, Christopher and Rupert, Peter},
+  title   = {Unobservable Individual Effects, Marriage and the Earnings of Young Men},
+  journal = {Economic Inquiry},
+  year    = {1997},
+  volume  = {35},
+  number  = {2},
+  pages   = {285--294},
+  doi     = {10.1111/j.1465-7295.1997.tb01910.x}
+}
+
+% Crossref record checked 2026-10-09; Crossref registers 360 as the first page only,
+% and the end page 366 comes from the index record.
+@article{cornwell1994estimating,
+  author  = {Cornwell, Christopher and Trumbull, William N.},
+  title   = {Estimating the Economic Model of Crime with Panel Data},
+  journal = {Review of Economics and Statistics},
+  year    = {1994},
+  volume  = {76},
+  number  = {2},
+  pages   = {360--366},
+  doi     = {10.2307/2109893}
+}
+
+% Crossref record checked 2026-10-09.
+@article{becker1968crime,
+  author  = {Becker, Gary S.},
+  title   = {Crime and Punishment: An Economic Approach},
+  journal = {Journal of Political Economy},
+  year    = {1968},
+  volume  = {76},
+  number  = {2},
+  pages   = {169--217},
+  doi     = {10.1086/259394}
+}
+
+@article{cattaneo2025uncertainty,
+  author  = {Cattaneo, Matias D. and Feng, Yingjie and Palomba, Filippo and Titiunik, Roc{\'i}o},
+  title   = {Uncertainty Quantification in Synthetic Controls with Staggered Treatment Adoption},
+  journal = {Review of Economics and Statistics},
+  year    = {2025},
+  pages   = {1--46},
+  note    = {Online ahead of print, 2025-04-21},
+  doi     = {10.1162/rest_a_01588}
+}
+
+@article{hagemann2025permutation,
+  author  = {Hagemann, Andreas},
+  title   = {Permutation Inference with a Finite Number of Heterogeneous Clusters},
+  journal = {Review of Economics and Statistics},
+  year    = {2025},
+  volume  = {107},
+  number  = {4},
+  pages   = {1115--1122},
+  doi     = {10.1162/rest_a_01300}
 }
