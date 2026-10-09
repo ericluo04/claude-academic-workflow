@@ -251,4 +251,4 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
   weak-instrument inference (the F ladder, AR/CLR intervals) lives in iv, along with
   many-instrument and shift-share logic.
 - did / synthetic-control: policy-date designs masquerading as RD in time.
-- preregister: pre-specifying an RD on an upcoming threshold change.
+- Preregistration: the user writes it themselves; this skill supplies the RD field list for an upcoming threshold change.

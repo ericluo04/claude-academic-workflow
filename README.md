@@ -1,6 +1,6 @@
 # claude-academic-workflow
 
-An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, designing and analyzing causal-inference studies (difference-in-differences, regression discontinuity, instrumental variables, synthetic control, randomized experiments), drafting preregistrations, checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
+An academic-research workflow for Claude Code: skills for reading papers, running literature reviews, auditing bibliographies, designing and analyzing causal-inference studies (difference-in-differences, regression discontinuity, instrumental variables, synthetic control, randomized experiments), checking drafts before submission, writing R&R responses, assembling replication packages, compiling LaTeX, iterating TikZ figures, and a Quarto reveal.js slide system with render-time quality gates. It was built for quantitative marketing and economics; most of it transfers to any empirical field.
 
 Everything in this repository, including the two example decks and their figures, is AI-generated with Claude Code, as a proof of concept for what an agent-built research workflow looks like. Generated content is the responsibility of whoever uses it: verify citations, numbers, and claims before relying on them, the same way you would verify a research assistant's first draft.
 
@@ -49,7 +49,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 
 ### Causal inference and natural experiments
 
-Eight skills for identification-strategy work. Each one is built on a canon it has actually
+Seven skills for identification-strategy work. Each one is built on a canon it has actually
 read, so the advice carries the citation that licenses it, and each keeps a
 `references/canon.md` recording what every source settles, which disputes stay open, and where
 the skill departs from the paper. The last column is that canon.
@@ -63,12 +63,9 @@ the skill departs from the paper. The last column is that canon.
 | `iv` | Estimates instrumental-variables designs with weak-instrument-robust inference, shift-share and formula instruments, leniency (judge and examiner) designs estimated by UJIVE, and an explicit exclusion-restriction argument. | [Imbens (2014)](https://doi.org/10.1214/14-STS480); [Keane and Neal (2024)](https://doi.org/10.1146/annurev-economics-092123-111021); [Borusyak et al. (2025)](https://doi.org/10.1257/jep.20231370); [Borusyak and Hull (2023)](https://www.nber.org/papers/w27845); [Mogstad et al. (2018)](https://www.nber.org/papers/w23568); [Goldsmith-Pinkham et al. (2026)](https://doi.org/10.1257/jep.20251480); [Cunningham, Mixtape ch. 7](https://mixtape.scunning.com/07-instrumental_variables) |
 | `field-experiment` | Designs and analyzes randomized experiments: stratified and clustered assignment, randomization inference, power, attrition bounds, and pre-specified heterogeneity. | [Athey and Imbens (2017)](https://arxiv.org/abs/1607.00698); [Freedman (2008)](https://doi.org/10.1214/08-STS262); [Lin (2013)](https://doi.org/10.1214/12-AOAS583); [Guo and Basse (2023)](https://arxiv.org/abs/2004.11615); [Lee (2009)](https://www.nber.org/papers/w11721) |
 | `conjoint` | Analyzes conjoint experiments in both traditions: as randomized experiments identifying average marginal component effects, and as preference-measurement instruments (hierarchical Bayes partworths, WTP, choice-share simulation), with measurement-error and multiple-testing corrections and a firewall on preference talk. | [Hainmueller et al. (2014)](https://doi.org/10.1093/pan/mpt024); [Leeper et al. (2020)](https://doi.org/10.1017/pan.2019.30); [de la Cuesta et al. (2022)](https://doi.org/10.1017/pan.2020.40); [Egami and Imai (2019)](https://doi.org/10.1080/01621459.2018.1476246); [Liu and Shiraito (2023)](https://doi.org/10.1017/pan.2022.30); [Abramson et al. (2022)](https://doi.org/10.1111/ajps.12714); [Netzer et al. (2008)](https://doi.org/10.1007/s11002-008-9046-1) |
-| `preregister` | Drafts a registry-ready preregistration (AsPredicted, OSF, AEA RCT) with clarity flags and placeholders instead of invented content. | [Gelman and Carlin (2014)](https://doi.org/10.1177/1745691614551642); [Simonsohn (2014)](https://datacolada.org/17); [Lakens (2017)](https://doi.org/10.1177/1948550617697177); [Abadie et al. (2023)](https://arxiv.org/abs/1710.02926) |
 
 Links point at the publisher when the article is free there and at the working paper or
-preprint otherwise, so nothing in that column sits behind a paywall. `preregister` is the one
-exception to the canon convention: it has no `references/canon.md`, and the papers listed are
-the ones it cites inline.
+preprint otherwise, so nothing in that column sits behind a paywall.
 
 These skills are opinionated. They pick defaults (which estimator, which standard errors, what
 bar an instrument has to clear) and say so, and where the literature genuinely disagrees they

@@ -1,6 +1,6 @@
 ---
 name: field-experiment
-description: Design, analyze, and write up randomized experiments (field experiments, A/B tests, RCTs): stratified and clustered designs, randomization inference, covariate adjustment done right, noncompliance, attrition and gated outcomes, treatment-effect heterogeneity, and interference. TRIGGER on "A/B test", "randomized experiment", "RCT", "field experiment", "holdout", "lift test", "randomization inference", "stratified randomization", "cluster randomized", "geo experiment", "power analysis", "MDE", "encouragement design", "noncompliance", "ITT", "attrition", "Lee bounds", "CUPED", "uplift", "heterogeneous treatment effects", "interference", "spillover", "SUTVA". Observational causal forests belong to causal-design, the pre-registration document to preregister.
+description: Design, analyze, and write up randomized experiments (field experiments, A/B tests, RCTs): stratified and clustered designs, randomization inference, covariate adjustment done right, noncompliance, attrition and gated outcomes, treatment-effect heterogeneity, and interference. TRIGGER on "A/B test", "randomized experiment", "RCT", "field experiment", "holdout", "lift test", "randomization inference", "stratified randomization", "cluster randomized", "geo experiment", "power analysis", "MDE", "encouragement design", "noncompliance", "ITT", "attrition", "Lee bounds", "CUPED", "uplift", "heterogeneous treatment effects", "interference", "spillover", "SUTVA". Observational causal forests belong to causal-design.
 ---
 
 # Field experiments
@@ -69,7 +69,7 @@ Beyond those two, this family declines.
   effects with unbalanced designs. Test sharp nulls by permutation; interval-estimate the ATE
   with Neyman/HC2 machinery.
 - Continuous monitoring and optional stopping are not covered by the canon. The design-time
-  answer is a stopping rule fixed in the preregistration (the preregister skill's field). If
+  answer is a stopping rule fixed in the preregistration, which the user writes themselves. If
   the platform peeked at interim results, fixed-sample p-values are invalid, and this family
   has no always-valid inference route to offer.
 
@@ -243,7 +243,7 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
 
 ## Handoffs
 
-- preregister: the pre-analysis plan document itself; this skill supplies what to
+- Preregistration: the user writes it themselves; this skill supplies what to
   pre-specify (strata, covariates, estimators, subgroups, gates).
 - iv: exclusion and monotonicity discipline for LATE claims; weak-instrument inference when
   the first stage is thin.

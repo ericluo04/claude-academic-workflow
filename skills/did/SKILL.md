@@ -631,4 +631,4 @@ paper cited beyond the canon with bibcheck before submission.
   parallel-trends toolkit applies to share balance.
 - rdd: policy-date designs masquerading as RD in time arrive here when many units switch at a
   date; treat the date as an event study, not a cutoff.
-- preregister: pre-specifying a DiD analysis of a known upcoming natural experiment.
+- Preregistration: the user writes it themselves; this skill supplies the DiD field list for a known upcoming natural experiment.

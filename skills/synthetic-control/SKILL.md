@@ -255,4 +255,4 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
   units switch at a date; treat the date as the event, not a cutoff.
 - field-experiment: prospective geo experiments (choosing treatment markets by design rather
   than analyzing one after the fact).
-- preregister: locking weights and specification before post-period outcomes exist.
+- Preregistration: the user writes it themselves; this skill supplies the fields to lock (donor pool, weights, specification) before post-period outcomes exist.

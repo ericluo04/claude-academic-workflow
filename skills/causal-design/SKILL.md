@@ -235,5 +235,5 @@ Every claim traces to references/canon.md; keys live in references/causal.bib.
 - Activation steering for stimuli and model-respondents (instrument choice, strength
   calibration, damage audits) is instrument practice; the surrounding design stays with the
   owning method skill.
-- preregister: pre-analysis plans once the design is chosen (experiment-first skill;
-  quasi-experimental and measurement PAPs adapt its structure).
+- Preregistration: the user writes it themselves once the design is chosen; the owning method
+  skill supplies the field list (outcomes, hypotheses, sample size, analysis plan).
