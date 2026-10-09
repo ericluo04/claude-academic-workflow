@@ -1,13 +1,15 @@
 # Field-experiment analysis template. Adapt the CONFIG block and run section by section.
 # Package versions, pins, and API traps: the package index in references/details.md.
-# Run end to end on 2026-10-09 on simulated data with seed 94305, once with stratified
-# unit-level assignment (N = 600, 6 strata) and once with stratified cluster assignment
-# (G = 10 clusters in 2 strata) (R 4.6.1; randomizr 2.0.1, estimatr 2.0.0, ri2 0.5.0,
-# DeclareDesign 1.1.1, grf 2.6.1, marginaleffects 1.0.0, dfadjust 1.1.0, qte 2.0.0).
-# Not run: the commented RobinCar, wildrwolf, and PowerUpR calls.
+# Run end to end on 2026-10-09 (tier 2) on simulated data with seed 94305, once with
+# stratified unit-level assignment (N = 600, 6 strata, no cluster column) and once with
+# stratified cluster assignment (G = 12 clusters in 2 strata) (R 4.6.1; randomizr 2.0.1,
+# estimatr 2.0.0, ri2 0.5.0, DeclareDesign 1.1.1, grf 2.6.1, marginaleffects 1.0.0,
+# dfadjust 1.1.0, qte 2.0.0, sandwich 3.1-3, GenericML 0.2.3 with ranger).
+# Not run: the commented RobinCar, wildrwolf, fwildclusterboot, and PowerUpR calls.
 
 ## ---- CONFIG ----------------------------------------------------------------
-df <- your_data       # unit-level frame: y, z (0/1), stratum, cluster, x1, x2, pre_y,
+df <- your_data       # unit-level frame: y, z (0/1), stratum, x1, x2, pre_y, cluster
+                      # (needed only when clustered = TRUE),
                       # s (observation gate, for the Lee block), y01 (binary 0/1 outcome,
                       # for the binary-outcome block), d (0/1 treatment actually received,
                       # for the noncompliance block)
@@ -129,8 +131,18 @@ if (clustered) {
   # Cluster-average effect (primary): difference in means on cluster means.
   cl_means <- aggregate(cbind(y, z) ~ cluster, data = df, mean)
   print(difference_in_means(y ~ z, data = cl_means))
-  # Unit-average effect: unit-level regression, CR2 + Satterthwaite dof:
-  print(lm_robust(y ~ z, data = df, clusters = cluster, se_type = "CR2"))
+  # Unit-average effect: unit-level regression. With few clusters the family's small-G
+  # rule (causal-design shared-rules, "Clustering") puts CV3 first, with the wild cluster
+  # restricted bootstrap, and CR2 + Satterthwaite dof as the cross-check beside them.
+  fit_u <- lm(y ~ z, data = df)
+  se_cv3 <- sqrt(diag(sandwich::vcovBS(fit_u, cluster = ~cluster, type = "jackknife")))["z"]
+  print(c(estimate = unname(coef(fit_u)["z"]), se_CV3 = unname(se_cv3)))   # CV3 first
+  # Wild cluster restricted bootstrap: fwildclusterboot is archived from CRAN; install from
+  # s3alfisc.r-universe.dev (did/references/details.md), then:
+  # dqrng::dqset.seed(94305)   # boottest draws from dqrng, not base R
+  # fwildclusterboot::boottest(fixest::feols(y ~ z, df, cluster = ~cluster), param = "z",
+  #   B = 9999, clustid = "cluster", type = "webb", impose_null = TRUE)  # Webb: few G
+  print(lm_robust(y ~ z, data = df, clusters = cluster, se_type = "CR2"))  # cross-check
   # Report BOTH when cluster sizes vary; the gap is evidence effects covary with size.
 }
 
@@ -172,12 +184,15 @@ lee_bounds <- function(d) {
   }
 }
 lb <- lee_bounds(df)
+lb                                        # point bounds, trim share, trimmed arm
 # Bootstrap the WHOLE pipeline (trimming share included; its estimation error was the
 # largest variance component in Lee's application). Under cluster assignment, resample
 # whole clusters within each arm, so that no draw loses an arm when G is small; otherwise
 # resample units.
 B <- 2000   # 2000 draws give stable trim-share quantiles
-cl_arm <- split(unique(df[, c("cluster", "z")])$cluster, unique(df[, c("cluster", "z")])$z)
+if (clustered) {
+  cz <- unique(df[, c("cluster", "z")]); cl_arm <- split(cz$cluster, cz$z)
+}
 draw <- function() {
   if (!clustered) return(df[sample(nrow(df), replace = TRUE), ])
   ids <- unlist(lapply(cl_arm, function(g) g[sample.int(length(g), replace = TRUE)]))
@@ -185,7 +200,14 @@ draw <- function() {
 }
 boots <- t(replicate(B, lee_bounds(draw())))
 flipped <- sum(boots[, "treated_trimmed"] != lb["treated_trimmed"])
-c(B = B, flipped = flipped)     # report: draws that trimmed the other arm
+c(B = B, flipped = flipped, share = flipped / B)  # report: draws that trimmed the other arm
+# A near-zero gap s1 - s0 puts the trim share at the kink of |s1 - s0|, where the bootstrap
+# is unreliable (the verification's near-equal run flipped 727 of 2000 draws). A large
+# flipped share means the bounds and their interval are uninformative: say so, and go to
+# the always-observed route above (balance test, selected-sample estimate). The 10 percent
+# cutoff below is our judgment, not a published threshold.
+if (flipped / B > 0.10) message("Flipped share above 10%: Lee interval uninformative; ",
+                                "use the always-observed route")
 se_l <- sd(boots[, "lower"]); se_u <- sd(boots[, "upper"])
 # Imbens-Manski interval (covers the EFFECT, the right default):
 cn <- uniroot(function(c) pnorm(c + (lb["upper"] - lb["lower"]) / max(se_l, se_u)) -
@@ -209,6 +231,43 @@ c(lb["lower"] - cn * se_l, lb["upper"] + cn * se_u)
 pvec <- c(y   = difference_in_means(y ~ z, clusters = cl, data = df)$p.value,
           y01 = difference_in_means(y01 ~ z, clusters = cl, data = df)$p.value)
 p.adjust(pvec, method = "holm")
+# Romano-Wolf stepdown by resampling, coded by hand so no archived package is needed.
+# Resample assignment units (whole clusters under cluster assignment) within stratum-by-arm
+# cells, recompute each outcome's HC2 (CR2 under clusters) t-statistic centered at the
+# full-sample estimate, and step down on the max |t|. With few clusters (G = 12 in the
+# test run), the wild cluster bootstrap route above is the better choice.
+# hdm::p_adjust(method = "RW") does not qualify: it draws Gaussian vectors from the
+# homoskedastic vcov of one lm fit, with no resampling and no HC2.
+outs <- c("y", "y01")                    # the outcome family; swap in yours
+tstat <- function(d) sapply(outs, function(v) {
+  f <- if (clustered) difference_in_means(reformulate("z", v), clusters = .u, data = d) else
+    difference_in_means(reformulate("z", v), data = d)
+  c(est = unname(f$coefficients), se = unname(f$std.error))
+})
+d0 <- df; d0$.u <- if (clustered) df$cluster else seq_len(nrow(df))
+s0 <- tstat(d0)
+ud <- unique(d0[, c(".u", "z", "stratum")])
+cells <- split(ud$.u, interaction(ud$z, ud$stratum, drop = TRUE))
+rows_by_unit <- split(seq_len(nrow(d0)), d0$.u)
+draw_rw <- function() {
+  picked <- unlist(lapply(cells, function(u) u[sample.int(length(u), replace = TRUE)]))
+  idx <- rows_by_unit[as.character(picked)]
+  bd <- d0[unlist(idx), ]
+  bd$.u <- rep(seq_along(idx), lengths(idx))   # a unit drawn twice counts as two units
+  s <- tstat(bd)
+  abs(s["est", ] - s0["est", ]) / s["se", ]
+}
+B_rw <- 999   # B chosen so that alpha * (B + 1) is an integer at alpha = .05
+tb <- t(replicate(B_rw, draw_rw()))
+t0 <- abs(s0["est", ] / s0["se", ])
+ord <- order(t0, decreasing = TRUE)
+p_rw <- setNames(numeric(length(outs)), outs)
+for (j in seq_along(ord)) {
+  maxb <- apply(tb[, ord[j:length(ord)], drop = FALSE], 1, max)
+  p_rw[ord[j]] <- (1 + sum(maxb >= t0[ord[j]])) / (B_rw + 1)
+}
+p_rw[ord] <- cummax(p_rw[ord])           # stepdown p-values are monotone in t
+p_rw
 # Data-driven: honest causal forest (grf; dot-separated arg names). Randomized
 # experiment: pass the KNOWN W.hat instead of estimating propensities.
 library(grf)
@@ -227,6 +286,26 @@ half <- sample(nrow(df), nrow(df) / 2)
 cf_tr <- causal_forest(X[half, ], df$y[half], df$z[half], W.hat = 0.5)
 cf_ev <- causal_forest(X[-half, ], df$y[-half], df$z[-half], W.hat = 0.5)
 rank_average_treatment_effect(cf_ev, priorities = predict(cf_tr, X[-half, ])$predictions)
+# Generic ML inference (Chernozhukov, Demirer, Duflo, Fernandez-Val 2025): BLP, GATES, and
+# CLAN over repeated sample splits. The propensity is known (constant) in an experiment.
+# Learners in mlr3 syntax; the ranger learner needs the ranger package. 100 splits is the
+# package default; 20 here keeps the run to seconds, so raise it for reported numbers.
+# The package has no cluster option, so this block runs under unit-level assignment only;
+# under cluster assignment, aggregate to clusters first. Intervals print at level
+# 1 - 2 * significance_level (95 percent here, the paper's recommended nominal level).
+if (!clustered) {
+  library(GenericML)
+  gm <- GenericML(Z = X, D = df$z, Y = df$y,
+                  learners_GenericML = c("mlr3::lrn('ranger', num.trees = 200)", "lasso"),
+                  learner_propensity_score = "constant", num_splits = 20,
+                  quantile_cutoffs = c(0.25, 0.5, 0.75), significance_level = 0.025,
+                  monotonize = TRUE,  # the 0.2.3 default, passed explicitly
+                  parallel = FALSE, seed = 94305)
+  print(get_BLP(gm, plot = FALSE))    # beta.2 significantly > 0: the proxy tracks real
+                                      # heterogeneity
+  print(get_GATES(gm, plot = FALSE))  # effects by proxy quartile, top-minus-bottom gap
+  print(get_CLAN(gm, variable = "pre_y", plot = FALSE))  # covariate means by group
+}
 
 ## ---- 9. Quantile treatment effects --------------------------------------------
 # qte 2.0.0 renamed the interface; ci.qte is deprecated. Randomized experiment:

@@ -19,8 +19,9 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
   (equivalently unit-level WLS with weights 1/N_g); for the unit-average estimand,
   unweighted unit OLS with Liang-Zeger CR (with few clusters, the family's small-G rule in
   ../../causal-design/references/shared-rules.md: CV3 plus the wild cluster restricted
-  bootstrap first, CR2 with Satterthwaite dof as the cross-check), or cluster-level WLS with weights N_g. One mega-cluster can make the unit-weighted
-  estimand essentially unlearnable.
+  bootstrap first, CR2 with Satterthwaite dof as the cross-check), or cluster-level WLS
+  with weights N_g. One mega-cluster can make the unit-average estimand far less precise
+  than the cluster-average one.
 - Clustered sampling with unit-level randomization is a different problem: Neyman for the
   sample ATE, clustered SEs only for the population ATE (abadie2023clustering).
 
@@ -28,7 +29,9 @@ Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
 
 Minimum N = (Phi^-1(beta) + Phi^-1(1 - alpha/2))^2 / ((tau^2/sigma^2) gamma (1 - gamma)),
 gamma the treated share (1/2 optimal under homoskedasticity). Worked example: sigma = 6,
-tau = 1, alpha = .05, power = .8 gives N = 1130; tau = 2 gives N = 282. Base R power.t.test
+tau = 1, alpha = .05, power = .8 gives N = 1130; tau = 2 gives N = 282. The chapter prints
+1,302 for tau = 1, which does not follow from its own formula (the formula gives 1,130, and
+power.t.test gives 566 per arm); its tau = 2 value matches. Base R power.t.test
 matches up to the t-vs-normal refinement; stratified and clustered designs by simulation
 (DeclareDesign) or PowerUpR closed forms for cluster designs.
 
@@ -40,8 +43,10 @@ matches up to the t-vs-normal refinement; stratified and clustered designs by si
   the 1 - R2 factor.
 - For uninteracted adjustment to hurt with one covariate, more than three quarters of
   subjects must sit in one arm, or the covariate must covary more with the effect than with
-  the outcome level. With more than two arms, pooled adjustment can hurt even balanced;
-  separate per-arm regressions keep the guarantee.
+  the outcome level. With more than two arms, pooled adjustment can hurt even in a balanced
+  design when effects are heterogeneous (Freedman 2008, AoAS, `freedman2008several`,
+  Section 4). Separate per-arm regressions keep the guarantee (Negi and Wooldridge 2021 for
+  two arms; Negi and Wooldridge 2025 for more).
 - Bias is order 1/n; leading term is a covariance of outcomes with squared demeaned
   covariates, estimable by plug-in (ALO example: -0.0002 against SE 0.146). Report it when
   arms are small and covariates skewed.
@@ -49,8 +54,10 @@ matches up to the t-vs-normal refinement; stratified and clustered designs by si
   times, compute empirical coverage for every planned estimator-variance pair. A coverage
   benchmark, not a permutation test.
 - Sandwich sweep: HC0-HC3 agreed (94.4-95.1 percent coverage) in Lin's 250k-replication
-  check; HC0 degrades first with leverage; the Guo-Basse Fatalities footnote has HC0
-  undercovering for Lin's estimator, a concrete HC2-by-default argument.
+  check; HC0 degrades first with leverage. In the Guo-Basse Fatalities example (footnote 8)
+  HC0 had poor coverage and they used HC3; the footnote says nothing about HC2. The HC2
+  default rests on Lin: HC2 equals the Neyman estimator (his remark (v)), and his Table 3
+  sweep gives 94.4 to 95.1 percent coverage.
 - Poststratification is lm_lin with partition indicators; then the estimator is exactly
   unbiased over the randomization distribution.
 
@@ -62,7 +69,7 @@ matches up to the t-vs-normal refinement; stratified and clustered designs by si
   not evidence of bias.
 - The calibration mechanism: logit score equations force arm-average fitted probabilities to
   equal arm-average outcomes; that plus randomization's covariate balance makes the plug-in
-  consistent. Probit lacks it (small but nonzero asymptotic bias).
+  consistent. Probit lacks it (nonzero asymptotic bias).
 - Freedman's simulation anchors: n = 5000 coefficient bias 0.195 (truth 0.939); swapping the
   covariate drove the coefficient to about 3 against truth near 1.
 - Standardization recipe: fit y ~ w * covariates with family = binomial; average predictions
@@ -110,9 +117,9 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
   MEM; do not report it.
 - Discrete and multivalued treatments: OLS on arm dummies reads out each arm's risk
   difference against control directly. Multi-arm logit coefficients are conditional log-odds
-  contrasts carrying the same noncollapsibility problem, and per Lin the multi-arm OLS
-  adjustment should be separate per-arm regressions (pooled adjustment can hurt even in
-  balanced designs beyond two arms).
+  contrasts carrying the same noncollapsibility problem, and the multi-arm OLS adjustment
+  should be separate per-arm regressions (pooled adjustment can hurt even in balanced
+  designs beyond two arms; Freedman 2008, AoAS; Negi and Wooldridge 2025).
 - The three-tier summary of this skill's position: LPM coefficients are read directly
   (primary); logit coefficients are never read (banned); the logit as an imputation engine
   whose coefficient is never read is an optional precision upgrade (Guo-Basse, with its
@@ -149,12 +156,26 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 - Honest trees: sample-split so the partition sample and estimation sample are independent;
   within-leaf means inherit randomization justification. Causal forests: pointwise
   asymptotic normality; average_treatment_effect, best_linear_projection for interpretable
-  summaries, rank_average_treatment_effect as the modern detectable-heterogeneity test.
-- Constant-effect test (Crump-Hotz-Imbens-Mitnik): series fit of both conditional means,
-  test equality of coefficients.
-- Bertanha-Imbens LATE-generalization pair: E[Y(1)] equal for always-takers vs treated
-  compliers; E[Y(0)] equal for never-takers vs untreated compliers; test separately,
-  possibly after covariate adjustment.
+  summaries, rank_average_treatment_effect as the modern detectable-heterogeneity test
+  (RATE with AUTOC or Qini weights; Yadlowsky et al. 2025).
+- Generic ML (Chernozhukov, Demirer, Duflo, and Fernandez-Val 2025; GenericML 0.2.3):
+  GenericML(Z, D, Y, learners_GenericML, num_splits, quantile_cutoffs, ...), then
+  get_BLP, get_GATES, and get_CLAN. Pass the known propensity in experiments
+  (learner_propensity_score = "constant" is the default). The package reports level
+  1 - 2 alpha. The published Econometrica paper recommends the nominal 1 - alpha level,
+  so pass significance_level = 0.025 for 95 percent intervals.
+- Romano-Wolf by resampling: the template codes a stratified bootstrap stepdown over
+  assignment units with HC2 (Neyman) t-statistics across an outcome family. With few
+  clusters, use a wild cluster bootstrap stepdown (Westfall-Young or Romano-Wolf);
+  wildrwolf does this for fixest models (archived from CRAN, r-universe 0.7.0).
+  hdm::p_adjust(method = "RW") does not qualify: it draws Gaussian vectors from the
+  homoskedastic vcov of one lm fit, with no resampling and no HC2 (hdm 0.3.2 source).
+- Constant-effect test (Crump, Hotz, Imbens, and Mitnik 2008): series fit of both
+  conditional means, test equality of coefficients.
+- Complier comparability pair: E[Y(1)] equal for always-takers vs treated compliers; E[Y(0)]
+  equal for never-takers vs untreated compliers; test separately, possibly after covariate
+  adjustment. Bertanha and Imbens (2020) build the tests for fuzzy RD and state the LATE
+  case as a lemma; the Athey-Imbens chapter applies them to experiments.
 - QTE: marginal-quantile differences; bootstrap invalid at mass points (0.10 quantile
   bootstrap SE exactly 0 with 30 percent zeros); use the exact test with the QTE statistic.
 
@@ -162,11 +183,16 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 
 - Cluster at the interaction boundary (markets, stores, social clusters).
 - Saturation (partial-population) designs: randomize the treated fraction across groups,
-  then units within; identifies direct and indirect effects (Hudgens-Halloran). The Crepon
-  displacement check: within-market differences varying with market-level treated share.
-- General networks: exact tests of sharp nulls with focal units, buffer units, and auxiliary
-  assignments (Athey-Eckles-Imbens); no coherent large-network asymptotics, so do not
-  substitute clustered SEs for the exact test.
+  then units within; identifies direct and indirect effects (Hudgens-Halloran). Baird et al.
+  (2018) give the power calculations and the optimal saturations. The Crepon displacement
+  check: within-market differences varying with market-level treated share.
+- General networks: exposure mappings (Aronow and Samii 2017), then exact tests of sharp
+  nulls with focal units, buffer units, and auxiliary assignments (Athey-Eckles-Imbens).
+  Large-network asymptotics exist only under extra assumptions: decaying interference with
+  a conservative network HAC variance (Leung 2022), or a bounded amount of unknown
+  interference (Savje, Aronow, and Hudgens 2021). Do not substitute clustered SEs for the
+  exact test.
+- Temporal interference: switchback designs (Bojinov, Simchi-Levi, and Zhao 2023).
 - Marketing instances: marketplace cannibalization, social-ad spillovers, budget-constrained
   auctions, referral programs, two-sided marketplace network effects.
 
@@ -175,7 +201,7 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 - Small-cell email/pricing tests: rare-arm HC2 + Behrens-Fisher regime.
 - 90/10 holdouts: the imbalanced-arms case where Lin's interactions are key.
 - CUPED: fixed-slope regression adjustment on pre-period outcomes in Lin's survey-sampling
-  framing; lm_lin with the pre-period metric is the design-based version.
+  framing (Deng et al. 2013); lm_lin with the pre-period metric is the design-based version.
 - Conversion/click/churn lifts: report percentage-point risk differences, never adjusted
   odds ratios; noncollapsibility breaks cross-segment and cross-platform OR comparisons.
 - Revenue per user: skewed, zero-inflated; Poisson quasi-likelihood imputation per arm,
@@ -199,7 +225,8 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 | RobinCar | 1.2.0 (CRAN) | covariate adjustment under covariate-adaptive randomization (ANOVA/ANCOVA/ANHECOVA) | strata argument is car_strata_cols; quoted column names, unlike estimatr's bare names |
 | dfadjust | 1.1.0 (CRAN, 2024-12-18) | dfadjustSE: HC2 with Imbens-Kolesar (or Bell-McCaffrey) degrees of freedom for regressions with a rare arm | takes an lm object, not an estimatr fit; the template refits the lm_lin specification with lm |
 | qte | 2.0.0 (CRAN, 2026-07) | QTE with bootstrap inference | ci.qte deprecated in 2.0.0; use unc_qte(yname, dname, xformla = ~1); all pre-2026-07 tutorials show the dead API |
-| wildrwolf | 0.7.0 (r-universe; ARCHIVED from CRAN 2024-05) | Romano-Wolf stepdown p-values | needs archived fwildclusterboot; accepts only fixest models; budget the p.adjust(holm) fallback |
+| GenericML | 0.2.3 (CRAN, 2026-07-03) | BLP, GATES, and CLAN with repeated sample splitting (Chernozhukov et al. 2025) | reports confidence level 1 - 2 alpha and doubles p-values; learners are mlr3 strings ("mlr3::lrn('ranger')"); slow at the default num_splits = 100 |
+| wildrwolf | 0.7.0 (r-universe; ARCHIVED from CRAN 2024-05) | Romano-Wolf stepdown p-values by wild cluster bootstrap | needs archived fwildclusterboot; accepts only fixest models; the template's hand-coded bootstrap stepdown is the route that needs no archived package |
 | PowerUpR | 1.1.0 (CRAN Archive; ARCHIVED 2026-03) | mdes.cra2/power.cra2/mrss.cra2 cluster-power closed forms | off CRAN; prefer hand-coding DEFF = 1 + (m-1) ICC in templates |
 | Lee bounds | none | no CRAN package implements Lee 2009 trimming bounds (checked the full index; ATbounds/bpbounds/rbounds/plausibounds are different things); vsemenova/leebounds is a replication archive, not installable, and its README example does not run against its own code | hand-roll (the template does) with a full-pipeline bootstrap |
 
