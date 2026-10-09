@@ -6,15 +6,20 @@ description: Design, analyze, and write up conjoint experiments in both traditio
 # Conjoint experiments
 
 Design, estimate, validate, and write up conjoint experiments. The canon is fifteen
-hand-picked sources (see references/canon.md, current as of 2026-08-05) spanning two
+user-picked sources (see references/canon.md) spanning two
 traditions that share one instrument: political science's design-based causal track
 (Hainmueller, Hopkins, and Yamamoto 2014 and its correction wave) and marketing's
 preference-measurement track (Netzer et al. 2008; Agarwal et al. 2015; Rossi, Allenby,
 and Misra 2024; Sonnier, Ainslie, and Otter 2007). The deliverable is the design or
 analysis recommendation with the assumption that licenses it, R code with calls verified
-against package documentation, and a drafted methods paragraph. The skill stops at the four stop points in
-../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user. Bib keys live in
+against package documentation, and a drafted methods paragraph. The skill stops at the
+four stop points in ../causal-design/references/shared-rules.md (section "Stop points")
+and puts each choice to the user. Bib keys live in
 ../causal-design/references/causal.bib, the family's shared bibliography.
+
+Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 
 ## The fork: what will the stakeholder do with the output?
 
@@ -67,28 +72,22 @@ Never mix the interpretations silently.
   marketing-ratings inheritance that creates the correlation problem it then corrects
   (Clayton et al. 2026). Three attribute types (independent, dependent across the pair,
   pair-level) organize what can be asked; profile-level analysis handles only the first.
-- Interactions BETWEEN attributes get their own estimand, the AMIE (Egami and Imai 2019).
-  A regression interaction coefficient estimates the conventional interaction effect,
-  whose relative magnitude depends on which level was named the baseline, and conjoint
-  attributes (gender, religion, occupation) rarely have a natural one. The mechanical
-  consequence is sharper than the interpretive one: any conventional interaction involving
-  a baseline level is identically zero, so an arbitrary coding decision blanks out a row
-  and a column of the interaction table. The AMIE subtracts the two AMEs instead of
-  conditioning at baseline, which makes relative magnitudes baseline-invariant, decomposes
-  any treatment-combination effect into main effects plus interactions of every order with
-  no residual, and returns the conditional effect of one attribute at a level of another as
-  AME plus AMIE. It marginalizes, so it carries the same averaging-distribution discipline
-  as the AMCE. This is the quantity inside the uAMCE-pAMCE gap above: when that gap is what
-  routes you to the pAMCE, the AMIE is what says which interactions and how large. Testing
-  whether ANY interaction exists is baseline-free either way, since all AMIEs are zero
-  exactly when all conventional interactions are, so the global F-test can use either.
+- Interactions BETWEEN attributes get their own estimand, the AMIE (Egami and Imai 2019):
+  the combination effect minus both AMEs. A regression interaction coefficient estimates
+  the conventional interaction effect instead, and any conventional interaction involving a
+  baseline level is identically zero, so an arbitrary coding decision blanks out a row and
+  a column of the interaction table. All AMIEs are zero exactly when all conventional
+  interactions are, so the global F-test can use either. Full statement:
+  references/track-experiment.md, section "Interactions: the AMIE, full statement".
+  Derivation: references/details.md, section "Causal interaction: the AMIE (Egami and Imai
+  2019)".
 - Conditional AMCEs are legitimate heterogeneous-effect estimates when the moderator is
   measured PRE-exposure. A difference in conditional AMCEs is never a causal effect of
   the moderator, and for preference description it is not even the right contrast (see
-  the subgroup rule below). The moderator's identity splits the two tools: respondent
-  characteristics route to conditional marginal means, other randomized attributes route
-  to the AMIE. Egami and Imai leave treatment-by-covariate interaction as future work, so
-  the seam is theirs, not our patch.
+  the subgroup rule in references/track-experiment.md). The moderator's identity splits
+  the two tools: respondent characteristics route to conditional marginal means, other
+  randomized attributes route to the AMIE. Egami and Imai leave treatment-by-covariate
+  interaction as future work, so the seam is theirs, not our patch.
 
 ## Design defaults
 
@@ -123,10 +122,8 @@ Never mix the interpretations silently.
   Odd but possible combinations stay in: in an eye-tracking study, odd attribute-level
   combinations did not change attention, information search, or choice substantially or
   consistently (Bansak and Jenke 2025).
-  When a target distribution is defensible, prefer design-based pAMCE randomization: the
-  three-design ladder (joint, marginal, mixed) keyed to what population data exist, with
-  the effective-sample-size check run before fielding (de la Cuesta, Egami, and Imai
-  2022; ladder details and the ESS formula in references/details.md).
+  When a target distribution is defensible, see references/track-experiment.md, section
+  "Design-based pAMCE randomization".
 - Attribute row order: randomized across respondents, frozen within a respondent across
   tasks.
 - Outcomes: collect BOTH the forced choice and a rating, with the order of the two
@@ -146,81 +143,71 @@ Never mix the interpretations silently.
   the IRR estimation method, the diagnostics to be run, and the target population with
   the sample-matching procedure. The user writes the preregistration from this list.
 
-## Estimation and inference
+## Estimation: the randomized-experiment track
 
-- One OLS of the choice indicator on all attribute dummies (reference level omitted per
-  attribute) gives every AMCE at once; nonparametric despite the OLS routine. Standard
-  errors cluster by respondent, always. The reason is the sampling design: respondents are
-  the sampled units, and every task and profile is drawn within a respondent, so the
-  respondent is the cluster at which the sample was drawn (the design rule in
-  ../causal-design/references/shared-rules.md, section "Clustering"). Within-respondent
-  correlation in outcomes is a consequence of that design (Hainmueller, Hopkins, and
-  Yamamoto 2014 cluster by respondent as well). With hundreds of respondents, CR2
-  clustered SEs are adequate. With few respondents (a pilot) or very unbalanced task
-  counts across respondents, the family's small-G rule governs: CV3 with the wild cluster
-  restricted bootstrap, CR2 as the cross-check (shared-rules.md, section "Clustering").
-  The template's
-  hand-rolled sections run this regression on the profile-stacked HHY structure with
-  clustered SEs, valid because it is the estimator HHY themselves use; choice-level
-  analysis remains the skill's default for choice modeling.
-- Under restricted or weighted (dependent) randomization, plain dummies silently change
-  the estimand: include the linked-attribute interactions and report the probability-
-  weighted coefficient combination over admissible strata (the eq. 9 machinery; worked
-  form in references/details.md).
-- Measurement error: never assume it away. Shown the identical task twice, respondents
-  agree with themselves only about 75% of the time in every study examined (IRR 73 to
-  81% across eight from-scratch replications), which attenuates every AMCE by roughly
-  30% (the factor 1 - 2*tau at tau near 0.15) and can flip subgroup differences
-  (Clayton et al. 2026). Estimate IRR (repeated task; for existing data, extrapolate
-  from task-pair agreement; or borrow with sensitivity), correct via projoint, and
-  report both raw and corrected estimates. The correction is for binary forced choice
-  ONLY; refuse to extend it to ratings, rankings, or choose-one-of-many, citing the
-  authors' own warning. A write-up reporting no IRR is assuming tau = 0, which was
-  false everywhere it has been checked.
-- Multiple testing: never report an uncorrected forest of AMCE stars. Under a global
-  null at a realistic design size (41 tests), the standard pipeline yields at least one
-  significant AMCE in over 90% of experiments (Liu and Shiraito 2023). The family rule
-  applies (../causal-design/references/shared-rules.md, section "Multiplicity, staged by
-  what a false positive costs"). For
-  screening, adaptive shrinkage (ashr) on the estimates and clustered SEs when priors about
-  which effects exist are weak, or Benjamini-Hochberg at the family's FDR level, q = .10.
-  For confirmatory work with a preregistered family, Romano-Wolf stepdown with the
-  respondent block bootstrap is the default, because AMCEs estimated on the same
-  respondents are correlated tests and resampling recovers the power Holm gives up. Holm
-  is the fallback where the bootstrap is impractical. Corrected and uncorrected shown
-  side by side, every status change discussed. Never plain Bonferroni. Screening uses plain
-  BH; the adaptive BKY variant is not used. BH controls FDR under positive regression
-  dependence on a subset (PRDS; Benjamini and Yekutieli 2001). BKY proved control under
-  independence and showed positive dependence only by simulation (Benjamini, Krieger, and
-  Yekutieli 2006). That AMCE tests satisfy PRDS is the skill's judgment and is unproven.
-  The reasoning: levels of one attribute share a reference marginal mean, so their
-  estimates correlate positively. Across attributes, independent randomization leaves
-  correlations near zero. A latent screen over machine-generated candidates is the case
-  that flips the choice. Composing the tau correction with the
-  multiple-testing correction is mechanically fine (ash consumes any estimate-SE pairs)
-  but unstudied; label the combination as our own judgment.
-- Interaction search is a worse multiplicity problem than the AMCE forest (every level pair
-  across every factor pair), and it takes a different instrument. Regularize the estimates
-  and report bootstrap selection probabilities instead of corrected p-values (Egami and Imai
-  2019, who decline family-wise error control explicitly and use a 90% selection cutoff).
-  Valid inference after level collapsing is unsolved, so a confirmatory interaction claim
-  needs a held-out half: collapse and select on one, estimate and build intervals on the
-  other. Screening this way is exploratory by construction, and the write-up says so.
-- Subgroups, the danger zone twice over. For preference description: differences in
-  conditional AMCEs conflate preferences with feelings about the arbitrary reference
-  category, so their sign, size, and significance are artifacts (Leeper, Hobolt, and
-  Tilley 2020). Estimate conditional marginal means, difference those, and test
-  "groups agree overall" with the nested-model F over group-by-level interactions. For
-  measurement error: IRR varies by respondent characteristics, so correct each
-  subgroup with its own tau before differencing; roughly 5% of subgroup differences
-  flipped sign under correction (Clayton et al. 2026).
-- Individual-level heterogeneity, when the subgroups are not known in advance. Zhirkov
-  (2022) estimates respondent-specific marginal component effects (IMCEs) with no added
-  assumptions, and he recommends some changes to the task design. Robinson and Duch
-  (2024) estimate IMCEs by BART and partition them afterward to find the subgroups (CRAN
-  package cjbart). The skill's judgment: treat both as exploratory description, and
-  confirm a subgroup found this way by conditional marginal means on fresh data or a
-  held-out half.
+Defaults, each with the condition that moves off it. The full rules, evidence, and worked
+numbers are in references/track-experiment.md, section "Estimation and inference". The
+code is scripts/conjoint_template.R, sections 1 to 7b.
+
+- Estimator: one OLS of the choice indicator on all attribute dummies, with standard
+  errors clustered by respondent (CR2). With few respondents or very unbalanced task
+  counts, use CV3 with the wild cluster restricted bootstrap (shared-rules.md, section
+  "Clustering"). Under restricted or weighted randomization, add the linked interactions
+  with the eq. 9 weights.
+- Measurement error: estimate IRR, correct via projoint, and report raw and corrected
+  estimates. The correction is for binary forced choice only. The skill refuses to extend
+  it to ratings, rankings, or choose-one-of-many.
+- Multiple testing: for screening, adaptive shrinkage or BH at q = .10. For confirmatory
+  work, Romano-Wolf with the respondent block bootstrap, and Holm where the bootstrap is
+  impractical. Never an uncorrected forest of stars, never plain Bonferroni.
+- Interactions: AMIEs with bootstrap selection probabilities. A confirmatory interaction
+  claim needs a held-out half.
+- Subgroups: conditional marginal means with the nested-model F, each subgroup corrected
+  with its own tau. Never difference conditional AMCEs.
+- Individual-level heterogeneity: IMCEs (Zhirkov 2022; cjbart) are exploratory
+  description, confirmed on fresh data or a held-out half.
+
+## Estimation: the preference-measurement track
+
+Defaults, each with the condition that moves off it. The full rules and evidence are in
+references/track-hb.md. The recipe, prior defaults, and input formats are in
+references/details.md, section "The HB recipe (bayesm 3.1-7, verified at source level)".
+The code is scripts/conjoint_template.R, sections 8 and 9.
+
+- Estimator: choice-based conjoint by hierarchical Bayes, bayesm's rhierMnlRwMixture with
+  a mixture-of-normals heterogeneity distribution. Convergence: four chains, split
+  rank-normalized R-hat below 1.01, bulk and tail ESS above 400 for every parameter, and
+  rank plots. Move to HMC (cmdstanr) at about 100 parameters (untested; track-hb.md) or
+  when a referee asks for HMC diagnostics.
+- Any run with a sign constraint passes the full Prior explicitly. Rescale price to about
+  unit scale and leave the prior alone.
+- When WTP, reservation prices, or optimal prices are the deliverable, parameterize in WTP
+  space with the prior on WTP. In partworth space, compute WTP draw by draw and report
+  posterior quantiles. Validate on holdout log predictive density, never in-sample LMD or
+  DIC.
+- Use incentive alignment for WTP-relevant tasks. Hold out one randomly selected middle task
+  per respondent.
+- Shares: share of preference on the posterior draws. Run first choice on draws as the
+  check when the scenario adds products similar to existing ones.
+- Heterogeneity defaults to mixtures. Flag latent class for segmentation deliverables.
+- Whether an IRR-style correction exists for HB partworths is unstudied. Flag it as open.
+
+## Diagnostics battery
+
+Run and report; each is a regression plus F-test with worked numbers in
+references/details.md.
+
+1. Carryover: AMCEs by task number, F-test the attribute-by-task interactions. Expected
+   benign pattern: a small task-1 drop, flat thereafter. Failure fallback: first-task
+   data only. The CRTConjoint randomization test is the modern sharp version.
+2. Profile-order effects: AMCEs by profile position, F-test.
+3. Randomization balance: regress respondent characteristics on attribute dummies,
+   omnibus F.
+4. Attribute row-order effects: row-specific AMCEs, F-test.
+5. Atypical profiles: AMCEs by realized-profile typicality strata (external validity,
+   not internal).
+6. Satisficing share (External validity) and IRR (the experiment track). IRR is the one
+   diagnostic whose absence is itself a finding.
 
 ## The claims firewall
 
@@ -284,114 +271,12 @@ adjudicated cell is in Live disputes below).
   above). Alignment improves prediction; benchmarking showed unincentivized EFFECTS can
   match real effects while levels fail.
 
-## The preference-measurement track (marketing)
-
-When the deliverable is partworths, shares, WTP, pricing, or targeting:
-
-- The stack is choice-based conjoint estimated by hierarchical Bayes, the field's
-  accepted default ("comparable or even superior to the traditional methods both in
-  part-worth estimation and predictive validity", Agarwal et al. 2015, p. 30). The reference
-  implementation is bayesm's rhierMnlRwMixture (Rossi, Allenby, and Misra 2024; bayesm
-  3.1-7): hierarchical MNL with a mixture-of-normals heterogeneity distribution. The
-  six-step recipe, the prior-defaults table, and the verified input formats are in
-  references/details.md; the template implements them. Convergence follows Vehtari,
-  Gelman, Simpson, Carpenter, and Bürkner (2021): four chains, split rank-normalized
-  R-hat below 1.01 and bulk and tail ESS above 400 for every parameter, and rank plots.
-  bayesm runs one chain per call, so the template runs four seeded calls, stacks their
-  `betadraw` arrays, and diagnoses them with `posterior::summarise_draws()`. One chain's
-  trace plot is not a convergence check. The HMC route is cmdstanr with a hand-written
-  hierarchical conditional logit. Use it when the parameter count reaches about 100, or
-  when a referee asks for HMC diagnostics. The threshold is an expectation Orme reports
-  from Kevin Lattery's correspondence, and it is untested; van Horn's datasets had 15 to
-  27 parameters. Van Horn (2024, reported by Orme) finds equal holdout prediction and
-  better R-hat and ESS for HMC than for Metropolis-Hastings (Sawtooth's CBC/HB).
-- The sign-constraint hard rule: any run constraining a coefficient's sign (price
-  negative) passes the FULL Prior explicitly, because the shipped constrained defaults
-  contradict the package's own documentation in two places (verified at source level;
-  the discrepancy table is in references/details.md). Report the priors used.
-- Scale before priors: bayesm defaults assume roughly unit-scale data; rescale price
-  (hundreds or thousands), leaving the prior alone.
-- WTP: when WTP, reservation prices, or optimal prices are the deliverable,
-  parameterize in WTP space (the surplus model) and put the normal heterogeneity prior
-  on WTP directly. Normal partworths over a lognormal price coefficient put prior mass
-  near a zero price coefficient, so the implied WTP prior is fat-tailed and, with 14-15
-  tasks per respondent, posterior WTP, demand curves, and optimized prices inherit the
-  tails: the partworth model priced a Taurus at $33,200 and a $499-max camera above
-  $1,500 in the paper's own data (Sonnier, Ainslie, and Otter 2007). Validate on
-  holdout log predictive density, never in-sample LMD or DIC (both preferred the badly
-  wrong model on simulated data with known truth). In partworth space, WTP is a
-  partworth divided by the price coefficient. When the price coefficient's
-  heterogeneity distribution has density at zero (normal, or a mixture of normals),
-  that ratio has no finite mean or variance, so posterior means and sds of WTP estimate
-  nothing (Daly, Hess, and Train 2012). WTP moments exist when the price coefficient is
-  lognormal (bayesm's sign constraint) or bounded away from zero. Compute WTP draw by
-  draw for each respondent, never as a ratio of posterior means, report posterior
-  quantiles, and keep the partworth-space posterior out of price optimizers. Caveat
-  carried: WTP space assumes everyone has finite WTP, an assumption when
-  noncompensatory price screening is plausible. Write the rule as "prior on the
-  quantity you report", not "WTP space always fits better" (the founding papers
-  disagree on the fit ranking).
-- Incentive alignment is the default for WTP-relevant tasks, with the mechanism chosen
-  by product availability (the BDM-based WTP mechanism with one real product, Rank
-  Order with several; Agarwal et al. 2015). Include the no-choice option when it is
-  feasible and salient for consumers, knowing its mere presence shifts processing.
-  Always field holdout tasks, holding out one randomly selected middle task per
-  respondent, never task 1 and never the final repeat (both carry task 1's
-  information); out-of-sample hit rate and LPD are this track's currency.
-- Choice-share simulation. Simulate shares on the posterior draws, respondent by
-  respondent and draw by draw, then average. van Horn (2024, reported by Orme 2024,
-  p. 4) found that simulating on draws predicted holdout shares better than simulating
-  on point estimates. Both authors guess that part of the gain is a lower scale factor
-  in the simulated shares. Name the rule in the write-up. First choice gives each respondent's
-  whole vote to the highest-utility product. Share of preference splits it by the logit
-  formula. Share of preference inherits IIA within a respondent: adding a near-copy of
-  a product draws share from every product in proportion, where real buyers would take
-  it mostly from the copied product. Averaging over heterogeneous respondents and draws
-  softens IIA without removing it. The skill's judgment: use share of preference on
-  draws as the default, and run first choice on draws as the check whenever the
-  scenario adds products similar to existing ones.
-- Managerial translation (MVAI and its cost threshold, reservation-price pricing,
-  product-line optimization) is mapped in references/details.md. Decisions ride on the
-  posterior draws.
-- Open question, flagged honestly: whether a measurement-error correction analogous to
-  the IRR correction exists for HB partworths is unstudied; the canon does not answer
-  it.
-
-## Diagnostics battery
-
-Run and report; each is a regression plus F-test with worked numbers in
-references/details.md.
-
-1. Carryover: AMCEs by task number, F-test the attribute-by-task interactions. Expected
-   benign pattern: a small task-1 drop, flat thereafter. Failure fallback: first-task
-   data only. The CRTConjoint randomization test is the modern sharp version.
-2. Profile-order effects: AMCEs by profile position, F-test.
-3. Randomization balance: regress respondent characteristics on attribute dummies,
-   omnibus F.
-4. Attribute row-order effects: row-specific AMCEs, F-test.
-5. Atypical profiles: AMCEs by realized-profile typicality strata (external validity,
-   not internal).
-6. Satisficing share and IRR, as above. IRR is the one diagnostic whose absence is
-   itself a finding.
-
 ## Live disputes, carried honestly
 
-- AMCE interpretation (Abramson-Kocak-Magazinnik 2022 vs Bansak-Hainmueller-Hopkins-
-  Yamamoto 2023): the mathematics is settled and shared; what stays live is which
-  question the estimand should answer. Both sides prove the AMCE is a probabilistic
-  Borda aggregation mixing direction and intensity, that a positive AMCE does not imply
-  a majority preference, and that it identifies the expected-vote-share effect in the
-  stated target election. The claims firewall is bilateral (the defenders ban the
-  majority reading too). Contested: whether vote share (the field's modal estimand, 87%
-  of 82 reviewed voting articles) or the head count (what 83% of applied conjoint
-  papers write sentences about) is the right target; both audits hold, the defect is in
-  applied prose. Full adjudicated cell with the asymmetries in references/details.md.
-- Preference-space vs WTP-space fit ranking: contested between the founding papers;
-  the durable claim is about the implied prior, and the rule is stated accordingly
-  (above).
-- Continuous vs discrete heterogeneity in HB: unresolved in the marketing literature
-  (Agarwal et al. 2015); the skill defaults to mixtures and flags latent class for
-  segmentation deliverables.
+The AMCE-interpretation dispute is adjudicated in references/details.md, section "The
+adjudicated dispute cell (AMCE interpretation)". The two HB-track disputes (WTP-space fit
+ranking, continuous vs discrete heterogeneity) are in references/track-hb.md, section
+"Live disputes on this track".
 
 ## Implementation
 

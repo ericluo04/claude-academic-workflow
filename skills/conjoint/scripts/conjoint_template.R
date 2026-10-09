@@ -7,28 +7,7 @@
 # CRTConjoint (6), and logitr (9). Package versions and pins live in one place:
 # ../references/details.md, "Package index". Adapt CONFIG and run section by section.
 #
-# API traps verified against docs/source:
-#   - projoint: EVERY argument is dot-prefixed (.data, .irr, .estimand). Subgroup trap:
-#     .by_var is honored only with .structure = "profile_level" (ignored at choice
-#     level); choice-level subgroup comparisons run projoint separately per group with
-#     group-specific tau. The repeated task's outcome goes LAST in .outcomes, and
-#     .flipped = TRUE means the repeat showed the profiles in reversed columns.
-#   - cjoint::amce: cluster = TRUE alone does nothing useful; pass BOTH
-#     cluster = TRUE and respondent.id = "<id column>".
-#   - factorEx::model_pAMCE: target_type is "marginal" or "target_data" only
-#     (partial_joint exists only in design_pAMCE); ord_fac has no default, pass it.
-#   - ashr: input is estimates + SEs (any estimator); accessors get_pm/get_psd/get_lfsr.
-#   - CRTConjoint: design = "Uniform" is capitalized; the default seed is RANDOM, set it.
-#   - bayesm sign constraints: any nonzero SignRes silently switches every prior
-#     default, and the shipped constrained V contradicts the man page AND vignette;
-#     pass the FULL Prior explicitly (see section 8).
-#   - logitr: WTP space is switched by scalePar = "price" (modelSpace/price/randPrice
-#     are the deprecated pre-0.7.0 interface; do not use them).
-#   - FindIt::CausalANOVA: vcov and CI.table come back ONLY when screen and collapse are
-#     both FALSE; with either TRUE the intervals must come from test.CausalANOVA on a
-#     held-out half. AME/AMIE2 are baselined at the GRAND MEAN, not a level. The FindIt
-#     manual writes "select=FALSE and collapse=FALSE"; CausalANOVA has no `select`
-#     argument, and the manual means `screen`.
+# API traps verified against docs/source sit as inline comments at the call each one guards.
 
 library(estimatr)
 library(projoint)
@@ -78,6 +57,7 @@ mm_A1 <- lm_robust(y ~ 0 + A1, data = df_est, clusters = id)  # MMs with cluster
 # admissible strata (HHY eq. 9; ../references/details.md). The packaged route:
 # cjoint::amce(y ~ A1 + A2 + A3, data = df_est, design = my_design,
 #              cluster = TRUE, respondent.id = "id")   # design from makeDesign()
+# cluster = TRUE alone does nothing useful; pass BOTH cluster = TRUE and respondent.id.
 
 ## ---- 2. Measurement error: IRR and the tau correction (projoint) -----------------------
 # Design route: the final task repeated task 1 with columns flipped. From Qualtrics:
@@ -91,6 +71,7 @@ mm_A1 <- lm_robust(y ~ 0 + A1, data = df_est, clusters = id)  # MMs with cluster
 # df_pj$y_rep <- NA
 # df_pj$y_rep[t1] <- r$y[match(paste(df_pj$id, 3 - df_pj$profile)[t1],
 #                              paste(r$id, r$profile))]
+# projoint: EVERY argument is dot-prefixed (.data, .irr, .estimand).
 # pj <- make_projoint_data(df_pj, .attribute_vars = c("A1", "A2", "A3"),
 #                          .selected_var = "y", .selected_repeated_var = "y_rep")
 # Choice level (the skill's default) estimates ONE contrast per call: build a set_qoi()
@@ -132,7 +113,8 @@ cbind(raw = est, shrunk = get_pm(a), psd = get_psd(a), lfsr = get_lfsr(a))
 # NEVER "bonferroni": "holm" is a drop-in that rejects everything Bonferroni rejects and
 # sometimes more, under the same assumptions. Screening uses "BH"; the adaptive BKY variant
 # is not used. BH controls FDR under PRDS (Benjamini and Yekutieli 2001); BKY is proven
-# only under independence. That AMCE tests are PRDS is the skill's judgment (SKILL.md).
+# only under independence. That AMCE tests are PRDS is the skill's judgment
+# (../references/track-experiment.md).
 # Composing ash with tau-corrected estimates is mechanically fine but unstudied in the
 # canon; label the combination as our own judgment.
 
@@ -169,6 +151,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # CRT_carryovereffect(y ~ A1 + A2 + A3, data = df_wide, left = left_cols,
 #                     right = right_cols, task = "task", design = "Uniform",
 #                     B = 200, seed = 42)$p_val    # set seed: the default is random
+# design = "Uniform" is capitalized.
 # B = 200 keeps the CRT cheap but the p-value coarse; raise B when p lands near the
 # threshold.
 
@@ -178,6 +161,8 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # retarget its design marginal.
 # target_dist <- list(A1 = c(lev1 = .70, lev2 = .30), A2 = c(a = .1, b = .5, c = .4),
 #                     A3 = c(x = .5, y = .5))
+# target_type is "marginal" or "target_data" only (partial_joint exists only in
+# design_pAMCE); ord_fac has no default, pass it.
 # fit_p <- model_pAMCE(y ~ A1 + A2 + A3, data = df_choice, ord_fac = rep(FALSE, 3),
 #                      pair = TRUE, pair_id = df_choice$pair_id,  # pair defaults to FALSE
 #                      cluster_id = df_choice$id, target_dist = target_dist,
@@ -204,6 +189,8 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 #                      nway = 2, diff = TRUE, pair.id = df_choice$pair_id,
 #                      cluster = df_choice$id, screen = FALSE, collapse = FALSE)
 # summary(fit_i)                                   # vcov + CI.table only in this mode
+# The FindIt manual writes "select=FALSE and collapse=FALSE"; CausalANOVA has no `select`
+# argument, and the manual means `screen`.
 # ConditionalEffect(fit_i, treat.fac = "A1", cond.fac = "A2")   # = AME + AMIE
 #
 # Regularized, when the design is large (>~6 factors to screen, >~6 levels to collapse).
@@ -230,7 +217,9 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # data_hb  <- list(lgtdata = lgtdata, p = p)     # + Z = centered covariates, no intercept
 # prior_hb <- list(ncomp = 1)
 # ## Sign-constrained price (LAST column): pass the FULL prior, the shipped defaults
-# ## contradict their own documentation (vignette values shown):
+# ## contradict their own documentation (vignette values shown). Any nonzero SignRes
+# ## silently switches every prior default, and the shipped constrained V contradicts the
+# ## man page AND the vignette:
 # # nvar <- ncol(lgtdata[[1]]$X)
 # # prior_hb <- list(ncomp = 1, SignRes = c(rep(0, nvar - 1), -1),
 # #                  mubar = c(rep(0, nvar - 1), 2), Amu = 0.1, nu = nvar + 15,
@@ -286,6 +275,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # ML route: logitr is MAXIMUM LIKELIHOOD (simulated), not Bayesian. It fits the WTP-space
 # mixed logit directly; randScale = "ln" makes the scale lognormal, which is Sonnier's
 # surplus model, (x'beta_i - p) / mu_i with log mu_i normal.
+# modelSpace/price/randPrice are the deprecated pre-0.7.0 interface; do not use them.
 # wtp_fit <- logitr(data = df_choice, outcome = "y", obsID = "obs", panelID = "id",
 #                   pars = c("A1", "A2", "A3"), scalePar = "price",   # WTP space
 #                   randPars = c(A1 = "n", A2 = "n", A3 = "n"),       # mixed logit

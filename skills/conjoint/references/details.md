@@ -1,7 +1,7 @@
 # Conjoint lookup details
 
 Heavy reference content the SKILL.md points into. Sources: reading notes in
-the maintainer's reading notes, current as of 2026-07-31.
+the maintainer's reading notes, current as of 2026-10-09.
 
 ## The adjudicated dispute cell (AMCE interpretation)
 
@@ -250,6 +250,10 @@ vignette, 70% single conjoint, 72% single vignette, with origin effects shrinkin
 in proportion. CRTConjoint implements the Ham-Imai-Janson randomization test for
 carryover/profile order.
 
+Conjoint's analog of the pre-trend rule: stability across tasks must never be cited as
+evidence of reliability (family formulation from the Bansak-Clayton compatibility
+analysis).
+
 ## The HB recipe (bayesm 3.1-7, verified at source level)
 
 Six steps: (1) format lgtdata as a list of per-respondent lists (y coded 1..p; X of
@@ -288,7 +292,7 @@ Kurowicka, and Joe 2009). The skill's
 reading of the cost: one degrees-of-freedom value sets the tightness of every variance and
 every correlation together, so the analyst cannot loosen one without the other. In the
 methods text, name the inverse-Wishart, its nu and V, and the reason (bayesm's conjugate
-sampler). A referee who asks for LKJ gets the cmdstanr route in SKILL.md.
+sampler). A referee who asks for LKJ gets the cmdstanr route in references/track-hb.md.
 
 Sign-constrained defaults, THE TRAP: any nonzero SignRes flips the whole prior (mubar = 2
 on constrained entries, Amu = 0.1, nu = nvar+15), and for V the three sources disagree:
@@ -396,9 +400,6 @@ test that all group-by-level interactions are zero.
   opposite of the true preference of the majority." (Abramson et al., abstract.)
 - "Marginal means contain all of the information provided by AMCEs and more." (Leeper et
   al.)
-- "The lack of a significant pre-trend..." does not belong here; conjoint's analog:
-  stability across tasks must never be cited as evidence of reliability (family
-  formulation from the Bansak-Clayton compatibility analysis).
 - "The standard estimation method for conjoint analysis has become hierarchical Bayes."
   (Netzer et al., p. 348; the paper follows it with citations to Lenk et al. 1996 and
   Rossi and Allenby.)
