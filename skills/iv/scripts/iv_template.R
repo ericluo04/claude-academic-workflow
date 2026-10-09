@@ -1,4 +1,4 @@
-# IV analysis template. Sections 1 through 10 were run on simulated data on 2026-10-08 under
+# IV analysis template. Sections 1 through 10 were run on simulated data on 2026-10-09 under
 # R 4.6.1; package versions and pins live in the package index in ../references/details.md.
 # Adapt CONFIG and run section by section.
 #
@@ -142,8 +142,8 @@ uj <- function(lhs, rhs = "d") stats::as.formula(   # one spec, reused by every 
   paste0(lhs, " ~ ", rhs, " + cell | examiner"))
 
 ## 6a. Step 1: controls, estimator, and the SE decision, all before any regression.
-# Rules: SKILL.md leniency check 1 and the Inference paragraph (cluster where assignment
-# varies; clustered assignment changes the estimator to leave-own-cluster-out).
+# Rules: ../references/designs.md leniency check 1 and its Inference paragraph (cluster
+# where assignment varies; clustered assignment changes the estimator to leave-own-cluster-out).
 # ujive() has NO cluster argument, so never paste clustered SEs onto a ManyIV fit. Under
 # clustered assignment, clusterIV (CRAN, row in ../references/details.md) implements the
 # cluster-jackknife IV of Frandsen, Leslie, and McIntyre 2025 and a cluster-jackknife AR:
@@ -161,7 +161,7 @@ covs <- c("w1", "w2", "w3")               # predetermined covariates, one row ea
 bal <- t(sapply(covs, function(v)
   unlist(ujive(uj(v), data = df)$estimate["ujive", c("estimate", "se_hte")])))
 cbind(bal, t = bal[, 1] / bal[, 2])
-# Why this form and which alternatives are wrong: SKILL.md leniency check 2.
+# Why this form and which alternatives are wrong: ../references/designs.md leniency check 2.
 # Sample trap: the dropped rows depend on the controls and instruments, so they are common
 # across outcomes, but NAs in one covariate shrink that row's sample. Compare $drop_obs
 # lengths across rows, or subset to complete cases once up front.
@@ -177,14 +177,15 @@ ujive(uj("months_under_review"), data = df)$estimate["ujive", ]
 fit <- ujive(uj("y"), data = df)
 fit                                       # prints all six rows plus F, n, K, L
 fit$estimate["ujive", c("estimate", "se_hte")]         # the headline pair
-# How to read the tsls, jive1, and ijive1 rows beside ujive: SKILL.md leniency check 3.
+# How to read the tsls, jive1, and ijive1 rows beside ujive: ../references/designs.md check 3.
 # Never plug a hand-built leniency measure into a just-identified IV.
 
 ## 6e. Strength: the first-stage F is the WRONG diagnostic here.
 K <- fit$IVData$k                          # post-collinearity-drop instrument count
 sqrt(K) * (fit$IVData$F - 1)               # the statistic to report, in place of F
-# Why, and why no cutoff: SKILL.md "Strength and the weak-instrument fallback". Run 6f when
-# the number is small; do not import the 2SLS Keane-Neal ladder from section 3.
+# Why, and why no cutoff: ../references/designs.md "Strength and the weak-instrument
+# fallback". Run 6f when the number is small; do not import the 2SLS Keane-Neal ladder
+# from section 3.
 
 ## 6f. Weak-instrument fallback when sqrt(K) * (E[F] - 1) is small: Yap (2025).
 # To test H0: beta = b0, compute eps_i0, the residual from projecting y - d * b0 on the
@@ -207,7 +208,8 @@ sqrt(K) * (fit$IVData$F - 1)               # the statistic to report, in place o
 # Two forms of v test different things. An outcome indicator (the line below) is the
 # Kitagawa-type check on the outcome distribution of treated compliers, the form behind
 # their Figure 1. A pre-assignment covariate indicator (e.g. v = w1 > median) checks the
-# complier covariate distribution. Rules and limits: SKILL.md "Monotonicity, weakened and tested".
+# complier covariate distribution. Rules and limits: ../references/details.md "Monotonicity,
+# weakened and tested".
 df$v <- as.numeric(df$y == 0)             # binary v: an indicator for one outcome value
 mono <- ujive(uj("I(v * d)"), data = df)$estimate["ujive", c("estimate", "se_hte")]
 c(est = mono$estimate, lo = mono$estimate - 1.96 * mono$se_hte,
@@ -224,7 +226,7 @@ comp <- t(sapply(covs, function(v)
   unlist(ujive(uj(paste0("I(", v, " * dt)"), "dt"),
                data = df)$estimate["ujive", c("estimate", "se_hte")])))
 cbind(comp, sample_mean = sapply(covs, function(v) mean(df[[v]], na.rm = TRUE)))
-# How to read the gaps: SKILL.md "Compliers and external validity".
+# How to read the gaps: ../references/details.md "Compliers and external validity".
 
 ## ---- 7. Shift-share, shift path (BHJ 2025) -----------------------------------
 # Objects: S = N x K share matrix (rows = units, cols = shocks/sectors), gk = length-K
