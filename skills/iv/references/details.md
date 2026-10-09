@@ -26,7 +26,7 @@ minimized at OLS, so sigma-hat is smallest when the 2SLS estimate lands near OLS
 covariance between the instrument and the structural error simultaneously inflates the apparent
 first stage and pulls the estimate toward OLS. Together they make the 2SLS standard error
 artificially small near OLS and large far from it (rank correlation of estimate and SE of
--0.92 at population F 29.4, rho 0.8). Consequences: one-sided t size is severely distorted at
+-0.92 at population F 73.75, rho 0.8). Consequences: one-sided t size is severely distorted at
 any realistic strength (100 percent of null rejections land on the OLS-bias side at F = 10);
 power against effects opposite the OLS bias is near zero (0.2 percent for a true beta of -0.3
 at F = 2.3); with publication bias, the t-test manufactures a spurious literature-wide
@@ -54,8 +54,9 @@ live.
 | Just-identified | 2SLS (= IV ratio = ILS) | AR (reduced-form robust t); interval by inversion |
 | Overidentified, homoskedastic | LIML | CLR (Moreira 2003) |
 | Overidentified, heteroskedastic/clustered | CUE (LIML + robust VCE as fallback) | Kleibergen 2005 GMM CLR |
-| Many instruments | LIML (Bekker-consistent), JIVE, HFUL, bias-corrected TSLS | CLR; Hansen J alongside CUE |
-| Many weak + severe endogeneity | Fuller, Andrews-Armstrong unbiased | same |
+| Many instruments | LIML (Bekker-consistent under homoskedasticity only; inconsistent with many instruments under heteroskedasticity), HFUL (Hausman et al. 2012, the heteroskedasticity-robust fix), JIVE, bias-corrected TSLS | jackknife AR (Mikusheva-Sun 2022) or jackknife LM (Matsushita-Otsu 2024); Yap 2025 under heterogeneous effects. CLR's critical values assume a fixed instrument count and do not hold here |
+| Many weak + severe endogeneity | Fuller | same |
+| Just-identified, first-stage sign known | Andrews-Armstrong 2017 unbiased estimator | AR |
 
 Never attach CLR p-values to a 2SLS estimate; never screen on t before AR. TSLS and LIML are
 identical just-identified and diverge exactly when instruments are weak or many, so their gap
@@ -126,7 +127,8 @@ a demand shifter identifies supply; without one side's shifter, that side stays 
 What the number is. The IV elasticity belongs to the compliers whose purchases the instrument
 moved, so a storm-instrumented elasticity describes buyers who responded to storm-driven price
 increases (Angrist, Graddy, and Imbens 2000). It need not be the elasticity a firm faces when it
-sets price itself, because when the firm lowers its price it will not do so using storms. The
+sets price itself. Cunningham (Remix, ch. 7) makes the point that a firm lowering its price will
+not do so using storms. The
 Mixtape (Cunningham, Causal Inference: The Remix, ch. 7) runs the same data with a binary Stormy
 instrument and day-of-week dummies and reports 2SLS -1.119 (0.431) against OLS -0.563 (0.152) at
 N = 111, so the two-line demonstration above is robust to the specification. Hand a pricing team
@@ -273,7 +275,7 @@ with the lesson each canonical case carries.
 | Design | Canonical case | What it teaches |
 |---|---|---|
 | Randomized encouragement with noncompliance | Oregon Medicaid lottery (Finkelstein et al. 2012; Baicker et al. 2013) | lottery IV under voluntary take-up, with the ITT and the LATE reported side by side across financial, utilization, and health outcomes; winning the lottery raised Medicaid enrollment by about 26 points |
-| Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | the design end to end at 331,971 cases and eight judges, where OLS finds nothing (-0.001) and IV finds 15 to 21 percent on guilty pleas, so the estimator choice carries the paper |
+| Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | the design end to end, where OLS finds nothing and IV carries the paper; in Cunningham's replication of the data (Remix, Table 7.12), 331,971 cases and eight judges, OLS -0.001 with time controls (0.029 with defendant controls) and IV 15 to 21 percent on guilty pleas. Stevenson's own headline is a 13 percent rise in conviction |
 | Shift-share exposure | Bartik 1991; Autor-Dorn-Hanson 2013 | shares and shifts are two different identification claims, each with its own estimator, balance test, and disqualifier |
 | Formula or network exposure | Borusyak-Hull 2023, China high-speed rail | a formula-built instrument inherits endogeneity from its nonrandom exposure weights: 0.23 collapses to 0.08 after recentering |
 | Cost shifter for price | Wright 1928; Graddy's Fulton fish market (Graddy 2006) | simultaneity: observed price-quantity pairs are equilibria, a supply shifter identifies demand, and the elasticity recovered belongs to the instrument's compliers |
@@ -305,27 +307,36 @@ with the lesson each canonical case carries.
 
 ## Package index (verified against package docs 2026-07-28; the ivmte row on 2026-07-29;
 the ManyIV row against the cloned source and a live run on its `fhl` data on 2026-08-04;
-versions and publication dates re-checked against crandb and the GitHub HEADs on 2026-08-26,
-with no package ahead of the version recorded here, so the traps below stand as written)
+versions and publication dates re-checked against crandb and the GitHub HEADs on 2026-08-26
+and again on 2026-10-08; on 2026-10-08 scripts/iv_template.R sections 1 through 10 ran on
+simulated data under R 4.6.1 with every version below, plus lpSolveAPI 5.5.2.0-17.15. This
+index is the one place the template's pins live)
 
 | Package | Version | Role | Traps |
 |---|---|---|---|
-| fixest | 0.14.2 (CRAN, 2026-06-26) | 2SLS with FE and clustered SEs; first stage via summary(est, stage = 1); fitstat(~ ivf1 + ivwald1 + sargan + wh) | IV part must be the LAST formula element, after fixed effects; fitstat keywords lowercase (pinned also in did's details; update the two pins together on refresh) |
 | ivreg | 0.6-8 (CRAN, 2026-07-10) | TSLS with diagnostics rows (weak instruments, Wu-Hausman, Sargan); successor to AER::ivreg | three-part form is y ~ exogenous \| endogenous \| instruments; in the two-part form, controls not repeated after the pipe silently become instruments; vcov. must be a function when diagnostics = TRUE |
 | ivmodel | 1.9.1 (CRAN, 2023-04-09) | AR.test and CLR with inversion CIs (matrix of interval rows; unions and unbounded sets happen), KClass/LIML/Fuller, heteroSE and clusterID options | KClass has a capital K; single endogenous regressor; takes data vectors, not formulas |
 | ivDiag | 1.0.6 (CRAN, 2023-09-17; yiqingxu.org/packages/ivDiag) | one-call audit: F.standard/robust/cluster/bootstrap/effective, AR with inverted CI, tF (Lee et al.), ltz local-to-zero. The components are also exported one at a time: `eff_F()` returns the Montiel Olea-Pflueger effective F alone, `AR_test()` the AR test with its inverted CI alone, and `plot_coef()` draws the estimator comparison (OLS, 2SLS, and the AR interval), which is what the Mixtape's code calls. The template calls the omnibus `ivDiag()` and reads `$F_stat`, `$AR`, and `$tF` off one fit, so reach for the components only when you want a single number without the bootstrap | every variable passed as a name string; pulls the lfe dependency chain |
 | ShiftShareSE | 1.1.0 (CRAN, 2022-04-24, Kolesar) | reg_ss / ivreg_ss with method = "akm" / "akm0" (AKM0 = null-imposed, better small-K coverage); sector_cvar clusters shocks | X is the aggregated shift-share vector, shares go in W, the instrument never appears in the formula; the akm0 "se" is a normalized CI length, never a t-stat input |
 | ssaggregate | GitHub kylebutts/ssaggregate (0.0.0.9000, HEAD 22df939 dated 2025-11-02) | BHJ shock-level aggregation for the equivalent shift-level regression and the exposure-robust F | dev version, no CRAN release or visible tests; n/s/l/t are strings while vars/controls are formulas; template keeps a hand-coded fallback |
 | bpbounds | 0.1.8 (CRAN, 2026-07-13) | Balke-Pearl inequality checks and ACE bounds (binary Y, X; Z with 2-3 categories) | xtabs order is positional treatment-outcome-instrument with margin = 3 on the instrument |
-| ManyIV | GitHub kolesarm/ManyIV (0.0.2.9000, HEAD 0b82852 dated 2025-06-17; source read and run 2026-08-04) | the leniency-design workhorse and the package `goldsmithpinkham2026leniency` uses for its own checklist: `ujive(formula, data, subset, na.action, tol = 1e-8, dropleverage = TRUE)` with formula `y ~ d + controls \| instruments`, returning class `IVResults` whose `$estimate` is a data frame with rows ols / tsls / ujive / "old ujive" / ijive1 / jive1 and columns `estimate`, `se_text` (textbook robust), `se_hte` (heteroskedasticity- and treatment-effect-heterogeneity-robust, the column the paper's tables report, and it absorbs the Bekker many-instrument term), plus `$IVData$F` (homoskedastic first-stage F), `$IVData$k` (instruments after collinear drops), `$IVData$l` (controls), `$IVData$n`, `$drop_obs`. Also `IVreg(..., inference = "standard"/"md")` for Kolesár 2018 minimum-distance many-instrument SEs (JoE 204(1):86-100, distinct from Kolesár-Rothe 2018 on discrete running variables in the rdd skill) and `IVoverid()` for Sargan + modified Cragg-Donald | the endogenous variable must be the FIRST right-hand term (put it second and another regressor is silently treated as endogenous, verified by running both orders); NO cluster argument, so the leave-own-cluster-out UJIVE that clustered assignment requires has to be hand-coded; no null-imposed SE, so the Yap (2025) weak-IV test is hand-coded too; `dropleverage = TRUE` silently drops leverage-one and singleton-dummy rows, `FALSE` returns NaN for UJIVE with a warning; no weights argument; rough dev API (man pages still carry TODOs); for single-endogenous LIML/Fuller use ivmodel |
+| ManyIV | GitHub kolesarm/ManyIV (0.0.2.9000, HEAD 0b82852 dated 2025-06-17; source read and run 2026-08-04) | the leniency-design workhorse and the package `goldsmithpinkham2026leniency` uses for its own checklist: `ujive(formula, data, subset, na.action, tol = 1e-8, dropleverage = TRUE)` with formula `y ~ d + controls \| instruments`, returning class `IVResults` whose `$estimate` is a data frame with rows ols / tsls / ujive / "old ujive" / ijive1 / jive1 and columns `estimate`, `se_text` (textbook robust), `se_hte` (heteroskedasticity- and treatment-effect-heterogeneity-robust, the column the paper's tables report, and it absorbs the Bekker many-instrument term), plus `$IVData$F` (homoskedastic first-stage F), `$IVData$k` (instruments after collinear drops), `$IVData$l` (controls), `$IVData$n`, `$drop_obs`. Also `IVreg(..., inference = "standard"/"md")` for Kolesár 2018 minimum-distance many-instrument SEs (JoE 204(1):86-100, distinct from Kolesár-Rothe 2018 on discrete running variables in the rdd skill) and `IVoverid()` for Sargan + modified Cragg-Donald | the endogenous variable must be the FIRST right-hand term (put it second and another regressor is silently treated as endogenous, verified by running both orders); NO cluster argument, so clustered assignment goes to clusterIV (row below) or a hand-coded leave-own-cluster-out UJIVE; `IVoverid()` takes the fitted `IVreg` object, not a formula; no null-imposed SE, so the Yap (2025) weak-IV test is hand-coded too; `dropleverage = TRUE` silently drops leverage-one and singleton-dummy rows, `FALSE` returns NaN for UJIVE with a warning; no weights argument; rough dev API (man pages still carry TODOs); for single-endogenous LIML/Fuller use ivmodel |
+| clusterIV | 0.2.0 (CRAN, 2026-10-01, Katawazi) | `cjive()`, the cluster-jackknife IV of Frandsen, Leslie, and McIntyre 2025, and `cjar()`, a cluster-jackknife AR test (Ligtenberg 2025, arXiv 2306.08559), with controls and absorbed fixed effects; formula `y ~ d \| instruments \| fe`, `cluster = ~id`; run on simulated data 2026-10-08 | stops on instruments collinear with the fixed effects (examiners nested in cells), so pool one reference examiner per cell first; formula sections accept bare names only; not checked whether CJIVE carries UJIVE's many-control correction, so confirm in the source before reporting it as the headline |
+| gmm | 1.9-1 (CRAN, 2025-08-26) | CUE via `gmm(y ~ d + x, ~ z + x, type = "cue")`; momentfit 1.0 (CRAN, 2025-08-26) is the successor framework; gmm call run on simulated data 2026-10-08 | not validated by us under clustering; pair with LIML(heteroSE = TRUE) |
 | AER | 1.2-17 (CRAN, 2026-07-11) | legacy ivreg (two-part formula only), kept for compatibility notes | superseded by the ivreg package |
 | lfe | 3.1.1 (CRAN, 2025-02-11) | `felm(y ~ x \| fe \| (d ~ z))`, the IV route in the Mixtape's bail code | superseded by fixest, which is faster, is maintained, and gives the first stage and fitstat keywords the template uses |
 | SteinIV | 0.1-1 (CRAN, 2016-01-26) | `jive.est(y, X, Z)`, the JIVE the Mixtape runs on the Stevenson data | JIVE only, with no UJIVE and no heterogeneity-robust SE; superseded by ManyIV, which returns OLS, 2SLS, UJIVE, IJIVE, and JIVE from one call. Unchanged on CRAN since 2016 |
-| ivmte | 1.4.0 (CRAN, 2021-09-17; GitHub jkcshea/ivmte slightly ahead, last commit 2024-08-27) | MST bounds and extrapolation, single entry point ivmte(): target 'ate'/'att'/'atu'/'late'/'genlate' with genlate.lb/.ub the u-interval (the alpha dial) or custom target.weight0/1; MTR space via m0/m1 formulas with uSpline(degree, knots, intercept); ivlike list of regression formulas as the estimands; shape flags m0/m1/mte .lb/.ub/.inc/.dec enforced on the audit grid (initgrid.nx/.nu, audit.nx/.nu); bootstraps for inference; cite `shea2023ivmte` | needs one of gurobi/cplexapi/rmosek/lpsolveapi; the only fully free solver (lpSolveAPI) is roughly an order of magnitude slower and cannot run the regression-based direct criterion (QCQP, Gurobi or MOSEK only), so with it always supply ivlike moments; point = TRUE forces GMM and silently ignores every shape constraint; the unobservable in m0/m1 must match uname (default u); m0/m1 bounds default to the observed outcome range, which is the bounded-outcome assumption |
+| ivmte | 1.4.0 (CRAN, 2021-09-17; GitHub jkcshea/ivmte slightly ahead, last commit 2024-08-27) | MST bounds and extrapolation, single entry point ivmte(): target 'ate'/'att'/'atu'/'late'/'genlate' with genlate.lb/.ub the u-interval (the alpha dial) or custom target.weight0/1; MTR space via m0/m1 formulas with uSpline(degree, knots, intercept); ivlike list of regression formulas as the estimands; shape flags m0/m1/mte .lb/.ub/.inc/.dec enforced on the audit grid (initgrid.nx/.nu, audit.nx/.nu); bootstraps for inference; cite `shea2023ivmte` | needs one of gurobi/rmosek/lpsolveapi (cplexAPI was archived from CRAN 2021-11-05); lpSolveAPI is the free CRAN solver, but ivmte warns that lp_solve is outdated and potentially unreliable, so confirm headline bounds with Gurobi or MOSEK (free academic licences), and it is roughly an order of magnitude slower and cannot run the regression-based direct criterion (QCQP, Gurobi or MOSEK only), so with it always supply ivlike moments; ivmte re-evaluates its call outside the caller's frame, so `min(df$y)` in an argument hits stats::df and a wrapper function's own arguments are not found (pass precomputed scalars through do.call, as the template does; reproduced 2026-10-08); point = TRUE forces GMM and silently ignores every shape constraint; the unobservable in m0/m1 must match uname (default u); m0/m1 bounds default to the observed outcome range, which is the bounded-outcome assumption |
 
-R has no reliable CUE implementation; for the overidentified heteroskedastic case the canon's
-CUE + CLR recipe runs in Stata (ivreg2 with cue, then weakiv), with LIML(heteroSE = TRUE) as
-the R fallback. Rotemberg weights: reference implementation at github.com/paulgp/bartik-weight
+Shared with other causal skills: fixest, for 2SLS with fixed effects and clustered SEs. Version and
+family-wide traps are in ../../causal-design/references/packages.md. Traps specific to this skill:
+the first stage comes from summary(est, stage = 1), and the fitstat keywords are lowercase
+(fitstat(~ ivf1 + ivwald1 + sargan + wh)).
+
+gmm::gmm(type = "cue") and momentfit implement CUE in R (rows above); we have not validated
+either under clustering, so for the overidentified heteroskedastic case pair it with
+LIML(heteroSE = TRUE) and report the Stata route for the canon's CUE + CLR recipe (ivreg2 with
+cue, then weakiv) when it matters. Rotemberg weights: reference implementation at github.com/paulgp/bartik-weight
 (Stata and R code, not a CRAN package); the template hand-codes the just-identified GPSS
 decomposition and labels it as our implementation.
 

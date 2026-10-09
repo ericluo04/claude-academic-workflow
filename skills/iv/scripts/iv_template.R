@@ -1,8 +1,6 @@
-# IV analysis template. Runnable end to end; every call signature verified against package
-# documentation on 2026-07-28 (fixest 0.14.2, ivreg 0.6-8, ivmodel 1.9.1, ivDiag 1.0.6,
-# ShiftShareSE 1.1.0, bpbounds 0.1.8, all CRAN; ssaggregate from GitHub; ivmte
-# 1.4.0, CRAN, verified 2026-07-29; ManyIV 0.0.2.9000 from GitHub, verified against the
-# source and run on its own fhl data 2026-08-04). Adapt CONFIG and run section by section.
+# IV analysis template. Sections 1 through 10 were run on simulated data on 2026-10-08 under
+# R 4.6.1; package versions and pins live in the package index in ../references/details.md.
+# Adapt CONFIG and run section by section.
 #
 # API traps older tutorials get wrong:
 #   - fixest: the IV part (endo ~ inst) must be the LAST formula element, after fixed effects
@@ -13,8 +11,10 @@
 #     standard error, so never build a t-stat from it
 #   - ivreg two-part formula: controls must be repeated after the pipe or they silently become
 #     excluded instruments; the three-part form (y ~ ex | en | in) avoids this
-#   - ivmte: point = TRUE silently ignores every shape constraint; the only fully free solver
-#     (lpSolveAPI) cannot run the regression-based direct criterion, so pass ivlike moments
+#   - ivmte: point = TRUE silently ignores every shape constraint; the free CRAN solver
+#     (lpSolveAPI) cannot run the regression-based direct criterion, so pass ivlike moments;
+#     ivmte re-evaluates its arguments where `df` means stats::df, so pass outcome bounds as
+#     precomputed scalars, never as min(df$y)
 #   - ManyIV::ujive: the endogenous variable must be the FIRST right-hand term, before the
 #     controls; put it second and the package silently treats another variable as endogenous
 
@@ -98,14 +98,16 @@ fit <- ivreg(y ~ x1 + x2 | d | z1 + z2, data = df)   # exogenous | endogenous | 
 summary(fit, diagnostics = TRUE)   # Weak instruments, Wu-Hausman, Sargan rows
 # TSLS-LIML divergence is a cheap weak/many-instrument alarm (they are identical
 # just-identified): compare coef(fit) with LIML(m2)$point.est where m2 <- ivmodel(...,
-# Z = df[, c("z1","z2")]). Under heteroskedasticity the canon wants CUE + CLR; R has no
-# reliable CUE, so use LIML with heteroSE = TRUE and report the Stata route
-# (ivreg2, cue + weakiv) when it matters. Interpret a Sargan/J rejection under the
-# heterogeneity rule (SKILL.md): divergent instruments may move different compliers.
+# Z = df[, c("z1","z2")]). Under heteroskedasticity the canon wants CUE + CLR. gmm and
+# momentfit implement CUE, e.g. gmm::gmm(y ~ d + x1 + x2, ~ z1 + z2 + x1 + x2, data = df,
+# type = "cue", vcov = "MDS"); we have not validated either under clustering, so pair it
+# with LIML(heteroSE = TRUE) and report the Stata route (ivreg2, cue + weakiv) when it
+# matters. Interpret a Sargan/J rejection under the heterogeneity rule (SKILL.md):
+# divergent instruments may move different compliers.
 # Many instruments: many-instrument-valid SEs (Kolesár 2018 minimum distance, JoE
 # 204(1):86-100; a different paper from Kolesár-Rothe 2018 on discrete running variables,
 # which belongs to rdd) live in remotes::install_github("kolesarm/ManyIV"):
-# IVreg(y ~ d + x1 | z1 + z2, data = df, inference = "standard"), then IVoverid() --
+# r <- IVreg(y ~ d + x1 | z1 + z2, data = df, inference = "standard"), then IVoverid(r) --
 # dev-version API, check before relying on it. When the many instruments are
 # decision-maker dummies, go to section 6 instead: the estimator changes to UJIVE.
 
@@ -139,40 +141,26 @@ uj <- function(lhs, rhs = "d") stats::as.formula(   # one spec, reused by every 
   paste0(lhs, " ~ ", rhs, " + cell | examiner"))
 
 ## 6a. Step 1: controls, estimator, and the SE decision, all before any regression.
-# Controls are whatever institutional knowledge says makes assignment as good as random,
-# and nothing more: in the patent setting, art unit by year, because the examiner pool
-# within an art unit changes slowly. Both counts matter, K = examiners and L = controls.
-# CLUSTERING RULE: cluster at the level at which ASSIGNMENT varies, not at the level at
-# which residuals correlate. Under the random-instrument view (Abadie et al. 2020, 2023)
-# what has to be uncorrelated is the product (relative leniency x error), so independent
-# case-by-case assignment needs only robust SEs, and clustering "just in case" buys overly
-# conservative inference. Cluster when a block is assigned together, e.g. one doctor covers
-# a whole shift: then cluster on shift. This argument never justifies clustering on the
-# examiner. Applied work sometimes does it anyway.
-# CONSEQUENCE IF YOU DO CLUSTER: the ESTIMATOR changes as well as the SE, because
-# leave-one-out leniency has to become leave-own-cluster-out. Otherwise within-
-# cluster correlation between d_i and eps_j puts the mechanical bias back. ujive() has NO
-# cluster argument (formals are formula, data, subset, na.action, tol, dropleverage), so
-# ManyIV cannot do this. Hand-code the leave-own-cluster-out version (Frandsen, Leslie, and
-# McIntyre 2025; Kolesár, Min, et al. 2026) and do not paste clustered SEs onto this fit.
+# Rules: SKILL.md leniency check 1 and the Inference paragraph (cluster where assignment
+# varies; clustered assignment changes the estimator to leave-own-cluster-out).
+# ujive() has NO cluster argument, so never paste clustered SEs onto a ManyIV fit. Under
+# clustered assignment, clusterIV (CRAN, row in ../references/details.md) implements the
+# cluster-jackknife IV of Frandsen, Leslie, and McIntyre 2025 and a cluster-jackknife AR:
+# cjive stops when examiner dummies are collinear with the cell FE (examiners nested in
+# cells), so pool one reference examiner per cell first:
+# ref <- tapply(as.character(df$examiner), df$cell, function(v) sort(unique(v))[1])
+# df$exam_ref <- factor(ifelse(df$examiner %in% ref, "ref", as.character(df$examiner)))
+# clusterIV::cjive(y ~ d | exam_ref | cell, data = df, cluster = ~shift)
+# clusterIV::cjar(y ~ d | exam_ref | cell, data = df, cluster = ~shift, beta0 = 0)
+# We have not checked whether cjive carries UJIVE's many-control correction; confirm that
+# against the package source before reporting it as the headline estimate.
 
 ## 6b. Step 2: balance, as the SAME UJIVE specification with the covariate as the outcome.
 covs <- c("w1", "w2", "w3")               # predetermined covariates, one row each
 bal <- t(sapply(covs, function(v)
   unlist(ujive(uj(v), data = df)$estimate["ujive", c("estimate", "se_hte")])))
 cbind(bal, t = bal[, 1] / bal[, 2])
-# The balance regression is the treatment specification with the covariate swapped in as
-# the outcome, still instrumenting d with the examiner dummies. So an imbalance coefficient
-# sits on the same scale as the treatment effect and reads directly as the bias it would
-# cause. Do NOT run the reduced form of the covariate on the instrument in its place.
-# Two more WRONG alternatives the paper rules out: (i) regressing observables on a
-# constructed leniency measure, which manufactures a mechanical correlation, and which even
-# in leave-out form suffers errors-in-variables bias from estimation noise in the measure;
-# (ii) the joint F on the full examiner dummy set, whose default distribution is invalid
-# with many examiners (Anatolyev and Sølvsten 2023).
-# Read the magnitudes and do not stop at the stars. In the paper's reanalysis the balance
-# coefficients run about 10x smaller than the treatment effects, and that gap is what makes
-# the design credible.
+# Why this form and which alternatives are wrong: SKILL.md leniency check 2.
 # Sample trap: the dropped rows depend on the controls and instruments, so they are common
 # across outcomes, but NAs in one covariate shrink that row's sample. Compare $drop_obs
 # lengths across rows, or subset to complete cases once up front.
@@ -188,28 +176,14 @@ ujive(uj("months_under_review"), data = df)$estimate["ujive", ]
 fit <- ujive(uj("y"), data = df)
 fit                                       # prints all six rows plus F, n, K, L
 fit$estimate["ujive", c("estimate", "se_hte")]         # the headline pair
-# The tsls row (examiner dummies) lands between ols and ujive exactly when the
-# many-instrument bias bites, and its SE is the tell: in the paper's reanalysis the
-# many-dummy 2SLS SEs come out 3 to 4 times smaller than UJIVE's, which is the same
-# overfitting that pulls the point estimate toward OLS. A large ujive-to-tsls SE ratio
-# confirms the diagnosis and is never a cost of using UJIVE. jive1 next to ujive prices the
-# many-covariate bias. ijive1 usually lands near ujive.
-# Do NOT build a leniency measure by hand and plug it into a just-identified IV. The
-# construction choices (leave-out or not, which cases enter) drive the bias, and the
-# second-stage SEs ignore estimation error in the measure. For the same reason, do not read
-# design strength off the variance of a constructed leniency measure: estimation noise in
-# the measure inflates it. The UJIVE standard error is the power statistic.
+# How to read the tsls, jive1, and ijive1 rows beside ujive: SKILL.md leniency check 3.
+# Never plug a hand-built leniency measure into a just-identified IV.
 
 ## 6e. Strength: the first-stage F is the WRONG diagnostic here.
 K <- fit$IVData$k                          # post-collinearity-drop instrument count
 sqrt(K) * (fit$IVData$F - 1)               # the statistic to report, in place of F
-# UJIVE stays approximately unbiased and consistent even when instruments are weak enough
-# that E[F] converges to one, so long as sqrt(K) * (E[F] - 1) is large. That product is the
-# signal-to-noise ratio of the estimator's denominator, which is what the delta-method
-# normal approximation needs. An F of 1.2 with K = 750 examiners gives sqrt(750) * 0.2 =
-# 5.5, so a first stage barely above one is no alarm in a design this wide.
-# The paper states no cutoff for sqrt(K) * (E[F] - 1), so report the number and run 6f when
-# it is small. Do not import the Keane-Neal ladder from section 3, which is about 2SLS.
+# Why, and why no cutoff: SKILL.md "Strength and the weak-instrument fallback". Run 6f when
+# the number is small; do not import the 2SLS Keane-Neal ladder from section 3.
 
 ## 6f. Weak-instrument fallback when sqrt(K) * (E[F] - 1) is small: Yap (2025).
 # To test H0: beta = b0, compute eps_i0, the residual from projecting y - d * b0 on the
@@ -221,22 +195,23 @@ sqrt(K) * (fit$IVData$F - 1)               # the statistic to report, in place o
 # sum((GY * MD + epD)^2): put eps_i0 where (YtW - DtW * beta) enters epD and where
 # (Y - D * beta) enters GYujive, keeping the same denominator. $IVData$Y/$D/$Z/$W return
 # the cleaned matrices to rebuild it on.
-# Do NOT substitute the Mikusheva-Sun (2022) many-instrument AR or Matsushita-Otsu (2024):
-# neither is robust to treatment-effect heterogeneity. Yap (2025) is.
+# Do NOT substitute the Mikusheva-Sun (2022) jackknife AR or the Matsushita-Otsu (2024)
+# jackknife LM test: neither is robust to treatment-effect heterogeneity. Yap (2025) is.
 
 ## 6g. Step 4: average monotonicity (their test, built on Abadie 2002 and Kitagawa 2015).
-# Keep the treatment, instruments, and controls, and replace the outcome with ytilde =
-# v * d for any v determined BEFORE assignment. UJIVE then estimates a convex weighted
-# average of v under exactly the weights of the main estimate. If v is BINARY that average
-# must lie in [0, 1]. Landing outside [0, 1] rejects.
+# Keep the treatment, instruments, and controls, and replace the outcome with v * d for a
+# binary v. UJIVE then estimates a weighted average of v under the weights of the main
+# estimate, and that ESTIMAND lies in [0, 1]. The point estimate is noisy, so the test
+# compares the 95% interval with [0, 1]: rejection means the whole interval sits outside.
+# Two forms of v test different things. An outcome indicator (the line below) is the
+# Kitagawa-type check on the outcome distribution of treated compliers, the form behind
+# their Figure 1. A pre-assignment covariate indicator (e.g. v = w1 > median) checks the
+# complier covariate distribution. Rules and limits: SKILL.md "Monotonicity, weakened and tested".
 df$v <- as.numeric(df$y == 0)             # binary v: an indicator for one outcome value
-ujive(uj("I(v * d)"), data = df)$estimate["ujive", c("estimate", "se_hte")]
-# The condition at stake is average monotonicity (Frandsen, Lefgren, and Leslie 2023),
-# which is weaker than Imbens-Angrist uniform monotonicity and is necessary and sufficient
-# for the LATE weights to be nonnegative. Their Figure 1 sweeps v over indicators for every
-# outcome value, so loop over the support and plot estimates with 95% intervals. This test
-# catches gross violations only: pushing a weighted average outside [0, 1] takes
-# on-average defiers who are both numerous and unlike the average complier.
+mono <- ujive(uj("I(v * d)"), data = df)$estimate["ujive", c("estimate", "se_hte")]
+c(est = mono$estimate, lo = mono$estimate - 1.96 * mono$se_hte,
+  hi = mono$estimate + 1.96 * mono$se_hte)  # reject only if [lo, hi] misses [0, 1]
+# Loop v over every outcome value (or covariate cell) and plot estimates with these intervals.
 
 ## 6h. Step 5: characterize compliers for external validity, same trick with v not binary.
 # v * d as the outcome gives TREATED compliers. Putting one minus the treatment in as the
@@ -248,9 +223,7 @@ comp <- t(sapply(covs, function(v)
   unlist(ujive(uj(paste0("I(", v, " * dt)"), "dt"),
                data = df)$estimate["ujive", c("estimate", "se_hte")])))
 cbind(comp, sample_mean = sapply(covs, function(v) mean(df[[v]], na.rm = TRUE)))
-# The complier-vs-sample gap is the external-validity statement the LATE licenses. Small
-# gaps let you say the LATE approximates the population effect. Complier means outside the
-# logical range of v are a second reading of the monotonicity test.
+# How to read the gaps: SKILL.md "Compliers and external validity".
 
 ## ---- 7. Shift-share, shift path (BHJ 2025) -----------------------------------
 # Objects: S = N x K share matrix (rows = units, cols = shocks/sectors), gk = length-K
@@ -273,7 +246,8 @@ ivreg_ss(y ~ x1 + sum_shares | d, X = z_ss, data = df, W = S,
 # remotes::install_github("kylebutts/ssaggregate")  (dev version; hand-code if in doubt)
 # library(ssaggregate)
 # ind <- ssaggregate(data = df_long, shares = shares_long, vars = ~ y + d,
-#                    n = "sector", s = "share", l = "unit", controls = ~ x1)
+#                    n = "sector", s = "share", l = "unit",
+#                    controls = ~ x1 + sum_shares)   # 7b: incomplete shares need sum_shares
 # ind <- merge(ind, shocks, by = "sector")
 # sl  <- feols(y ~ 1 | d ~ g, data = ind, weights = ~s_n, vcov = ~shock_cluster)
 # fitstat(sl, ~ ivf1)                      # the exposure-robust F to report
@@ -284,10 +258,12 @@ ivreg_ss(y ~ x1 + sum_shares | d, X = z_ss, data = df, W = S,
 # Rotemberg weights: which shares carry the design. Hand-coded from the GPSS
 # just-identified decomposition (reference implementation: github.com/paulgp/bartik-weight,
 # Stata and R); this block is OUR implementation, label it as such:
+df$z_var <- as.vector(S %*% gk)                     # the shift-share instrument
 x_perp <- resid(feols(d ~ x1 + x2, data = df))       # endogenous var, residualized
-z_perp <- resid(feols(z_var ~ x1 + x2, data = df))   # z_var = as.vector(S %*% gk)
+z_perp <- resid(feols(z_var ~ x1 + x2, data = df))
+# lm, not feols: feols looks variables up in `data` only, so S[, k] fails inside it
 alpha_k <- sapply(seq_len(ncol(S)), function(k) {
-  gk[k] * sum(resid(feols(S[, k] ~ x1 + x2, data = df)) * x_perp)
+  gk[k] * sum(resid(lm(S[, k] ~ x1 + x2, data = df)) * x_perp)
 }) / sum(z_perp * x_perp)
 sort(alpha_k, decreasing = TRUE)[1:5]     # weights sum to 1, some may be negative
 # Per-share audit for the top-weight shares: one-share-at-a-time IV estimates, and
@@ -301,7 +277,9 @@ sort(alpha_k, decreasing = TRUE)[1:5]     # weights sum to 1, some may be negati
 # exogeneity is NOT enough; compute the expected instrument and recenter.
 S_draws <- 1999
 perm_z <- replicate(S_draws, {
-  g_cf <- ave(gk, strata, FUN = sample)   # permute shocks WITHIN exchangeability strata
+  # permute shocks WITHIN exchangeability strata; never FUN = sample, which draws from
+  # 1:x when a stratum holds a single shock
+  g_cf <- ave(gk, strata, FUN = function(v) v[sample.int(length(v))])
   compute_instrument(g_cf, w)             # your formula f(g; w), recomputed per draw
 })                                        # N x S_draws matrix
 mu   <- rowMeans(perm_z)                  # expected instrument: the sole confounder
@@ -311,7 +289,7 @@ rec <- feols(y ~ x1 | d ~ z_re, data = df, vcov = ~cl)   # or control for mu ins
 # for SEVERAL candidate mu's from different guessed assignment processes (double robust).
 # 9a. RI balance test: regress z_re on predetermined covariates; joint p from the
 # sum-of-squared-fitted-values statistic across draws:
-Tstat <- function(zv) { f <- fitted(feols(zv ~ x1 + x2, data = df)); sum(f^2) }
+Tstat <- function(zv) { f <- fitted(lm(zv ~ x1 + x2, data = df)); sum(f^2) }  # lm: zv is not in df
 T_obs  <- Tstat(df$z_re)
 T_null <- apply(perm_z - mu, 2, Tstat)
 mean(T_null >= T_obs)                     # RI joint balance p-value
@@ -339,12 +317,14 @@ lapply(runs, range)                       # the RI 95% set, a union printed as a
 # LATE: bound a generalized LATE extrapolated alpha beyond the complier interval, anchored by
 # the IV-like estimands under stated MTR restrictions (Mogstad-Santos-Torgovitsky 2018,
 # implemented by ivmte; see ../references/details.md for the package row).
-# SOLVER TRAP: ivmte needs one of gurobi / cplexAPI / Rmosek / lpSolveAPI. The only fully
-# free solver (lpSolveAPI) is roughly an order of magnitude slower and cannot run the
-# regression-based direct criterion (a QCQP; Gurobi or MOSEK only), so this section always
-# passes explicit ivlike moments, the route every solver can handle.
+# SOLVER TRAP: ivmte needs one of gurobi / Rmosek / lpSolveAPI (cplexAPI was archived from
+# CRAN on 2021-11-05; install it only from the archive with a CPLEX licence). lpSolveAPI is
+# the free CRAN solver, but ivmte itself warns that it is outdated and potentially
+# unreliable, and it is roughly an order of magnitude slower and cannot run the
+# regression-based direct criterion (a QCQP; Gurobi or MOSEK only). This section always
+# passes explicit ivlike moments, the route every solver can handle. With lpSolveAPI,
+# confirm headline bounds with Gurobi or MOSEK (both have free academic licences).
 have_solver <- any(requireNamespace("gurobi",     quietly = TRUE),
-                   requireNamespace("cplexAPI",   quietly = TRUE),
                    requireNamespace("Rmosek",     quietly = TRUE),
                    requireNamespace("lpSolveAPI", quietly = TRUE))
 if (requireNamespace("ivmte", quietly = TRUE) && have_solver) {
@@ -364,19 +344,23 @@ if (requireNamespace("ivmte", quietly = TRUE) && have_solver) {
   # grid (initgrid.nx/.nu, audit.nx/.nu); defaults are fine at this scale.
   # Do NOT set point = TRUE to force a number: it switches to GMM point estimation and
   # silently ignores every shape constraint.
+  # ivmte re-evaluates its call outside the caller's frame: min(df$y) in the call hits
+  # stats::df ("object of type 'closure' is not subsettable"), and a wrapper's own argument
+  # (a) is not found. So compute scalars first and pass values through do.call.
+  ylo <- min(df$y); yhi <- max(df$y)
   mst_bounds <- function(a) {
-    ivmte(data = df,
+    do.call(ivmte, list(data = df,
           target = "genlate",
           genlate.lb = p0, genlate.ub = min(p1 + a, 1),
           m0 = ~ uSpline(degree = 2, knots = c(p0, p1)),
           m1 = ~ uSpline(degree = 2, knots = c(p0, p1)),
-          m0.lb = min(df$y), m0.ub = max(df$y),
-          m1.lb = min(df$y), m1.ub = max(df$y),
+          m0.lb = ylo, m0.ub = yhi,
+          m1.lb = ylo, m1.ub = yhi,
           ivlike = c(y ~ z, y ~ d, y ~ d * z),
           propensity = d ~ z,
-          mte.dec = TRUE)
+          mte.dec = TRUE))
   }
-  mst_bounds(alpha)               # the headline bounds at the stated alpha
+  print(mst_bounds(alpha))        # the headline bounds (print: inside if, nothing autoprints)
   # Sensitivity: bounds as a function of alpha (MST Figure 8 is the template). They collapse
   # to the LATE as alpha -> 0 and widen as the policy reaches beyond the compliers; report
   # the widening as the stated price of the question. Grid spans plausible rollout sizes.
@@ -387,9 +371,5 @@ if (requireNamespace("ivmte", quietly = TRUE) && have_solver) {
 }
 
 ## ---- Session ----------------------------------------------------------------
-# Pin: fixest >= 0.14 (IV formula order), ivreg >= 0.6 (three-part formula),
-# ivmodel 1.9.1 (KClass capitalization), ivDiag >= 1.0.6 (F_stat vector incl.
-# F.effective), ShiftShareSE 1.1.0 (X-vs-W roles), bpbounds >= 0.1.8, ManyIV
-# 0.0.2.9000 (GitHub only, se_hte column and no cluster argument, section 6);
-# optional ivmte 1.4.0 plus an LP solver (section 10).
+# Pins and the reason for each: package index in ../references/details.md.
 sessionInfo()

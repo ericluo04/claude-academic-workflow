@@ -38,7 +38,7 @@ Annual Review of Economics 16: 185-212. Key: `keane2024practical`.
   instrument-strength standards.
 - Settles: abandon the 2SLS t-test at every instrument strength (power asymmetry: the 2SLS
   standard error is spuriously small when the estimate lands near OLS, rank correlation -0.92
-  at population F 29.4); AR always (CLR overidentified), intervals only by inversion; the F
+  at population F 73.75, rho 0.8); AR always (CLR overidentified), intervals only by inversion; the F
   ladder (sample 10 certifies population 2.3; 50 certifies 29.4; 104.7 certifies 73.75 at 5
   percent size); target robust F about 50, scaled 50/K^(3/4); below 3.84 do not run IV;
   just-identified AR is the reduced-form robust t; overidentified use LIML/CUE + CLR, avoid
@@ -174,8 +174,11 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
   treats growing cluster sizes explicitly (verified against the paper 2026-08-05; note in
   notes/router/). It belongs to `frandsen2025cluster` or to Goldsmith-Pinkham-Hull-Kolesar's
   reading of it, neither of which has been re-read; reattribute before quoting. What AAIW does
-  scope: linear estimators only, and only the sampling and assignment processes they model. MST-style extrapolation has not been formalized for
-  many decision-makers or controls, so do not carry the extrapolation ladder into a leniency
+  scope: linear estimators only, and only the sampling and assignment processes they model.
+  Kolesár, Montiel Olea, and Roth (2025, arXiv 2512.24096, revised March 2026) give sharp
+  bounds on counterfactual judge policies without IV monotonicity, so policy effects in a
+  leniency design have a formal route. Parametric MST-style extrapolation has not been
+  formalized for many decision-makers or controls, so do not carry that ladder into a leniency
   design without saying so.
 - Implement: the authors' own R package ManyIV (github.com/kolesarm/ManyIV), row in
   references/details.md, template block in scripts/iv_template.R. Chyn-Frandsen-Leslie 2025
@@ -188,8 +191,9 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
 ## Named disputes the skill carries
 
 1. Just-identified t-test: Keane-Neal (abandon it; power asymmetry is the binding problem) vs
-   Angrist-Kolesár 2024 (size is fine at realistic endogeneity) and Lee et al. 2022 (tF/VtF
-   critical values fix size). Default: AR/CLR and the F-50 standard; report both when pushed,
+   Angrist-Kolesár 2024 (size is fine at realistic endogeneity), Lee et al. 2022 (tF critical
+   values fix size), and Lee, McCrary, Moreira, Porter, and Yap 2023 (VtF intervals, NBER
+   w31893). Default: AR/CLR and the F-50 standard; report both when pushed,
    cite the dispute. Presented as live, not settled.
 2. Overid rejections: invalidity vs heterogeneity (both canon papers, plus
    Mogstad-Torgovitsky-Walters 2021). Not a dispute between authors but a fork in
@@ -203,8 +207,8 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
    the sqrt(K)(E[F] - 1) reading inside one, and name the estimator either way, since the bar
    is a statement about 2SLS and not about IV in general.
 4. Weak-instrument fallback in leniency designs: the skill's general default is AR/CLR, but
-   Goldsmith-Pinkham-Hull-Kolesár flag that the many-instrument AR of Mikusheva-Sun 2022 and
-   Matsushita-Otsu 2024 are not robust to treatment-effect heterogeneity, which a leniency
+   Goldsmith-Pinkham-Hull-Kolesár flag that the jackknife AR of Mikusheva-Sun 2022 and the
+   jackknife LM test of Matsushita-Otsu 2024 are not robust to treatment-effect heterogeneity, which a leniency
    design has by construction. Inside a leniency design the fallback is Yap 2025 instead.
 
 ## Primary papers cited through the canon
