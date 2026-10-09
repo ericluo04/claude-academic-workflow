@@ -12,7 +12,8 @@ Borda aggregation mixing preference direction and intensity (AKM Prop 1; BHHY Pr
 generalizes it to any independent-profiles randomization), a positive AMCE does not imply
 a majority preference, and the AMCE identifies the effect on expected vote share in the
 election defined by the design's attribute and voter distributions, for any preference
-structure and any number of candidates (BHHY Prop 2). The claims firewall is bilateral:
+structure and any number of candidates (BHHY Prop 2, p. 510, checked in the published
+article). The claims firewall is bilateral:
 BHHY's own reporting rules ban reading an AMCE as a majority preference, a
 proportion-preferring difference, or a probability-of-winning effect. Contested: BHHY show
 vote share is the modal estimand of empirical election research (87% of 82 reviewed
@@ -22,9 +23,11 @@ consequence, their handedness case); AKM show the modal conjoint paper writes ma
 sentences anyway (83% preference talk, 51% electoral framing). The audits sample different
 literatures and both hold; the defect is in applied prose, and both papers say so.
 Asymmetries carried honestly: AKM's bounds (their Prop 2) and sign condition (Prop 3) are
-undisputed and are the only practical route to a proportion claim, because BHHY show
-direct estimation of the fraction preferring from typical conjoint data is biased toward
-0.5; AKM's ceteris paribus definition of attribute preference is the weak flank (with
+undisputed and are the only practical route to a proportion claim, because BHHY (p. 502)
+call the fraction preferring infeasible to estimate from typically sized conjoint data,
+where individual-level data are sparse ("biased toward 0.5" is unconfirmed: the main text
+does not say it, and the Supplementary Material was not read); AKM's ceteris paribus
+definition of attribute preference is the weak flank (with
 three binary attributes only 1/7 of comparisons per attribute inform it; undefined under
 non-separability, which AKM's own Prop 4 concedes). Design dependence is absorbed rather
 than refuted: the AMCE is indexed by a stated target election, so cross-design AMCEs are
@@ -33,6 +36,16 @@ supports no substantive sentence. Routing: vote-share language with the target
 distribution named is licensed by both sides; proportion talk gates through AKM's bounds;
 electability talk routes to BHHY's probability-of-winning estimands, model-based and
 validated by calibration, never to a reinterpreted AMCE.
+
+The AKM side's sequel is a preprint: Abramson, Kocak, Magazinnik, and Strezhnev,
+"Aggregation, Interpretation, and Estimation of Preferences in Conjoint Experiments"
+(SocArXiv xjre9, v1 2023, v3 2026; not peer reviewed). It separates binary preference
+relations (does a respondent prefer A to B) from estimands that score a feature against
+the whole field of alternatives the design induces. The two can diverge under preference
+cycles. It proposes the average feature choice probability (AFCP) for the binary
+relation, writes common estimands as weighted averages of pairwise comparisons, and
+gives diagnostics for divergence. Cite it as a preprint, from its abstract; the
+skill has not read the full text.
 
 ## The AKM bounds (proportion-claim gate)
 
@@ -195,20 +208,24 @@ ratings/rankings/choose-one-of-many without new research.
 
 FWER 1-(1-.05)^m: .401 at 10 tests, .642 at 20. Headline: >90% of 1,000 global-null
 simulations of the HHY immigration design (41 tests) contain at least one significant
-AMCE; mode 2. Ten-true-effects scenario: exact truth recovered 248/1,000 uncorrected vs
-~600-650 corrected; Bonferroni misses at least one true effect in ~30% of trials; BH
-almost never misses but is most lenient; Ash between, and it also shrinks point
+AMCE; fewer than 75 of 1,000 show none, and the Figure 1 histogram peaks at 2
+significant AMCEs (about 210 data sets, read off the bars). Ten-true-effects scenario:
+exact truth recovered 248/1,000 uncorrected vs 589-645 corrected (Table 2: BH 589,
+Bonferroni 625, uniform-mixture Ash 620, normal-mixture Ash 645); Bonferroni misses at
+least one true effect in ~30% of trials; BH is the method least likely to miss a true
+AMCE (their Section 4.2) but is most lenient; Ash between, and it also shrinks point
 estimates (smaller MSE, the only method improving magnitudes). Matched default: Ash when
-prior knowledge is weak (preregister the mixture family; insensitive at social-science
-test counts); BH at the family's FDR level (q = .10, ../../causal-design/references/shared-rules.md)
-for screening; BC confirmatory with the preregistered family m
+prior knowledge is weak (preregister the mixture family; the uniform-mixture and
+normal-mixture families performed similarly in their simulations); BH at the family's FDR
+level (q = .10, ../../causal-design/references/shared-rules.md) for screening. Liu and
+Shiraito's matched default for confirmatory work is BC with the preregistered family m
 (count attribute-level comparisons minus constraint-excluded combinations, plus subgroup,
-balance, and quality tests). BC here is Liu-Shiraito's own recommendation. The skill's
-confirmatory default is Romano-Wolf by respondent block bootstrap, with Holm as the fallback
-at the same alpha and the same family: Holm rejects everything BC rejects
-under the same assumptions, so every BC simulation number above is a bound on Holm's (the
-~30% miss rate is a ceiling, not an estimate). Family discipline: realism-only attributes excluded from the
-family are excluded from reported findings. Always report corrected and uncorrected side
+balance, and quality tests). This skill's confirmatory default is Romano-Wolf by
+respondent block bootstrap, with Holm as the fallback at the same alpha and the same
+family. Holm rejects everything BC rejects under the same assumptions, so every BC
+simulation number above is a bound on Holm's (the ~30% miss rate is a ceiling, not an
+estimate). Family discipline: realism-only attributes excluded from the family are excluded
+from reported findings. Always report corrected and uncorrected side
 by side and discuss status changes. Reanalysis anchor: Ash removed the
 construction-worker bonus in Hainmueller-Hopkins-Yamamoto 2014, and BC and Ash removed
 the Vietnam military-ally result in Spilker et al. 2016 (an attribute respondents
@@ -220,7 +237,8 @@ as our judgment).
 
 ## Diagnostics battery, worked numbers
 
-From HHY 2014's application (each a regression plus F-test): carryover, per-task
+From HHY 2014's application (each a regression plus F-test; pp. 22, 25, 26, checked
+against the published article): carryover, per-task
 interpreter penalties 0.13-0.19 around pooled 0.16, p ~ .52; profile order 0.15 vs 0.17,
 p ~ .48; balance omnibus p ~ .69; row order 0.10-0.23, p ~ .14; atypical-profile strata
 compared with the concession that typicality lists are somewhat arbitrary (census
@@ -260,6 +278,18 @@ deltabar = 0; Ad = 0.01*I; mubar = 0; Amu = 0.01 (authors flag as too small for 
 applications); nu = nvar+3; V = nu*I; s = 2.38/sqrt(nvar) IN CODE (man page's 2.93 is
 stale); w = 0.1.
 
+The covariance prior and its price. bayesm offers only an inverse-Wishart (nu, V) on each
+component's covariance. The Stan User's Guide (2.40, Regression Models, "Multivariate
+priors for hierarchical models") says the scaled inverse-Wishart (Gelman and Hill's
+choice) was motivated mainly by conjugacy, which simplifies Gibbs sampling. It recommends
+splitting the covariance into scales and a correlation matrix: "*Our final recommendation
+is to give the correlation matrix Ω an LKJ prior with shape η ≥ 1*" (LKJ: Lewandowski,
+Kurowicka, and Joe 2009). The skill's
+reading of the cost: one degrees-of-freedom value sets the tightness of every variance and
+every correlation together, so the analyst cannot loosen one without the other. In the
+methods text, name the inverse-Wishart, its nu and V, and the reason (bayesm's conjugate
+sampler). A referee who asks for LKJ gets the cmdstanr route in SKILL.md.
+
 Sign-constrained defaults, THE TRAP: any nonzero SignRes flips the whole prior (mubar = 2
 on constrained entries, Amu = 0.1, nu = nvar+15), and for V the three sources disagree:
 man page diag 4/0.01, vignette 4/0.1, shipped code OVERWRITES to 1/0.2. Hard rule: pass
@@ -270,8 +300,10 @@ transform beta = SignRes*exp(beta*) shrinks WTP-relevant tails.
 Relatives: rhierMnlDP (Dirichlet-process heterogeneity; check posteriors of a, nu, v not
 piled at support ends); rhierLinearMixture (ratings analog); rhierBinLogit deprecated.
 Camera data: 332 respondents x 16 tasks, 4 brands + none, price in hundreds so defaults
-work. Citation hygiene: the package's own citation strings say "Rossi, Allenby and
-McCulloch (second edition 2024)"; the 2e's third author is Misra. Version-pin bayesm and
+work. Citation hygiene: the DESCRIPTION file's Description field says "Rossi, Allenby
+and McCulloch (second edition 2024)"; the 2e's third author is Misra. `citation("bayesm")`
+returns only the package itself (Rossi 2025, version 3.1-7) and names no book.
+Version-pin bayesm and
 record sessionInfo; defaults changed across 2.0-2, 3.0, 3.1-0, 3.1-2, 3.1-3.
 
 ## WTP space (the Sonnier numbers)
@@ -279,14 +311,19 @@ record sessionInfo; defaults changed across 2.0-2, 3.0, 3.1-0, 3.1-2, 3.1-3.
 Trap: normal partworths over a lognormal price coefficient put prior mass near a zero
 price coefficient, so the implied WTP prior is fat-tailed and with 14-15 tasks the
 posterior never escapes it. Remedy: surplus parameterization, index
-(x'beta_i - p)/mu_i, theta_i = (beta_i', log mu_i)' ~ N; same sampler. Evidence: surplus
-recovers true WTP better in all four simulation DGPs including both generated by the
-utility model (worst case RMSE 1.52 vs 18.73, and in-sample LMD preferred the WRONG
-model there); sedans: utility-model WTP means 2-3x, sds 5-6x the surplus model's
-(Camry-vs-Passat mean $16,230 vs $7,000; sd $47,870 vs $9,730); a quarter of respondents
+(x'beta_i - p)/mu_i, theta_i = (beta_i', log mu_i)' ~ N; same sampler. Evidence (page
+numbers from the published article): the surplus model has the lower average WTP RMSE
+in all four simulated data sets (Table 3, p. 320). In D1 and D2, generated by the
+utility model, the RMSEs are 49.23 vs 51.63 and 1.32 vs 1.74 (surplus vs utility). In
+D3 and D4, generated by the surplus model, they are 1.52 vs 18.73 and 0.92 vs 1.24. In
+D3 the in-sample LMD preferred the utility model although it recovered WTP badly
+(p. 321). LMD also preferred the utility model in D1 and D2, where it is the true
+model. Sedans: utility-model WTP means 2-3x, sds 5-6x the surplus model's (p. 323;
+Camry mean $16,230 vs $7,000, sd $47,870 vs $9,730, Table 7, p. 324); a quarter of respondents
 implied to need a free Passat plus a subsidy; optimal prices $33,200 vs $25,800 (Taurus,
-largest shown relative difference $9,000) and >$1,500 vs ~$522 (camera, max shown $499);
-holdout LPD favors surplus in both data sets. Medians are much less prior-sensitive than
+largest price difference shown in the experiment $9,000) and >$1,500 vs ~$522 (camera,
+max shown $499; p. 329); holdout LPD favors surplus in both data sets (p. 324).
+Medians are much less prior-sensitive than
 means/sds (the Sawtooth practitioner dodge), but the median fix fails for
 decision-theoretic uses since actions depend on the whole distribution. The cause of the
 exploding means: in partworth space, WTP is the ratio of a partworth to the price
@@ -322,7 +359,11 @@ fielded no-buy option, equalization prices do not.
   paramorphic to the true underlying decision process." Fit and prediction never license
   a process claim.
 
-## Package index (versions verified 2026-07-29/31; projoint, factorEx, FindIt, cjoint, estimatr, ashr, CRTConjoint, bayesm, logitr, posterior, and bayesplot re-run in the template on 2026-10-08 under R 4.6.1; signature-level details in conjoint_template.R comments)
+## Package index
+
+Versions verified 2026-07-29/31. projoint, factorEx, FindIt, cjoint, estimatr, ashr,
+CRTConjoint, bayesm, logitr, posterior, and bayesplot were re-run in the template on
+2026-10-08 under R 4.6.1. Signature-level details are in the conjoint_template.R comments.
 
 | Tool | Version | Role | Traps |
 |---|---|---|---|
@@ -359,9 +400,10 @@ test that all group-by-level interactions are zero.
   stability across tasks must never be cited as evidence of reliability (family
   formulation from the Bansak-Clayton compatibility analysis).
 - "The standard estimation method for conjoint analysis has become hierarchical Bayes."
-  (Netzer et al.)
+  (Netzer et al., p. 348; the paper follows it with citations to Lenk et al. 1996 and
+  Rossi and Allenby.)
 - "conjoint analysis is only a special case of the broader field of preference
-  measurement" (Netzer et al.).
+  measurement" (Netzer et al., p. 338).
 - "researchers first created a statistical problem for no reason and then had to turn
   around and correct the problem they originally created" (Clayton et al., on profile
   stacking).
