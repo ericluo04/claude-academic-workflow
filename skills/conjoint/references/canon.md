@@ -1,9 +1,9 @@
 # Conjoint canon
 
-Current as of 2026-08-05. Fourteen hand-picked sources plus `egami2019causal`, approved
-2026-08-05; nothing enters this file without explicit approval. BibTeX keys point into
-../../causal-design/references/causal.bib, the family's shared bib. Refresh: litreview on
-conjoint methodology since the canon date; addenda need approval.
+Current as of 2026-10-09. The user picked fourteen sources and approved a fifteenth,
+`egami2019causal`, on 2026-08-05; nothing enters this file without their approval. BibTeX keys
+point into ../../causal-design/references/causal.bib, the family's shared bib. Refresh:
+litreview on conjoint methodology since the canon date; addenda need user approval.
 
 ## The randomized-experiment track
 
@@ -100,24 +100,10 @@ flagged-unread list below.
 
 - Role: the interaction estimand. HHY gave the design a main effect; this gives it an
   interaction effect that survives the absence of a natural baseline.
-- Settles: the AMIE (average marginal interaction effect), the combination effect minus both
-  AMEs, against the conventional AIE, which is what a dummy-coded regression interaction
-  coefficient estimates; the AMIE is interval invariant to the baseline choice and the AIE is
-  invariant if and only if every AIE is zero (Theorem 2); the mechanical-zero corollary, that
-  any AIE involving a baseline level is identically zero, so an arbitrary coding decision
-  blanks out a row and a column of the interaction table; the two are linear functions of one
-  another, so all AMIEs are zero iff all AIEs are (Theorem 1) and the global no-interaction
-  F-test can use either; the decomposition of any K-way combination effect into AMIEs of every
-  order with no residual, which the AIE has no analogue for; conditional effects recovered as
-  AME plus AMIE; the K-way AIE degenerating into a conditional effect of a conditional effect
-  for K > 2; nonparametric estimation by difference in means or, equivalently, ANOVA with
-  weighted zero-sum constraints (Theorem 3), neither of which assumes away higher-order
-  interactions; regularization by GASH-ANOVA (`post2013factor`) penalizing DIFFERENCES in
-  coefficients, which is what preserves the invariance, against group-lasso relatives
-  (`lim2015learning`) that penalize coefficients and do not; that valid inference after
-  level-collapsing is unsolved, with bootstrap selection probabilities at a 90% cutoff and an
-  explicit refusal to claim FWER control as their stand-in, and sample splitting as the
-  alternative.
+- Settles: the AMIE as the interaction estimand that survives an arbitrary baseline,
+  with the mechanical-zero corollary for the conventional AIE (Theorems 1 to 3). The
+  derivation, the estimators, the regularization, and inference after selection are in
+  details.md, section "Causal interaction: the AMIE (Egami and Imai 2019)".
 - Binds when: any attribute-by-attribute interaction claim; any high-dimensional interaction
   search; whenever the pAMCE machinery says interactions are what drives the uAMCE gap and the
   user asks which ones.
@@ -235,8 +221,9 @@ Marketing Letters 19(3-4): 337-354. Key: `netzer2008beyond`.
 - Settles: HB as the standard estimator; the adaptive-design family (and that it exists to
   serve prediction, not causal identification); incentive alignment over hypothetical
   tasks (26% to 48% holdout hit rates); the Sonnier prior trap flagged; auxiliary-data
-  fusion; the isomorphic/paramorphic rule (fit and prediction alone never license a
-  process claim); the action stage (posterior expected loss, product-line optimization).
+  fusion; the isomorphic/paramorphic rule (quoted in details.md, section "Marketing
+  translation and instrument threats"); the action stage (posterior expected loss,
+  product-line optimization).
 - Binds when: the fork; adaptive designs; the marketing track's scope.
 - Caveats: an agenda paper, no estimands, no estimators, no software; never cite for
   identification, inference, or diagnostics.
