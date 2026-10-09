@@ -52,6 +52,17 @@ library(ashr)
 ## default for choice modeling stays choice-level (one row per respondent-task), which
 ## projoint reshapes to internally. Qualtrics exports skip df entirely:
 ## read_Qualtrics() + reshape_projoint().
+## Three data layouts, by section:
+##   df (long display, above): sections 1, 3, 5, 6 directly; section 2 builds its
+##     projoint object from it (make_projoint_data), which estimates at choice level.
+##   df_wide: the object passed to CRTConjoint in section 6 (one row per respondent-task,
+##     left and right attribute columns named in left_cols and right_cols). Not run on
+##     2026-10-09. cjoint (section 1) takes df_est, one row per profile as in its own
+##     example data. On df_wide, cjoint::amce ran without error but used half the rows.
+##   df_choice: one row per respondent-task-profile carrying the pair id (pair_id), an
+##     observation id (obs), and price for section 9. Used by factorEx (7), FindIt (7b),
+##     and logitr (9).
+## Section 8 (bayesm) takes its own lgtdata list, built per respondent.
 
 ## ---- 1. AMCEs and MMs by hand (uniform independent randomization) ----------------------
 # One regression, all AMCEs; respondent-clustered SEs are mandatory (within-task
@@ -65,7 +76,7 @@ mm_A1 <- lm_robust(y ~ 0 + A1, data = df_est, clusters = id)  # MMs with cluster
 # RESTRICTED or WEIGHTED randomization: plain dummies silently change the estimand.
 # Include the linked interactions and report the probability-weighted combination over
 # admissible strata (HHY eq. 9; ../references/details.md). The packaged route:
-# cjoint::amce(y ~ A1 + A2 + A3, data = df_wide, design = my_design,
+# cjoint::amce(y ~ A1 + A2 + A3, data = df_est, design = my_design,
 #              cluster = TRUE, respondent.id = "id")   # design from makeDesign()
 
 ## ---- 2. Measurement error: IRR and the tau correction (projoint) -----------------------
@@ -111,13 +122,17 @@ est <- amce_fit$coefficients[-1]                 # drop the intercept
 se  <- amce_fit$std.error[-1]
 a   <- ash(est, se, mixcompdist = "normal")      # adaptive shrinkage; preregister family
 # mixcompdist "normal": symmetric unimodal shrinkage is the sensible default for AMCE
-# effects, and Liu and Shiraito found results insensitive to this choice.
+# effects, and the uniform- and normal-mixture families performed similarly in Liu and
+# Shiraito's simulations.
 cbind(raw = est, shrunk = get_pm(a), psd = get_psd(a), lfsr = get_lfsr(a))
-# Exploratory alternative: p.adjust(p, "BH") at FDR .05. Confirmatory: p.adjust(p, "holm")
-# with the preregistered family m. Corrected + uncorrected side by side.
+# Shared family rule (../../causal-design/references/shared-rules.md). Screening alternative:
+# p.adjust(p, "BH") at q = .10. Confirmatory: Romano-Wolf stepdown with the bootstrap
+# resampling respondents, over the preregistered family m. Holm, p.adjust(p, "holm"), is the
+# fallback where resampling is impractical. Corrected + uncorrected side by side.
 # NEVER "bonferroni": "holm" is a drop-in that rejects everything Bonferroni rejects and
-# sometimes more, under the same assumptions. And "BH", not the adaptive BKY variant: AMCEs
-# share respondents, which BH's PRDS condition covers and BKY's does not.
+# sometimes more, under the same assumptions. Screening uses "BH"; the adaptive BKY variant
+# is not used. BH controls FDR under PRDS (Benjamini and Yekutieli 2001); BKY is proven
+# only under independence. That AMCE tests are PRDS is the skill's judgment (SKILL.md).
 # Composing ash with tau-corrected estimates is mechanically fine but unstudied in the
 # canon; label the combination as our own judgment.
 
@@ -164,6 +179,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # target_dist <- list(A1 = c(lev1 = .70, lev2 = .30), A2 = c(a = .1, b = .5, c = .4),
 #                     A3 = c(x = .5, y = .5))
 # fit_p <- model_pAMCE(y ~ A1 + A2 + A3, data = df_choice, ord_fac = rep(FALSE, 3),
+#                      pair = TRUE, pair_id = df_choice$pair_id,  # pair defaults to FALSE
 #                      cluster_id = df_choice$id, target_dist = target_dist,
 #                      target_type = "marginal", reg = TRUE, boot = 2000, seed = 42)
 # summary(fit_p)

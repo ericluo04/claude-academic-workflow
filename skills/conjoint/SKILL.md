@@ -95,12 +95,12 @@ Never mix the interpretations silently.
 - Paired profiles (J = 2) side by side in a table, not a vignette. The evidence: paired
   conjoint tracked real referendum behavior with mean absolute error of 2 percentage
   points across 21 attribute effects; single vignettes, the format closest to the real
-  documents, recovered no origin effect at all; vignettes attenuate toward zero, and
+  documents, recovered no significant origin effect; vignettes attenuate toward zero, and
   engagement beats format mimicry (Hainmueller, Hangartner, and Yamamoto 2015).
 - Tasks: choose K by power and cost, not satisficing fear. Degradation is front-loaded
   and bounded: AMCEs drop once from task 1 to 2, then stay flat through 30 (Bansak et
-  al. 2018; scope: opt-in online panels, familiar domains). K is typically 5 to 6 in
-  applications (the 2021 handbook chapter's own example ran 15). Budget ONE extra task
+  al. 2018; scope: opt-in online panels, familiar domains). The 2021 handbook chapter's
+  own example ran 15 tasks. Budget ONE extra task
   at the end repeating the first task with the profile columns switched: it estimates
   intra-respondent reliability at near-zero cost,
   and zero of 9,472 respondents noticed the repeat (Clayton et al. 2026).
@@ -109,8 +109,9 @@ Never mix the interpretations silently.
   included ones (masking), and adding or dropping attributes can flip signs with the
   same respondents (Abramson, Kocak, and Magazinnik 2022). Burden binds late: adding 15
   to 35 FILLER attributes on top of the base set produced modest, roughly uniform
-  attenuation with relative magnitudes preserved (the ocean-view AMCE roughly halved by
-  18 fillers), with small effects losing significance first (Bansak et al. 2021 PSRM).
+  attenuation with relative magnitudes preserved (the ocean-view AMCE fell from 0.175
+  with no fillers to 0.082 with 18, keeping nearly half its size, p. 67), with small
+  effects losing significance first (Bansak et al. 2021 PSRM).
   The practical ceiling is a judgment about respondent burden, with no hard 20 in the
   evidence. Equalize the number of levels across attributes (the
   number-of-levels effect inflates derived importance; Agarwal et al. 2015).
@@ -119,6 +120,9 @@ Never mix the interpretations silently.
   match real-world marginals, restrictions for genuinely impossible combinations only
   (excluded combinations have undefined counterfactuals, and the restricted AMCE is
   defined only on the remaining support), and joint draws for correlated attributes.
+  Odd but possible combinations stay in: in an eye-tracking study, odd attribute-level
+  combinations did not change attention, information search, or choice substantially or
+  consistently (Bansak and Jenke 2025).
   When a target distribution is defensible, prefer design-based pAMCE randomization: the
   three-design ladder (joint, marginal, mixed) keyed to what population data exist, with
   the effective-sample-size check run before fielding (de la Cuesta, Egami, and Imai
@@ -132,9 +136,9 @@ Never mix the interpretations silently.
   and forced choice produced the largest single distortion (Hainmueller, Hangartner,
   and Yamamoto 2015).
 - Sample: matched to the target population, screened to likely decision-makers,
-  reweighted to known margins. The identical questionnaire that tracked behavior on a
-  matched probability sample failed badly on a student convenience sample (mean error 7
-  points, maximum 28, wrong attributes loading).
+  reweighted to known margins. The forced-choice paired questionnaire had a mean error of
+  4 points on the matched probability sample. The same questionnaire failed badly on a
+  student convenience sample (mean error 7 points, maximum 28, wrong attributes loading).
 - Preregister. A conjoint is a multiple-testing machine, which makes preregistration
   especially valuable (Bansak et al. 2021; Liu and Shiraito 2023). Pin ex ante: the
   attribute list with the masking rationale, the averaging distribution and its source,
@@ -151,8 +155,11 @@ Never mix the interpretations silently.
   respondent is the cluster at which the sample was drawn (the design rule in
   ../causal-design/references/shared-rules.md, section "Clustering"). Within-respondent
   correlation in outcomes is a consequence of that design (Hainmueller, Hopkins, and
-  Yamamoto 2014 cluster by respondent as well). Block bootstrap by respondent is the
-  small-sample alternative. The template's
+  Yamamoto 2014 cluster by respondent as well). With hundreds of respondents, CR2
+  clustered SEs are adequate. With few respondents (a pilot) or very unbalanced task
+  counts across respondents, the family's small-G rule governs: CV3 with the wild cluster
+  restricted bootstrap, CR2 as the cross-check (shared-rules.md, section "Clustering").
+  The template's
   hand-rolled sections run this regression on the profile-stacked HHY structure with
   clustered SEs, valid because it is the estimator HHY themselves use; choice-level
   analysis remains the skill's default for choice modeling.
@@ -181,12 +188,15 @@ Never mix the interpretations silently.
   respondent block bootstrap is the default, because AMCEs estimated on the same
   respondents are correlated tests and resampling recovers the power Holm gives up. Holm
   is the fallback where the bootstrap is impractical. Corrected and uncorrected shown
-  side by side, every status change discussed. Never plain Bonferroni. Plain BH and not the
-  adaptive BKY variant, deliberately: BKY's
-  extra power comes with an independence-flavoured guarantee, and AMCEs estimated on the same
-  respondents are dependent in a way BH's positive-regression-dependence condition covers and
-  BKY's does not. A screen over machine-generated candidates, where the candidates are not
-  respondent-linked, is the case that flips it. Composing the tau correction with the
+  side by side, every status change discussed. Never plain Bonferroni. Screening uses plain
+  BH; the adaptive BKY variant is not used. BH controls FDR under positive regression
+  dependence on a subset (PRDS; Benjamini and Yekutieli 2001). BKY proved control under
+  independence and showed positive dependence only by simulation (Benjamini, Krieger, and
+  Yekutieli 2006). That AMCE tests satisfy PRDS is the skill's judgment and is unproven.
+  The reasoning: levels of one attribute share a reference marginal mean, so their
+  estimates correlate positively. Across attributes, independent randomization leaves
+  correlations near zero. A latent screen over machine-generated candidates is the case
+  that flips the choice. Composing the tau correction with the
   multiple-testing correction is mechanically fine (ash consumes any estimate-SE pairs)
   but unstudied; label the combination as our own judgment.
 - Interaction search is a worse multiplicity problem than the AMCE forest (every level pair
@@ -204,6 +214,13 @@ Never mix the interpretations silently.
   measurement error: IRR varies by respondent characteristics, so correct each
   subgroup with its own tau before differencing; roughly 5% of subgroup differences
   flipped sign under correction (Clayton et al. 2026).
+- Individual-level heterogeneity, when the subgroups are not known in advance. Zhirkov
+  (2022) estimates respondent-specific marginal component effects (IMCEs) with no added
+  assumptions, and he recommends some changes to the task design. Robinson and Duch
+  (2024) estimate IMCEs by BART and partition them afterward to find the subgroups (CRAN
+  package cjbart). The skill's judgment: treat both as exploratory description, and
+  confirm a subgroup found this way by conditional marginal means on fresh data or a
+  held-out half.
 
 ## The claims firewall
 
@@ -224,15 +241,17 @@ adjudicated cell is in Live disputes below).
 - Proportion claims gate through the AKM sharp bounds, which need only the AMCE, the
   number of possible profiles, and the attribute's level count (formula and R helper in
   references/details.md; quick screens: a binary attribute in a large design needs an
-  AMCE above 0.25). Direct estimation of the fraction preferring an attribute from
-  standard conjoint data is severely biased toward 0.5 and covariate pooling needs
-  exact within-stratum preference homogeneity, so the bounds are the only practical
-  route (Bansak et al. 2023 concede this from the other side).
+  AMCE above 0.25). Bansak et al. (2023, p. 502) call the fraction preferring an
+  attribute infeasible to estimate from typically sized conjoint data, because
+  individual-level data are sparse (the "biased toward 0.5" wording is unconfirmed:
+  their main text does not say it). Covariate pooling needs exact within-stratum
+  preference homogeneity, so the bounds are the only practical route.
 - The uncorrelated-intensity escape hatch (sign correspondence when direction and
   intensity are uncorrelated) must be argued with evidence, never assumed: supporters
   and opponents attach different importance on 17 of 22 ANES issues.
 - Electability routes to model-based probability-of-winning estimands: conditional
-  logistic ridge with two-way interactions, thresholded and averaged, validated by
+  logistic ridge with two-way interactions (unconfirmed: the main text sends the
+  estimator to a Supplementary Material not yet read), thresholded and averaged, validated by
   CALIBRATION on cross-validated predictions, never by raw accuracy (a perfect model of
   a 55-45 contest scores 0.55).
 - The intensity screen for user questions: "do most people prefer X" needs a head count
@@ -271,7 +290,7 @@ When the deliverable is partworths, shares, WTP, pricing, or targeting:
 
 - The stack is choice-based conjoint estimated by hierarchical Bayes, the field's
   accepted default ("comparable or even superior to the traditional methods both in
-  part-worth estimation and predictive validity", Agarwal et al. 2015). The reference
+  part-worth estimation and predictive validity", Agarwal et al. 2015, p. 30). The reference
   implementation is bayesm's rhierMnlRwMixture (Rossi, Allenby, and Misra 2024; bayesm
   3.1-7): hierarchical MNL with a mixture-of-normals heterogeneity distribution. The
   six-step recipe, the prior-defaults table, and the verified input formats are in
@@ -281,10 +300,11 @@ When the deliverable is partworths, shares, WTP, pricing, or targeting:
   bayesm runs one chain per call, so the template runs four seeded calls, stacks their
   `betadraw` arrays, and diagnoses them with `posterior::summarise_draws()`. One chain's
   trace plot is not a convergence check. The HMC route is cmdstanr with a hand-written
-  hierarchical conditional logit, used when the parameter count exceeds about 100 (Orme's
-  expectation, which he does not test) or a
-  referee asks for HMC diagnostics; van Horn (2024, reported by Orme) finds equal holdout
-  prediction and better R-hat and ESS for HMC than for the Gibbs sampler.
+  hierarchical conditional logit. Use it when the parameter count reaches about 100, or
+  when a referee asks for HMC diagnostics. The threshold is an expectation Orme reports
+  from Kevin Lattery's correspondence, and it is untested; van Horn's datasets had 15 to
+  27 parameters. Van Horn (2024, reported by Orme) finds equal holdout prediction and
+  better R-hat and ESS for HMC than for Metropolis-Hastings (Sawtooth's CBC/HB).
 - The sign-constraint hard rule: any run constraining a coefficient's sign (price
   negative) passes the FULL Prior explicitly, because the shipped constrained defaults
   contradict the package's own documentation in two places (verified at source level;
@@ -318,9 +338,21 @@ When the deliverable is partworths, shares, WTP, pricing, or targeting:
   Always field holdout tasks, holding out one randomly selected middle task per
   respondent, never task 1 and never the final repeat (both carry task 1's
   information); out-of-sample hit rate and LPD are this track's currency.
+- Choice-share simulation. Simulate shares on the posterior draws, respondent by
+  respondent and draw by draw, then average. van Horn (2024, reported by Orme 2024,
+  p. 4) found that simulating on draws predicted holdout shares better than simulating
+  on point estimates. Both authors guess that part of the gain is a lower scale factor
+  in the simulated shares. Name the rule in the write-up. First choice gives each respondent's
+  whole vote to the highest-utility product. Share of preference splits it by the logit
+  formula. Share of preference inherits IIA within a respondent: adding a near-copy of
+  a product draws share from every product in proportion, where real buyers would take
+  it mostly from the copied product. Averaging over heterogeneous respondents and draws
+  softens IIA without removing it. The skill's judgment: use share of preference on
+  draws as the default, and run first choice on draws as the check whenever the
+  scenario adds products similar to existing ones.
 - Managerial translation (MVAI and its cost threshold, reservation-price pricing,
   product-line optimization) is mapped in references/details.md. Decisions ride on the
-  posterior, not point estimates.
+  posterior draws.
 - Open question, flagged honestly: whether a measurement-error correction analogous to
   the IRR correction exists for HB partworths is unstudied; the canon does not answer
   it.
@@ -384,18 +416,27 @@ swapping error that attenuates estimates and can reverse subgroup comparisons (C
 et al. 2026), we [included a repeated task / extrapolated task-pair agreement],
 estimated IRR = [x] (tau = [y]), and report corrected estimates via projoint
 [, with subgroup-specific tau for subgroup comparisons]. Because the design implies [m]
-simultaneous tests, we report [adaptive-shrinkage / BH / Holm]-corrected
-estimates alongside uncorrected ones (Liu and Shiraito 2023). Subgroup preferences are
+simultaneous tests, we report [adaptive-shrinkage / BH (screening) / Romano-Wolf
+(confirmatory) / Holm (fallback)]-corrected estimates alongside uncorrected ones (Liu and
+Shiraito 2023). Subgroup preferences are
 described by conditional marginal means with nested-model F-tests (Leeper, Hobolt, and
 Tilley 2020). [Interactions: We estimate average marginal interaction effects (Egami and
 Imai 2019), which are invariant to the choice of baseline level, by ANOVA under weighted
 zero-sum constraints[, collapsing levels within factors and reporting selection
 probabilities from [b] bootstrap replicates / with regularization on a held-out half and
-intervals estimated on the remainder].] [HB track: We estimate individual partworths by hierarchical Bayes
-multinomial logit with a mixture-of-normals heterogeneity distribution (Rossi, Allenby,
+intervals estimated on the remainder].] [HB track: We estimate individual partworths by
+hierarchical Bayes multinomial logit with a mixture-of-normals heterogeneity distribution
+(Rossi, Allenby,
 and Misra 2024; bayesm 3.1-7, priors reported in the appendix)[, parameterized in WTP
 space with the heterogeneity prior on WTP directly (Sonnier, Ainslie, and Otter 2007)],
-validated on [h] holdout tasks.]"
+validated on [h] holdout tasks. We ran [c] chains of [R] iterations each and discarded
+the first half as warm-up. Split rank-normalized R-hat was below 1.01 (maximum [r]),
+and bulk and tail ESS exceeded 400 (minimum [e]) for every parameter (Vehtari et al.
+2021)[; [k] divergent transitions (HMC runs only)]. [Shares: simulated by [share of
+preference / first choice] on the posterior draws.]]"
+
+The template is written in "we". Match the paper's voice: switch to "I" for a
+sole-authored paper.
 
 ## Handoffs
 
@@ -411,4 +452,9 @@ validated on [h] holdout tasks.]"
 - Text or image profiles whose treatment components are latent inside the stimulus are out of
   scope for this skill (the Fong-Grimmer boundary): randomizing the object does not randomize
   the component, and the component needs a design of its own. Discovering the latent drivers in
-  unstructured stimuli is a problem for that separate design, not for this one.
+  unstructured stimuli is a problem for that separate design, not for this one. LLM-simulated
+  respondents fall under the same separate design. Two marketing papers frame that case.
+  Goli and Singh (2024) find GPT-3.5 and GPT-4 less patient than humans on intertemporal
+  choices, so elicited LLM preferences can mislead. Wang, Zhang, and Zhang (2026) combine
+  LLM-generated and human conjoint responses in a data-augmentation estimator that stays
+  consistent when the LLM data are biased.
