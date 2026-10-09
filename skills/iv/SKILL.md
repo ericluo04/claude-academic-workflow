@@ -236,7 +236,7 @@ monotonicity and compliers".
 ## Exhibits: three figures and one table
 
 Three figures carry an IV paper: the instrument's own variation, the first stage, and the reduced
-form (Angrist-Krueger 1991 for the pair, Cunningham-Finlay 2012 for the three-figure structure).
+form (Angrist-Krueger 1991 for the pair, Cunningham-Finlay 2013 for the three-figure structure).
 Never plot the outcome against fitted treatment, a processed quantity that reads as opaque. Where
 a placebo series exists (an untreated market, an unaffected product category), plot it on the
 same axes so the reader can see the shock hit one thing. The table carries OLS beside IV, the
