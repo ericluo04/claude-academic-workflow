@@ -12,7 +12,8 @@ Borusyak-Hull(-Jaravel) papers for shift-share and formula instruments,
 Mogstad-Santos-Torgovitsky's Econometrica framework for extrapolating beyond the compliers, and
 Goldsmith-Pinkham-Hull-Kolesár's JEP operator's manual for leniency designs.
 Deliverable: the recommendation with its citation, the R estimation and diagnostics code, and a
-methods paragraph.
+methods paragraph. The skill stops at the four stop points in
+../causal-design/references/shared-rules.md (section "Stop points") and puts each choice to the user.
 
 Refresh path: run litreview on the method since the canon date, then propose additions to
 references/canon.md as flagged addenda.
@@ -39,8 +40,9 @@ an equilibrium object like a price, where OLS mixes supply and demand slopes (th
 market numbers in references/details.md are the two-line demonstration). An instrument is an
 incentive or cost shifter: it changes the attractiveness of taking treatment without entering the
 potential outcomes. A price elasticity estimated this way is the elasticity of the compliers the
-instrument moved, and need not be the elasticity a firm faces when it sets price itself: "when
-the firm lowers its price, it won't do so using storms" (Angrist, Graddy, and Imbens 2000). Route
+instrument moved (Angrist, Graddy, and Imbens 2000), and need not be the elasticity a firm faces
+when it sets price itself. Cunningham (Causal Inference: The Remix, section 7.7) puts it as
+*"But when the firm lowers its price, it won't do so using storms!"* Route
 a pricing question to the PRTE ladder below, naming the policy that will move the price.
 
 Before you estimate, establish that the mechanism exists. An instrument is a treatment assignment
@@ -69,8 +71,9 @@ Five assumptions, argued separately because they have different characters (Imbe
    subsidy, default). Strong in examiner and judge designs: by Vytlacil's theorem it is
    equivalent to every examiner ranking the cases identically and differing only in where the
    cutoff falls, which fails whenever examiners weight criteria differently or differ in skill
-   (Chan-Gentzkow-Yu find skill accounts for about 40 percent of the variation in radiologist
-   leniency). A leniency design needs less than this. The operative condition is average
+   (Chan-Gentzkow-Yu find that skill accounts for 39 percent of the variation in radiologists'
+   diagnosis rates, which is the leniency measure in this design). A leniency design needs less
+   than this. The operative condition is average
    monotonicity, no unit a defier on average across pairwise comparisons, which is necessary
    and sufficient for nonnegative weights and is testable. The leniency section below carries
    the weakening and the test; do not price a leniency design against the uniform condition.
@@ -282,9 +285,9 @@ mechanically small in these designs because the formula divides by K, so a modes
 uninformative about whether leniency moves treatment. The heterogeneity-robust plug-in variance
 absorbs the Bekker many-instrument term, so one standard error covers both. When
 sqrt(K) times (E[F] - 1) is small, the fallback is Yap 2025, which substitutes the null-imposed
-residual into the UJIVE standard error. The many-instrument AR of Mikusheva-Sun 2022 and
-Matsushita-Otsu 2024 do not apply here, since neither survives treatment-effect heterogeneity,
-which a leniency design has by construction.
+residual into the UJIVE standard error. The jackknife AR of Mikusheva-Sun 2022 and the
+jackknife LM test of Matsushita-Otsu 2024 do not apply here, since neither survives
+treatment-effect heterogeneity, which a leniency design has by construction.
 
 Monotonicity, weakened and tested. Price the design against average monotonicity
 (Frandsen-Lefgren-Leslie 2023), meaning no unit is a defier on average across pairwise
@@ -296,10 +299,14 @@ break average monotonicity where the true relative leniency satisfies it. Check 
 interacting examiner assignment with the stratum fixed effects, and expect that flexibility to
 cost precision.
 
-The test: pick a v determined before assignment, replace the outcome with v times treatment,
-hold the treatment, instruments, and controls fixed, and run UJIVE. The estimate is a convex
-weighted average of v under the same weights as the headline estimate, so for binary v it has to
-land in [0, 1]. Outside those bounds something in the LATE theorem has failed. Two limits to
+The test: pick a binary v, replace the outcome with v times treatment, hold the treatment,
+instruments, and controls fixed, and run UJIVE. The estimand is a convex weighted average of v
+under the same weights as the headline estimate, so it lies in [0, 1]. The point estimate is
+noisy, so compare the 95% interval with [0, 1] and reject only when the whole interval sits
+outside. A rejection means something in the LATE theorem has failed. Two forms of v test
+different things. An indicator for an outcome value (the template's default) checks the outcome
+distribution of treated compliers, the Kitagawa-type form. An indicator built from a covariate
+determined before assignment checks the complier covariate distribution. Two limits to
 state when reporting it: the null is joint across assignment, exclusion, and monotonicity, so a
 rejection does not localize; and it catches only gross violations, since on-average defiers have
 to be both common and unlike the compliers to push a weighted average out of [0, 1]. What it
@@ -313,8 +320,11 @@ any pre-assignment characteristic under the headline weights. Put the complier m
 sample mean covariate by covariate and let the gaps carry the external-validity claim. Untreated
 compliers come from using one minus the treatment. To pool the two, run UJIVE of v times (2x - 1)
 on (2x - 1). This doubles as a monotonicity check, since a complier mean outside logical bounds
-rejects. Do not carry the MST extrapolation ladder into a leniency design without flagging it:
-neither the MTE-curve approach nor MST has been formalized for many decision-makers or controls.
+rejects. For effects of counterfactual decision-maker policies, use Kolesár, Montiel Olea, and
+Roth (2025, "Evaluating Counterfactual Policies Using Instruments", arXiv 2512.24096), which gives
+sharp bounds in judge designs without IV monotonicity. Do not carry the parametric MST
+extrapolation ladder into a leniency design without flagging it: that route has not been
+formalized for many decision-makers or controls.
 
 Chyn-Frandsen-Leslie 2025 (JEL 63(2)) is the companion practitioner's guide. Read both when the
 design is the whole paper.
@@ -371,9 +381,10 @@ which puts the valid interval where a reader looks for it.
 ## The live disputes, carried honestly
 
 Whether the just-identified 2SLS t-test is rescuable. Angrist-Kolesár 2024 defend it (size is
-approximately fine at realistic endogeneity); Lee et al. 2022 patch it with tF/VtF critical
-values. The canon's position (Keane-Neal) is that both miss the binding problem: power, not
-size. The t-test has near-zero power against effects opposite the OLS bias, which under
+approximately fine at realistic endogeneity); Lee et al. 2022 patch it with tF critical values,
+and Lee, McCrary, Moreira, Porter, and Yap 2023 (NBER w31893) with VtF intervals. The canon's
+position (Keane-Neal) is that both miss the binding problem: power, not size. The t-test has
+near-zero power against effects opposite the OLS bias, which under
 publication bias manufactures spurious literature-wide consensus, and tF inherits the asymmetry.
 Default in a few-instrument design: AR/CLR and the F-50 standard. When a referee pushes back
 with Angrist-Kolesár, report both and cite the dispute. The AR test costs one regression, so
@@ -411,6 +422,9 @@ paper's own tables were produced with. Package index with versions, links, and t
 references/details.md.
 
 ## Methods paragraph template
+
+Report each effect with the results sentence in ../causal-design/references/shared-rules.md
+(section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
 > Treatment here is chosen, not assigned: [selection story]. We instrument with [instrument],
 > which shifts the incentive to take treatment through [channel]. Assignment of the instrument
@@ -464,10 +478,12 @@ A leniency design shares almost none of that structure, so it gets its own templ
 > unlike the compliers to move a weighted average outside those bounds, and its null is joint
 > across assignment, exclusion, and monotonicity, so a rejection would not tell us which failed.
 > Compliers resemble the full sample on [characteristics], which is the basis for reading the
-> estimate as informative beyond the marginal cases. We do not extrapolate further, because the
-> frameworks for doing so have not been formalized for designs with many decision-makers.
+> estimate as informative beyond the marginal cases. [If a counterfactual policy is the target:]
+> We bound the effect of [policy] using the framework of Kolesár, Montiel Olea, and Roth (2025),
+> which does not require monotonicity. [Otherwise:] We do not extrapolate beyond the compliers.
 
-Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
+Every claim traces to references/canon.md. Keys for the canon papers live in
+../causal-design/references/causal.bib; works cited only in passing may have no entry there yet.
 
 ## Handoffs
 
