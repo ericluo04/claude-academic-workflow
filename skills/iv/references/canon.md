@@ -1,9 +1,8 @@
 # IV canon
 
-Current as of 2026-08-04. These sources are hand-picked; nothing enters this file without
-explicit human approval. Goldsmith-Pinkham, Hull, and Kolesár is an approved addendum
-(2026-08-04) covering the leniency design, which the other five sources reach only in
-passing. BibTeX keys point into
+Current as of 2026-10-09. The user picked these sources. Goldsmith-Pinkham, Hull, and Kolesár
+is a user-supplied addendum (2026-08-04) covering the leniency design, which the other five
+sources reach only in passing. BibTeX keys point into
 ../../causal-design/references/causal.bib. Refresh: litreview on the method since the date
 above, results proposed as flagged addenda.
 
@@ -140,45 +139,25 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
 - Role: the leniency design (judge, examiner, caseworker, assessor) end to end. Which estimator,
   which standard errors, and the five checks that make the design credible. Every other canon
   paper here is about IV in general. This one is about a design.
-- Settles: UJIVE (Kolesár 2013) is the estimator for these designs, because it is the only
-  candidate whose bias trace is zero, and leniency designs are exactly the setting with many
-  instruments and many controls at once (2SLS carries many-instrument bias scaling in K, JIVE
-  carries many-covariate bias scaling in the number of controls L and with the opposite sign,
-  bias-corrected 2SLS has trace zero but only under homoskedasticity, IJIVE is close in
-  practice); UJIVE instruments with leave-one-out fitted relative leniency, the examiner dummies
-  residualized on the controls first; manual leniency IV (build an external leniency measure,
-  plug it into a just-identified IV) is out, because construction details drive the bias and the
-  second-stage standard errors are wrong; the variance of a constructed leniency measure is not
-  a reading of design strength, since estimation noise inflates it; balance is tested by running
-  the same UJIVE specification with the covariate as the outcome, which puts any imbalance in
-  treatment-effect units and is immune to the mechanical correlation a constructed-leniency
-  balance regression manufactures; the joint F on the examiner dummies is invalid with many
-  examiners; the same machinery on a post-assignment variable tests exclusion; average
-  monotonicity (Frandsen-Lefgren-Leslie 2023) is the operative condition, weaker than
-  Imbens-Angrist uniform monotonicity, sufficient for nonnegative weights (FLL) and, as GHK
-  state, also necessary, but it is not invariant to first-stage misspecification; average
-  monotonicity is testable, by running UJIVE on v_i times treatment for a binary v_i and checking
-  whether the 95 percent interval overlaps [0, 1], since the bound holds for the estimand; the
-  same trick with non-binary v_i characterizes compliers and probes external validity; the
-  first-stage F is the wrong strength diagnostic for UJIVE, which stays
-  approximately unbiased as E[F] goes to one provided sqrt(K) times (E[F] - 1) is large; the
-  heterogeneity-robust plug-in variance also absorbs the Bekker many-instrument term; under
-  independent assignment plain robust standard errors suffice, and clustering by examiner is not
-  justified by the assignment process; clustered assignment changes the estimator as well as
-  the standard error, requiring leave-own-cluster-out UJIVE.
+- Settles: UJIVE (Kolesár 2013) is the estimator, because its bias trace is zero with many
+  instruments and many controls at once; manual leniency IV is out; balance and exclusion are
+  tested by running the same UJIVE specification with the covariate or a post-assignment
+  variable as the outcome, and the joint F on the examiner dummies is invalid with many
+  examiners; average monotonicity (Frandsen-Lefgren-Leslie 2023) is the operative condition,
+  sufficient for nonnegative weights (FLL) and, as GHK state, also necessary; it is testable by
+  checking whether the UJIVE interval for v_i times treatment overlaps [0, 1], and the same trick
+  characterizes compliers; strength is read from sqrt(K) times (E[F] - 1), not the first-stage
+  F; under independent assignment plain robust standard errors suffice, and clustering by
+  examiner is not justified by the assignment process; clustered assignment requires
+  leave-own-cluster-out UJIVE. The mechanics are in references/designs.md, section "Leniency
+  designs: UJIVE and the five checks", and the trace algebra in references/details.md.
 - Binds when: any design where cases are assigned to decision-makers who differ in strictness and
   the assignment is as good as random within a stratum. Judges, patent examiners, disability
   assessors, loan officers, child-protection investigators, radiologists, immigration officers,
   content moderators, and platform review queues that route by roster.
-- Scope limits: the fixed-number-of-examiners caveat recorded here is NOT a description of
-  Abadie-Athey-Imbens-Wooldridge, whose framework is asymptotic in the number of clusters and
-  treats growing cluster sizes explicitly (verified against the paper 2026-08-05; note in
-  notes/router/). It belongs to `frandsen2025cluster` or to Goldsmith-Pinkham-Hull-Kolesar's
-  reading of it, neither of which has been re-read; reattribute before quoting. What AAIW does
-  scope: linear estimators only, and only the sampling and assignment processes they model.
-  Kolesár, Montiel Olea, and Roth (2025, arXiv 2512.24096, revised March 2026) give sharp
-  bounds on counterfactual judge policies without IV monotonicity, so policy effects in a
-  leniency design have a formal route. Parametric MST-style extrapolation has not been
+- Scope limits: Kolesár, Montiel Olea, and Roth (2025, arXiv 2512.24096, revised March 2026)
+  give sharp bounds on counterfactual judge policies without IV monotonicity, so policy effects
+  in a leniency design have a formal route. Parametric MST-style extrapolation has not been
   formalized for many decision-makers or controls, so do not carry that ladder into a leniency
   design without saying so.
 - Implement: the authors' own R package ManyIV (github.com/kolesarm/ManyIV), row in
@@ -195,7 +174,10 @@ version arXiv 2511.03572. User-supplied addendum, read 2026-08-04.
    Angrist-Kolesár 2024 (size is fine at realistic endogeneity), Lee et al. 2022 (tF critical
    values fix size), and Lee, McCrary, Moreira, Porter, and Yap 2023 (VtF intervals, NBER
    w31893). Default: AR/CLR and the F-50 standard; report both when pushed,
-   cite the dispute. Presented as live, not settled.
+   cite the dispute. Presented as live, not settled. The t-test has near-zero power against
+   effects opposite the OLS bias, which under publication bias manufactures spurious
+   literature-wide consensus, and tF inherits the asymmetry. The AR test costs one
+   regression, so there is no economy argument for the t-test.
 2. Overid rejections: invalidity vs heterogeneity (both canon papers, plus
    Mogstad-Torgovitsky-Walters 2021). Not a dispute between authors but a fork in
    interpretation the skill refuses to collapse.
@@ -311,21 +293,29 @@ The recognition table's canonical cases. New keys were Crossref-verified and mer
 causal.bib 2026-08-26. One line each, with the design the case is the precedent for.
 
 - Finkelstein et al. 2012 (`finkelstein2012oregon`), randomized encouragement with noncompliance,
-  the Oregon Medicaid lottery with the ITT and the LATE reported side by side.
+  the Oregon Medicaid lottery with the ITT and the LATE reported side by side. It teaches
+  lottery IV under voluntary take-up, across financial, utilization, and health outcomes;
+  winning the lottery raised Medicaid enrollment by about 26 points.
 - Baicker et al. 2013 (`baicker2013oregon`), the clinical-outcome companion to the same lottery,
   and the paper the chapter points at for the lottery-as-instrument design.
 - Stevenson 2018 (`stevenson2018distortion`), leniency routing, Philadelphia bail magistrates,
-  where OLS finds nothing and IV carries the paper.
+  where OLS finds nothing and IV carries the paper. It teaches the design end to end. In
+  Cunningham's replication of the data (The Mixtape, online ch. 7 sec. 7.7, Table 7.12), 331,971
+  cases and eight judges, OLS -0.001 with time controls (0.029 with defendant controls) and IV 15
+  to 21 percent on guilty pleas. Stevenson's own headline is a 13 percent rise in conviction.
 - Bartik 1991 (`bartik1991who`) and Autor, Dorn, and Hanson 2013 (`autor2013china`), shift-share
-  exposure, the shares claim and the shifts claim as two separate identification arguments. Both
-  keys already resolve in causal.bib.
+  exposure, the shares claim and the shifts claim as two separate identification arguments, each
+  with its own estimator, balance test, and disqualifier. Both keys already resolve in causal.bib.
 - Borusyak and Hull 2023 (`borusyak2023nonrandom`), formula or network exposure, and the
-  recentering that a nonrandom exposure map requires. Key already resolves in causal.bib, and the
-  paper has its own canon section above.
+  recentering that a nonrandom exposure map requires. A formula-built instrument inherits
+  endogeneity from its nonrandom exposure weights: 0.23 collapses to 0.08 after recentering. Key
+  already resolves in causal.bib, and the paper has its own canon section above.
 - Wright 1928 (`wright1928tariff`), the cost shifter for price, and the origin of the
-  simultaneity problem the design solves.
+  simultaneity problem the design solves: observed price-quantity pairs are equilibria, a supply
+  shifter identifies demand, and the elasticity recovered belongs to the instrument's compliers.
 - Graddy 2006 (`graddy2006fulton`), the Fulton fish market data behind the worked price-elasticity
   example, read alongside `angrist2000interpretation` for what the recovered elasticity is.
 - McClellan, McNeil, and Newhouse 1994 (`mcclellan1994intensive`), the access or distance design,
   and the differential-distance trick of conditioning on generic distance and instrumenting with
-  the specific version. The SKILL.md row names no year; this is the paper it points at.
+  the specific version, because raw distance proxies everything. The SKILL.md row names no year;
+  this is the paper it points at.

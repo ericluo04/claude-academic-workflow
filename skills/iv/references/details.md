@@ -1,6 +1,6 @@
 # IV lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 
 ## The F ladder (Keane-Neal Table 1)
 
@@ -273,20 +273,6 @@ Caveat the paper itself flags: passing the RI balance tests supports the counter
 specification, and does not directly certify shock exogeneity; the placebo-outcome test is the
 check aimed at that assumption.
 
-## The six designs, and what each canonical case teaches
-
-The recognition table in SKILL.md indexes designs by what kills them. This is the longer form,
-with the lesson each canonical case carries.
-
-| Design | Canonical case | What it teaches |
-|---|---|---|
-| Randomized encouragement with noncompliance | Oregon Medicaid lottery (Finkelstein et al. 2012; Baicker et al. 2013) | lottery IV under voluntary take-up, with the ITT and the LATE reported side by side across financial, utilization, and health outcomes; winning the lottery raised Medicaid enrollment by about 26 points |
-| Leniency routing | Philadelphia bail magistrates (Stevenson 2018) | the design end to end, where OLS finds nothing and IV carries the paper; in Cunningham's replication of the data (The Mixtape, online ch. 7 sec. 7.7, Table 7.12), 331,971 cases and eight judges, OLS -0.001 with time controls (0.029 with defendant controls) and IV 15 to 21 percent on guilty pleas. Stevenson's own headline is a 13 percent rise in conviction |
-| Shift-share exposure | Bartik 1991; Autor-Dorn-Hanson 2013 | shares and shifts are two different identification claims, each with its own estimator, balance test, and disqualifier |
-| Formula or network exposure | Borusyak-Hull 2023, China high-speed rail | a formula-built instrument inherits endogeneity from its nonrandom exposure weights: 0.23 collapses to 0.08 after recentering |
-| Cost shifter for price | Wright 1928; Graddy's Fulton fish market (Graddy 2006) | simultaneity: observed price-quantity pairs are equilibria, a supply shifter identifies demand, and the elasticity recovered belongs to the instrument's compliers |
-| Access or distance | the McClellan-Newhouse differential-distance trick | condition on generic distance and instrument with the specific version, because raw distance proxies everything |
-
 ## Marketing translations
 
 - Price endogeneity: cost shifters and Hausman-style other-market prices routinely land F in
@@ -355,3 +341,75 @@ sec. 7.6), ssaggregate, bartik_weight, manyiv, and fejiv (Lei and Słoczyński, 
 R, and Stata, listed in the software table of Słoczyński, Sun, and Uysal 2026). These are names
 and roles only: unlike the R rows above, no Stata API
 here has been verified against its help file.
+
+## Leniency designs: monotonicity and compliers
+
+Moved verbatim from SKILL.md on 2026-10-09. SKILL.md keeps a six-line summary.
+
+Monotonicity, weakened and tested. Price the design against average monotonicity
+(Frandsen-Lefgren-Leslie 2023), meaning no unit is a defier on average across pairwise
+comparisons. FLL show that the condition is sufficient for nonnegative weights on the
+individual effects, and Goldsmith-Pinkham, Hull, and Kolesár (2026) state that it is also
+necessary. Nonnegative weights are what uniform monotonicity was protecting in the first place,
+and the condition is strictly weaker. It is not invariant to first-stage misspecification: when
+examiners work across several strata with stratum-specific leniency, an additive first stage can
+break average monotonicity where the true relative leniency satisfies it. Check robustness to
+interacting examiner assignment with the stratum fixed effects, and expect that flexibility to
+cost precision.
+
+The test: pick a binary v, replace the outcome with v times treatment, hold the treatment,
+instruments, and controls fixed, and run UJIVE. The estimand is a convex weighted average of v
+under the same weights as the headline estimate, so it lies in [0, 1]. The point estimate is
+noisy, so compare the 95% interval with [0, 1] and reject only when the whole interval sits
+outside. A rejection means something in the LATE theorem has failed. Two forms of v test
+different things. An indicator for an outcome value (the template's default) checks the outcome
+distribution of treated compliers, the Kitagawa-type form. An indicator built from a covariate
+determined before assignment checks the complier covariate distribution. Two limits to
+state when reporting it: the null is joint across assignment, exclusion, and monotonicity, so a
+rejection does not localize; and it catches only gross violations, since on-average defiers have
+to be both common and unlike the compliers to push a weighted average out of [0, 1]. A sharper
+joint test of random assignment, exclusion, and monotonicity is Coulibaly, Hsu, Mourifié, and
+Wan (2024), built from the sharp testable implications. It handles few or many cases per judge
+and discrete or continuous instruments, and they apply it to Stevenson's Philadelphia data.
+What the [0, 1] test buys over testing the stronger condition is that its rejections bear
+directly on sign reversals, and it needs neither bounded outcomes nor a small number of
+decision-makers. Sigstad 2026 is the calibration for how much to worry: monotonicity is often
+violated in judicial panels, yet the violations bias leniency IV estimates little.
+
+Compliers and external validity. The same trick with non-binary v identifies complier means of
+any pre-assignment characteristic under the headline weights. Put the complier mean beside the
+sample mean covariate by covariate and let the gaps carry the external-validity claim. Untreated
+compliers come from using one minus the treatment. To pool the two, run UJIVE of v times (2x - 1)
+on (2x - 1). This doubles as a monotonicity check, since a complier mean outside logical bounds
+rejects. For effects of counterfactual decision-maker policies, use Kolesár, Montiel Olea, and
+Roth (2025, "Evaluating Counterfactual Policies Using Instruments", arXiv 2512.24096), which gives
+sharp bounds in judge designs without IV monotonicity. Do not carry the parametric MST
+extrapolation ladder into a leniency design without flagging it: that route has not been
+formalized for many decision-makers or controls.
+
+## Mixtape notes
+
+Where this skill departs from Cunningham's chapter 7 and why. Moved verbatim from SKILL.md on
+2026-10-09.
+
+AR intervals. Cunningham (The Mixtape, online ch. 7 sec. 7.4) reports AR intervals
+"for robustness"; this skill makes them the only interval, because the two disagree in the
+chapter's own fish example (sec. 7.7, Table 7.14, on Graddy's data): at an effective F of
+22.929 the 2SLS estimate is -1.119 with a robust standard error of 0.431, so the t-interval
+is about [-1.96, -0.27] against a printed AR interval of [-2.186, -0.394]. Both ends move,
+and the AR interval is asymmetric.
+
+F language. The Mixtape calls an F of 17.6 "strong enough for identification" (online ch. 7
+sec. 7.8, on Cunningham and Finlay's data) and the fish instrument "strong (F > 22)" (sec.
+7.7), both inside the band this ladder distrusts (a sample F of 23.1 certifies a population F
+of 10), so a reader who copies that language into a current submission will draw the objection.
+
+JIVE. The Mixtape (online ch. 7 sec. 7.7) demonstrates JIVE in its bail exercise, calling that
+treatment "somewhat backwards looking", and flags UJIVE itself as the more robust version. This
+skill runs UJIVE: by the trace argument above, many examiners and many controls at once leave
+JIVE's many-covariate bias live and pointing opposite to 2SLS's. Report JIVE beside UJIVE as a
+diagnostic.
+
+Balance. The Mixtape (online ch. 7 sec. 7.7) calls balance "an absolute must" and says
+nothing about how, and the two implementations a reader reaches for first are the two ruled
+out here.
