@@ -1,8 +1,11 @@
 # Conjoint template: the randomized-experiment pipeline plus the HB and WTP blocks.
-# Every call verified against package documentation on 2026-07-31 (projoint 1.1.2,
-# factorEx 1.1.0, cjoint 2.1.3, ashr 2.2-63, CRTConjoint 0.1.0, logitr 1.2.0,
-# estimatr 1.0.6, bayesm 3.1-7; FindIt 1.3.0 added 2026-08-05). Adapt CONFIG and run
-# section by section.
+# Ran on 2026-10-09 (R 4.6.1; projoint 1.1.4, estimatr 2.0.0, ashr 2.2.63, bayesm 3.1.7,
+# posterior 1.7.0, bayesplot 1.16.0) on 300 simulated respondents with a flipped repeat
+# task: the live code of sections 1-6, the make_projoint_data lines of section 2, and
+# sections 8 and 9's bayesm lines uncommented (R 2000 per chain, plain and sign-constrained
+# priors). Not run on 2026-10-09: cjoint (section 1), factorEx (7), FindIt (7b),
+# CRTConjoint (6), and logitr (9). Package versions and pins live in one place:
+# ../references/details.md, "Package index". Adapt CONFIG and run section by section.
 #
 # API traps verified against docs/source:
 #   - projoint: EVERY argument is dot-prefixed (.data, .irr, .estimand). Subgroup trap:
@@ -23,15 +26,19 @@
 #     are the deprecated pre-0.7.0 interface; do not use them).
 #   - FindIt::CausalANOVA: vcov and CI.table come back ONLY when screen and collapse are
 #     both FALSE; with either TRUE the intervals must come from test.CausalANOVA on a
-#     held-out half. AME/AMIE2 are baselined at the GRAND MEAN, not a level.
+#     held-out half. AME/AMIE2 are baselined at the GRAND MEAN, not a level. The FindIt
+#     manual writes "select=FALSE and collapse=FALSE"; CausalANOVA has no `select`
+#     argument, and the manual means `screen`.
 
-library(estimatr)   # 1.0.6
-library(projoint)   # 1.1.2
-library(ashr)       # 2.2-63
-# library(factorEx)     # 1.1.0, section 7
-# library(CRTConjoint)  # 0.1.0, section 6
-# library(bayesm)       # 3.1-7, section 8
-# library(logitr)       # 1.2.0, section 9
+library(estimatr)
+library(projoint)
+library(ashr)
+# library(factorEx)     # section 7
+# library(CRTConjoint)  # section 6
+# library(bayesm)       # section 8
+# library(posterior)    # section 8, convergence diagnostics
+# library(bayesplot)    # section 8, rank plots
+# library(logitr)       # section 9
 
 ## ---- CONFIG ----------------------------------------------------------------------------
 ## df: LONG, one row per respondent-task-profile (the display format), with:
@@ -66,14 +73,36 @@ mm_A1 <- lm_robust(y ~ 0 + A1, data = df_est, clusters = id)  # MMs with cluster
 #   raw <- read_Qualtrics("export.csv")
 #   pj  <- reshape_projoint(raw, .outcomes = c(paste0("choice", 1:K), "choice_rep"),
 #                           .repeated = TRUE, .flipped = TRUE)   # repeat outcome LAST
-# Long non-Qualtrics data: make_projoint_data(df_long, .attribute_vars = c("A1","A2","A3"))
-out_mm   <- projoint(pj, .structure = "choice_level", .estimand = "mm")    # tau estimated
-out_amce <- projoint(pj, .structure = "choice_level", .estimand = "amce")  # from the repeat
+# Long non-Qualtrics data (the CONFIG df): projoint wants the repeated choice on the rows
+# of task 1, as y_rep, in task 1's profile numbering. With flipped columns, the repeat's
+# profile 2 showed task 1's profile 1, hence 3 - profile:
+# df_pj <- df[!df$rep, ]; r <- df[df$rep, ]; t1 <- df_pj$task == 1
+# df_pj$y_rep <- NA
+# df_pj$y_rep[t1] <- r$y[match(paste(df_pj$id, 3 - df_pj$profile)[t1],
+#                              paste(r$id, r$profile))]
+# pj <- make_projoint_data(df_pj, .attribute_vars = c("A1", "A2", "A3"),
+#                          .selected_var = "y", .selected_repeated_var = "y_rep")
+# Choice level (the skill's default) estimates ONE contrast per call: build a set_qoi()
+# object for each contrast the paper reports. projoint renames attributes and levels;
+# read the ids from pj$labels and pass levels WITHOUT the "attN:" prefix ("level2").
+q_mm <- set_qoi(.structure = "choice_level", .estimand = "mm",   # P(choose level2
+                .att_choose = "att1", .lev_choose = "level2",    #   when paired with
+                .att_notchoose = "att1", .lev_notchoose = "level1")  # level1)
+q_amce <- set_qoi(.structure = "choice_level", .estimand = "amce",
+                  .att_choose = "att1", .lev_choose = "level3",      # level3 over level1
+                  .att_notchoose = "att1", .lev_notchoose = "level1",
+                  .att_choose_b = "att1", .lev_choose_b = "level2",  # minus the baseline
+                  .att_notchoose_b = "att1", .lev_notchoose_b = "level1")  # level2 over level1
+out_mm   <- projoint(pj, q_mm)      # tau estimated from the repeated task
+out_amce <- projoint(pj, q_amce)
 summary(out_mm); plot(out_mm, .estimates = "corrected")
+# The all-levels MM plot runs at PROFILE level, the only structure that sweeps every
+# attribute without a .qoi. Say so in the figure note.
+out_all <- projoint(pj, .structure = "profile_level", .estimand = "mm")
+plot(out_all, .estimates = "both")
 # Existing data with NO repeated task: extrapolate tau from task-pair agreement.
 tau_hat <- predict_tau(pj)      # $irr row x = 0 is the extrapolated IRR; $figure the fit
-out_mm2 <- projoint(pj, .structure = "choice_level", .estimand = "mm",
-                    .irr = tau_hat$irr$predicted[tau_hat$irr$x == 0])
+out_mm2 <- projoint(pj, q_mm, .irr = tau_hat$irr$predicted[tau_hat$irr$x == 0])
 # Report corrected AND uncorrected. Correction is for binary forced choice ONLY.
 # Uncertainty in tau: .se_method = "analytical" (default) / "simulation" / "bootstrap".
 
@@ -129,12 +158,18 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # threshold.
 
 ## ---- 7. pAMCE under a target profile distribution (factorEx) ---------------------------
-# target_dist: named list of per-factor marginals (names = the data's levels).
-# target_dist <- list(A1 = c(lev1 = .70, lev2 = .30), A2 = c(a = .1, b = .5, c = .4))
+# target_dist: named list of per-factor marginals (names = the data's levels). EVERY
+# factor in the formula needs one (model_pAMCE stops otherwise); give a factor you do not
+# retarget its design marginal.
+# target_dist <- list(A1 = c(lev1 = .70, lev2 = .30), A2 = c(a = .1, b = .5, c = .4),
+#                     A3 = c(x = .5, y = .5))
 # fit_p <- model_pAMCE(y ~ A1 + A2 + A3, data = df_choice, ord_fac = rep(FALSE, 3),
 #                      cluster_id = df_choice$id, target_dist = target_dist,
 #                      target_type = "marginal", reg = TRUE, boot = 2000, seed = 42)
-# summary(fit_p); decompose_pAMCE(fit_p)   # where the uAMCE-pAMCE gap comes from
+# summary(fit_p)
+# decompose_pAMCE(fit_p, effect_name = c("A1", "lev2"))   # c(factor, level); required
+# # Without target_diff it compares the target with the in-sample (uniform design)
+# # distribution, which is where the uAMCE-pAMCE gap comes from.
 # Design-based route (target enters the randomization): design_pAMCE(..., target_type =
 # "partial_joint", partial_joint_name = list(c("A1","A2"), "A3")). Run the ESS check
 # before fielding (../references/details.md).
@@ -143,7 +178,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # The estimand behind section 7's gap. Do NOT read a dummy-coded interaction coefficient as
 # the causal interaction: its relative magnitude depends on the baseline level, and any
 # interaction involving a baseline level is mechanically zero.
-# library(FindIt)   # 1.3.0
+# library(FindIt)
 # Declare level order FIRST; it decides which merges the collapse step may make.
 # df_choice$A1 <- factor(df_choice$A1, ordered = TRUE, levels = c("low","mid","high"))
 # df_choice$A2 <- factor(df_choice$A2, ordered = FALSE, levels = c("x","y"))
@@ -173,7 +208,7 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # coefficients rather than their differences, so the baseline-invariance argument covers the
 # collapse and estimation stages only.
 
-## ---- 8. The HB block (preference-measurement track; bayesm 3.1-7) ----------------------
+## ---- 8. The HB block (preference-measurement track; bayesm) ----------------------------
 # lgtdata: list of per-respondent lists; y in 1..p; X of (n_i * p) x nvar rows via
 # createX; "none" option = all-zero row; price in ~unit scale (hundreds/thousands).
 # data_hb  <- list(lgtdata = lgtdata, p = p)     # + Z = centered covariates, no intercept
@@ -184,21 +219,61 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # # prior_hb <- list(ncomp = 1, SignRes = c(rep(0, nvar - 1), -1),
 # #                  mubar = c(rep(0, nvar - 1), 2), Amu = 0.1, nu = nvar + 15,
 # #                  V = (nvar + 15) * diag(c(rep(4, nvar - 1), 0.1)))
-# mcmc_hb <- list(R = 50000, keep = 10, nprint = 1000)   # man page: R > 20,000 required
-# out_hb  <- rhierMnlRwMixture(Data = data_hb, Prior = prior_hb, Mcmc = mcmc_hb)
-# summary(out_hb$nmix); plot(out_hb$betadraw)    # trace/ACF/ESS; burn-in 10% default
-# ndraw <- dim(out_hb$betadraw)[3]; burn <- ceiling(0.1 * ndraw)
-# partworths <- apply(out_hb$betadraw[, , (burn + 1):ndraw], 1:2, mean)
+# mcmc_hb <- list(R = 50000, keep = 10, nprint = 1000)  # man page: "Large R values may
+#                                                        # be required (>20,000)"
+# Convergence (Vehtari, Gelman, Simpson, Carpenter, and Buerkner 2021): four chains,
+# split rank-normalized R-hat < 1.01 and bulk and tail ESS > 400 for EVERY parameter,
+# rank plots in place of trace plots. bayesm runs one chain per call, so run four
+# seeded calls and diagnose them jointly. bayesm's 10% burn-in is a convention. Discard
+# the first half as warm-up and let R-hat and the rank plots judge it. bayesm starts every
+# chain at the same values (each respondent's fractional-likelihood estimate), so the seeds
+# differ only in the Metropolis path, and R-hat is weaker than from overdispersed starts.
+# runs <- lapply(1:4, function(s) {
+#   set.seed(s)
+#   rhierMnlRwMixture(Data = data_hb, Prior = prior_hb, Mcmc = mcmc_hb)
+# })
+# ndraw <- dim(runs[[1]]$betadraw)[3]; keep_it <- (floor(ndraw / 2) + 1):ndraw
+# nlgt <- dim(runs[[1]]$betadraw)[1]; nvar <- dim(runs[[1]]$betadraw)[2]
+# # betadraw is nlgt x nvar x draws; stack into iterations x chains x variables.
+# arr <- simplify2array(lapply(runs, function(r)
+#   matrix(aperm(r$betadraw[, , keep_it, drop = FALSE], c(3, 1, 2)),
+#          nrow = length(keep_it))))                        # iter x variables x chains
+# arr <- aperm(arr, c(1, 3, 2))                             # iter x chains x variables
+# dimnames(arr) <- list(NULL, NULL,
+#   paste0("beta[", rep(seq_len(nlgt), nvar), ",", rep(seq_len(nvar), each = nlgt), "]"))
+# stopifnot(dim(arr)[2] == 4)          # chains on dimension 2, or the diagnostics lie
+# dr <- posterior::as_draws_array(arr)
+# diag_hb <- posterior::summarise_draws(dr, "rhat", "ess_bulk", "ess_tail")
+# ok <- with(diag_hb, rhat < 1.01 & ess_bulk > 400 & ess_tail > 400)
+# bad <- diag_hb[is.na(ok) | !ok, ]    # an NA R-hat or ESS counts as a failure
+# nrow(bad)    # must be 0; otherwise raise R and rerun all four chains
+# bayesplot::mcmc_rank_overlay(dr, pars = head(diag_hb$variable[order(-diag_hb$rhat)], 6))
+# Report the max R-hat and min bulk and tail ESS in the methods paragraph.
+# partworths <- matrix(apply(arr, 3, mean), nlgt, nvar)   # pooled post-warm-up draws
 # Report QUANTILES, not just posterior means and sds (the authors' explicit instruction).
+# Mixture components are label-switched across draws, so diagnose the implied population
+# moments, never the component draws. Use the same half warm-up as the betadraw:
+# summary(runs[[1]]$nmix, burnin = floor(ndraw / 2))   # mixture-implied population moments
 
 ## ---- 9. WTP space (when WTP or prices are the deliverable) -----------------------------
 # The Sonnier rule: put the heterogeneity prior on WTP directly; never feed a
 # partworth-space posterior into a price optimizer; validate on holdout LPD, never
-# in-sample LMD/DIC. logitr implements both spaces:
+# in-sample LMD/DIC.
+# HB route (Bayesian, stays on the section 8 posterior): WTP from preference space,
+# computed draw by draw, never as a ratio of posterior means. A partworth over a price
+# coefficient with density at zero (normal or a normal mixture) has no finite mean or
+# variance (Daly, Hess, and Train 2012), so sign-constrain price (lognormal) and report
+# posterior QUANTILES. With price in column nvar, constrained negative:
+# wtp_draws <- -runs[[1]]$betadraw[, k, keep_it] / runs[[1]]$betadraw[, nvar, keep_it]
+# wtp_q <- t(apply(wtp_draws, 1, quantile, c(.05, .5, .95)))   # per respondent
+# (Pool all four chains the same way before reporting.)
+# ML route: logitr is MAXIMUM LIKELIHOOD (simulated), not Bayesian. It fits the WTP-space
+# mixed logit directly; randScale = "ln" makes the scale lognormal, which is Sonnier's
+# surplus model, (x'beta_i - p) / mu_i with log mu_i normal.
 # wtp_fit <- logitr(data = df_choice, outcome = "y", obsID = "obs", panelID = "id",
 #                   pars = c("A1", "A2", "A3"), scalePar = "price",   # WTP space
 #                   randPars = c(A1 = "n", A2 = "n", A3 = "n"),       # mixed logit
-#                   numMultiStarts = 10)
+#                   randScale = "ln", numMultiStarts = 10)
 # numMultiStarts = 10: mixed-logit likelihoods are multimodal; 10 starts balance
 # local-optimum risk against runtime, raise for publication runs.
 # scalePar = NULL gives preference space for the comparison. Holdout: one randomly
@@ -207,7 +282,6 @@ ct <- lm_robust(y ~ A1 * factor(task), data = df_est, clusters = id)
 # duplicates task 1's information); compare on holdout log predictive density.
 
 ## ---- Session ---------------------------------------------------------------------------
-# Pin: projoint 1.1.2, factorEx 1.1.0, cjoint 2.1.3, ashr 2.2-63, CRTConjoint 0.1.0,
-# logitr 1.2.0, estimatr 1.0.6, bayesm 3.1-7 (defaults changed across bayesm releases;
-# the sessionInfo record is what makes the priors auditable).
+# Pins: ../references/details.md, "Package index". Record sessionInfo with every run
+# (defaults changed across bayesm releases; the record makes the priors auditable).
 sessionInfo()
