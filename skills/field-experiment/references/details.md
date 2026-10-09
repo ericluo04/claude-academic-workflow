@@ -1,6 +1,6 @@
 # Field-experiment lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 
 ## Variance algebra
 
@@ -92,22 +92,11 @@ For counts and skewed-positive outcomes the analogous contrast is OLS versus Poi
 log-scale models, and the same three-tier logic applies through the Guo-Basse routing
 (nonlinear coefficients are never read; nonlinear models serve only as imputation engines).
 
-- Choosing the LPM over a logit is declining to assume a functional form, not assuming a
-  linear one: OLS of the binary outcome on the treatment dummy is the linear probability
-  model in saturated form and equals the difference in proportions, so under randomization
-  the coefficient is unbiased for the risk difference (the ATE) with no functional-form
-  assumption doing any work, while the logit imposes a shape whose coefficient still needs
-  AME post-processing before it is interpretable. The LPM is the nonparametric estimator
-  here, and the applied-econometrics preference for it is fully vindicated in the
-  design-based frame.
 - The classic anti-LPM objections have no force for ATE estimation in an experiment:
   heteroskedasticity is handled by the HC2 default, and fitted probabilities outside [0, 1]
   only matter when predicted probabilities are consumed, which the ATE never does. (If
   calibrated predictions are the deliverable, that is a different task; use the logistic
   working model for it.)
-- lm_lin on a binary outcome is the covariate-adjusted LPM. Nothing in Lin's agnostic theory
-  assumes a continuous outcome, so the never-hurts-precision guarantee and the sandwich
-  validity apply verbatim.
 - AME vs MEM: what a logit needs before it says anything interpretable. The average marginal
   effect (AME) averages unit-level risk differences over the sample and equals the
   g-computation risk difference; avg_comparisons computes it, and it is the standardization
@@ -115,11 +104,6 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
   effect at the mean covariate vector, a profile that may describe no actual unit; under
   nonlinearity MEM does not equal AME. Older Stata habits (margins, atmeans) produce the
   MEM; do not report it.
-- Discrete and multivalued treatments: OLS on arm dummies reads out each arm's risk
-  difference against control directly. Multi-arm logit coefficients are conditional log-odds
-  contrasts carrying the same noncollapsibility problem, and the multi-arm OLS adjustment
-  should be separate per-arm regressions (pooled adjustment can hurt even in balanced
-  designs beyond two arms; Freedman 2008, AoAS; Negi and Wooldridge 2025).
 - The three-tier summary of this skill's position: LPM coefficients are read directly
   (primary); logit coefficients are never read (banned); the logit as an imputation engine
   whose coefficient is never read is an optional precision upgrade (Guo-Basse, with its
@@ -179,43 +163,22 @@ log-scale models, and the same three-tier logic applies through the Guo-Basse ro
 - QTE: marginal-quantile differences; bootstrap invalid at mass points (0.10 quantile
   bootstrap SE exactly 0 with 30 percent zeros); use the exact test with the QTE statistic.
 
-## Interference designs
-
-- Cluster at the interaction boundary (markets, stores, social clusters).
-- Saturation (partial-population) designs: randomize the treated fraction across groups,
-  then units within; identifies direct and indirect effects (Hudgens-Halloran). Baird et al.
-  (2018) give the power calculations and the optimal saturations. The Crepon displacement
-  check: within-market differences varying with market-level treated share.
-- General networks: exposure mappings (Aronow and Samii 2017), then exact tests of sharp
-  nulls with focal units, buffer units, and auxiliary assignments (Athey-Eckles-Imbens).
-  Large-network asymptotics exist only under extra assumptions: decaying interference with
-  a conservative network HAC variance (Leung 2022), or a bounded amount of unknown
-  interference (Savje, Aronow, and Hudgens 2021). Do not substitute clustered SEs for the
-  exact test.
-- Temporal interference: switchback designs (Bojinov, Simchi-Levi, and Zhao 2023).
-- Marketing instances: marketplace cannibalization, social-ad spillovers, budget-constrained
-  auctions, referral programs, two-sided marketplace network effects.
-
 ## Marketing translations
 
-- Small-cell email/pricing tests: rare-arm HC2 + Behrens-Fisher regime.
-- 90/10 holdouts: the imbalanced-arms case where Lin's interactions are key.
+The rest of the marketing cases (small-cell tests, 90/10 holdouts, conversion lifts,
+retention, uplift, geo tests apart from the displacement check below) are stated in SKILL.md at the rule they instantiate.
+
 - CUPED: fixed-slope regression adjustment on pre-period outcomes in Lin's survey-sampling
   framing (Deng et al. 2013); lm_lin with the pre-period metric is the design-based version.
-- Conversion/click/churn lifts: report percentage-point risk differences, never adjusted
-  odds ratios; noncollapsibility breaks cross-segment and cross-platform OR comparisons.
 - Revenue per user: skewed, zero-inflated; Poisson quasi-likelihood imputation per arm,
   reported in levels or as a share of the control mean (Chen and Roth 2024). Log-OLS with
   second-stage recalibration only when every value is positive. Never the
   log-coefficient-as-lift.
-- Retention experiments: post-period behavior among survivors is the Lee case; differential
-  churn is the trimming share.
-- Uplift modeling: honest forests + policy learning; report the RATE test before claiming
-  targetable heterogeneity.
-- Geo experiments: cluster-level analysis primary, both estimands when market sizes vary;
-  displacement checks before scaling a winning arm.
+- Geo experiments: run displacement checks before scaling a winning arm.
+- Interference instances: marketplace cannibalization, social-ad spillovers, referral
+  programs, livestream network effects.
 
-## Package index (versions refreshed against CRAN 2026-10-08; template run end to end on these versions)
+## Package index (versions checked against CRAN; template run end to end on these versions)
 
 | Package | Version | Role | Traps |
 |---|---|---|---|

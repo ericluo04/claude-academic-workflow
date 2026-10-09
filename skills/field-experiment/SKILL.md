@@ -5,8 +5,8 @@ description: Design, analyze, and write up randomized experiments (field experim
 
 # Field experiments
 
-An opinionated experimental workflow grounded in a read canon (references/canon.md, current as
-of 2026-07-28): the Athey-Imbens handbook chapter as the spine (randomization-based inference
+An opinionated experimental workflow grounded in a read canon (references/canon.md):
+the Athey-Imbens handbook chapter as the spine (randomization-based inference
 first), Freedman's logistic-regression critique and Lin's repair for covariate adjustment,
 Guo-Basse's generalization to nonlinear outcomes, and Lee's bounds for attrition and gated
 outcomes. Deliverable: the recommendation with its citation, the R estimation and diagnostics
@@ -16,8 +16,9 @@ Before any estimation, stop and confirm three things with the user: the estimand
 or unit-average under clustering), the pre-specified covariate list, and whether outcomes have
 been seen.
 
-Refresh path: run litreview on the method since the canon date, then propose additions to
-references/canon.md as flagged addenda for the user's approval; nothing enters the canon without it.
+Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 The same refresh checks every pin in the package index of references/details.md against CRAN
 and reads the NEWS of any package with a new major version.
 
@@ -67,6 +68,9 @@ and reads the NEWS of any package with a new major version.
   homoskedasticity). For stratified and clustered designs, simulate the design instead
   (DeclareDesign). Ex-post power from observed effects is not a diagnostic anywhere in this
   family of skills.
+- Interference is a design decision: when units interact (marketplaces, shared budgets,
+  networks), pick the randomization unit and the design in section "Interference" below
+  before anything is assigned.
 
 Adaptive and bandit experiments are out of scope here: no canon source covers adaptive
 inference, and causal-design carries the route. The caution stands regardless: naive sample
@@ -263,15 +267,16 @@ monotonicity also fails.
 When units interact, SUTVA fails and the simple ATE misstates the policy effect. Contained
 interactions: randomize at the group level (markets, stores). Direct-vs-indirect effects:
 two-stage saturation designs (randomize treated fractions across groups, then units within;
-Baird, Bohren, McIntosh, and Ozler 2018 give power and the optimal saturations);
-if within-market treatment-control differences vary with the market-level treated share,
-displacement is present, the marketplace-cannibalization check. One general network: define
-each unit's exposure through an exposure mapping (Aronow and Samii 2017), then run exact
-randomization tests with focal, buffer, and auxiliary units. Exact tests are the default
-because large-network asymptotics need extra assumptions. Leung (2022) assumes interference
-that decays with network distance, and his network HAC variance is conservative. Savje,
-Aronow, and Hudgens (2021) assume a bounded amount of unknown interference. Platform
-experiments should default to market-level clustering
+Hudgens and Halloran 2008; Baird, Bohren, McIntosh, and Ozler 2018 give power and the
+optimal saturations); if within-market treatment-control differences vary with the
+market-level treated share, displacement is present, the marketplace-cannibalization check
+(Crepon et al. 2013). One general network: define each unit's exposure through an exposure
+mapping (Aronow and Samii 2017), then run exact randomization tests with focal, buffer, and
+auxiliary units (Athey, Eckles, and Imbens 2018). Exact tests are the default because
+large-network asymptotics need extra assumptions. Leung (2022) assumes interference that
+decays with network distance, and his network HAC variance is conservative. Savje, Aronow,
+and Hudgens (2021) assume a bounded amount of unknown interference. Clustered SEs do not
+substitute for the exact test. Platform experiments should default to market-level clustering
 when cannibalization or budget spillover is plausible. Marketplace and two-sided settings:
 multiple randomization designs assign treatment to buyer-seller pairs (Bajari et al. 2023;
 Johari, Li, Liskovich, and Weintraub 2022 analyze the bias of one-sided designs). Temporal

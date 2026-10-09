@@ -1,7 +1,7 @@
 # Field-experiment canon
 
-Current as of 2026-07-28. Athey-Imbens and Freedman are hand-picked; Lin, Guo-Basse, and Lee
-are human-approved addenda (2026-07-28) filling the covariate-adjustment and attrition gaps.
+Current as of 2026-10-09. The user picked Athey-Imbens and Freedman; Lin, Guo-Basse, and Lee
+are user-approved addenda (2026-07-28) filling the covariate-adjustment and attrition gaps.
 BibTeX keys point into ../../causal-design/references/causal.bib. Refresh: litreview on the
 method since the date above, results proposed as flagged addenda.
 
@@ -13,18 +13,11 @@ Key: `athey2017econometrics`. Read: arXiv 1607.00698
 
 - Role: the spine; randomization-based inference put ahead of the regression paradigm, and
   the design and analysis rules that follow.
-- Settles: Fisher exact tests and Neyman conservative variance as the default pair; the
-  Neyman variance drops an unidentifiable term, so CIs are conservative; HC2 equals the
-  Neyman estimator for binary treatment, EHW is anti-conservative with rare arms
+- Settles: Fisher exact tests and Neyman conservative variance as the default pair; HC2
+  equals the Neyman estimator for binary treatment, EHW is anti-conservative with rare arms
   (Behrens-Fisher dof fix); stratify ex ante (weakly dominates complete randomization even
-  small-sample), strata to 2+2, do not pair (their position, contested by the later
-  matched-pair theory in dispute 1 below, so do not carry it as settled),
-  re-randomization needs a pre-specified
-  acceptance rule; clustered designs have two estimands and cluster-level analysis is
-  primary; ITT plus LATE and never as-treated or per-protocol; honest sample splitting for
-  data-driven heterogeneity (coverage survives, MSE pays); QTEs are marginal-quantile
-  differences and the bootstrap fails at mass points; interference handled by cluster
-  randomization, saturation designs, or network-exact tests with focal/buffer units.
+  small-sample), strata to 2+2; clustered designs have two estimands and cluster-level
+  analysis is primary; ITT plus LATE and never as-treated or per-protocol.
 - Binds when: designing any experiment; every analysis choice; the noncompliance and
   interference blocks.
 - Implement: names no software; the randomizr/estimatr/ri2/grf mapping is ours, in
@@ -203,3 +196,12 @@ change a rule also say where they bind and give their caveats.
   asymptotics under decaying or bounded unknown interference.
 - `bojinov2023design` (Management Science 2023): switchback designs and their inference.
 - `roth2023efficient` (JPE Micro 2023): the estimator for randomized rollout timing.
+
+## Marketplace designs
+
+Moved from causal-design on 2026-10-09 (tier-3 audit pass): ownership of the two marketplace
+keys. The text below is causal-design/references/canon.md's, verbatim; causal-design's canon keeps
+a one-line pointer here.
+
+- `bajari2023experimental` and
+  `johari2022experimental` (marketplace designs).
