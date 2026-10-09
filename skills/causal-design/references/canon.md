@@ -1,6 +1,6 @@
 # causal-design canon
 
-Current as of 2026-08-05. Four sources: three hand-picked and a fourth,
+Current as of 2026-10-09. Four sources: three hand-picked and a fourth,
 `abadie2023clustering`, approved on 2026-08-05, which was promoted from a cross-reference to
 a full entry because five skills lean on it. Nothing enters this file without explicit human
 approval. BibTeX keys point into ./causal.bib, which is the
@@ -46,7 +46,8 @@ Annual Review of Statistics and Its Application 11:123-152. Key: `imbens2024caus
 ## Li, Luo, and Pattabhiramaiah (2024)
 
 AMA Marketing News, 2024-11-20; no journal companion, the web page is the citable object.
-Key: `li2024quasiexperimental`.
+Key: `li2024quasiexperimental`. Hereafter AMA, the one definition the family uses; other files
+write "AMA (causal-design canon)".
 
 - Role: the marketing-native data-shape axis, complementary to Imbens' assumption axis.
   Routes by number of treated units, pre-period length, covariate richness, treatment
@@ -66,11 +67,9 @@ Key: `li2024quasiexperimental`.
   synthetic control / matrix completion, unit and time reweighting both wanted -> SDID
   with inference procedure chosen by data shape; PSM "called into question," replaced by
   AIPW, double ML, causal forests; unconfoundedness often defensible in marketing because
-  targeting rules are known and observable; the Li-Sonnier result that the gsynth
-  parametric bootstrap gives biased coverage when treated and control error variances
-  differ ("false precision or false imprecision... lead to
-  incorrect business decisions"); the field vocabulary (design rigor vs statistical rigor,
-  ATT-first, clean controls).
+  targeting rules are known and observable; the Li-Sonnier result (owned by
+  ../../synthetic-control/references/canon.md, section "AMA panel family"); the field
+  vocabulary (design rigor vs statistical rigor, ATT-first, clean controls).
 - Binds when: routing within the panel branch; arguing a method is accepted marketing
   practice; writing for marketing reviewers.
 - Caveats: read via WebFetch extraction, so re-verify any quotation against the live page
@@ -166,14 +165,16 @@ header cross-reference on 2026-08-05 because five skills lean on it.
 
 New to the bib with this skill: `hirano2003efficient` (estimated propensity score),
 `li2018balancing` (overlap weights), `bang2005doubly` (doubly robust), `athey2021policy`
-(policy learning), `aronow2017estimating` (exposure mappings), `bajari2023experimental` and
-`johari2022experimental` (marketplace designs), `athey2026surrogate` (the surrogate index,
-REStud 93(4):2284-2312, online 2025-09-30, no longer the NBER WP), the sensitivity ladder
-(`manski1990nonparametric`, `rosenbaum1983assessing`, `imbens2003sensitivity`,
+(policy learning), `aronow2017estimating` (exposure mappings), `athey2026surrogate` (the
+surrogate index, REStud 93(4):2284-2312, online 2025-09-30, no longer the NBER WP), and the
+sensitivity ladder (`manski1990nonparametric`, `rosenbaum1983assessing`, `imbens2003sensitivity`,
 `cinelli2020making`, `rosenbaum2002observational`; `oster2019unobservable` stays in the bib
-but the family dropped Oster's delta on 2026-10-09, see details.md), and the AMA
-panel family (`hsiao2012panel`, `li2020inference`, `li2023augmented`, `li2024forward`,
-`li2023statistical` for Li-Sonnier). Already in the bib from
+but the family dropped Oster's delta on 2026-10-09, see details.md). The AMA panel family
+(`hsiao2012panel`, `li2020inference`, `li2023augmented`, `li2024forward`, `li2023statistical`)
+is owned by ../../synthetic-control/references/canon.md (section "AMA panel family"); this
+skill keeps the routing fan-out in SKILL.md. The marketplace design keys
+`bajari2023experimental` and `johari2022experimental` are owned by
+../../field-experiment/references/canon.md (section "Marketplace designs"). Already in the bib from
 method skills and reused here: `crump2009dealing`, `wager2018estimation`,
 `chernozhukov2018double`, `xu2017generalized`, `athey2021matrix`, `crepon2013labor`,
 `hudgens2008toward`, `athey2018exact`, `egami2022make`, the did/rdd/synthetic-control canons.
@@ -187,7 +188,14 @@ and strict exogeneity in SKILL.md's plain-panel-fixed-effects section, and the p
 the panel methods that section leaves out, random effects among them. Added 2026-08-26 from
 the reference list of the panel-data chapter of Cunningham, The Mixtape, online ch. 8,
 whose footnote 1 names it for the same purpose. A textbook, so it carries no reading notes and
-does not sit alongside the four read sources above.
+does not sit alongside the three read sources above.
+
+Reference shelf, not canon: Cunningham's Mixtape, `cunningham2021causal` (Causal Inference: The
+Mixtape, Yale University Press, 2021) and `cunningham2026remix` (Causal Inference: The Remix, the
+online second edition at https://mixtape.scunning.com/, accessed 2026-10-08). Cite
+`cunningham2021causal` for the printed first edition and `cunningham2026remix` for the second.
+A claim verified against the site carries the locator "online ch. N sec. M", as in "Cunningham,
+The Mixtape, online ch. 9 sec. 9.6".
 
 ## Shelf additions from the 2026-10-08 audit (tier 2, added 2026-10-09)
 

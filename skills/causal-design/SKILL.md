@@ -6,13 +6,13 @@ description: Triage a causal question and hand off to the owning method skill. O
 # Causal design triage
 
 The router of the family, grounded in a read canon of four sources
-(references/canon.md, current as of 2026-08-05): Imbens (2024) supplies the assumption axis
-(what licenses identification), Li, Luo, and Pattabhiramaiah (2024, hereafter AMA) the
-marketing data-shape axis (how many treated units, how many pre-periods, how rich the
-covariates), Feder et al. (2022) the text-role axis (which role unstructured data plays
-in the graph), and Abadie, Athey, Imbens, and Wooldridge (2023) the clustering rules the
-family shares. The deliverable is a design
-recommendation carrying four things: the assumption that licenses it, the estimand it
+(references/canon.md): Imbens (2024) supplies the assumption axis
+(what licenses identification), Li, Luo, and Pattabhiramaiah (2024, hereafter AMA; defined in
+references/canon.md) the marketing data-shape axis (how many treated units, how many
+pre-periods, how rich the covariates), Feder et al. (2022) the text-role axis (which role
+unstructured data plays in the graph), and Abadie, Athey, Imbens, and Wooldridge (2023) the
+clustering rules the family shares. The deliverable is a
+design recommendation carrying four things: the assumption that licenses it, the estimand it
 actually identifies WITH its subpopulation named, the handoff to the owning skill, and, for
 the one branch no method skill owns (selection on observables), estimation code and a methods
 paragraph. The skill stops at the four stop points in references/shared-rules.md (section
@@ -20,8 +20,9 @@ paragraph. The skill stops at the four stop points in references/shared-rules.md
 the gold standard, and quasi-experimental work substitutes statistical rigor for design rigor
 (AMA); a design that fails its gate is a verdict, not an obstacle.
 
-Refresh path: run litreview on quasi-experimental methods in marketing since the canon date,
-then propose additions to references/canon.md as flagged addenda.
+Current as of 2026-10-09; refresh per shared-rules (references/shared-rules.md,
+section "Refresh path").
+Nothing enters the canon without the user's approval.
 
 ## The triage: four questions in order
 
@@ -136,7 +137,8 @@ taxonomy (data type, frame shape, assignment mechanism; did skill):
   biased coverage when treated and control error variances differ (Li and Sonnier 2023).
   Use fect's nonparametric bootstrap or jackknife `vartype`, or hand-code the Li-Sonnier
   correction (synthetic-control's details.md); unit AND time reweighting wanted: synthetic DiD;
-  the inference-procedure-by-data-shape rules live in synthetic-control.
+  the inference-procedure-by-data-shape rules live in synthetic-control's details, absorbed
+  there from the AMA piece with "permutation" mapped to the placebo estimator.
 
 ## Plain panel fixed effects: no comparison group, no adoption date
 
@@ -146,18 +148,13 @@ conditional on the unit effect, E[eps_it | D_i1, ..., D_iT, u_i] = 0 for every t
 confounder, observed or not, and lets D_it be arbitrarily correlated with u_i. It buys
 nothing against a time-varying unobservable, feedback from past outcomes to current
 treatment, or simultaneity. Feedback is what fires in marketing panels: last period's sales
-set this period's promotion, last quarter's churn sets this quarter's retention spend. The
-5% price premium on unprotected sex in Cunningham's own exercise (The Mixtape, online ch. 8
-sec. 8.1, Table 8.3) holds "under the assumption of strict exogeneity", and the condom
-decision is settled inside the session alongside the price, so a
-session-level shock moving both is the violation it rests on being absent. Reverse causality
-and simultaneity defeat the estimator outright: Cornwell and Trumbull (1994) put crime on
-police in North Carolina counties and the within estimate is 0.413 (0.027), the wrong sign
-against Becker's (1968) prediction, because Y -> D was there all along. Exits: iv under
+set this period's promotion, last quarter's churn sets this quarter's retention spend.
+Reverse causality and simultaneity defeat the estimator outright. The two Mixtape worked
+cases (the condom premium and Cornwell and Trumbull 1994) are in references/details.md
+(section "Plain panel fixed effects: the Mixtape's worked cases"). Exits: iv under
 feedback or simultaneity, did when an adoption date and clean untreated or not-yet-treated
 comparisons exist. The design needs within-unit variation in D and identifies no
-time-invariant covariate's effect (Cunningham, The Mixtape, online ch. 8 sec. 8.1, Table 8.3 shows
-the column of exact zeros with (.) standard errors).
+time-invariant covariate's effect.
 
 Do not add controls that are consequences of the treatment. That rule makes the tenure and
 years-married columns of Cornwell and Rupert (1997) inadmissible here (columns 3 and 4 of

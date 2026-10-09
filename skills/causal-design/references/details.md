@@ -1,6 +1,6 @@
 # Causal-design lookup details
 
-Heavy reference content the SKILL.md points into. Current as of 2026-07-28.
+Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 
 ## The sensitivity ladder, in full (Imbens 2024)
 
@@ -44,25 +44,12 @@ mistakes in economics (Imbens); the descendant rule catches the common error.
 
 ## Selection-on-observables facts worth citing
 
-- Doubly robust = consistent if EITHER the outcome model or the propensity model is
-  consistent (the AIPW estimator is robins1994estimation; bang2005doubly named the
-  property). Slow ML-rate nuisances are allowed with cross-fitting when the product of the two
-  error rates is o(n^-1/2), for example n^-1/4 each (chernozhukov2018double). grf meets this
-  through out-of-bag nuisance predictions; a hand-rolled AIPW needs sample splitting.
-- Fixed-number-of-matches matching is never fully efficient. With k continuous covariates
-  its bias is of order N^(-1/k). With two or more, the bias does not vanish at the root-N
-  rate and is no longer negligible against the standard error, so the estimator is not
-  root-N consistent in general (abadie2006large);
-  bias-corrected matching with a growing number of matches restores the efficiency bound.
-- Weighting by the true propensity score is inefficient relative to the estimated one
-  (hirano2003efficient); use the estimated score even in simulations.
-- Overlap: the Crump et al. variance-minimizing trimming rule, commonly approximated by
-  dropping units with estimated scores outside [0.1, 0.9] (crump2009dealing); overlap
-  weights e(x)(1-e(x)) shift the estimand to the population with genuine treatment
-  ambiguity (li2018balancing), often the policy-relevant one in targeting applications.
-- PSM in marketing: used "for decades," now "called into question due to the technique's
-  sensitivity to parametric assumptions" (AMA, citing Athey-Imbens); field replacements
-  are AIPW, double ML, causal forests.
+The doubly robust, matching, propensity-weighting, overlap, and PSM facts are stated in
+SKILL.md (section "Selection on observables"), with their keys in canon.md.
+
+- Matching with k continuous covariates has bias of order N^(-1/k); bias-corrected matching with
+  a growing number of matches restores the efficiency bound (abadie2006large).
+
 - Adaptive experiments: naive sample means are biased under adaptive assignment because
   adaptivity truncates the losing arms' samples early (Imbens 2024). The analysis route for
   bandit-collected data is adaptive weighting (hadad2021confidence). Hadad, Hirshberg, Zhan,
@@ -71,14 +58,21 @@ mistakes in economics (Imbens); the descendant rule catches the common error.
   banditsCI (1.0.0) implements it. The design-side exits stay: a final non-adaptive
   confirmatory phase, or analysis restricted to a uniform-assignment holdout. field-experiment
   owns the design decision.
-- Surrogate index (athey2026surrogate): estimate the relation of long-run outcome to
-  surrogates in observational data, apply it to experimental surrogate movements. It needs
-  three assumptions, each to argue and each a limitation to state: unconfoundedness in the
-  experiment, surrogacy (all causal paths from treatment to the long-run outcome pass
-  through the measured surrogates), and comparability of the experimental and observational
-  samples. The
-  family ships no estimation template; Athey, Chetty, Imbens, and Kang's own empirical
-  implementation is the recipe, and the deliverable stops at the validity argument.
+- Surrogate index: stated once in shared-rules.md (section "Combined experimental and
+  observational data").
+
+## Plain panel fixed effects: the Mixtape's worked cases
+
+Moved from SKILL.md (section "Plain panel fixed effects"). The
+5% price premium on unprotected sex in Cunningham's own exercise (The Mixtape, online ch. 8
+sec. 8.1, Table 8.3) holds "under the assumption of strict exogeneity", and the condom
+decision is settled inside the session alongside the price, so a
+session-level shock moving both is the violation it rests on being absent. Reverse causality
+and simultaneity defeat the estimator outright: Cornwell and Trumbull (1994) put crime on
+police in North Carolina counties and the within estimate is 0.413 (0.027), the wrong sign
+against Becker's (1968) prediction, because Y -> D was there all along. The design
+identifies no time-invariant covariate's effect (Cunningham, The Mixtape, online ch. 8 sec.
+8.1, Table 8.3 shows the column of exact zeros with (.) standard errors).
 
 ## Plain panel fixed effects: the Mixtape's Table 8.2 columns
 
@@ -94,11 +88,6 @@ The chapter assumes constant effects and declares that scope. A non-absorbing ti
 treatment with heterogeneous effects has left it, the implicit weighting is live, and the dCDH
 weight diagnostic in did applies. Random effects, Mundlak-Chamberlain devices, and dynamic
 panel estimators stay out, and Wooldridge (2010) is the shelf for them.
-
-## SDID inference by data shape (pointer)
-
-The authoritative statement lives in synthetic-control's details, absorbed there from the
-AMA piece with "permutation" mapped to the placebo estimator.
 
 ## The AMA exemplar table (method -> published marketing application)
 
@@ -117,19 +106,6 @@ Use these to argue a method is accepted practice in marketing journals.
 
 These are the AMA piece's citations, not bib entries of this family; pull the full
 references from the piece when one is needed in a paper.
-
-## Interference routing (pointer)
-
-Designs, estimators, and diagnostics live in field-experiment.
-
-- Clustered interference: two-stage randomization over clusters (hudgens2008toward,
-  crepon2013labor).
-- Network interference: exposure mappings (aronow2017estimating) with exact tests of the
-  sharp null (athey2018exact).
-- Marketplaces and two-sided platforms: multiple randomization designs over buyer-seller
-  pairs (bajari2023experimental, johari2022experimental).
-- The 61-million-person Facebook voting experiment (Bond et al. 2012) is the scale anchor
-  for network experiments; cite from Imbens 2024.
 
 ## Marketing vocabulary glossary (AMA; write for reviewers in these terms)
 
@@ -170,7 +146,12 @@ Designs, estimators, and diagnostics live in field-experiment.
   move; sensitivity: minimal label-flipping edits, predictions must move) belong to the
   diagnostics battery for the measurement model, run before it feeds a causal estimate.
 
-## Package index (CRAN versions re-checked 2026-10-08; the observables and plain-FE branches only, method skills carry their own; the version list for this skill's own packages, which scripts/unconfoundedness_template.R points to; shared packages such as grf and marginaleffects are pinned in packages.md)
+## Package index
+
+CRAN versions re-checked 2026-10-08. The index covers the observables and plain-FE branches
+only, since method skills carry their own. It is the version list for this skill's own
+packages, which scripts/unconfoundedness_template.R points to. Shared packages such as grf and
+marginaleffects are pinned in packages.md.
 
 | Tool | Version | Role | Traps |
 |---|---|---|---|
