@@ -26,6 +26,15 @@
 --- Opt a single slide out with `{.no-stage}` on its heading:
 ---   ## Everything at once {.no-stage}
 ---
+--- AUTO-STAGING OFF. A format or a deck that sets `auto-stage: false` turns the
+--- default round: no slide is staged unless its heading carries `{.stage}`, and
+--- every other slide keeps exactly the fragments the author wrote. That is the
+--- Beamer default, where clicks are planned by hand.
+---
+--- FIXED RETURNS. A format or deck that sets `back-returns: fixed` gets Back
+--- buttons with a fixed return, wired at build time by `wire_back_buttons` below.
+--- Without the key, Back returns to the stored origin of the last jump.
+---
 --- GROUPING. A `.together` div is one beat: everything inside it arrives on a
 --- single keypress, and a list inside it is marked `.nonincremental` so it does
 --- not re-stage itself item by item.
@@ -709,6 +718,114 @@ function Span(sp)
     jump_attr(sp, { "jump-btn" }, { { "data-jump", target } }))
 end
 
+-- FIXED RETURNS. Every Back button returns to the
+-- main-talk slide that holds the jump button leading into its appendix section,
+-- at the step where that button became visible, whatever was visited in between.
+-- The stored origin below is only the fallback for a Back button with no section.
+--
+-- Built here from the document, so each Back anchor carries its answer:
+--   data-return      id of the main-talk slide that holds the jump button
+--   data-return-via  the data-jump target of that button (the script reads the
+--                    button's fragment step from the rendered slide)
+-- A section is a jump target in the appendix plus the appendix slides after it
+-- up to the next jump target (continuation slides have no id of their own). A
+-- target reached only from another appendix slide is followed back up the chain
+-- to the main talk. A target linked from several main slides returns to the first
+-- of them in talk order; the filter lists those on stderr.
+local function has_cls(blk, name)
+  for _, c in ipairs(blk.classes or {}) do if c == name then return true end end
+  return false
+end
+
+function wire_back_buttons(blocks)
+  local slides, in_app = {}, false
+  for i, blk in ipairs(blocks) do
+    if blk.t == "Header" then
+      if has_cls(blk, "appendix-break") or has_cls(blk, "references-break") then in_app = true end
+      table.insert(slides, { id = blk.identifier or "", appendix = in_app or has_cls(blk, "appendix"), idx = {} })
+    elseif #slides > 0 then
+      table.insert(slides[#slides].idx, i)
+    end
+  end
+  -- A button inside a `.reserve` div is never shown (the div only holds space),
+  -- so it does not make its slide a source.
+  local first_src, all_src = {}, {}
+  for k, sl in ipairs(slides) do
+    local n, hidden = {}, {}
+    local function count_hidden(d)
+      if d.t == "Div" and has_cls(d, "reserve") then
+        pandoc.walk_block(d, { Link = function(l)
+          local t = l.attributes["data-jump"]
+          if t then hidden[t] = (hidden[t] or 0) + 1 end
+        end })
+      end
+    end
+    for _, i in ipairs(sl.idx) do
+      -- walk_block visits the children only, so the top-level block is checked by hand.
+      count_hidden(blocks[i])
+      pandoc.walk_block(blocks[i], {
+        Link = function(l)
+          local t = l.attributes["data-jump"]
+          if t then n[t] = (n[t] or 0) + 1 end
+        end,
+        Div = function(d) count_hidden(d) end })
+    end
+    for t, c in pairs(n) do
+      if c > (hidden[t] or 0) then
+        if not first_src[t] then first_src[t] = k; all_src[t] = {} end
+        table.insert(all_src[t], sl.id)
+      end
+    end
+  end
+  local by_id = {}
+  for k, sl in ipairs(slides) do if sl.id ~= "" then by_id[sl.id] = k end end
+  local function head(k)
+    for j = k, 1, -1 do
+      if not slides[j].appendix then return nil end
+      if slides[j].id ~= "" and first_src[slides[j].id] then return j end
+    end
+    return nil
+  end
+  local function resolve(k)
+    local h = head(k)
+    for _ = 1, 20 do
+      if not h then return nil end
+      local via = slides[h].id
+      local src = first_src[via]
+      if not slides[src].appendix then return slides[src].id, via end
+      h = head(src)
+    end
+    return nil
+  end
+  for t, list in pairs(all_src) do
+    if #list > 1 then
+      io.stderr:write(("stage-slide.lua jump: #%s is linked from %s; Back returns to #%s\n")
+        :format(t, table.concat(list, ", #"), slides[first_src[t]].id))
+    end
+  end
+  for k, sl in ipairs(slides) do
+    if sl.appendix then
+      local ret, via = resolve(k)
+      for _, i in ipairs(sl.idx) do
+        blocks[i] = pandoc.walk_block(blocks[i], { Link = function(l)
+          if l.attributes["data-jump-back"] ~= nil then
+            if l.attributes["data-return"] then
+              -- Set by hand in deck.qmd (a slide no button leads to); kept as written.
+            elseif ret then
+              l.attributes["data-return"] = ret
+              l.attributes["data-return-via"] = via
+            else
+              io.stderr:write(("stage-slide.lua jump: Back on #%s has no section; it falls back to the stored origin\n")
+                :format(sl.id ~= "" and sl.id or ("slide " .. k)))
+            end
+            return l
+          end
+        end })
+      end
+    end
+  end
+end
+
 -- Storing the origin is the whole problem, and neither obvious answer works.
 -- `Reveal.getPreviousSlide()` is the slide shown immediately before the current
 -- one, so one arrow press after arriving in the appendix loses the way back. The
@@ -789,11 +906,31 @@ local jump_script = [[
       var to = Reveal.getIndices(sec);
       // Land it fully revealed. An appendix slide is a reference exhibit pulled
       // up under a question, and clicking through its staging in front of the
-      // room is the wrong three keypresses.
-      Reveal.slide(to.h, to.v, lastStep(sec));
+      // room is the wrong three keypresses. Exception: a slide
+      // marked data-jump-land="start" lands at click 0, so its clicks play.
+      Reveal.slide(to.h, to.v, sec.getAttribute("data-jump-land") === "start" ? -1 : lastStep(sec));
     } else {
-      var o = origin || lastMainSlide();
-      if (o) Reveal.setState(o);
+      // FIXED RETURNS (see above): the main slide and the jump that leads here
+      // were written onto this button at build time. Land on that slide at the
+      // step where the jump button shows: the largest index among the fragments
+      // that hold it (a fade-out wrapper does not hide it on arrival), or -1.
+      var rid = a.getAttribute("data-return"), via = a.getAttribute("data-return-via");
+      var rel = rid ? document.getElementById(rid) : null;
+      var rsec = rel && rel.closest ? rel.closest(".slides section") : null;
+      if (rsec) {
+        var btn = via ? rsec.querySelector('a.jump-btn[data-jump="' + via + '"]') : null, f = -1;
+        for (var e = btn; e && e !== rsec; e = e.parentElement) {
+          if (e.classList.contains("fragment") && !e.classList.contains("fade-out") && e.hasAttribute("data-fragment-index"))
+            f = Math.max(f, parseInt(e.getAttribute("data-fragment-index"), 10));
+        }
+        // data-return-step="last": a hand-set return lands fully revealed.
+        if (a.getAttribute("data-return-step") === "last") f = lastStep(rsec);
+        var at = Reveal.getIndices(rsec);
+        Reveal.slide(at.h, at.v, f);
+      } else {
+        var o = origin || lastMainSlide();
+        if (o) Reveal.setState(o);
+      }
     }
 
     // Drop focus. A focused link eats the next Enter, and reveal ignores the
@@ -1415,6 +1552,13 @@ function Pandoc(doc)
     end
   end
 
+  -- Fixed returns only where the format or the deck asks for them, so a deck on
+  -- the older formats keeps the stored-origin Back it was built with.
+  if doc.meta["back-returns"] ~= nil
+    and pandoc.utils.stringify(doc.meta["back-returns"]) == "fixed" then
+    wire_back_buttons(doc.blocks)
+  end
+
   local out = {}
   local header = nil
   local body = {}
@@ -1495,12 +1639,22 @@ function Pandoc(doc)
   -- clicking through a reference list one entry at a time in front of a room is
   -- the wrong eight keypresses. That covers the whole slide, including a back
   -- button in a trailing `.aside-note`.
+  -- With `auto-stage: false` the default flips: only a
+  -- heading carrying `.stage` is staged.
+  local auto_stage = true
+  if doc.meta["auto-stage"] ~= nil then
+    local v = doc.meta["auto-stage"]
+    if type(v) == "boolean" then auto_stage = v
+    else auto_stage = pandoc.utils.stringify(v) ~= "false" end
+  end
   local function staged(hdr)
     if not hdr or hdr.level < 2 then return false end
+    local opted_in = false
     for _, c in ipairs(hdr.classes or {}) do
       if c == "no-stage" or c == "references" then return false end
+      if c == "stage" then opted_in = true end
     end
-    return true
+    return auto_stage or opted_in
   end
 
   -- Cut the reference list across as many slides as it needs, each one a copy of

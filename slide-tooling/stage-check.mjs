@@ -190,6 +190,19 @@ await evaluate(`(async () => {
   return 1;
 })()`);
 
+// Size the window to the deck's own canvas (Reveal's width and height). Chrome
+// opens at 1050x700, the starter format's canvas, so a deck on that canvas sees
+// exactly the window it always had.
+{
+  const c = await evaluate(`(() => { const c = window.Reveal?.getConfig?.() || {}; return [c.width || 1050, c.height || 700]; })()`);
+  const [cw, ch] = (Array.isArray(c) ? c : [1050, 700]).map((v) => parseInt(v, 10) || 0);
+  if (cw && ch && (cw !== 1050 || ch !== 700)) {
+    await send("Emulation.setDeviceMetricsOverride", { width: cw, height: ch, deviceScaleFactor: 1, mobile: false });
+    await evaluate(`(() => { window.Reveal?.layout?.(); return 1; })()`);
+    await new Promise((r) => setTimeout(r, 300));
+  }
+}
+
 // Every reading below is a settled reading. See the dead-step note in the header.
 await evaluate(`(() => {
   const st = document.createElement("style");
