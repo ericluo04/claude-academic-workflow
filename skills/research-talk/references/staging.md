@@ -255,6 +255,20 @@ target silently breaks are in the README under "Jump buttons"; label diction
 is in `../style/house.md`. Target ids prefixed `ap-` read well and stay clear
 of the crossref prefixes Quarto claims (`#fig-`, `#tbl-`, `#eq-`, `#sec-`).
 
+Two format keys change these defaults. With `back-returns: fixed`, the filter
+wires every Back at build time: it returns to the main-talk slide whose button
+leads into that appendix section, at the step where the button appears,
+whatever was visited in between. An appendix slide reached from another
+appendix slide returns through the chain to the main talk. On an appendix
+heading, `data-jump-land="start"` makes a jump land at step 0 so the slide's
+own clicks play, and `[]{.jump-back data-return="slide-id"}` sets a return by
+hand for a slide that no button leads to. With `auto-stage: false`, no slide is
+staged unless its heading carries `{.stage}`, and every other slide keeps
+exactly the fragments you wrote, which is the Beamer habit of planning each
+click by hand. `stage-check.mjs` still holds every content slide to the
+title-alone rule, so on such a deck read its failures on hand-planned slides
+as hints.
+
 Measured on the sample talk: a button written as a sibling after an
 `.aside-note` sits with the note's rule ending 5.8px above the button's box,
 and the button's right edge lands on the slide's content right edge to the

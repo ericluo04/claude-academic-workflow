@@ -63,3 +63,14 @@ drafting among them.
 Sections of `CLAUDE.md` not published. The private file carries a section on mirroring the
 configuration to its own repositories and a section on a specific computing grid. Neither belongs
 in a file offered as an example, so neither is published.
+
+The 2026-11-10 research-talk rewrite. The private skill was rewritten around a Beamer-match
+reveal.js format: hand-planned clicks, a nav bar with dots, and classes such as `.swap`,
+`.li-dim`, `.eq-layer`, `.btn-corner`, and `.shrink-NN`, plus a step-video player and scripts
+that build a portable zip and a PDF. None of that format ships here, and `starter-theme.scss`
+defines none of those classes, so the public skill keeps its starter-based text. What did come
+across is the filter: `stage-slide.lua` now honours `auto-stage: false` (only `{.stage}` slides
+are staged) and `back-returns: fixed` (Back returns to the main-talk slide that leads into the
+appendix section), and `references/staging.md` documents both keys. The gate scripts size their
+window to the deck's own canvas. Port the narrative and delivery rules once the shipped theme
+gains the classes they rely on.
