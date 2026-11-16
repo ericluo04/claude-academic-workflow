@@ -1,19 +1,20 @@
 ---
 title: "Why benchmark scores mislead"
-subtitle: "AI and Managerial Decisions, Week 3. An AI-generated example lecture."
+subtitle: "An AI-generated example lecture"
 author: "Claude Code"
+course: "AI and Managerial Decisions"
+lecture: "Week 3"
 date: 2026-09-15
 bibliography: lecture-refs.bib
-# The live copy under docs/ is this source rendered standalone against the
-# repo's light starter theme, exactly as below. To reproduce it: from
-# this directory,
+# The live copy under docs/ is this source rendered standalone in the repo's
+# Dark lab lecture format, exactly as below. To reproduce it: from this
+# directory,
 #   quarto add ../../slide-tooling --no-prompt
-#   cp -R ../../slide-tooling/mathjax .
-#   cp -R ../../slide-tooling/fonts .
+#   cp -R ../../slide-tooling/_extensions/darklab/vendor/{mathjax,fonts} .
 #   quarto render w03-evaluation.qmd
 # In a real course this deck would render as part of a course website (see the
-# course-site skill), with a theme of your own carried by a format extension.
-format: starter-revealjs
+# course-site skill), with the format installed once at the project root.
+format: darklab-revealjs
 engine: knitr
 ---
 
@@ -30,27 +31,30 @@ engine: knitr
 library(ggplot2)
 
 # One figure theme for the whole deck, set once here, so a chunk only says
-# what is different about its own figure. Matched to the starter theme's
-# paper ground and plum accent; if you restyle the slide theme, restyle this
-# with it so the figures sit on the same ground as the slides.
-col_accent <- "#7d3a5e"
-col_muted  <- "#6b6157"
-col_flag   <- "#9c3b26"
-col_bg     <- "#faf7f2"
+# what is different about its own figure. Matched to the Dark lab palette in
+# darklab.scss: the figure is drawn on the slide ground itself, teal marks the
+# point of the figure, amber flags, and everything else is the muted ink.
+col_accent <- "#3fd6c1"   # teal
+col_flag   <- "#f4b860"   # amber
+col_muted  <- "#9ba3ad"   # muted ink, 6.9:1 on the ground
+col_text   <- "#e9e6df"   # running-text ink
+col_grid   <- "#2f353d"   # the theme's hairline
+col_bg     <- "#16191d"   # the slide ground, exactly
 
-lecture_theme <- function(base_size = 18) {
+lecture_theme <- function(base_size = 20) {
   theme_minimal(base_size = base_size) +
     theme(
-      panel.grid.major  = element_line(colour = "#e5ddd0"),
+      panel.grid.major  = element_line(colour = col_grid),
       panel.grid.minor  = element_blank(),
-      text              = element_text(colour = "#33302b"),
-      axis.text         = element_text(colour = "#4f463c"),
-      plot.background   = element_rect(fill = col_bg, colour = NA)
+      text              = element_text(colour = col_text),
+      axis.text         = element_text(colour = col_muted),
+      plot.background   = element_rect(fill = col_bg, colour = NA),
+      panel.background  = element_rect(fill = col_bg, colour = NA)
     )
 }
 
-theme_set(lecture_theme(18))
-knitr::opts_chunk$set(dev.args = list(bg = "#faf7f2"))
+theme_set(lecture_theme(20))
+knitr::opts_chunk$set(dev.args = list(bg = col_bg))
 ```
 
 ## Where we left off {#recap}
@@ -81,14 +85,14 @@ incumbent scores 0.79. What have you learned?
 :::: {.columns .fragment fragment-index="1"}
 ::: {.column width="50%"}
 ::: {.fragment .fade-right fragment-index="1"}
-[Vendor A]{.yblue} scores **0.83**. It is strong on arithmetic and weak on
-anything requiring several steps.
+[[Vendor A]{.yblue} scores **0.83**. It is strong on arithmetic and weak on
+anything requiring several steps.]{.fragment .gray-out fragment-index="3"}
 :::
 :::
 ::: {.column width="50%"}
 ::: {.fragment .fade-left fragment-index="2"}
-[Vendor B]{.ygray} scores **0.79**. It is even across every task family, with no
-sharp weakness.
+[[Vendor B]{.ygray} scores **0.79**. It is even across every task family, with no
+sharp weakness.]{.fragment .gray-out fragment-index="3"}
 :::
 :::
 ::::
@@ -124,30 +128,52 @@ scored by a rule that returns 1 for a pass and 0 for a fail.
   different $\D$ entirely.
 :::
 
-::: {.fragment .fade-up}
-$$\Sh = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}\{\text{item } i \text{ passes}\},
-\qquad \se(\Sh) = \sqrt{\frac{S(1-S)}{n}}$$
+::: {.eq}
+$$\Sh = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}\{\text{item } i \text{ passes}\}
+\class{hid b1}{{}, \qquad \se(\Sh) = \sqrt{\frac{S(1-S)}{n}}}$$
 :::
 
+:::: {.fragment .build}
 ::: {.aside-note}
 The same arithmetic is why field measurements of AI at work report intervals rather
 than a single number [@brynjolfsson2025Generative; @wiles2025Algorithmic]. The
-[derivation]{.jump target="ap-se"} is in the appendix.
+derivation is the backup under this slide.
+:::
+::::
+
+## Where the interval comes from {.backup #ap-se}
+
+<ol class="steps">
+<li>One item is a Bernoulli draw: it passes with probability $S$.</li>
+<li>A sum of $n$ independent draws has variance $nS(1-S)$.</li>
+<li>The score divides that sum by $n$, so $\operatorname{var}(\Sh) = S(1-S)/n$.</li>
+<li>Take the root, and substitute $\Sh$ for the $S$ you do not know.</li>
+</ol>
+
+::: {.aside-note}
+The 1.96 is the normal approximation. It is fine at $n = 900$ and wrong at
+$n = 20$, where you want the exact binomial interval.
 :::
 
 ## How much a leaderboard can move on its own {.section-break}
 
 ## The top of the leaderboard is a tie {#exhibit}
 
-::: {.fragment fragment-index="1"}
+:::: {.swap .fragment fragment-index="1"}
+::: {.swap-out}
 Six systems, 900 items each. Read as a ranking, the order looks settled.
 :::
+::: {.fragment fragment-index="2"}
+Teal: the interval overlaps the leader's. The top four are a tie.
+:::
+::::
 
 ::: {.r-stack .fragment fragment-index="1"}
 ```{r}
 #| label: board-ranked
 #| fig-width: 8
 #| fig-height: 4.0
+#| out-width: 820px
 n <- 900
 board <- data.frame(
   system = c("Aster", "Borel", "Cedar", "Delta", "Ember", "Fenwick"),
@@ -176,6 +202,7 @@ board_base + geom_point(size = 4, colour = col_muted)
 #| label: board-intervals
 #| fig-width: 8
 #| fig-height: 4.0
+#| out-width: 820px
 board_base +
   geom_vline(xintercept = max(board$lo), linetype = "dashed",
              colour = col_flag, linewidth = 0.6) +
@@ -184,10 +211,6 @@ board_base +
   geom_point(aes(colour = tied), size = 4)
 ```
 :::
-:::
-
-::: {.fragment fragment-index="2"}
-Plum marks every system whose interval overlaps the leader's. The top four are a tie.
 :::
 
 ## Worked example: how wide is that interval? {#worked}
@@ -200,9 +223,21 @@ Plum marks every system whose interval overlaps the leader's. The top four are a
 5. Ask what $n$ would settle it. Halving the interval needs $4n$ items.
 :::
 
+## Why more items stop helping {.backup #ap-budget}
+
+::: {.warning}
+[Watch out]{.label}
+Halving the interval costs four times the items, and grader disagreement puts a
+floor under it that no item count clears.
+:::
+
+Two graders disagreeing on 8% of items hold the honest half-width near 0.02.
+Past that, more items buy precision about the benchmark rather than about your
+own traffic.
+
 ## The interval you should have quoted {auto-animate="true" #ci1}
 
-::: {style="font-size: 1.9em; color: #7d3a5e; text-align: center; margin-top: 130px;"}
+::: {.hero .amber style="text-align: center; margin-top: 120px;"}
 $0.83 \pm 0.025$
 :::
 
@@ -212,7 +247,7 @@ $n = 900$ items. The gap to the incumbent disappears inside it.
 
 ## The interval you should have quoted {auto-animate="true" #ci2}
 
-::: {style="font-size: 1.9em; color: #38684a; text-align: center; margin-top: 130px;"}
+::: {.hero style="text-align: center; margin-top: 120px;"}
 $0.83 \pm 0.006$
 :::
 
@@ -235,7 +270,24 @@ runs [3.5 standard errors]{.fragment .highlight-accent} wide.
 
 ::: {.aside-note}
 A leaderboard publishes two marginal scores, so overlap is all you can draw. The
-[paired standard error]{.jump target="ap-paired"} is derived in the appendix.
+paired standard error is derived in the backup under this slide.
+:::
+
+## Where the paired standard error comes from {.backup #ap-paired}
+
+::: {.proof name="of @thm-paired"}
+Write $D_i = X_i - Y_i$ for the difference of the two pass indicators on item $i$.
+It is $+1$ where A passes and B fails, $-1$ where B passes and A fails, and 0
+otherwise, so $\E[D_i] = p_{10} - p_{01} = \Delta$. Since $D_i^2$ is 1 exactly on a
+disagreement, $\E[D_i^2] = p_{10} + p_{01}$ and
+$\operatorname{var}(D_i) = p_{10} + p_{01} - \Delta^2$. The difference in scores is
+the mean of $n$ independent draws of $D_i$, which divides that variance by $n$.
+:::
+
+::: {.aside-note}
+Substitute the sample disagreement shares to use it. This beats the unpaired
+$\sqrt{\se(\Sh_A)^2 + \se(\Sh_B)^2}$ whenever the two systems pass the same items
+more often than independence predicts, which on a shared benchmark is always.
 :::
 
 ## Your turn {#discussion}
@@ -270,9 +322,32 @@ what does the other one still get you?
 ::: {.aside-note}
 Only the second one is a statistics problem. The other two are incentive
 problems, and no amount of extra items fixes them. Item families make the first
-column worse still; what that clustering does to the interval is
-[worked out in the appendix]{.jump target="ap-clusters"}. On building the
-measure before trusting it, see @golder2023Learning.
+column worse still; what that clustering does to the interval is worked out in
+the backup under this slide. On building the measure before trusting it, see
+@golder2023Learning.
+:::
+
+## When items are not independent {.backup #ap-clusters}
+
+Benchmark items arrive in families built from one template, so the effective
+sample size is smaller than the item count.
+
+<table>
+<thead>
+<tr><th>Design</th><th class="num">Items</th><th class="num">Effective $n$</th>
+<th class="num">95% half-width</th></tr>
+</thead>
+<tbody>
+<tr><td>Independent items</td><td class="num">900</td><td class="num">900</td>
+<td class="num">0.025</td></tr>
+<tr><td>30 templates, 30 variants each, $\rho = 0.2$</td><td class="num">900</td>
+<td class="num">130</td><td class="num">0.065</td></tr>
+</tbody>
+</table>
+
+::: {.aside-note}
+Cluster on the template, not the item. A published score almost never does, which
+is one more reason the leaderboard gap is narrower than it looks.
 :::
 
 ## Contamination {#contamination}
@@ -300,7 +375,7 @@ ggplot(d, aes(x = set, y = score, group = system, colour = drop)) +
   scale_colour_manual(values = c(`TRUE` = col_flag, `FALSE` = col_muted)) +
   scale_y_continuous(limits = c(0.55, 0.88)) +
   labs(x = NULL, y = "Score") +
-  lecture_theme(20) +
+  lecture_theme(22) +
   theme(legend.position = "none", panel.grid.major.x = element_blank())
 ```
 :::
@@ -360,7 +435,7 @@ training.
 
 ## What the leaderboard hides {.full-bleed #grid}
 
-![](images/task-grid.png)
+![](images/task-grid.png){.fig-card}
 
 ## Where we got to {#synthesis}
 
@@ -402,97 +477,11 @@ line of work [@yin2024MetaLearning].
    would grade them with. One page is enough.
 :::
 
-[Bring the rubric even if you hate it. It is what we build on next week.]{.dim}
-
-::: {.aside-note}
-Nobody writes a usable rubric on the first pass. Two graders disagreeing on 8% of
-items is the ordinary starting point, and arguing about that 8% is the exercise.
+::: {.next-week}
+Bring the rubric even if you hate it. Nobody writes a usable one on the first
+pass, and arguing about where two graders disagree is next week's exercise.
 :::
 ::::
-
-## Appendix {.appendix-break background-color="var(--appendix-ground)"}
-
-## Where the interval comes from {.appendix #ap-se}
-
-<ol class="steps">
-<li>One item is a Bernoulli draw: it passes with probability $S$.</li>
-<li>A sum of $n$ independent draws has variance $nS(1-S)$.</li>
-<li>The score divides that sum by $n$, so $\operatorname{var}(\Sh) = S(1-S)/n$.</li>
-<li>Take the root, and substitute $\Sh$ for the $S$ you do not know.</li>
-</ol>
-
-::: {.aside-note}
-The 1.96 is the normal approximation. It is fine at $n = 900$ and wrong at
-$n = 20$, where you want the exact binomial interval.
-:::
-
-::: {.with-previous}
-[Back to the lecture]{.jump-back}.
-:::
-
-## Where the paired standard error comes from {.appendix #ap-paired}
-
-::: {.proof name="of @thm-paired"}
-Write $D_i = X_i - Y_i$ for the difference of the two pass indicators on item $i$.
-It is $+1$ where A passes and B fails, $-1$ where B passes and A fails, and 0
-otherwise, so $\E[D_i] = p_{10} - p_{01} = \Delta$. Since $D_i^2$ is 1 exactly on a
-disagreement, $\E[D_i^2] = p_{10} + p_{01}$ and
-$\operatorname{var}(D_i) = p_{10} + p_{01} - \Delta^2$. The difference in scores is
-the mean of $n$ independent draws of $D_i$, which divides that variance by $n$.
-:::
-
-::: {.aside-note}
-Substitute the sample disagreement shares to use it. This beats the unpaired
-$\sqrt{\se(\Sh_A)^2 + \se(\Sh_B)^2}$ whenever the two systems pass the same items
-more often than independence predicts, which on a shared benchmark is always.
-:::
-
-::: {.with-previous}
-[Back to the lecture]{.jump-back}.
-:::
-
-## When items are not independent {.appendix #ap-clusters}
-
-Benchmark items arrive in families built from one template, so the effective
-sample size is smaller than the item count.
-
-<table>
-<thead>
-<tr><th>Design</th><th class="num">Items</th><th class="num">Effective $n$</th>
-<th class="num">95% half-width</th></tr>
-</thead>
-<tbody>
-<tr><td>Independent items</td><td class="num">900</td><td class="num">900</td>
-<td class="num">0.025</td></tr>
-<tr><td>30 templates, 30 variants each, $\rho = 0.2$</td><td class="num">900</td>
-<td class="num">130</td><td class="num">0.065</td></tr>
-</tbody>
-</table>
-
-::: {.aside-note}
-Cluster on the template, not the item. A published score almost never does, which
-is one more reason the leaderboard gap is narrower than it looks.
-:::
-
-::: {.with-previous}
-[Back to the lecture]{.jump-back}.
-:::
-
-## Why more items stop helping {.appendix #ap-budget}
-
-::: {.warning}
-[Watch out]{.label}
-Halving the interval costs four times the items, and grader disagreement puts a
-floor under it that no item count clears.
-:::
-
-Two graders disagreeing on 8% of items hold the honest half-width near 0.02.
-Past that, more items buy precision about the benchmark rather than about your
-own traffic.
-
-::: {.with-previous}
-[Back to the lecture]{.jump-back}.
-:::
 
 ## References {.references-break background-color="var(--references-ground)"}
 

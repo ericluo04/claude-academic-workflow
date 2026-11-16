@@ -1,0 +1,657 @@
+/*-- scss:defaults --*/
+// Dark lab, a lecture theme for a dark room and a projector.
+//   format: darklab-revealjs
+//
+// Charcoal ground, Manrope for text, JetBrains Mono for labels, numbers and
+// wayfinding, teal and amber as the only two accents. The canvas is 1280x720
+// and every slide pads itself, so nothing is centred by reveal.
+//
+// It implements every hook stage-slide.lua, deck-check.mjs and stage-check.mjs
+// expect (dividers, staging, citations, the reference list, the closing slide),
+// plus the click mechanics documented in the CLICK MECHANICS block below.
+// Blocks marked LOAD-BEARING make the tooling work and should survive a
+// restyle.
+//
+// ---- palette ----
+// WCAG 2.1 contrast, measured against the ground (#16191d) and the surface
+// (#1f2328) that boxes sit on. Text inks all hold 4.5:1 on both.
+//
+//   role          hex       ground  surface  use
+//   ground        #16191d     -       -      every slide, dividers included
+//   surface       #1f2328   1.13      -      box and code grounds
+//   line          #2f353d   1.43    1.28     rules and frames, never text
+//   text          #e9e6df  14.15   12.67     running text, just off white
+//   white         #ffffff  17.63   15.80     headings and <strong> only
+//   crumb         #b4bbc4   9.11    8.16     breadcrumb, hint
+//   muted         #9ba3ad   6.92    6.20     .dim, captions, asides, done items
+//   teal          #3fd6c1   9.74    8.73     accent: key ideas, numbers, marks
+//   amber         #f4b860   9.97    8.93     second accent: warnings, questions
+//   card          #f4f1ea     -       -      light card behind a figure drawn
+//                                            on white (ink on it is the figure's)
+//
+// Running text sits at #e9e6df rather than pure white, because pure white
+// running text halates on a projector. Headings take white.
+
+$lab-ground:   #16191d;
+$lab-surface:  #1f2328;
+$lab-line:     #2f353d;
+$lab-text:     #e9e6df;
+$lab-white:    #ffffff;
+$lab-crumb:    #b4bbc4;
+$lab-muted:    #9ba3ad;
+$lab-teal:     #3fd6c1;
+$lab-amber:    #f4b860;
+$lab-card:     #f4f1ea;
+
+$font-sans: "Manrope", "Helvetica Neue", Arial, sans-serif;
+$font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+$body-bg: $lab-ground;
+$body-color: $lab-text;
+$link-color: $lab-teal;
+$link-color-hover: $lab-white;
+$selection-bg: rgba($lab-teal, 0.3);
+$font-family-sans-serif: $font-sans;
+$font-family-monospace: $font-mono;
+$presentation-font-family: $font-sans;
+
+// LOAD-BEARING SIZES. A lecture-hall root: 31px on the 1280x720 canvas is the
+// same physical size as a 30px root on a 1050x700 canvas, scaled by height.
+// The reference-list budget in _extension.yml was measured against it.
+$presentation-font-size-root: 31px;
+$presentation-line-height: 1.42;
+$presentation-heading-font: $font-sans;
+$presentation-heading-color: $lab-white;
+$presentation-heading-font-weight: 700;
+$presentation-heading-line-height: 1.15;
+$presentation-heading-letter-spacing: -0.015em;
+$presentation-heading-text-transform: none;
+$presentation-h1-font-size: 1.7em;
+$presentation-h2-font-size: 1.45em;
+$presentation-h3-font-size: 1.0em;
+$presentation-title-slide-text-align: left;
+// Must be unitless: a unit compiles to `0.7remem` and breaks `.smaller`.
+$presentation-font-smaller: 0.78;
+
+$code-color: $lab-amber;
+$code-bg: $lab-surface;
+$code-block-bg: $lab-surface;
+$code-block-border-color: $lab-line;
+$code-block-font-size: 0.7em;
+
+// Quarto recolours text on a slide with a background attribute from these.
+$light-bg-text-color: $lab-text;
+$light-bg-link-color: $lab-teal;
+$light-bg-code-color: $lab-amber;
+$dark-bg-text-color: $lab-text;
+$dark-bg-link-color: $lab-teal;
+$dark-bg-code-color: $lab-amber;
+
+/*-- scss:rules --*/
+
+// LOAD-BEARING. The two back-matter grounds by name, for
+//   ## References {.references-break background-color="var(--references-ground)"}
+// Both stay on the page ground in this theme.
+:root {
+  --appendix-ground: #{$lab-ground};
+  --references-ground: #{$lab-ground};
+  --lab-teal: #{$lab-teal};
+  --lab-amber: #{$lab-amber};
+}
+
+.reveal { font-family: $font-sans; font-feature-settings: "ss01" on; }
+.reveal pre, .reveal code, .reveal kbd, .reveal samp { font-family: $font-mono; }
+
+// ---- layout ----
+// Every slide fills the canvas and sets its own gutter: 76px left and right,
+// 52px top, and 78px at the foot so content stops above the breadcrumb.
+// LOAD-BEARING for the fit gate: with height 100% and border-box, content that
+// runs into the foot strip raises scrollHeight past 720 and the gate fails it.
+.reveal .slides > section:not(.stack),
+.reveal .slides > section.stack > section {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 52px 76px 78px 76px !important;
+  text-align: left;
+}
+.reveal .slides > section.stack { padding: 0 !important; height: 100%; }
+
+.reveal .slides section h2 {
+  font-size: 46px;
+  line-height: 1.13;
+  letter-spacing: -0.018em;
+  text-align: left;
+  margin: 0 0 28px 0;
+  max-width: 1100px;
+  text-wrap: balance;
+}
+.reveal .slides section h3 { color: $lab-muted; font-size: 0.9em; font-weight: 600; }
+// LOAD-BEARING. Pandoc emits a real empty <h2> for a titleless heading.
+.reveal .slides section > h2:empty { display: none; }
+
+.reveal p { margin: 0 0 20px 0; }
+.reveal strong { color: $lab-white; font-weight: 700; }
+.reveal em { font-style: oblique 8deg; }
+.reveal a { color: $lab-teal; text-decoration: none; }
+.reveal a:hover { color: $lab-white; }
+
+// Lists: a short teal dash, no bullet glyph.
+.reveal ul { margin: 0; padding-left: 0; list-style: none; display: block; }
+.reveal ul li { position: relative; padding-left: 36px; margin-bottom: 14px; }
+.reveal ul li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.66em;
+  width: 16px;
+  height: 3px;
+  background: $lab-teal;
+}
+.reveal ol { margin: 0 0 0 1.2em; }
+.reveal ol li { margin-bottom: 14px; }
+.reveal ol li::marker { color: $lab-teal; font-family: $font-mono; font-weight: 600; }
+.reveal ul + p, .reveal ol + p { margin-top: 22px; }
+
+// Inline colour spans. The names are the shared vocabulary of the example
+// decks; on this theme they fold onto the two accents.
+.yblue, .ymid, .ypale, .ygreen, .teal { color: $lab-teal; font-weight: 600; }
+.yamber, .yred, .amber { color: $lab-amber; font-weight: 600; }
+.ygray, .dim { color: $lab-muted; }
+.reveal .dim { color: $lab-muted; }
+.mono { font-family: $font-mono; }
+
+// A muted note at the foot of a block. In the flow, not pinned to the slide
+// bottom, so the fit gate sees it collide with anything above it. The filter
+// treats `.aside-note` as an addendum: it arrives with the block above it.
+.reveal .aside-note {
+  font-size: 22px;
+  line-height: 1.45;
+  color: $lab-muted;
+  border-top: 1px solid $lab-line;
+  padding-top: 10px;
+  margin-top: 22px;
+}
+.reveal .aside-note p { color: $lab-muted; margin: 0; }
+// LOAD-BEARING. The filter moves an addendum that follows a list into the last
+// list item; pull it back to the text rail.
+.reveal li > .aside-note,
+.reveal li > div.citation,
+.reveal li > div.cite { margin-left: -36px; }
+
+// ---- teaching boxes ----
+// One family: the surface ground, a 4px coloured left edge, and a mono label.
+// The edge and the label colour tell the classes apart, and the mapping stays
+// fixed for a semester:
+//   .keyidea     teal edge, faint teal ground   the one thing to remember
+//   .definition  teal edge                      new vocabulary
+//   .example     text-ink edge                  the concrete case
+//   .warning     amber edge                     the common error
+//   .question    amber frame on all four sides  a check the student answers
+.reveal .keyidea, .reveal .definition, .reveal .example,
+.reveal .warning, .reveal .question,
+.reveal .result, .reveal .assumption {
+  background: $lab-surface;
+  border: 1px solid $lab-line;
+  border-left: 4px solid $lab-teal;
+  border-radius: 6px;
+  padding: 16px 26px 18px 24px;
+  margin: 6px 0 22px 0;
+}
+.reveal .keyidea { background: mix($lab-teal, $lab-ground, 9%); border-color: mix($lab-teal, $lab-ground, 30%); border-left-color: $lab-teal; }
+.reveal .example { border-left-color: $lab-text; }
+.reveal .warning, .reveal .assumption { border-left-color: $lab-amber; }
+.reveal .question { border: 2px solid $lab-amber; padding-left: 26px; }
+.reveal .keyidea .label, .reveal .definition .label, .reveal .example .label,
+.reveal .warning .label, .reveal .question .label,
+.reveal .result .label, .reveal .assumption .label {
+  display: block;
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: $lab-teal;
+  margin-bottom: 6px;
+}
+.reveal .example .label { color: $lab-crumb; }
+.reveal .warning .label, .reveal .question .label, .reveal .assumption .label { color: $lab-amber; }
+.reveal .keyidea p, .reveal .definition p, .reveal .example p,
+.reveal .warning p, .reveal .question p,
+.reveal .result p, .reveal .assumption p { margin: 0; }
+
+// The slide's one claim in teal type, no box.
+.reveal .takeaway { font-size: 1em; font-weight: 650; color: $lab-teal; line-height: 1.3; margin-top: 8px; }
+.reveal .takeaway p { color: $lab-teal; margin: 0; }
+
+// A discussion prompt, one to a slide: large type behind a teal bar.
+.reveal .prompt {
+  border-left: 6px solid $lab-teal;
+  padding: 6px 0 6px 34px;
+  font-size: 1.3em;
+  font-weight: 600;
+  line-height: 1.4;
+  color: $lab-white;
+  max-width: 1040px;
+}
+.reveal .prompt p { color: $lab-white; margin: 0; }
+
+// One number that should land hard.
+.reveal .hero {
+  font-family: $font-mono;
+  font-size: 2.9em;
+  font-weight: 700;
+  color: $lab-teal;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.reveal .hero.amber { color: $lab-amber; }
+.reveal .big-num { font-family: $font-mono; color: $lab-teal; font-weight: 700; }
+
+// Live-coding marker beside a heading: [demo]{.demo-tag}.
+.reveal .demo-tag {
+  display: inline-block;
+  vertical-align: middle;
+  border: 2px solid $lab-amber;
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: $lab-amber;
+  margin-left: 14px;
+}
+
+// The roadmap: done items muted with a check, the current item in teal.
+.reveal ul.agenda li, .reveal .agenda ul li { margin-bottom: 16px; padding-left: 44px; }
+.reveal ul.agenda li::before, .reveal .agenda ul li::before {
+  content: "";
+  top: 0.32em;
+  width: 16px;
+  height: 16px;
+  border: 2px solid $lab-muted;
+  border-radius: 50%;
+  background: none;
+}
+.reveal ul.agenda li.done, .reveal .agenda ul li.done { color: $lab-muted; }
+.reveal ul.agenda li.done::before, .reveal .agenda ul li.done::before { background: $lab-muted; }
+.reveal ul.agenda li.now, .reveal .agenda ul li.now { color: $lab-teal; font-weight: 700; }
+.reveal ul.agenda li.now::before, .reveal .agenda ul li.now::before {
+  border-color: $lab-teal;
+  background: $lab-teal;
+  box-shadow: 0 0 0 5px rgba($lab-teal, 0.18);
+}
+
+// Worked-example steps: mono teal numerals in a ring, one step per line.
+.reveal ol.steps, .reveal .steps ol { list-style: none; counter-reset: step; margin-left: 0; padding-left: 0; }
+.reveal ol.steps > li, .reveal .steps ol > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 58px;
+  margin-bottom: 16px;
+}
+.reveal ol.steps > li::before, .reveal .steps ol > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  width: 36px;
+  height: 36px;
+  border: 2px solid $lab-teal;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 32px;
+  text-align: center;
+  color: $lab-teal;
+}
+.reveal .steps ol > li > p { margin: 0; }
+
+// ---- tables ----
+// Mono header and numerals, a teal rule under the header, hairline row rules.
+.reveal table {
+  border-collapse: collapse;
+  font-size: 24px;
+  margin: 4px 0 22px 0;
+}
+.reveal .slides section table:has(tr > :nth-child(4)) { width: 100%; }
+.reveal table th {
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: $lab-crumb;
+  text-align: left;
+  border-bottom: 2px solid $lab-teal !important;
+  padding: 8px 14px;
+  vertical-align: bottom;
+}
+.reveal table td {
+  border-bottom: 1px solid $lab-line !important;
+  padding: 9px 14px;
+  color: $lab-text;
+}
+.reveal table td.num, .reveal table th.num { text-align: right; }
+.reveal table td.num { font-family: $font-mono; font-size: 0.92em; font-variant-numeric: tabular-nums; }
+.reveal table tr.hl td { color: $lab-teal; font-weight: 700; }
+.reveal table thead tr, .reveal table tbody tr:nth-child(odd) { background: none; }
+
+// ---- math ----
+.reveal .MathJax_Display { text-align: left !important; }
+.reveal .eq { font-size: 1.15em; margin: 14px 0 24px 0; }
+
+// ---- code ----
+.reveal pre {
+  box-shadow: none;
+  border: 1px solid $lab-line;
+  border-radius: 6px;
+  width: 100%;
+  background: $lab-surface;
+}
+.reveal pre code { padding: 16px 20px; background: $lab-surface; }
+.reveal div.sourceCode { background: $lab-surface; border: none; }
+.reveal code { color: $lab-amber; }
+
+// ---- figures ----
+// Figures are drawn on the ground (see the skill's figures-dark.md). A figure
+// that only exists on white goes on a light card: give the image or a wrapping
+// div `.fig-card`.
+.reveal figure { margin: 0.2em auto; }
+.reveal img.fig-card, .reveal .fig-card img {
+  background: $lab-card;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-sizing: border-box;
+}
+.reveal .fig-card { display: inline-block; }
+// LOAD-BEARING SELECTORS. Quarto's own figcaption rules load after the theme;
+// these win on specificity. The second pair covers the caption auto-stretch
+// leaves as a bare sibling <p class="caption">.
+.reveal .slides section figure > figcaption,
+html .reveal .slides section > img.r-stretch + p.caption,
+html .reveal .slides section > img.stretch + p.caption,
+.reveal .fig-cap {
+  font-family: $font-mono;
+  color: $lab-muted;
+  font-size: 18px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+.reveal .fig-cap p { color: $lab-muted; margin: 0; }
+// LOAD-BEARING. A caption hoisted next to a staged lone image rides the
+// image's own fragment state, so it costs no extra keypress.
+.reveal .slides section > img.fragment + p.caption { opacity: 0; visibility: hidden; transition: opacity 0.2s ease; }
+.reveal .slides section > img.fragment.visible + p.caption { opacity: 1; visibility: inherit; }
+// LOAD-BEARING. Never transition height on a stretched image.
+.reveal .slides section > img.r-stretch.fragment { transition-property: opacity; }
+// A slide that is one exhibit, capped under the heading.
+.reveal .slides section.full-bleed img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 500px;
+  width: auto;
+  height: auto;
+}
+// Two columns: flex so gap and alignment take.
+.reveal .columns { display: flex; align-items: flex-start; gap: 36px; }
+.reveal .columns.vcenter { align-items: center; }
+
+// ---- citations ----
+// Size and colour only; the parentheses come from the CSL.
+.reveal .citation, .reveal .cite { font-size: 0.85em; }
+.reveal .citation, .reveal .citation a, .reveal .cite, .reveal .cite a { color: $lab-muted; }
+.reveal span.citation, .reveal span.cite { border-bottom: 1px solid transparent; }
+.reveal .citation:hover, .reveal .citation:hover a, .reveal .cite:hover, .reveal .cite:hover a { color: $lab-teal; }
+// LOAD-BEARING. Multi-cite spans hover per segment (the filter wraps each in
+// span.cite-seg and stamps .cite-multi).
+.reveal span.citation.cite-multi:hover, .reveal span.citation.cite-multi:hover a { color: $lab-muted; }
+.reveal span.citation.cite-multi .cite-seg:hover, .reveal span.citation.cite-multi .cite-seg:hover a { color: $lab-teal; }
+.reveal .aside-note .citation, .reveal .aside-note .cite,
+.reveal figcaption .citation, .reveal figcaption .cite { font-size: 1em; }
+
+// ---- reference list ----
+// LOAD-BEARING METRICS. The budget in _extension.yml (refs-lines 18,
+// refs-chars-per-line 124) was measured at these values: 20px entries at a
+// 1.4 line height (28px a line), the list starting under a 46px heading, and
+// the foot strip reserved. Change them and re-measure with
+// STAGE_REFS_DEBUG=1 quarto render.
+.reveal div.csl-bib-body { margin-top: 0; }
+.reveal div.csl-entry { font-size: 20px; line-height: 1.4; margin-bottom: 10px; color: $lab-text; }
+.reveal .slides div.csl-bib-body { margin-left: 0; text-indent: 0; }
+.reveal .slides div.csl-bib-body div.csl-entry { margin-left: 0; }
+.reveal .slides div.csl-bib-body.hanging-indent div.csl-entry { padding-left: 1.5em; text-indent: -1.5em; }
+.reveal div.csl-entry a, .reveal div.csl-entry em { color: inherit; }
+// LOAD-BEARING. Quarto stamps `smaller scrollable` on the slide holding #refs.
+.reveal .slides section.references-break.smaller,
+.reveal .slides section.references.smaller { font-size: inherit; }
+.reveal .slides section.references-break.scrollable,
+.reveal .slides section.references.scrollable { overflow-y: visible; }
+.reveal section.references h2 { color: $lab-crumb; }
+
+// ---- jump buttons ----
+// This theme puts extra material in vertical backups, so a deck needs no jump
+// buttons. If one is written anyway the filter's anchor still works and reads
+// as a teal mono link.
+.reveal a.jump-btn { font-family: $font-mono; color: $lab-teal; font-size: 0.8em; border-bottom: 1px solid rgba($lab-teal, 0.4); }
+
+// ---- theorems ----
+.reveal .theorem, .reveal .proposition, .reveal .lemma {
+  background: $lab-surface;
+  border: 1px solid $lab-line;
+  border-left: 4px solid $lab-teal;
+  border-radius: 6px;
+  padding: 16px 26px 18px 24px;
+  margin: 6px 0 22px 0;
+}
+.reveal .theorem p { margin: 0; }
+.reveal .theorem .label, .reveal .proposition .label, .reveal .lemma .label,
+.reveal .theorem .theorem-title {
+  font-family: $font-mono;
+  font-size: 0.75em;
+  font-weight: 600;
+  color: $lab-teal;
+  margin-right: 0.5em;
+}
+.reveal .proof { font-size: 0.9em; color: $lab-text; margin: 0.2em 0 0.4em; }
+.reveal .proof-title, .reveal .proof-title em { font-family: $font-mono; font-style: normal; font-size: 0.85em; color: $lab-amber; font-weight: 600; }
+.reveal .proof:not(.remark):not(.solution) > :last-child::after { content: " \25A0"; color: $lab-teal; }
+// Native #def- and #exm- blocks keep their teaching box.
+.reveal .theorem.definition { border-left-color: $lab-teal; }
+.reveal .theorem.example { border-left-color: $lab-text; }
+
+// ---- section dividers ----
+// A two-digit mono numeral in teal, a teal rule, and the title in white, set on
+// the left rail at mid-height. stage-slide.lua writes data-section-number;
+// never hand-number a divider. Height 100%, and never display:flex on the
+// section (reveal writes display inline).
+.reveal .slides section.section-break,
+.reveal .slides section.appendix-break,
+.reveal .slides section.references-break { height: 100%; }
+.reveal .slides section.section-break::before {
+  content: "0" attr(data-section-number);
+  position: absolute;
+  left: 76px;
+  top: 214px;
+  font-family: $font-mono;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  color: $lab-teal;
+  letter-spacing: -0.02em;
+}
+.reveal .slides section.section-break::after,
+.reveal .slides section.appendix-break::after,
+.reveal .slides section.references-break::after {
+  content: "";
+  position: absolute;
+  left: 76px;
+  top: 304px;
+  width: 64px;
+  height: 4px;
+  background: $lab-teal;
+}
+.reveal .slides section.appendix-break::after,
+.reveal .slides section.references-break::after { background: $lab-muted; }
+.reveal .slides section.section-break h2,
+.reveal .slides section.appendix-break h2,
+.reveal .slides section.references-break h2 {
+  margin: 0;
+  padding-top: 286px;
+  font-size: 58px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  max-width: 1040px;
+}
+.reveal .slides section.appendix-break h2,
+.reveal .slides section.references-break h2 { color: $lab-crumb; }
+.reveal .slide-background.appendix-break,
+.reveal .slide-background.references-break { background-color: $lab-ground; }
+
+// ---- backups ----
+// A {.backup} slide hangs under the slide above it (lab.html). The heading
+// drops to the muted ink and the breadcrumb says "backup"; nothing is added
+// above the title.
+.reveal .slides section.backup h2 { color: $lab-crumb; }
+
+// ---- title slide ----
+// Title and subtitle on the left rail in the upper half; at the foot a full
+// width teal rule over two mono lines, the author and then the course, the
+// lecture and the date. The partial is title-slide.html in this extension.
+.reveal #title-slide { padding-top: 196px !important; }
+.reveal #title-slide h1.title {
+  font-size: 64px;
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  color: $lab-white;
+  max-width: 1060px;
+  margin: 0 0 26px 0;
+  text-wrap: balance;
+}
+.reveal #title-slide .subtitle {
+  font-size: 28px;
+  font-weight: 500;
+  color: $lab-muted;
+  max-width: 980px;
+  margin: 0;
+}
+.reveal #title-slide .lab-meta {
+  position: absolute;
+  left: 76px;
+  right: 76px;
+  bottom: 64px;
+  border-top: 3px solid $lab-teal;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 40px;
+}
+.reveal #title-slide .lab-meta p { margin: 0; font-family: $font-mono; font-size: 21px; }
+.reveal #title-slide .lab-author { color: $lab-white; font-weight: 600; }
+.reveal #title-slide .lab-course { color: $lab-crumb; }
+.reveal #title-slide .lab-course span + span::before { content: "·"; color: $lab-teal; margin: 0 0.7em; }
+
+// ---- closing slide ----
+// The lecture's last slide: `## Before next class {.closing-slide}` over one
+// `.together` beat. A larger heading on the left rail, the steps, and at the
+// foot a teal rule over the line about next week. stage-slide.lua and
+// stage-check.mjs both read `.closing-slide` by name.
+.reveal .slides section.closing-slide h2 { font-size: 60px; letter-spacing: -0.03em; margin: 34px 0 34px; }
+.reveal .slides section.closing-slide .next-week {
+  margin-top: 28px;
+  border-top: 3px solid $lab-teal;
+  padding-top: 16px;
+  font-family: $font-mono;
+  font-size: 22px;
+  color: $lab-crumb;
+}
+.reveal .slides section.closing-slide .next-week p { margin: 0; color: $lab-crumb; }
+
+// ---- overlay strip ----
+// Breadcrumb bottom left, backup hint bottom right; both live inside .slides
+// so they scale with the canvas. 19px mono at #b4bbc4 (9.1:1 on the ground),
+// section number in teal, readable from the back of a room.
+.lab-crumb, .lab-hint {
+  position: absolute;
+  bottom: 26px;
+  font-family: $font-mono;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: pre;
+  z-index: 30;
+  pointer-events: none;
+}
+.lab-crumb { left: 76px; color: $lab-crumb; }
+.lab-crumb b { color: $lab-teal; font-weight: 700; }
+.lab-hint { right: 76px; color: $lab-amber; font-weight: 600; }
+.lab-hint[hidden], .lab-crumb[hidden] { display: none; }
+html.print-pdf .lab-crumb, html.print-pdf .lab-hint { display: none; }
+// LOAD-BEARING. stage-slide.lua re-enables reveal's slide number at load even
+// when the format sets `slide-number: false`, so the theme hides it, and the
+// progress bar with it.
+.reveal .slide-number, .reveal .progress { display: none !important; }
+
+// ---- CLICK MECHANICS ----
+// Five tools for building a slide in front of the room. Each is a class here
+// plus, for the equation build, a few lines in lab.html.
+//
+// 1. Step equation. Hide the terms that are not there yet with \class{hid bK},
+//    never \phantom (a phantom is gone from the DOM, so it cannot be shown
+//    later, and it changes spacing). Term K enters on the K-th `.build` on the
+//    slide, and is drawn in teal on the press that brings it:
+//      ::: {.eq}
+//      $$ y = \beta_1 x \class{hid b1}{{} + \beta_2 z} \class{hid b2}{{} + \varepsilon} $$
+//      :::
+//      []{.fragment .build}
+//      []{.fragment .build}
+//    The equation keeps its final width from the first press, because a
+//    hidden term keeps its box.
+.hid { visibility: hidden; }
+.mjx-new, .reveal .MathJax .mjx-new { color: $lab-teal; }
+html.print-pdf .hid { visibility: visible; }
+//
+// 2. Swap in place. Two children in one cell of a grid: the first shows until
+//    the second (a fragment) arrives, then the first is hidden.
+//      ::: {.swap}
+//      ::: {.swap-out}
+//      The ranking looks settled.
+//      :::
+//      ::: {.fragment}
+//      The top four are a tie.
+//      :::
+//      :::
+.reveal .swap { display: grid; }
+.reveal .swap > * { grid-area: 1 / 1; }
+.reveal .swap:has(> .fragment.visible) > .swap-out { visibility: hidden; }
+//
+// 3. Gray-out. A block or a span that has been said recedes to the muted ink
+//    on cue. It is a fragment that starts visible, so put it on a span or a
+//    nested div (a top-level one leaks at step 0) and give it the same
+//    fragment-index as whatever arrives on that press: a colour change on its
+//    own is a dead step to stage-check.mjs.
+.reveal .slides section .fragment.gray-out { opacity: 1; visibility: inherit; transition: color 0.3s ease; }
+.reveal .slides section .fragment.gray-out.visible,
+.reveal .slides section .fragment.gray-out.visible * { color: $lab-muted !important; }
+//
+// The theme's colour-on-cue variant, under the name the starter theme uses:
+// the term takes teal and weight 700 (the weight change keeps it from being a
+// dead step).
+.reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; }
+.reveal .slides section .fragment.highlight-accent.visible { color: $lab-teal; font-weight: 700; }
+//
+// 4. Shrink. `{.shrink-90}` (or 85, 80, 75) on a heading sets everything under
+//    the heading at that share of the root, for the one slide with a table or
+//    a block of code that has to stay whole. Splitting the slide is the first
+//    fix; this is the second.
+@each $s in 95, 90, 85, 80, 75 {
+  .reveal .slides section.shrink-#{$s} > :not(h2) { font-size: #{$s * 1%}; }
+}
+//
+// 5. Vertical backups. `## Title {.backup}` after a slide hangs it under that
+//    slide (see the backups block above). No jump buttons and no appendix
+//    divider: the hint at the bottom right says a backup is there, the down
+//    arrow opens it, and the right arrow and the clicker skip it.

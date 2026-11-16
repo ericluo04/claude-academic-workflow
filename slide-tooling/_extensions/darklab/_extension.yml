@@ -1,0 +1,96 @@
+title: Dark lab lecture format
+version: 1.0.0
+quarto-required: ">=1.10"
+contributes:
+  formats:
+    revealjs:
+      # Dark lab: a charcoal ground, Manrope for text, JetBrains Mono for labels,
+      # numbers and wayfinding, teal and amber as the only two accents. Built for
+      # a lecture hall. The palette table with measured contrast ratios is at the
+      # head of darklab.scss.
+      theme: [default, darklab.scss]
+      # The title slide is a partial of its own: title, subtitle, then a teal
+      # rule over the author and a mono line built from `course:`, `lecture:`,
+      # and `date:` in the deck's front matter. Any of the three may be absent.
+      template-partials:
+        - title-slide.html
+      # stage-slide.lua runs citeproc itself, which is the only way a Lua filter
+      # can see the rendered entries and paginate them: Quarto runs pandoc's
+      # citeproc after its whole filter chain. Leaving `citeproc: false` out
+      # gives a second, unpaginated bibliography on the last slide, and
+      # `deck-check.mjs fit` fails the deck for it. The copy here is the one in
+      # slide-tooling/ at the time this format was built; keep them in sync.
+      filters:
+        - stage-slide.lua
+      citeproc: false
+      # Reference-list budget, measured against this theme in headless Chrome
+      # on the 1280x720 canvas (the derivation is in darklab.scss beside the
+      # csl-entry rule). No filter preset matches this theme, so both numbers
+      # are given outright and `refs-fit` only names the fallback.
+      refs-fit: lecture
+      refs-lines: 18
+      refs-chars-per-line: 124
+      # The canvas. 16:9 at 1280x720 matches every current projector, and
+      # margin 0 hands the gutter to the theme, which pads each slide itself.
+      width: 1280
+      height: 720
+      margin: 0
+      center: false
+      # No slide transition: a lecture moves on the speaker's word, and a slide
+      # that slides in reads as motion the room has to wait for.
+      transition: none
+      background-transition: none
+      # Wayfinding is the breadcrumb at the foot of every slide (lab.html), not
+      # reveal's furniture. The progress bar, the slide number, the menu and the
+      # arrow controls are all off.
+      progress: false
+      slide-number: false
+      menu: false
+      controls: false
+      hash: true
+      # Backup slides are vertical children of the slide they support. In the
+      # default navigation mode the right arrow and the clicker skip them, and
+      # the down arrow opens them. lab.html also remaps Space and PageDown, which
+      # reveal would otherwise send down into a backup.
+      navigation-mode: default
+      # Self-hosted MathJax 2.7.9, shipped in this extension's vendor/mathjax/
+      # and copied next to the deck as mathjax/. It sits under vendor/ on
+      # purpose: Quarto resolves a format url against the extension directory
+      # when the file exists there, so a mathjax/ beside this file would make
+      # every deck load MathJax from _extensions/darklab/ and break the copy
+      # under docs/ or on a course site. It carries
+      # extensions/TeX/HTML.js, which `\class{hid}{...}` needs for equation
+      # builds. A project whose decks render into a subdirectory overrides the
+      # url with its own relative path.
+      html-math-method:
+        method: mathjax
+        url: mathjax/MathJax.js
+      # MathJax pinned to its own TeX webfonts so glyph metrics match on every
+      # machine and the fit gate's certification transfers; HTML.js preloaded
+      # so the first `\class` does not wait on an autoload.
+      #
+      # The two faces are self-hosted from a `fonts/` copy next to the deck
+      # (shipped in this extension's vendor/fonts/, both OFL 1.1). The rules live here
+      # and not in darklab.scss because theme SCSS compiles into <deck>_files/,
+      # where a url() resolves against the wrong base. Manrope has no italic
+      # cut, so emphasis in running text is a synthesized oblique.
+      header-includes: |
+        <script>window.MathJax = { "HTML-CSS": { availableFonts: [], preferredFont: null, webFont: "TeX" }, TeX: { extensions: ["HTML.js"] } };</script>
+        <style>
+        @font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800;
+          font-display: block; src: url("fonts/Manrope-var.woff2") format("woff2"); }
+        @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800;
+          font-display: block; src: url("fonts/JetBrainsMono-var.woff2") format("woff2"); }
+        @font-face { font-family: "JetBrains Mono"; font-style: italic; font-weight: 100 800;
+          font-display: block; src: url("fonts/JetBrainsMono-Italic-var.woff2") format("woff2"); }
+        </style>
+      # Breadcrumb, backup hint, backup nesting, key remap, equation builds.
+      include-after-body: lab.html
+      highlight-style: a11y-dark
+      incremental: true
+      date-format: "D MMMM YYYY"
+      fig-align: center
+      auto-animate-duration: 0.4
+      echo: false
+      warning: false
+      message: false

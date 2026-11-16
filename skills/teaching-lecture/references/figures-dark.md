@@ -5,19 +5,22 @@ when hovering or zooming genuinely helps the teaching.
 
 ## Geometry
 
-The canvas is 1050x700 and its content box is 945 px wide. knitr renders at
-192 dpi. `auto-stretch` is on by default, so a lone figure gets `.r-stretch` and
-is scaled to the height left under the heading, which makes `fig-height` mostly
-an aspect-ratio control. The rendered sizes below were measured on a
-lecture theme at a 34px root; the mechanics are the same on any theme, so
-re-measure if yours runs a different root.
+Dark lab's canvas is 1280x720 and its content box is 1128 px wide and about
+510 px tall under a one-line heading (the theme pads 76px at each side, 52px at
+the top, and keeps 78px at the foot for the breadcrumb). knitr renders at 192
+dpi. `auto-stretch` is on by default, so a lone figure gets `.r-stretch` and is
+scaled to the height left under the heading, which makes `fig-height` mostly
+an aspect-ratio control. The sizes below were measured with
+`deck-check.mjs fit --json` on the sample lecture at Dark lab's 31px root;
+re-measure if your theme runs a different root.
 
 | Chunk options | Rendered on slide | Use for |
 |---|---|---|
-| `fig-width: 8`, `fig-height: 4.2`, `base_size = 18` | 945 x 496 | full-width exhibit, heading only |
-| `fig-width: 8`, `fig-height: 4.0`, `base_size = 18` | 913 x 456 | full width plus one caption line |
-| `fig-width: 9`, `fig-height: 5`, `base_size = 20` | 920 x 511 | full width, fills the slide |
-| `fig-width: 5.4`, `fig-height: 4.0`, `base_size = 20` in a 58% column | 466 x 346 | figure beside interpretation |
+| `fig-width: 8`, `fig-height: 4.0`, `out-width: 820px`, `base_size = 20`, in an `.r-stack` under a two-line text block | 779 x 390 | layered exhibit with a sentence above it |
+| `fig-width: 5.6`, `fig-height: 5.2`, `base_size = 22` in a 60% column | 537 x 499 | figure beside a teaching box |
+| a 1504x880 PNG on a `.full-bleed` slide, `.fig-card` | 843 x 500 | a figure that exists only on white |
+
+The theme caps a `.full-bleed` image at 500px tall so it clears the breadcrumb.
 
 `base_size` runs higher than in a research deck because a lecture theme runs a
 larger body type, and a figure whose axis labels are half the size of the prose
@@ -51,20 +54,20 @@ README under "Figures and tables".
 ## Figures take the deck ground
 
 A default ggplot lands a pure-white panel that ignores whatever ground the deck
-has. On the starter theme's warm paper it reads as a mismatched card; on a dark
-theme it is a lightbox on the wall, the single most visible way a lecture deck
-looks unfinished. Define a theme once in the setup chunk, keyed to the deck
-theme's documented palette table, and reuse it:
+has. On a dark theme it is a lightbox on the wall, the single most visible way a
+lecture deck looks unfinished. Define a theme once in the setup chunk, keyed to
+the deck theme's documented palette table, and reuse it:
 
 ```r
-# Values from your deck theme's palette table; these are the starter theme's.
-# A dark theme swaps in its own ground and inks, and the method is identical.
-deck_ground <- "#faf7f2"   # the slide ground, exactly
-deck_grid   <- "#ddd6c9"   # the theme's hairline
-deck_text   <- "#33302b"   # body ink
-deck_axis   <- "#6b6157"   # muted ink
+# Values from the palette table at the head of darklab.scss.
+deck_ground <- "#16191d"   # the slide ground, exactly
+deck_grid   <- "#2f353d"   # the theme's hairline
+deck_text   <- "#e9e6df"   # running-text ink
+deck_axis   <- "#9ba3ad"   # muted ink, 6.9:1 on the ground
+deck_teal   <- "#3fd6c1"   # the point of the figure
+deck_amber  <- "#f4b860"   # the flag
 
-deck_theme <- function(base_size = 18) {
+deck_theme <- function(base_size = 20) {
   theme_minimal(base_size = base_size) +
     theme(
       plot.background   = element_rect(fill = deck_ground, colour = NA),
@@ -78,22 +81,31 @@ deck_theme <- function(base_size = 18) {
     )
 }
 
-scale_colour_manual(values = c(treated = "#7d3a5e", control = "#6b6157"))
+scale_colour_manual(values = c(treated = deck_teal, control = deck_axis))
 ```
 
-Series colours come from the same table (here the starter accent against its
-muted ink), so a contrast the deck names in a colour span looks identical
-inside the figure.
+Series colours come from the same table: teal for the series the slide is
+about, amber for the one that misbehaves, the muted ink for everything else. A
+contrast the deck names in a colour span then looks identical inside the
+figure. Two accents is the ceiling on this theme; a figure that needs a third
+series colour needs a second look at what it is trying to show.
+
+Also pass the ground to the device, `knitr::opts_chunk$set(dev.args =
+list(bg = deck_ground))`, so the margins outside the plot panel match too.
 
 Fill with the exact ground hex instead of asking for a transparent PNG. A
 transparent background antialiases the text against nothing and the labels come
 out fringed.
 
 A figure lifted from the paper arrives with a white panel and the paper's own
-colours, neither keyed to the deck. Regenerate it with `deck_theme()` when it
-is a figure students have to read, and keep any that stay white to the
+colours, neither keyed to the deck. Regenerate it with `deck_theme()` when the
+source script exists. When it does not, put it on the light card: `.fig-card`
+on the image (`![](grid.png){.fig-card}`) or on a div around it sets the image
+on a `#f4f1ea` card with rounded corners and padding, so it reads as a printed
+exhibit held up to the room, not as a hole in the wall. Keep carded figures to
 `.full-bleed` slides where the image is the whole slide, so the deck does not
-alternate.
+alternate. The sample lecture's task grid is the worked case: a PNG with no
+source script, carded on its own slide.
 
 ## The silent-shrink trap
 
