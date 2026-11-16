@@ -14,46 +14,47 @@ that goes in the report. A disagreement inside a point or so is rounding.
 Anything larger is a finding, because it means the element is not sitting on
 the background the theme intended.
 
-The starter theme, which both example decks render on, is dark ink on a warm
-paper ground `#faf7f2`:
+The repository ships two formats, and each example deck renders on one.
+Editorial, the talk format, is dark ink on a white page `#ffffff` (ratios
+computed with the WCAG 2.1 formula, against white and against the accent tint
+`#fbeae6`):
 
-| Role | Hex | Ratio | Where it belongs |
-|---|---|---|---|
-| body | `#33302b` | 12.3:1 | every run of text |
-| muted | `#6b6157` | 5.7:1 | footer, slide number, `figcaption`, `.dim`, dates |
-| quiet emphasis | `#4f463c` | 8.6:1 | h3, blockquotes, `.ygray`, citations, appendix headings |
-| accent | `#7d3a5e` | 7.5:1 | links, `li::marker`, block labels, jump buttons |
-| dark accent | `#54263f` | 11.4:1 | inline code, `.yblue`, `.takeaway` |
-| good | `#38684a` | 6.0:1 | `.ygreen` |
-| warning | `#7d5b12` | 5.8:1 | `.yamber` |
-| bad | `#9c3b26` | 6.4:1 | `.yred`, the `.warning` label |
-| decoration only | `#d9bccb` | 1.6:1 | hover underlines; never text |
-| decoration only | `#ddd6c9` | 1.4:1 | hairlines and block frames; never text |
+| Role | Hex | On white | On tint | Where it belongs |
+|---|---|---|---|---|
+| ink | `#151515` | 18.3:1 | 15.7:1 | every run of text, headings |
+| muted | `#5c5c5c` | 6.7:1 | 5.7:1 | `.gray`/`.dim`, `.aside-note`, captions, the page number |
+| accent | `#D4371C` | 4.8:1 | 4.1:1 | `.em`, list numbers, the progress line, section slide ground |
+| second | `#2f5e8c` | 6.8:1 | 5.8:1 | a second term role inside math only |
+| math gray | `#8a8a8a` | 3.5:1 | 3.0:1 | `.gr` inside display math only; never body text |
+| decoration only | `#d9d9d9` | 1.4:1 | 1.2:1 | hairlines and rules; never text |
 
-Everything the starter theme uses as text also holds 4.5:1 on its `#f2ede3`
-panel tint, so a block ground never turns a passing ink into a failing one. The
-two decoration rows are where a starter deck fails contrast: either value
-carrying text is a finding. A deck on your own theme gets read against your
-table the same way, and a dark theme's table lists ratios against its
-near-black ground plus which low-ratio values are allowed as large marks (the
-dark sections below).
+The accent holds 4.5:1 on white and drops to 4.1:1 on the tint, so accent text
+on a tinted block is a MAJOR finding at body size.
 
-The class inventory is the README's `Theme classes` section. Three visual facts
-the review needs sit outside it, given here for the starter theme: the block
-family (`.result`, the teaching boxes) is a hairline frame on the panel tint
-with a small-caps label carrying the class's colour, and a block without a
-label is a style choice, not a finding; the jump buttons are accent-coloured
-links with a standing underline, joining the muted scheme on `.appendix` and
-`.references` slides; `.prompt` is centred between double rules, `.aside-note`
-sits behind a left rule, and `ol.steps` is a spaced numbered list.
+Dark lab, the lecture format, is light ink on a charcoal ground `#16191d`. Its
+palette table, with ratios against the ground and against the box surface
+`#1f2328`, is at the head of `darklab.scss`: running text `#e9e6df` at 14.2:1,
+muted `#9ba3ad` at 6.9:1, teal `#3fd6c1` at 9.7:1, amber `#f4b860` at 10.0:1,
+and the rule colour `#2f353d` at 1.4:1, which is never text.
+
+A deck on your own theme gets read against your table the same way, and a dark
+theme's table lists ratios against its near-black ground plus which low-ratio
+values are allowed as large marks (the dark sections below).
+
+The class inventory is the README's `Theme classes` section. The visual facts
+the review needs that sit outside it are in each theme's SCSS: Editorial's
+`.result` carries an accent left rule and `.takeaway` a hairline above it, and
+Dark lab's teaching boxes sit on an opaque tint of their colour with a
+coloured left rule. A block without a label is a style choice, not a finding.
 
 ## Font sizes, contrast, math, citations
 
 Nothing here measures overflow. Stage 3 owns that, and its numbers go into the report unaltered.
 
-`tiny.pctH` is the rendered font size as a percent of the 700px canvas height, which is the only
-projector-independent way to talk about legibility. Thresholds, calibrated against the smallest sizes
-the starter theme sets deliberately (figcaption 0.6em = 18px = 2.6%, table 0.72em = 21.6px = 3.1%):
+`tiny.pctH` is the rendered font size as a percent of the canvas height, which is the only
+projector-independent way to talk about legibility. The thresholds below were calibrated on a
+1050x700 canvas, with the smallest deliberate sizes at 18px (2.6%) and 21.6px (3.1%). Both shipped
+formats run a 1280x720 canvas, where Editorial's `.aside-note` at 18px is 2.5%:
 
 | pctH | Deck px at H=700 | Severity |
 |---|---|---|
@@ -62,24 +63,22 @@ the starter theme sets deliberately (figcaption 0.6em = 18px = 2.6%, table 0.72e
 | 2.3 to 2.7% | 16 to 19 | MINOR, hard from the back row |
 | 2.7% and up | 19 and up | fine |
 
-A `div.csl-entry` reference list sits in the MINOR band by theme default (18px on the starter
-theme). That is a real finding on a
+A `div.csl-entry` reference list sits in the MINOR band by theme default (18px on Editorial). That is a real finding on a
 slide the audience is meant to read and a non-finding on a parked bibliography, so say which it is.
 
 `lowContrast.ratio` is a WCAG ratio against the composited background, alpha layers flattened. Under
 3.0 is CRITICAL (a washed-out projector erases it), 3.0 to 4.5 is MAJOR. The ratio is symmetric, so
 those two thresholds hold on both deck types; what changes is the ground the ratio is taken against,
-and therefore which colours fail. On a light deck the failures are pale inks washing out: the
-starter theme's two decoration values measure 1.4:1 and 1.6:1 on its paper ground, which is why the
-theme confines them to hairlines and hover underlines. On a dark deck the failures are dark ink
+and therefore which colours fail. On a light deck the failures are pale inks washing out: Editorial's
+hairline gray measures 1.4:1 on white, which is why the theme confines it to rules. On a dark deck the failures are dark ink
 drowning in the ground, and it is almost always ink that came from a light deck: measured on one
 designed dark theme, a light theme's charcoal body ink landed at 1.02:1, its navy accent at 1.4:1,
 and its dark red at 2.2:1, while the values the dark theme's own table held in the 3:1 to 4:1 band
 were allowed for thick rules and large marks and forbidden as text.
 
 Alpha compositing is what makes tinted-block numbers come out right, so keep it. A theme that
-grounds its blocks in an rgba accent tint over the deck ground (the usual dark-theme pattern; the
-starter theme uses an opaque panel tint instead) composites to something barely lighter than the
+grounds its blocks in an rgba accent tint over the deck ground (the usual dark-theme pattern; Dark
+lab mixes an opaque tint instead) composites to something barely lighter than the
 ground itself, and the label inside is the full accent. Measured that way, label and body text both
 clear their thresholds. Measured against an assumed white page the same label reads near 1.5:1, and
 the probe would report every teaching block in the deck as CRITICAL.

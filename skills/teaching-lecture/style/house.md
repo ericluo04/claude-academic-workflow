@@ -34,10 +34,11 @@ and where the one allowed aside goes.
 
 ## Button diction
 
-Your diction for `.jump` labels; see the research-talk stub for a workable
-default.
+Dark lab puts extra material in vertical backups and needs no jump labels.
+Your diction for the sentence that points at a backup ("the derivation is the
+backup under this slide") goes here.
 
-## Divider titles
+## Section titles
 
-House rules for section-divider titles, e.g. whether the title may repeat the
-number the disc already shows.
+House rules for section titles (the `section="..."` text the breadcrumb
+shows), e.g. whether they must match the roadmap items word for word.

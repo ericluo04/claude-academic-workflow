@@ -1,280 +1,304 @@
-# Staging the reveal
+# Staging: clicks, the step equation, swaps, buttons, and Back
 
-Content should arrive as you say it. Beamer's `\pause` is a hard cut because it
-renders separate pages; reveal fades in place, and both themes slow every
-fragment variant to 0.45s on a decelerating curve and give the plain
-`.fragment` a 0.3em rise, so a line settles onto the slide instead of blinking
-on.
+Content arrives as the speaker says it. On `editorial-revealjs` the author plans
+every click by hand: the format sets `incremental: false` and `auto-stage:
+false`, so nothing is a fragment unless the source says so. Reveals are instant
+(no fade), as Beamer overlays are, because a fade pulls the eye to the motion.
 
-`incremental: true` (the format sets it) stages every list one bullet at a
-time, which is the pacing a seminar wants. Tag the exceptions, which are
-usually the agenda and the references:
+`examples/research-talk/talk.qmd` has each pattern below in a slide that
+renders and passes both gates. The slide ids are named with each pattern.
 
-```markdown
-::: {.nonincremental}
-- Setting and data
-- Identification
-- Results
-:::
-```
+## The click map
 
-## What the filter stages
-
-`incremental: true` stages lists and nothing else, so a slide holding a
-paragraph and a callout lands half-built: the prose and the box arrive with the
-heading while only the bullets wait. The format's `stage-slide.lua` fixes
-that. It stages every top-level block on a content slide, so the slide opens as
-its title alone and the blocks arrive top to bottom, one keypress each.
-Nothing in the markdown changes.
-
-The invariant is that the title always appears alone, on every content slide,
-including a slide whose only content is a figure. The exemptions are the
-divider classes, which carry nothing but a title anyway, a slide you opted out
-with `{.no-stage}`, and material that is not content: speaker notes, the
-footer, a `{visibility="hidden"}` slide. The filter's internals are in the
-README under "Staging: the title appears alone, always"; below is what to know
-when writing a slide.
-
-A figure cell is staged on the image itself rather than in a wrapper, because
-Quarto's auto-stretch refuses to size an image that has a `.fragment` ancestor
-and would leave a wrapped one behind when it hoists the image up to the
-section. So the figure both waits for its keypress and fills the slide, at the
-same size it had before it was staged. The exception is a cell holding more
-than the image, an echoed chunk or a second figure, where the whole cell is
-wrapped and the stretch is lost; the figure then renders at its authored width
-and the fit gate is what tells you whether that fits.
-
-A caption is not that exception, as long as the cell is labelled for
-cross-reference. With `#| label: fig-something` and `#| fig-cap:`, the figure
-stays stretched and the theme rides the caption on the image's own fragment
-state, so the figure and its caption arrive together on one keypress and the
-caption prints in the handout. Measured on the sample talk, slide 7: two
-fragments on the slide (the figure and the source note), the caption hidden at
-step 0 and visible after one press, and the figure still stretched at 813x427.
-A `fig-cap` on a cell whose label does NOT start with `fig-` is the losing
-case: the filter has to wrap the cell and the stretch goes (README, "Figures
-and tables", has the mechanism).
-
-A table is always one beat, and its cells are never staged. That covers a
-table written as raw `<table>` HTML, which pandoc parses into one block per
-tag; the filter collapses the whole raw run into a single fragment.
-
-A note that annotates the block above it arrives on the same beat as that
-block, so it costs no keypress. That covers `.aside-note`, `.citation`,
-`.cite`, `.caption`, and `.with-previous`, which is the opt-in for anything
-else. A source line under a list arrives with the last bullet, and one under a
-figure arrives with the figure. The single case where it costs a keypress of
-its own is a note under a figure on a slide that also has a staged list, where
-the filter has no index to group them with.
-
-`.together` makes a group of blocks one beat, for the two paragraphs or the
-paragraph plus box that should land at once. A list inside it stops staging
-itself item by item:
+Every slide that builds gets a click map in an HTML comment at its top. It
+lists the clicks in the order the speaker will talk:
 
 ```markdown
-::: {.together}
-The level effect is a wash.
+## Prices move at adoption, and stay moved {#event-study}
 
-The interaction is not.
-:::
+<!-- Clicks: 0 title only; 1 the figure and the estimate; 2 the reading and the
+     pre-trend test. -->
 ```
 
-`{.no-stage}` on a heading turns the whole thing off for one slide, for the
-rare slide that should arrive complete.
+Write the map before the markup, then give each fragment an explicit
+`fragment-index` that matches it. When the order changes, edit the map and the
+indices together.
+
+The rules for a click map:
+
+1. One click per idea, in speaking order.
+2. Group what belongs together into one click. An image and its caption, or two
+   things that are compared, arrive together.
+3. A slide that opens a new visual build may start on its title alone.
+4. A continuation slide arrives whole. The second and later slides of a run
+   show their content on entry.
+5. A button arrives on the click of the thing it qualifies.
+6. Nothing already on screen moves when something new arrives, within a slide
+   or across consecutive slides.
 
 ## Fragment indices
 
-One caveat, which is why the filter numbers some slides and not others. reveal
-sorts every fragment carrying `data-fragment-index` ahead of every fragment
-that has none, and pandoc writes `<li class="fragment">` with no index. So
-numbering the blocks on a slide that also has a staged list would push its
-bullets to the end of the slide. Verified: a slide of paragraph, list,
-paragraph reveals as 0, 2, 3, 1. The filter therefore adds explicit indices
-only when it can account for every fragment on the slide, and falls back to
-document order otherwise. Your own `fragment-index` is never touched, so the
-manual form below keeps working; just do not mix it with an incremental list
-on the same slide.
+Write `fragment-index` on every fragment. Equal indices fire together. In raw
+HTML the attribute is `data-fragment-index`.
 
-`fragment-index` reorders the beats, and equal indices fire together, so an
-annotation and the bullet it belongs to can arrive on one keypress. The
-attribute is `fragment-index`; `data-fragment-index` is the reveal HTML
-attribute and is not what Quarto reads:
+reveal renumbers the indices from 0 in sorted order, so number clicks 1, 2, 3
+without gaps. reveal also sorts every fragment with an index ahead of every
+fragment without one. A list that Quarto stages item by item (`::: {.incremental}`)
+has no indices, so do not mix it with indexed fragments on one slide. Where a
+list must build item by item next to other fragments, wrap each item in its own
+indexed div, as `#threats` does.
 
-```markdown
-[0.29 log points]{.fragment fragment-index=1} in the top quartile,
-[0.06 elsewhere]{.fragment fragment-index=1}.
-```
+## Opt-in staging
 
-## Variants and patterns
+The filter can still stage every top-level block of a slide, one click each,
+with the title alone at click 0. Turn it on for one slide with `{.stage}` on
+the heading, for a simple slide whose blocks arrive top to bottom with no
+grouping. `stage-check.mjs` then holds that slide to the title-alone rule.
 
-`.fade-in-then-semi-out` is the best variant for a talk. Each point stays
-legible once the next arrives and recedes to 50%, so the audience keeps its
-place in the list and still has the earlier lines to refer to:
+## Patterns
 
-```markdown
-::: {.fragment .fade-in-then-semi-out}
-Prices rise where search costs are high.
-:::
-```
+### The step equation (`#id-equation`)
 
-Build a layered exhibit with `.r-stack` and `.fragment` children. Scatter,
-then the fitted line, then the counterfactual, each on its own beat, and
-nothing on the slide moves as they land:
+An equation that gains terms is built as layers in one `.eq-stack`. Each layer
+is the whole equation with every term in its final place. Terms not yet
+entered are wrapped in `\class{hid}{...}`. Layer 1 is a plain div. Each later
+layer is an `.eq-layer` fragment with the next index. Every layer has the same
+box, so no term moves when the next one appears.
 
 ```markdown
-::: {.r-stack}
-::: {.fragment}
-![](fig/scatter.png){width=900}
+::: {.eq-stack}
+::: {}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ \class{hid}{{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}}
+ \class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}$$
 :::
-::: {.fragment}
-![](fig/scatter-fit.png){width=900}
+::: {.eq-layer .fragment fragment-index=1}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ {}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}
+ \class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}$$
 :::
-::: {.fragment}
-![](fig/scatter-cf.png){width=900}
+::: {.eq-layer .fragment fragment-index=2}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ {}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}
+ {}+ \class{gr}{\gamma_j + \delta_{mt}}$$
 :::
 :::
 ```
 
-Give each layer the same explicit `width`, since nothing inside an `.r-stack`
-can be stretched and the layers have to agree or they will not sit on top of
-each other. Mark every layer `.fragment`, including the base. Leave the base
-plain and the filter wraps the whole stack instead, which still keeps it off
-the title beat but spends a keypress before the overlays start.
+`\class{hid}` sets `visibility: hidden`, so the hidden term keeps the exact
+layout of the real one. Do not use `\phantom`: MathJax spaces a relation or a
+binary operator next to a `\phantom` differently from the same operator next
+to the real term, and the visible terms shift between clicks. Put the operator
+inside the hidden group with an empty group in front, `\class{hid}{{}+ ...}`,
+so it keeps its binary spacing.
 
-Replace rather than accumulate when a slide shows a run of parallel examples
-(packaging, then ads, then posters). Same `.r-stack`, but the children carry
-`.current-visible`, so each row leaves as the next arrives and the slide never
-grows. The last child must be a plain `.fragment` and never
-`.current-visible`: reveal has nothing current once you advance past the final
-one, so the slide goes blank, live and in the decktape export.
+Notes under the equation go in an `.eq-notes` div, one line per variable or
+term, each line a fragment on the click of its term. The accent bar is drawn
+per line, so at every click it spans only the lines on screen:
 
 ```markdown
-::: {.r-stack}
-::: {.fragment .current-visible}
-![](fig/packaging.png){width=900}
+::: {.eq-notes}
+::: {}
+$A_{jt} \in \{0,1\}$ marks automation; $\beta_1$ is the level effect.
 :::
-::: {.fragment .current-visible}
-![](fig/ads.png){width=900}
-:::
-::: {.fragment}
-![](fig/posters.png){width=900}
+::: {.fragment fragment-index=1}
+$\beta_2$ is how the effect grows with the share of rivals already automated.
 :::
 :::
 ```
 
-Where the point is the set and not the sequence, drop the stack and let every
-example arrive on one beat with `.together`.
+### The derivation chain
 
-Group the setup and land the punchline alone by sharing one index across the
-setup blocks and giving the last its own. This is the shape for three bullets
-that set up a fourth:
+A derivation that runs over several lines or slides is a chain of steps. Each
+step is a step equation whose lines are the rows of one `aligned` block, with a
+label column on the right. The rules:
 
-```markdown
-- [First]{.fragment fragment-index=1}
-- [Second]{.fragment fragment-index=1}
-- [Third]{.fragment fragment-index=1}
-- [The problem all three create]{.fragment fragment-index=2}
-```
+1. Start each step from an equation the room has already seen, and say which
+   one in the label column.
+2. Replace one term per line. The label says what was replaced and where the
+   replacement comes from.
+3. Open each step with a one-line recap at click 0 that names the earlier
+   result it starts from.
+4. A prediction shows the term that produces it: regroup the expression and put
+   a brace under that term with its reading.
+5. Define the variables as bullets under the equation (`.eq-notes`), one per
+   line, never inline in a sentence.
+6. Keep brace labels short and spaced so neighbouring labels do not touch.
+7. One colour per term role on every equation and figure: `\class{ac}` for the
+   term the step is about, `\class{bl}` for a second role, and `\class{gr}` for
+   a constant or absorber, grayed and moved to the end.
+8. No step tags (assumption, identity, approximation) and no caveats on the
+   step. Caveats go to a backup slide behind one button.
 
-A footnote that should arrive AFTER the content it annotates, rather than on
-its beat, is the one case where `.aside-note` is not enough on its own: give
-it `.fragment` and an index one above the block it follows. A footnote that
-appears before its content makes the room read the footnote first, which is
-why the default rides the previous beat and why this override is explicit.
-
-`auto-animate` is for a thing that changes, not a thing that appears. Two
-consecutive slides with the same heading and `auto-animate="true"` tween
-between them, which is how an equation rearranges or an estimate moves in
-place. The format sets `auto-animate-duration: 0.4`; reveal's 1.0 default is
-long enough that you end up waiting on it mid-sentence.
-
-A custom fragment class has to restore `opacity: 1; visibility: inherit` in
-CSS, because reveal hides every fragment that is not `.custom`. The theme's
-`.highlight-yale` does this already; a hand-rolled one that skips it never
-appears.
-
-The recurring roadmap is the framework arc's convention (SKILL.md, deck
-architecture): the framework overview slide carries the whole pipeline as one
-schematic, and each stage reopens on that same schematic with the active
-stage highlighted. Two mechanics implement the highlight. An `.r-stack` of
-stage-lit variants, one per fragment as above, fits when the roadmap recurs
-on a single slide and the stages light up on successive keypresses. Repeated
-image files (`roadmap-1.png`, `roadmap-2.png`, ...) on consecutive
-`auto-animate` slides fit the arc's normal shape, where each stage's
-reopening is its own slide after that stage's `.section-break`; export every
-variant from one figure script so the geometry matches between slides.
-
-## Demo frames
-
-A run of full-bleed exhibit frames continuing a titled slide's thought (a
-generation demo cycling images, a schematic built in steps, a table revealed
-in two passes) is written as repeats of the same title: one slide
-per frame, the title verbatim on each, `auto-animate="true"` on all of them,
-the exhibit swapped per slide. Staging stays on, so each frame opens on the
-standing title and its exhibit arrives on one keypress; because the repeated
-title never moves, the run reads as one continuing thought.
+The repricing talk's estimating equation, derived from the pooled comparison
+the room saw on the claim slide. A chain with a label column goes in
+`::: {.eq-stack .chain}`, which sets the math at 28px so the equation and its
+labels fit the measure. The recap line sits above the stack at click 0. The
+second layer, with lines 3 and 4 still hidden:
 
 ```markdown
-## The model generates coherent variants {auto-animate="true"}
+Start from the pooled comparison on the claim slide.
 
-![](fig/demo-real.png){width=800}
-
-## The model generates coherent variants {auto-animate="true"}
-
-![](fig/demo-generated.png){width=800}
+::: {.eq-stack .chain}
+...
+::: {.eq-layer .fragment fragment-index=1}
+$$\begin{aligned}
+\log p_{jmt} &= \alpha + \beta A_{jt}
+  && \text{pooled comparison} \\
+&{}= \alpha + \class{ac}{(\beta_1 + \beta_2 \Rival_{mt})} A_{jt}
+  && \beta \to \beta_1 + \beta_2 \Rival_{mt} \\
+&\class{hid}{{}= \beta_1 A_{jt} + \class{ac}{\beta_2 A_{jt} \Rival_{mt}} + \class{gr}{\gamma_j + \delta_{mt}}}
+  &&\class{hid}{\alpha \to \text{fixed effects}} \\
+&\class{hid}{{}= \underbrace{\beta_1 A_{jt}}_{\text{level}} + \underbrace{\class{ac}{\beta_2 A_{jt} \Rival_{mt}}}_{\text{rises with rival share}} + \class{gr}{\gamma_j + \delta_{mt}}}
+  &&\class{hid}{\text{regroup}}
+\end{aligned}$$
+:::
+...
+:::
 ```
 
-Verified: this passes both gates at exit 0. The other candidate, a titleless
-`## {.center}` exhibit slide after the titled one, fails `stage-check.mjs`,
-which classifies it as content and prints `HEADING NOT VISIBLE   (none)`
-with the verdict `STEP-0-CLEAN: NO`, while the fit gate passes it.
-`{.no-stage}` does not rescue it: the report becomes `LEAKS AT STEP 0:
-<img>; HEADING NOT VISIBLE; NO FRAGMENTS ON A CONTENT SLIDE`. No existing
-class makes the titleless form pass, so do not use it, and do not put
-`{.no-stage}` on the repeated-title frames either; the two leak messages
-fail that slide the same way.
+Line 2 replaces the single slope with one that depends on the rival share,
+which is the claim. Line 3 replaces the intercept with the two sets of fixed
+effects, grayed and moved to the end. Line 4 regroups and puts a brace under
+the term that carries the prediction. Each later layer unwraps one more line.
+The relation goes inside the hidden group (`&\class{hid}{{}= \dots}`), so the
+label column never moves. Measured on the 1280x720 canvas: this block fits at
+28px with its labels. At the default 36px, a draft of the same chain with an
+error term on every line ran 458px past the slide.
 
-For two or three such frames, the `.r-stack` above on the single titled
-slide is often the better replacement: the exhibits cycle in place on
-keypresses, nothing on the slide moves, and the `c/t` meter does not
-inflate.
+A step that runs past `.shrink-85` follows the overflow rule below.
 
-## Jump buttons and beats
+### Swap in place (`#composition`)
 
-Wrap a `.jump` or `.jump-back` button in `::: {.with-previous}` so it keeps
-the beat of the block above it. A bare paragraph holding a button is a block
-like any other to the filter, and it would spend a keypress of its own;
-`.with-previous` hands it the preceding block's fragment index instead, so the
-button arrives with the note under the exhibit it belongs to. The jump lands
-the appendix slide fully revealed, which is what you want with a hand up in
-the third row.
+To replace one block with another at the same click, keep both in the flow at
+the same size:
 
-Markup, placement after bordered blocks, right-alignment, the Back semantics
-(exact slide and fragment step, one stored origin per deck), and the ways a
-target silently breaks are in the README under "Jump buttons"; label diction
-is in `../style/house.md`. Target ids prefixed `ap-` read well and stay clear
-of the crossref prefixes Quarto claims (`#fig-`, `#tbl-`, `#eq-`, `#sec-`).
+```markdown
+::: {.swap}
+::: {.fragment .fade-out fragment-index=1}
+A regulator could be asked to observe the pricing algorithms, which are private.
+:::
+::: {.swap-in .fragment fragment-index=1}
+This test asks for the share of a market already automated.
+:::
+:::
+```
 
-Two format keys change these defaults. With `back-returns: fixed`, the filter
-wires every Back at build time: it returns to the main-talk slide whose button
-leads into that appendix section, at the step where the button appears,
-whatever was visited in between. An appendix slide reached from another
-appendix slide returns through the chain to the main talk. On an appendix
-heading, `data-jump-land="start"` makes a jump land at step 0 so the slide's
-own clicks play, and `[]{.jump-back data-return="slide-id"}` sets a return by
-hand for a slide that no button leads to. With `auto-stage: false`, no slide is
-staged unless its heading carries `{.stage}`, and every other slide keeps
-exactly the fragments you wrote, which is the Beamer habit of planning each
-click by hand. `stage-check.mjs` still holds every content slide to the
-title-alone rule, so on such a deck read its failures on hand-planned slides
-as hints.
+The old block stays in the flow after it fades out, so it keeps its space. The
+`.swap-in` block sits absolutely over it on an opaque ground. Everything below
+the pair keeps its place. Make the new block no taller than the old one.
 
-Measured on the sample talk: a button written as a sibling after an
-`.aside-note` sits with the note's rule ending 5.8px above the button's box,
-and the button's right edge lands on the slide's content right edge to the
-pixel. The button owns a line the slide did not own before, so run the fit
-gate after adding one. The theme takes the body leading off that line and
-collapses the gap above it (measured on the talk: 31.7px of line where body
-leading reserves 43.5px, and a 4.1px gap instead of 12px), but on a slide
-already near the canvas that line is still what tips it over. Cut a sentence,
-do not shrink the type.
+For a layered exhibit with no swap-out (a still, then the still with more drawn
+on it), an `.eq-stack` of image layers works the same way as the step equation.
+
+### Gray-out (`#intro`, `#threats`)
+
+`.dim-past` on a list built item by item grays every item already said, so the
+current item is the only one in full ink. On a list-only slide,
+`::: {.incremental .dim-past}` is enough. Next to other fragments, wrap each
+item in an indexed fragment div inside one `.dim-past` div.
+
+`.li-dim` on a fragment grays that block only while its own click is current.
+It is on screen in full ink before and after. Two `.li-dim` blocks with
+consecutive indices gray one column of a comparison, then the other, then
+return both to full ink on the next click.
+
+### A phrase takes the accent (`#claim`)
+
+`[6.2 log points]{.fragment .highlight-accent fragment-index=1}` turns the
+phrase to the accent on its click. It is on screen from click 0. The accent is
+a colour change only, never a weight change, so the line does not reflow.
+
+### Reserved space
+
+`.reserve` (a div) or `.ph` (a span or table cell) is `visibility: hidden`,
+Beamer's `\invisible`. Use it for a table column that fills in on later clicks.
+
+### Revisiting a slide
+
+To come back to an earlier slide, repeat it exactly, then change one thing in
+place on a click. The repeat must be identical to the state the room last saw.
+
+### Fixed geometry across a run
+
+Consecutive slides that share content keep the same positions: the same image
+height, the same column widths, the same top of the body. Put the shared sizes
+in one deck-local class used by every slide in the run.
+
+## Overflow
+
+On overflow, shrink the slide body and keep the slide whole:
+
+1. `.tight-math` reduces the display-math margins.
+2. `.shrink-98`, `.shrink-95`, `.shrink-92`, `.shrink-90`, `.shrink-88`, or
+   `.shrink-85` on the heading scales everything under the rule.
+
+Never change the title band or the title size, and never split one topic across
+two slides. Past `.shrink-85`, cut content and ask the author which line goes.
+
+## Buttons
+
+A jump button names its destination in one or two words. It is
+`[Measurement]{.jump target="ap-measure"}`. Target ids prefixed `ap-` stay clear
+of the cross-reference prefixes Quarto claims (`#fig-`, `#tbl-`, `#eq-`,
+`#sec-`).
+
+The button arrives on the click of the content it qualifies, so put it inside
+that content's fragment. Three placements:
+
+1. Inline at the end of a list line (`#queue`).
+2. On its own line under a block, which right-aligns it (`#robustness`).
+3. In the bottom-right corner, in a `::: {.btn-corner}` div.
+
+## Back
+
+Every backup slide has a Back button. Write it as an empty span on its own
+line; the filter renders it as Back and the theme puts it in the bottom-right
+corner:
+
+```markdown
+[]{.jump-back}
+```
+
+Back returns are fixed at build time (`back-returns: fixed`). The filter finds
+the main-talk slide whose button leads into the backup slide. Back lands there
+at the click where that button appears, whatever was visited in between. A
+backup slide reached from another backup slide returns through the chain to
+the main-talk slide.
+
+Overrides:
+
+1. `data-jump-land="start"` on a backup heading makes a jump land at click 0,
+   so the slide's own clicks play. By default a jump lands fully revealed.
+2. `[]{.jump-back data-return="slide-id" data-return-step="last"}` sets the
+   return by hand, for a backup slide that no button leads to.
+3. A target linked from two main slides returns to the first in talk order. The
+   render warns about it. Give the second slide its own target if that matters.
+
+Backup slides are static by default.
+
+To test the returns, open the rendered deck in a browser, put each main slide
+at the click where its button shows, click the button, move one slide away and
+back, click Back, and check the slide and the click. On the example talk all
+three buttons return to their slide and click.
+
+## Retired slides
+
+A slide that leaves the talk goes into a raw comment block with a dated note.
+Pandoc drops the block, and the slide comes back by removing the two fence
+lines:
+
+`````markdown
+<!-- 2026-11-04: cut for time; the full table is a backup slide. -->
+````{=comment}
+## Old slide title {#old-id}
+...
+````
+`````
+
+## Ids
+
+Every slide that a button, a CSS rule, or a click map refers to gets an explicit
+`#id`. Never key anything on an id that Pandoc generated (`#section-1`): those
+ids move when a slide is inserted. A section slide gets an auto id from its
+words, so do not reuse that word as a slide id.

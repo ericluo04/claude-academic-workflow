@@ -101,7 +101,7 @@ handing it over. The right column is what to look for when auditing.
 | A worked example within two slides of every definition, in `ol.steps`. Hard requirement here, unlike a research talk where one empirical thread serves several definitions. | Two definition slides in a row. |
 | Incremental notation. At most two new symbols a slide, each introduced in prose before it appears in display math. | A slide needing `s`, `a`, `L`, `\delta`, and `\tau` at once. |
 | Progressive complexity: simple, then relative, then distributional, then conditional. | A conditional expectation before an unconditional one. |
-| A `.section-break` every five to eight slides. | A 40-slide deck that reads as one block. |
+| A new section (`section="..."` on its first slide, shown in the breadcrumb) every five to eight slides. | A 40-slide deck that reads as one block. |
 | Two slides for a dense result: the statement with color and a forward pointer, then one slide per term with the intuition. | One slide holding a theorem and all its definitions. |
 | Semantic colour fixed for the semester: treated `.yblue`, control `.ygray`, counterfactual dashed `.yred`, with the same hexes (from the theme's palette table) inside the figures. | A binary contrast shown in one colour, or a figure still carrying ink from another theme's palette. |
 | Box hierarchy honored: right block for the content, two per slide, at most three `.keyidea` in the deck. | Everything is a key idea, so nothing is. |

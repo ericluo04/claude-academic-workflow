@@ -4,18 +4,25 @@ subtitle: "An example seminar deck, generated end to end with Claude Code"
 author: "Claude Code"
 date: "2026-09-18"
 bibliography: talk-refs.bib
-# Everything else (theme, stage-slide.lua, citeproc: false, refs-fit, self-hosted
-# MathJax, highlight style, staging defaults) lives in the format extension,
-# installed under _extensions/. The deck keeps only what is its own.
+# Everything else (theme, stage-slide.lua, citeproc: false, the reference
+# budget, self-hosted MathJax, hand-planned clicks, fixed-return Back) lives in
+# the Editorial format extension, installed under _extensions/. The deck keeps
+# only what is its own.
 #
-# The live copy under docs/ is this source rendered against the repo's starter
-# theme, exactly as below. To reproduce it: from this directory,
+# The live copy under docs/ is this source rendered exactly as below. To
+# reproduce it: from this directory,
 #   quarto add ../../slide-tooling --no-prompt
 #   cp -R ../../slide-tooling/mathjax .
 #   cp -R ../../slide-tooling/fonts .
 #   quarto render talk.qmd
-# The look is the starter theme's; restyle the theme to your own taste.
-format: starter-revealjs
+# The figures are drawn in the deck face, Schibsted Grotesk, from the static
+# TTF cuts in fonts/schibsted-grotesk/ (the browser uses the woff2 files).
+#
+# Symbols, one per quantity on every slide and figure: p_jmt price of listing j
+# in market m, week t; A_jt automation indicator; RivalShare_mt share of rival
+# listings automated; beta_1 level effect; beta_2 interaction; gamma_j listing
+# fixed effect; delta_mt market-week fixed effect.
+format: editorial-revealjs
 ---
 
 ## Notation {visibility="hidden"}
@@ -30,106 +37,144 @@ format: starter-revealjs
 #| include: false
 library(ggplot2)
 
-# Figure palette, matched to the starter theme's paper ground and plum
-# accent. If you restyle the slide theme, restyle this with it so the figures
-# sit on the same ground as the slides.
-col_main <- "#7d3a5e"
-col_soft <- "#8a8178"
-col_text <- "#4f463c"
-col_bg   <- "#faf7f2"
+# Figures use the deck's own face. FreeType cannot read the woff2 files the
+# browser loads, so slide-tooling ships two static TTF cuts for R. Without
+# them the figures fall back to the system sans.
+sg_dir <- "fonts/schibsted-grotesk"
+fig_family <- "sans"
+known <- c(systemfonts::system_fonts()$family, systemfonts::registry_fonts()$family)
+if ("Schibsted Grotesk" %in% known) {
+  fig_family <- "Schibsted Grotesk"
+} else if (file.exists(file.path(sg_dir, "SchibstedGrotesk-Regular.ttf"))) {
+  systemfonts::register_font(
+    "Schibsted Grotesk",
+    plain = file.path(sg_dir, "SchibstedGrotesk-Regular.ttf"),
+    bold  = file.path(sg_dir, "SchibstedGrotesk-SemiBold.ttf")
+  )
+  fig_family <- "Schibsted Grotesk"
+}
 
-talk_theme <- function(base_size = 15) {
-  theme_minimal(base_size = base_size) +
+# Figure palette, matched to the Editorial theme: the vermilion accent for the
+# series the slide is about, gray for the comparison, a white ground. If you
+# restyle the slide theme, restyle this with it.
+col_main <- "#D4371C"
+col_soft <- "#8c8c8c"
+col_text <- "#5c5c5c"
+col_bg   <- "#ffffff"
+
+# base_size 18 sets tick labels near 19px on the slide, since figures are drawn
+# at 96 dpi and shown close to 1:1.
+talk_theme <- function(base_size = 18) {
+  theme_minimal(base_size = base_size, base_family = fig_family) +
     theme(
       panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(colour = "#e5ddd0", linewidth = 0.4),
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_line(colour = "#e6e6e6", linewidth = 0.4),
       axis.title = element_text(colour = col_text),
       axis.text = element_text(colour = col_text),
       legend.position = "top",
+      legend.justification = "left",
       legend.title = element_blank(),
+      legend.text = element_text(colour = col_text),
       legend.margin = margin(0, 0, 0, 0),
       plot.margin = margin(2, 6, 2, 2),
       plot.background = element_rect(fill = col_bg, colour = NA)
     )
 }
-knitr::opts_chunk$set(dev.args = list(bg = "#faf7f2"))
+knitr::opts_chunk$set(dev = "ragg_png", dev.args = list(bg = col_bg))
 ```
 
-## Most prices on this marketplace are now set by software
+## Most prices on this marketplace are now set by software {#intro}
 
-- [68%]{.yblue} of active listings change price at least once a week, against 4% in 2015.
+<!-- Clicks: 0 the first line; 1 and 2 one line each, and each earlier line
+     grays when the next arrives. -->
+
+::: {.dim-past}
+::: {}
+- [68%]{.em} of active listings change price at least once a week, against 4% in 2015.
+:::
+::: {.fragment fragment-index=1}
 - Repricing is delegated to a handful of third-party tools whose rules are published.
+:::
+::: {.fragment fragment-index=2}
 - Sellers meet the same rivals week after week, so rules respond to rules.
-
-The policy question is usually posed as whether automation is inflationary. That framing
-is incomplete: the answer depends on the composition of the market a seller automates into.
+:::
+:::
 
 ::: {.aside-note}
 Source: PriceScope weekly listing panel, 2015--2023. Own calculations. Online price
 competition on this kind of marketplace has been measured since @chevalier2003Measuring.
 :::
 
-## Automation pulls prices in two directions at once
+## Automation pulls prices in two directions at once {#two-forces}
+
+<!-- Clicks: 0 the cost line; 1 the downward force; 2 the upward force; 3 the
+     question it leaves. -->
 
 Delegating price setting cuts the cost of a revision from roughly \$14 of seller
-attention to near zero. Two consequences run in opposite directions.
+attention to near zero.
 
+::: {.fragment fragment-index=1}
 - Cheap revisions let a seller undercut a slow rival within hours, which pushes prices
-  [down]{.ygreen} toward marginal cost.
-- Cheap revisions also make undercutting visible and matchable within hours, which
-  sustains higher prices when rivals are [equally fast]{.yred}.
-
-Which force dominates is a question about the rival mix $\Rival_{mt}$, the share of a
-market's listings already under automated pricing, not about automation itself.
-
-::: {.aside-note}
-Both forces are old; what is new is that they can now run at machine speed. Undercutting
-is the mechanism @chevalier2003Measuring find between two online booksellers, and the
-variety it is traded against is what @brynjolfsson2003Consumer price [see also
-@chevalier2006Effecta].
+  [down]{.em} toward marginal cost.
 :::
 
-## Automation raises prices only where rivals automate too
+::: {.fragment fragment-index=2}
+- Cheap revisions also make undercutting visible and matchable within hours, which
+  sustains higher prices when rivals are [equally fast]{.em}.
+:::
+
+::: {.fragment fragment-index=3}
+Which force dominates depends on the rival mix $\Rival_{mt}$, the share of a market's
+listings already under automated pricing.
+:::
+
+::: {.aside-note}
+Undercutting is the mechanism @chevalier2003Measuring find between two online
+booksellers, and the variety it is traded against is what @brynjolfsson2003Consumer
+price [see also @chevalier2006Effecta].
+:::
+
+## Automation raises prices only where rivals automate too {#claim}
+
+<!-- Clicks: 0 the estimate; 1 the number takes the accent; 2 the reading. -->
 
 ::: {.result}
 [Headline estimate]{.label}
-Adoption raises a listing's price by [6.2 log points]{.fragment .highlight-accent} (s.e. 1.4)
-in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.
+Adoption raises a listing's price by [6.2 log points]{.fragment .highlight-accent fragment-index=1}
+(s.e. 1.4) in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.
 :::
 
-The two estimates come from the same regression, the same sellers, and the same weeks. The
-sign of the effect of automation is a property of the market, not of the technology.
+The two estimates come from the same regression, the same sellers, and the same weeks.
 
-::: {.takeaway .fragment .fade-up}
-Automation is not inflationary on its own. It is inflationary where it is already common.
+::: {.takeaway .fragment fragment-index=2}
+Automation is inflationary where it is already common.
 :::
 
-## Setting and identification {.section-break}
+## Setting {.section-break}
 
-## API access arrived in a queue, not by application
+## API access arrived in a queue, not by application {#queue}
 
-- 41,208 listings across 320 narrow product markets, priced weekly, 2015--2023.
-- API access arrived by seller tier between March 2019 and November 2021, with no
-  application and no way to move up the queue.
-- A listing is coded as automated in the first week its price changes on three or more
-  distinct days, [a threshold no manual seller in the pre-period ever crosses]{.ygray}.
+- 41,208 listings in 320 product markets, priced weekly, 2015--2023.
+- API access arrived by seller tier, March 2019 to November 2021, with no application
+  and no way to move up the queue.
+- A listing counts as automated from the first week its price changes on three or more
+  distinct days. [Measurement]{.jump target="ap-measure"}
 
 Rival exposure $\Rival_{mt}$ is the share of other listings in market $m$ and week $t$
-coded as automated. The full [measurement rule]{.jump target="ap-measure"} is in the
-appendix.
+coded as automated.
 
 ::: {.aside-note}
 A queue rollout is a design used elsewhere: @wiles2025Algorithmic identify the effect
-of algorithmic writing assistance the same way, on hires rather than prices.
+of algorithmic writing assistance the same way, on hires.
 :::
 
-## Adoption tracks the tier queue that granted API access
+## Adoption tracks the tier queue that granted API access {#adoption}
 
 ```{r}
-#| label: fig-adoption-curves
-#| fig-cap: "Adoption of the repricing API, by queue position"
-#| fig-width: 8
-#| fig-height: 4.2
+#| label: adoption-curves
+#| fig-width: 11.2
+#| fig-height: 4.1
 base <- subset(economics, date >= as.Date("2000-01-01") & date <= as.Date("2008-12-01"))
 n <- nrow(base)
 z <- as.numeric(scale(log(base$pce)))
@@ -145,13 +190,13 @@ ggplot(adoption, aes(date, share, colour = grp)) +
   geom_vline(xintercept = as.Date("2019-03-01"), linetype = "dashed",
              colour = col_soft, linewidth = 0.5) +
   geom_line(linewidth = 1.2) +
-  annotate("text", x = as.Date("2019-06-01"), y = 0.97, hjust = 0, size = 4.6,
-           colour = col_text, label = "Repricing API opens") +
+  annotate("text", x = as.Date("2019-06-01"), y = 0.97, hjust = 0, size = 6.2,
+           family = fig_family, colour = col_text, label = "Repricing API opens") +
   scale_colour_manual(values = c(col_main, col_soft)) +
   scale_y_continuous(limits = c(0, 1), labels = scales::label_percent(accuracy = 1)) +
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
   labs(x = NULL, y = "Share of listings automated") +
-  talk_theme(15)
+  talk_theme()
 ```
 
 ::: {.aside-note}
@@ -160,53 +205,92 @@ behaviour on this marketplace has mostly been studied through reviews rather tha
 [@he2022Market].
 :::
 
-## Identification compares adopters to not-yet-adopters inside the same market-week
+## Identification {.section-break}
 
-$$
-\begin{aligned}
-\log p_{jmt} = \;& \beta_1 A_{jt} + \beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr) \\[2pt]
-                 & + \gamma_j + \delta_{mt} + \varepsilon_{jmt}
-\end{aligned}
-$$
+## Identification compares adopters to [not-yet-adopters]{style="white-space:nowrap"} inside the same market-week {#id-equation}
 
-Here $A_{jt} \in \{0,1\}$ marks automation, $\gamma_j$ absorbs the listing and
-$\delta_{mt}$ the market-week, so $\beta_2$ is identified off variation in $\Rival_{mt}$
-across sellers who adopt in different quarters. Standard errors are clustered by market.
+<!-- Clicks: 0 the level term and its note; 1 the interaction; 2 the fixed
+     effects; 3 the error, the clustering note, and the assumption. Each layer
+     is the whole equation with the terms not yet entered under \class{hid}, so
+     nothing moves. -->
 
-::: {.assumption}
-[Assumption 1 (Parallel trends given exposure)]{.label}
-Given rival exposure, adoption timing carries no information about the untreated price path:
-$$\E\bigl[\Delta \log p_{jmt}(0) \mid A_{jt}, \Rival_{mt}\bigr]
- = \E\bigl[\Delta \log p_{jmt}(0) \mid \Rival_{mt}\bigr].$$
+::: {.eq-stack}
+::: {}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ \class{hid}{{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}}
+ \class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}
+ \class{hid}{{}+ \varepsilon_{jmt}}$$
+:::
+::: {.eq-layer .fragment fragment-index=1}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ {}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}
+ \class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}
+ \class{hid}{{}+ \varepsilon_{jmt}}$$
+:::
+::: {.eq-layer .fragment fragment-index=2}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ {}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}
+ {}+ \class{gr}{\gamma_j + \delta_{mt}}
+ \class{hid}{{}+ \varepsilon_{jmt}}$$
+:::
+::: {.eq-layer .fragment fragment-index=3}
+$$\log p_{jmt} = \beta_1 A_{jt}
+ {}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \Rival_{mt}\bigr)}
+ {}+ \class{gr}{\gamma_j + \delta_{mt}}
+ {}+ \varepsilon_{jmt}$$
+:::
 :::
 
-## What the estimates say {.section-break}
+::: {.eq-notes}
+::: {}
+$A_{jt} \in \{0,1\}$ marks automation; $\beta_1$ is the level effect.
+:::
+::: {.fragment fragment-index=1}
+$\beta_2$ is how the effect grows with the share of rivals already automated.
+:::
+::: {.fragment fragment-index=2}
+$\gamma_j$ absorbs the listing and $\delta_{mt}$ the market-week.
+:::
+::: {.fragment fragment-index=3}
+Standard errors are clustered by market.
+:::
+:::
 
-## The level effect is a wash; the interaction is not
+::: {.assumption .fragment fragment-index=3}
+[Parallel trends given exposure.]{.label} Given rival exposure, adoption timing carries
+no information about the untreated price path.
+:::
 
-::: {tbl-colwidths="[43,15,24,18]"}
+## Estimates {.section-break}
+
+## The level effect is a wash; the interaction is not {#table}
+
+::: {.regtable}
 | Outcome: log price | Pooled | + Market × week FE | Interaction |
 |---|---:|---:|---:|
 | Automated pricing | 0.024 | 0.019 | −0.004 |
 |   | (0.008) | (0.009) | (0.011) |
-| Automation × top-quartile rival exposure |  |  | 0.066 |
+| Automation × top-quartile rival exposure |  |  | [0.066]{.em} |
 |   |  |  | (0.017) |
 | Market × week fixed effects | No | Yes | Yes |
 | Listings | 41,208 | 41,208 | 41,208 |
 :::
 
-::: {.takeaway .fragment .fade-up}
+::: {.fragment fragment-index=1}
 Pooling across markets averages a positive and a zero effect into a small positive one.
 :::
 
-## Prices move at adoption, and stay moved
+## Prices move at adoption, and stay moved {#event-study}
 
-:::: {.columns .fragment fragment-index="1"}
+<!-- Clicks: 0 the figure and the estimate; 1 the reading and the pre-trend
+     test. -->
+
+:::: {.columns}
 ::: {.column width="58%"}
 ```{r}
 #| label: event-study
-#| fig-width: 5.4
-#| fig-height: 4.0
+#| fig-width: 6.8
+#| fig-height: 4.3
 es <- data.frame(
   k  = -4:4,
   b  = c(-0.004, 0.002, -0.006, 0, 0.011, 0.038, 0.052, 0.059, 0.062),
@@ -221,29 +305,29 @@ ggplot(es, aes(k, b)) +
   scale_x_continuous(breaks = -4:4) +
   scale_y_continuous(limits = c(-0.04, 0.11)) +
   labs(x = "Quarters relative to adoption", y = "Effect on log price") +
-  talk_theme(14)
+  talk_theme()
 ```
 :::
 ::: {.column width="42%"}
-::: {.fragment fragment-index="2"}
-High-exposure markets only. Nothing happens in the four quarters before adoption, the jump
-lands in the quarter of adoption, and the level persists for a year.
-:::
-
-::: {.result .fragment fragment-index="1"}
+::: {.result}
 [Estimate]{.label}
 0.062 (0.018) four quarters out
 :::
 
-::: {.aside-note .fragment fragment-index="2"}
-Pre-period coefficients are jointly insignificant, $p = 0.71$.
+::: {.fragment fragment-index=1}
+High-exposure markets only. Nothing happens before adoption, the jump lands in the
+quarter of adoption, and the level persists for a year.
 :::
 :::
 ::::
 
-## The interaction survives every specification we can think of
+::: {.aside-note .fragment fragment-index=1}
+Pre-period coefficients are jointly insignificant, $p = 0.71$.
+:::
 
-<table class="spec">
+## The interaction survives every specification we can think of {#robustness}
+
+<table class="spec regtable">
 <thead>
 <tr>
 <th>Outcome: log price</th>
@@ -251,7 +335,7 @@ Pre-period coefficients are jointly insignificant, $p = 0.71$.
 <th class="num">Seller trends</th>
 <th class="num">Drop 2020</th>
 <th class="num">Balanced</th>
-<th class="num">Continuous exposure</th>
+<th class="num">Continuous</th>
 <th class="num">Winsorized</th>
 <th class="num">PPML</th>
 </tr>
@@ -266,113 +350,117 @@ Pre-period coefficients are jointly insignificant, $p = 0.71$.
 </tbody>
 </table>
 
+[Sample window]{.jump target="ap-window"}
+
 ::: {.aside-note}
-Standard errors clustered by market throughout. The continuous-exposure column reports the
+Standard errors clustered by market throughout. The continuous column reports the
 effect of a one-standard-deviation move in $\Rival_{mt}$. The empirics-first posture, a
-robust fact ahead of a model, is the one @golder2023Learning argue for. Sensitivity to
-the [sample window]{.jump target="ap-window"} is tabulated in the appendix.
+robust fact ahead of a model, is the one @golder2023Learning argue for.
 :::
 
-## Why the effect is a complementarity {.section-break}
+## Mechanism {.section-break}
 
-## Complementarity follows from the slope of the best response
+## Complementarity follows from the slope of the best response {#proposition}
+
+<!-- Clicks: 0 the proposition; 1 the proof; 2 the reading. -->
 
 ::: {.proposition}
-[Proposition 1]{.label}
+[Proposition 1.]{.label}
 Let $\pi_j(p_j, p_{-j})$ be log-concave in $p_j$ and suppose automation lowers the
 adjustment cost $\kappa_j$. If $\partial^2 \pi_j / \partial p_j \partial p_{-j} > 0$, then
 $p_j^\star = \argmax_p \pi_j(p, p_{-j}) - \kappa_j \mathbf{1}\{p \neq p_{j,t-1}\}$ is
 increasing in $p_{-j}$, and adoption decisions are strategic complements.
 :::
 
-::: {.proof}
+::: {.proof .fragment fragment-index=1}
 Log-concavity gives a unique interior maximizer, so $p_j^\star$ is characterized by the
 first-order condition. Falling $\kappa_j$ widens the region where the constraint
 $p = p_{j,t-1}$ does not bind, and on that region the cross-partial signs
-$\mathrm{d} p_j^\star / \mathrm{d} p_{-j} > 0$ by Topkis. Adopting therefore raises the
-marginal return to a rival's adoption.
+$\mathrm{d} p_j^\star / \mathrm{d} p_{-j} > 0$ by Topkis.
 :::
 
-::: {.takeaway .fragment .fade-up}
-The empirical interaction is the comparative static the model predicts, not a
-specification artifact.
+::: {.takeaway .fragment fragment-index=2}
+The empirical interaction is the comparative static the model predicts.
 :::
 
-## Three checks bound the demand-selection threat
+## Three checks bound the demand-selection threat {#threats}
+
+<!-- Clicks: 0 the threat; 1 to 3 one check each, earlier checks gray. The IV
+     button arrives with the second check, which it qualifies. -->
 
 Sellers who automate first may be facing rising demand, which would raise prices with or
-without the API. Three pieces of evidence bound this.
+without the API.
 
-- Adoption timing is [uncorrelated]{.yblue} with pre-period price and quantity trends
-  once tier is held fixed ($p = 0.71$ above).
-- Within-tier queue position, which is set by a signup date years earlier, gives the same
-  interaction estimate: 0.059 (0.022).
-- Rival exposure is [not]{.yred} predicted by own-market demand growth, so the interaction
-  is not a demand shock in disguise.
-
-::: {.aside-note}
-The one case we cannot rule out is a market-level shock hitting exposure and prices
-together in the same week. [We treat this as an open question.]{.dim} Demand dynamics on
-platforms of this kind are modelled directly by @yin2024MetaLearning.
+::: {.dim-past}
+::: {.fragment fragment-index=1}
+- Adoption timing is [uncorrelated]{.em} with pre-period price and quantity trends
+  once tier is held fixed ($p = 0.71$).
+:::
+::: {.fragment fragment-index=2}
+- Within-tier queue position, set by a signup date years earlier, gives the same
+  interaction: 0.059 (0.022). [IV]{.jump target="ap-iv"}
+:::
+::: {.fragment fragment-index=3}
+- Rival exposure is [not]{.em} predicted by own-market demand growth.
+:::
 :::
 
-## What this means for policy {.section-break}
+::: {.aside-note}
+A market-level shock hitting exposure and prices in the same week remains open. Demand
+dynamics on platforms of this kind are modelled directly by @yin2024MetaLearning.
+:::
 
-## A composition test is what a regulator can actually run
+## Policy {.section-break}
 
-::: {.r-stack}
-::: {.fragment .fade-in-then-out style="width: 100%"}
+## A composition test is what a regulator can actually run {#composition}
+
+<!-- Clicks: 0 the unavailable inputs; 1 swapped in place for the available
+     one; 2 the two regimes. -->
+
+::: {.swap}
+::: {.fragment .fade-out fragment-index=1}
 A regulator could be asked to observe the pricing algorithms, which are private, or to
 prove intent, which is unfalsifiable. Neither is available.
 :::
-
-::: {.fragment style="width: 100%"}
-This test asks for the share of a market already automated, which the platform records and
-publishes. That is the whole input.
+::: {.swap-in .fragment fragment-index=1}
+This test asks for the share of a market already automated, which the platform records
+and publishes. That is the whole input.
 :::
 :::
 
-- Below roughly a 40% automated share, permitting automation moves prices by nothing we can
-  distinguish from zero.
-- Above it, the same permission is worth 4 to 7 log points, [rising in the share]{.yblue}.
+::: {.fragment fragment-index=2}
+- Below roughly a 40% automated share, permitting automation moves prices by nothing we
+  can distinguish from zero.
+- Above it, the same permission is worth 4 to 7 log points, [rising in the share]{.em}.
+:::
 
 ::: {.aside-note}
 The threshold is where the fitted interaction crosses zero, so it inherits the standard
-error on the interaction and should be read as a range. Whether firms adopt in the first
-place is a separate question with its own literature [@dietvorst2018Overcoming;
-@brynjolfsson2025Generative].
+error on the interaction. Whether firms adopt in the first place is a separate question
+[@dietvorst2018Overcoming; @brynjolfsson2025Generative].
 :::
 
-## Automation raises prices where it is already common
+## Takeaways {#takeaways .closing-slide}
 
-::: {.result}
-[Headline estimate]{.label}
-[6.2 log points]{.fragment .highlight-accent} (s.e. 1.4) in the top quartile of rival
-exposure, −0.4 (1.1) in the bottom quartile, from the same regression.
+1. Automated pricing has no single price effect. It raises prices by [6.2 log points]{.em}
+   (s.e. 1.4) in the top quartile of rival exposure and by −0.4 (1.1) in the bottom.
+2. The interaction is the comparative static a model with strategic complements predicts.
+3. A regulator can test market composition, the share of a market already automated,
+   which the platform already records and publishes.
+
+::: {.contact}
+[you@example.edu](mailto:you@example.edu)  ·  [your-site.example](https://your-site.example)  ·  Paper and replication files at example.edu/~presenter/repricing
 :::
 
-A rule that permits automated pricing has no single price effect. Its effect is increasing
-in how much automation the market already has, which makes [market composition]{.ymid} the
-object a regulator should be measuring.
+## Backup {.appendix-break}
 
-::: {.aside-note}
-Paper and replication files: `example.edu/~presenter/repricing`
-:::
+- Robustness to the sample window
+- Why we do not instrument adoption with tier eligibility
+- How automated pricing is measured
 
-## Thank you {.thanks-slide .no-stage transition="fade"}
+## Robustness to the sample window {#ap-window}
 
-Comments and objections are equally welcome, in the room or afterwards.
-
-::: {.thanks-contact}
-Write to me at [you@example.edu](mailto:you@example.edu)
-
-The paper and these slides live at [your-site.example](https://your-site.example)
-:::
-
-## Appendix {.appendix-break background-color="var(--appendix-ground)"}
-
-## Robustness to the sample window {.appendix #ap-window}
-
+::: {.spec}
 | Sample or specification | Interaction | s.e. | Level effect | Listings | Markets | Pre-trend $p$ |
 |---|---:|---:|---:|---:|---:|---:|
 | Baseline, 2015--2023 | 0.066 | 0.017 | −0.004 | 41,208 | 320 | 0.71 |
@@ -380,22 +468,17 @@ The paper and these slides live at [your-site.example](https://your-site.example
 | Drop the 2020 demand spike | 0.070 | 0.018 | −0.002 | 38,940 | 320 | 0.69 |
 | Drop the last adoption cohort | 0.061 | 0.023 | −0.006 | 29,884 | 311 | 0.55 |
 | Market-specific linear trends | 0.058 | 0.026 | −0.005 | 41,208 | 320 | 0.83 |
+:::
 
-: Sensitivity of the interaction estimate to the sample window {.spec tbl-colwidths="[32,12,10,12,12,10,12]"}
-
-::: {.aside-note}
 Nothing here moves the estimate by more than half a standard error.
-:::
 
-::: {.with-previous}
-[Back to the talk]{.jump-back}.
-:::
+[]{.jump-back}
 
-## Why we do not instrument adoption with tier eligibility {.appendix #ap-iv}
+## Why we do not instrument adoption with tier eligibility {#ap-iv}
 
-Tier eligibility is a valid instrument for own adoption and a [weak]{.yamber} one for the interaction,
-because the first stage for $A_{jt} \times \Rival_{mt}$ requires exogenous variation in
-both arguments at once. The available instrument moves only the first.
+Tier eligibility is a valid instrument for own adoption and a [weak]{.em} one for the
+interaction, because the first stage for $A_{jt} \times \Rival_{mt}$ requires exogenous
+variation in both arguments at once. The available instrument moves only the first.
 
 The reduced form is reported instead: crossing an eligibility threshold raises price by
 0.031 (0.012) in high-exposure markets and 0.002 (0.010) elsewhere, a ratio close to the
@@ -405,37 +488,30 @@ interaction estimate scaled by the 0.48 first stage.
 A two-sample approach using a second platform's queue is in progress.
 :::
 
-::: {.with-previous}
-[Back to the talk]{.jump-back}.
-:::
+[]{.jump-back}
 
-## How automated pricing is measured {.appendix #ap-measure}
+## How automated pricing is measured {#ap-measure}
 
 The three-distinct-days rule is the middle of three thresholds. Tighter and looser rules
 move the classified share, but not the estimate.
 
+::: {.spec}
 | Classification rule | Share | Changes per week | Interaction | s.e. | Listings |
 |---|---:|---:|---:|---:|---:|
 | Price changes on two or more distinct days | 0.71 | 2.4 | 0.061 | 0.015 | 41,208 |
 | Three or more distinct days (baseline) | 0.54 | 3.6 | 0.066 | 0.017 | 41,208 |
 | Four or more distinct days | 0.39 | 4.5 | 0.072 | 0.020 | 41,208 |
-
-: Classification threshold and the interaction estimate {.spec tbl-colwidths="[38,10,20,14,9,9]"}
+:::
 
 ::: {.aside-note}
 No listing in the 2015--2018 pre-period crosses the three-day rule for more than two
-consecutive weeks, which is what makes the threshold usable as a proxy. Imputing the level
-a listing would have been assigned under an unobserved rule follows
-@bradlow2004LearningBased; richer platform data would allow the transformer approach of
-@gabel2024Market or the multimedia features surveyed in @grewal2021Marketing, and letting a
-model propose the rule rather than fixing three by hand is the case @ludwig2024Machine make.
+consecutive weeks. Imputing the level a listing would have been assigned under an
+unobserved rule follows @bradlow2004LearningBased; richer platform data would allow the
+approach of @gabel2024Market or the features surveyed in @grewal2021Marketing, and letting
+a model propose the rule is the case @ludwig2024Machine make.
 :::
 
-::: {.with-previous}
-[Back to the talk]{.jump-back}.
-:::
-
-## References {.references-break background-color="var(--references-ground)"}
+[]{.jump-back}
 
 ## References {.references}
 

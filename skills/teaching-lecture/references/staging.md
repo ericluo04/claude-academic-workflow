@@ -1,10 +1,10 @@
 # Staging, animation, and the deck machinery
 
 This is where a lecture deck earns its keep. Beamer's `\pause` is a hard cut
-because it renders separate pages; reveal fades in place, and both themes slow
-every fragment variant to 0.45s on a decelerating curve and give the plain
-`.fragment` a 0.3em rise, so a line settles onto the slide instead of blinking
-on. Content should arrive as you say it.
+because it renders separate pages; reveal fades each fragment in place, so a
+line settles onto the slide instead of blinking on. Dark lab turns slide
+transitions off (`transition: none`) and leaves fragment fades at reveal's
+default. Content should arrive as you say it.
 
 The invariant `stage-slide.lua` holds is that the title appears alone: nothing
 but the heading is visible before you advance, on every content slide, including
@@ -57,17 +57,20 @@ A model gives you a posterior.
 ```
 
 The other variants worth using: plain `.fragment` for the answer after a
-question, `.fade-up` for a punchline, `.highlight-yale` (a theme class) to turn
-a term to the accent colour on cue, `.semi-fade-out` to dim a line you have finished with
-while keeping it readable. Avoid `.grow` and `.shrink`, which read as a
-rendering bug from the back of a room, and avoid `.highlight-red`, whose
-saturated red is both off-palette and the colour family this theme gives
-`.question`.
+question, `.fade-up` for a punchline, `.highlight-accent` (a theme class) to
+turn a term teal and bold on cue, and the theme's `.gray-out` to send a line
+you have finished with to the muted ink while a new block arrives on the same
+press. Avoid `.grow` and `.shrink`, which read as a rendering bug from the
+back of a room, and avoid `.highlight-red`, whose saturated red is off-palette.
 
 A custom fragment class has to restore `opacity: 1; visibility: inherit` in
 CSS, because reveal hides every fragment that is not `.custom`. The theme's
-`.highlight-yale` does this already; a hand-rolled one that skips it never
-appears at all.
+`.highlight-accent` and `.gray-out` do this already; a hand-rolled one that
+skips it never appears at all.
+
+Dark lab's own build tools (the step equation with `\class{hid bK}`, `.swap`,
+`.gray-out`, `.shrink-NN`, and vertical backups) are documented in the skill
+under "Click mechanics" and in the CLICK MECHANICS block of `darklab.scss`.
 
 ## Layered exhibits with `.r-stack`
 
@@ -112,10 +115,22 @@ HTML attribute and Quarto does not read it:
 `auto-animate` is for a thing that changes, not a thing that appears. Two
 consecutive slides with the same heading and `auto-animate="true"` tween
 between them, which is how you make a single quantity visibly move: a threshold
-sliding from 0.50 to 0.09, an equation rearranging, a bar growing. The starter
+sliding from 0.50 to 0.09, an equation rearranging, a bar growing. The
 template does the threshold. The format sets `auto-animate-duration: 0.4`; the
 1.0 default is long enough that the class waits on it and so do you,
 mid-sentence.
+
+The changing element has to be on screen when the second slide enters, or
+there is nothing to morph: the filter would stage it, and the number would
+vanish and reappear. Mark it `.no-stage` on the second slide and give both
+copies the same `data-id`, so reveal pairs them even though their text differs:
+
+```markdown
+::: {.hero data-id="thr-hero"}          (first slide)
+::: {.hero .no-stage data-id="thr-hero"} (second slide)
+```
+
+`stage-check.mjs` exempts a `.no-stage` block from the step-0 invariant.
 
 ## The animation budget
 
@@ -124,85 +139,42 @@ lists. More and the class waits for the animation instead of the argument.
 Hidden fragments still occupy layout space, so a staged slide cannot overflow at
 the last step without overflowing at the first.
 
-## The progress bar and the slide number
+## The breadcrumb and backup navigation
 
-Students pace themselves off the bar, and "7 / 25" is what a student writes
-down when they want to ask about a slide later. On this theme the bar is also
-cut into one segment per section, so a glance says both how far the class has
-gone and which block it is in: `stage-slide.lua` emits a script that reads the
-divider positions off `Reveal.getSlides()` at load and hands them to the theme,
-and it does that only when the deck has two or more `.section-break` dividers.
-The bar mechanics (the takeover, the seek remap, the settled-read caveat) are in
-the README under "The progress bar".
+Dark lab has no progress bar and no slide number. Students locate themselves off
+the breadcrumb at the bottom left of every slide: the section's number in teal
+and its title in 19px mono at 9.1:1 against the ground, which reads from the
+back of a room. There are no section slides. `lab.html` builds the crumb at
+load from the `section="..."` attribute on the first slide of each section and
+numbers the sections itself, so nothing else is written per slide. The title
+slide, the closing slide, and the reference pages carry no crumb, and neither
+do the recap and agenda before the first named section.
 
-The same script rewrites the slide number, off the same boundary the bar uses,
-so the two cannot disagree. Out of the box the `t` in `c/t` is every slide in
-the document, so the sample lecture would open at 1/33 and reach its closing
-slide at 25/33 with an appendix and a reference list still behind it. Instead
-the class body counts 1/25 to 25/25 and ends on the `.closing-slide`, and the
-appendix and the references share one run of their own after it, 1/8 to 8/8, one
-denominator across both. Measured, and correct on first paint with no
-navigation. The handout is on a different path and cannot be affected: reveal's
-print view builds its own `.slide-number-pdf` per page from a running counter
-and never asks for a number, so a printed page carries a bare sequential number
-with no denominator.
+A backup is a vertical child of the slide it supports. `## Title {.backup}`
+written after a slide hangs it there; `lab.html` moves each backup into a
+vertical stack before reveal builds its index, so the gates, the hash, and the
+overview all see the stack. The bottom-right hint reads "↓ backup" on a slide
+with a backup under it, once the slide is at its last click (before that the
+down arrow advances a fragment), and "↑ back" on the backup. The breadcrumb adds
+"backup". One press of the up arrow on a backup returns to the parent slide at
+its last click; `lab.html` remaps the up arrow so it does not first step back
+through the backup's own fragments.
 
-The appendix and the references are both outside the bar. Neither is in the
-denominator and neither gets a segment, so the bar is full at the last slide of
-the class and stays full through both. A long appendix plus a page or two of
-references would otherwise leave the closing slide at about half and tell the
-room the class was nowhere near over, which is the opposite of what a pacing cue
-is for. This needs nothing in the deck beyond the two dividers those sections
-already have. Measured on the sample lecture (25 main slides, 5 appendix, 3
-references): 95.83% one slide out, 100% on the `.closing-slide`, and 100% on
-every slide after it. The 95.83% holds through that slide's own fragments,
-because the fill is capped at `(last - 1) / last` and the last step of the bar
-belongs to the closing slide.
+The lecture's path skips backups. The right arrow already does in reveal's
+default navigation mode, and `lab.html` maps Space, PageDown and N to the same
+behaviour (PageUp and P to the left arrow), because reveal would otherwise send
+those keys, and most clickers, down into the stack. Measured on the sample
+lecture: PageDown at the last fragment of the estimator slide lands on the next
+main slide, and the down arrow lands on the backup at step 0.
 
-## Jump buttons, measured on this theme
-
-The button-writing rules (own line, after a bordered block and never inside one,
-`.with-previous`, the silent target breakers) are in the README under "Jump
-buttons"; the label diction is in `style/house.md`. What the lecture theme adds
-is the measurement: on the sample lecture the note's rule ends 8.4px above the
-button's box, and the button's right edge lands on the slide's content right
-edge to the pixel. Out of the note the button also gets back the size this theme
-designs it at, 21.1px instead of the roughly 15.2px an em inside an em compounds
-to.
-
-The button owns a line the slide did not own before, so run the fit gate after
-adding one. The theme takes the body leading off that line and collapses the gap
-above it (measured on the lecture: 35.3px of line where body leading reserves
-49.3px, and a 6.8px gap instead of 16px), but on a slide already near the canvas
-that line is still what tips it over. Cut a sentence, do not shrink the type.
+A backup is staged like any content slide. That costs a press or two when a
+question sends you there, and it keeps the stage gate's invariant whole.
 
 ## Vertical alignment and the heading gap
 
-Content slides are top-aligned, which is Quarto's `center: false` default. The
-theme used to force it with `top: 0 !important`; that rule is gone and must not
-come back. It was redundant, and it silently killed title-slide centring,
-because reveal centres the title slide by writing a normal inline `top` and an
-`!important` author rule outranks an inline style.
-
-With it gone, `{.center}` works per slide. Use it on any sparse slide (a hero
-number, a single question, an assertion), which otherwise pools its whitespace
-at the bottom and reads as half-finished:
-
-```markdown
-## {.center}
-
-::: {.hero}
-94%
-:::
-```
-
-The heading mark under each `##` is 7rem wide and 4px thick. Tables sit flush
-to the left text rail instead of being centred by reveal.
-
-The gap between a heading and the first block under it lives in one place, the
-mark's bottom margin (`1.6rem`, 25.6px measured), and the `h2` carries
-`margin-bottom: 0` so there is no second margin to collapse into it. Turn that
-one number if a deck wants more air; the previous arrangement had two competing
-margins and the larger one won silently. Note that a `rem` in this theme is
-16px: reveal sets its root size on `.reveal` and not on `html`, so `rem` is
-canvas-absolute and has nothing to do with the 34px root.
+Content slides are top-aligned (`center: false`, which the format sets), and
+every slide pads itself: 52px at the top, 76px at each side, and 78px at the
+foot, where the breadcrumb sits. The heading gap is the `h2`'s 28px bottom
+margin. The sample lecture places its sparse slides (the hero interval, the
+discussion prompt) with a top margin on the block; `{.center}` has not been
+checked on this theme.

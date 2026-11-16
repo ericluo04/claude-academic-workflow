@@ -1,0 +1,62 @@
+<!-- Editorial format, after-body include: the progress line, the page number,
+     and the full-bleed accent behind section slides.
+
+     The progress line measures the main talk only. It runs from the title to
+     the closing slide (`.closing-slide`, the Takeaways), is full there, and
+     stays full through the backup slides and the references, the same rule
+     stage-slide.lua applies to reveal's own bar. The page number counts every
+     visible slide and is blank on the title, section, and divider slides. -->
+<div class="ed-progress"><div class="ed-progress-fill"></div></div>
+<div class="ed-num"></div>
+<script>
+(function () {
+  function visible() {
+    return Reveal.getSlides().filter(function (s) {
+      return s.getAttribute('data-visibility') !== 'hidden' && !s.closest('[data-visibility="hidden"]');
+    });
+  }
+  function pastMain(s) {
+    var c = s.classList;
+    return c.contains('appendix-break') || c.contains('appendix') ||
+           c.contains('references-break') || c.contains('references');
+  }
+  function update() {
+    var slides = visible(), cur = Reveal.getCurrentSlide();
+    if (!cur) return;
+    var i = slides.indexOf(cur);
+    // The last main slide: the closing slide if the deck names one, otherwise
+    // the slide before the first backup or references slide.
+    var end = -1;
+    for (var k = 0; k < slides.length; k++) {
+      if (slides[k].classList.contains('closing-slide')) { end = k; break; }
+    }
+    if (end < 0) {
+      end = slides.length - 1;
+      for (var k2 = 0; k2 < slides.length; k2++) { if (pastMain(slides[k2])) { end = k2 - 1; break; } }
+    }
+    var frac = end > 0 ? Math.min(1, Math.max(0, i) / end) : 1;
+    document.querySelector('.ed-progress-fill').style.width = (100 * frac) + '%';
+    var c = cur.classList;
+    var onAccent = c.contains('section-break');
+    document.body.classList.toggle('ed-on-accent', onAccent);
+    var bare = onAccent || cur.id === 'title-slide' || c.contains('appendix-break') || c.contains('references-break');
+    document.querySelector('.ed-num').textContent = bare ? '' : String(i + 1);
+  }
+  // Section slides take the accent as their reveal background, so the colour
+  // reaches the window edge at any aspect ratio. A slide that sets its own
+  // background-color keeps it.
+  function paintSections() {
+    var changed = false;
+    document.querySelectorAll('.reveal .slides section.section-break').forEach(function (s) {
+      if (!s.hasAttribute('data-background-color')) {
+        s.setAttribute('data-background-color', getComputedStyle(s).backgroundColor || '#D4371C');
+        changed = true;
+      }
+    });
+    if (changed) Reveal.sync();
+  }
+  function ready() { paintSections(); update(); }
+  Reveal.on('slidechanged', update);
+  if (Reveal.isReady()) ready(); else Reveal.on('ready', ready);
+})();
+</script>

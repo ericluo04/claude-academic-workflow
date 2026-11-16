@@ -1,0 +1,163 @@
+<script>
+// Dark lab runtime. Five jobs, all on the live deck and none at build time:
+//
+// 1. Backup nesting. A slide whose heading carries {.backup} becomes a vertical
+//    child of the nearest slide above it that is not a backup, so it sits one
+//    press of the down arrow under the slide it supports and never in the
+//    lecture's path. This runs before reveal builds its index; on a deck where
+//    reveal is already up it re-syncs.
+// 2. The breadcrumb at the bottom left: the number and title of the section the
+//    slide belongs to. Dark lab has no section slides. The first slide of a
+//    section names it in its heading attributes,
+//      ## Two vendors, one number {#motivation section="A benchmark score is an estimate"}
+//    (pandoc writes it as data-section), and every later slide inherits it
+//    until the next one. Sections are numbered here, in document order.
+// 3. The hint at the bottom right: "↓ backup" on a slide with a backup under it,
+//    shown once the slide is at its last click (before that, the down arrow
+//    would advance a fragment), and "↑ back" on the backup itself.
+// 4. Key remap. Space, PageDown and N advance like the right arrow, and PageUp
+//    and P go back like the left arrow, so a clicker never walks into a backup.
+//    Up (and K) on a backup returns to the parent slide at its last click in one
+//    press, instead of first stepping back through the backup's own fragments.
+// 5. Equation builds. A term written \class{hid bK}{...} inside display math
+//    enters on the K-th `.build` element of the slide (an empty
+//    [ ]{.fragment .build} marker or any staged block carrying .build). The term
+//    that entered on the current press is drawn in teal until the next press.
+(function () {
+  function nestBackups() {
+    var slides = document.querySelector(".reveal .slides");
+    if (!slides) return false;
+    var moved = false;
+    var top = Array.prototype.slice.call(slides.children).filter(function (el) {
+      return el.tagName === "SECTION";
+    });
+    var parent = null;
+    top.forEach(function (sec) {
+      if (!sec.classList.contains("backup")) { parent = sec; return; }
+      if (!parent) return;
+      var stack = parent.parentNode === slides && parent.tagName === "SECTION" &&
+                  parent.querySelector(":scope > section") ? parent : null;
+      if (!stack) {
+        stack = document.createElement("section");
+        stack.className = "stack lab-stack";
+        slides.insertBefore(stack, parent);
+        stack.appendChild(parent);
+        parent = stack;
+      }
+      stack.appendChild(sec);
+      moved = true;
+    });
+    return moved;
+  }
+
+  var moved = nestBackups();
+
+  function setup() {
+    if (moved && window.Reveal && Reveal.sync) Reveal.sync();
+    var slides = document.querySelector(".reveal .slides");
+    var crumb = document.createElement("div");
+    crumb.className = "lab-crumb";
+    var hint = document.createElement("div");
+    hint.className = "lab-hint";
+    slides.appendChild(crumb);
+    slides.appendChild(hint);
+
+    // One pass in document order: each slide inherits the last section named
+    // at or above it.
+    var label = new Map();
+    var current = null;
+    var count = 0;
+    Reveal.getSlides().forEach(function (s) {
+      var c = s.classList;
+      var named = s.getAttribute("data-section") || s.getAttribute("section");
+      if (named) {
+        count += 1;
+        current = { n: String(count), t: named.trim() };
+      }
+      if (s.id === "title-slide" || c.contains("closing-slide") ||
+          c.contains("references-break") || c.contains("references") ||
+          c.contains("appendix-break")) {
+        label.set(s, null);
+        return;
+      }
+      label.set(s, current);
+    });
+
+    function update() {
+      var s = Reveal.getCurrentSlide();
+      var idx = Reveal.getIndices();
+      var c = label.get(s);
+      crumb.textContent = "";
+      if (c) {
+        var b = document.createElement("b");
+        b.textContent = c.n;
+        crumb.appendChild(b);
+        crumb.appendChild(document.createTextNode(
+          (c.n ? "  " : "") + c.t + (idx.v > 0 ? "  ·  backup" : "")));
+        crumb.hidden = false;
+      } else {
+        crumb.hidden = true;
+      }
+      var r = Reveal.availableRoutes();
+      var more = Reveal.availableFragments().next;
+      if (r.down && !more) { hint.textContent = "↓ backup"; hint.hidden = false; }
+      else if (r.down) { hint.hidden = true; }
+      else if (idx.v > 0) { hint.textContent = "↑ back"; hint.hidden = false; }
+      else { hint.hidden = true; }
+    }
+
+    function build() {
+      var s = Reveal.getCurrentSlide();
+      var markers = s.querySelectorAll(".build");
+      if (!markers.length) return;
+      var step = 0, fresh = 0;
+      markers.forEach(function (m, i) {
+        var f = m.classList.contains("fragment") ? m : m.closest(".fragment");
+        if (!f || f.classList.contains("visible")) {
+          step = i + 1;
+          if (f && f.classList.contains("current-fragment")) fresh = i + 1;
+        }
+      });
+      for (var k = 1; k <= markers.length; k++) {
+        s.querySelectorAll(".b" + k).forEach(function (el) {
+          el.classList.toggle("hid", k > step);
+          el.classList.toggle("mjx-new", k === fresh);
+        });
+      }
+    }
+
+    function forward(e) { if (e && e.shiftKey) Reveal.left(); else Reveal.right(); }
+    // From a backup, back to the parent at its last click: the state the
+    // speaker left it in.
+    function up() {
+      var i = Reveal.getIndices();
+      if (!(i.v > 0)) { Reveal.up(); return; }
+      var parent = Reveal.getSlide(i.h, 0);
+      var last = -1;
+      if (parent) {
+        parent.querySelectorAll(".fragment[data-fragment-index]").forEach(function (f) {
+          last = Math.max(last, parseInt(f.getAttribute("data-fragment-index"), 10));
+        });
+      }
+      Reveal.slide(i.h, 0, last);
+    }
+    Reveal.configure({
+      keyboard: {
+        32: forward, 34: forward, 78: forward,
+        33: function () { Reveal.left(); }, 80: function () { Reveal.left(); },
+        38: up, 75: up
+      }
+    });
+
+    Reveal.on("slidechanged", function () { update(); build(); });
+    Reveal.on("fragmentshown", function () { update(); build(); });
+    Reveal.on("fragmenthidden", function () { update(); build(); });
+    update();
+    build();
+    if (window.MathJax && MathJax.Hub) MathJax.Hub.Queue(build);
+  }
+
+  if (window.Reveal && Reveal.isReady && Reveal.isReady()) setup();
+  else if (window.Reveal) Reveal.on("ready", setup);
+})();
+</script>

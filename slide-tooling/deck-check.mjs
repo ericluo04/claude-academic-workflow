@@ -123,7 +123,7 @@ for (let i = 0; i < 80; i++) {
   await new Promise((r) => setTimeout(r, 250));
 }
 // Size the window to the deck's own canvas (Reveal's width and height). Chrome
-// opens at 1050x700, the starter format's canvas, so a deck on that canvas sees
+// opens at 1050x700, reveal's default canvas, so a deck on that canvas sees
 // exactly the window it always had.
 {
   const c = await evaluate(`(() => { const c = window.Reveal?.getConfig?.() || {}; return [c.width || 1050, c.height || 700]; })()`);
@@ -136,8 +136,8 @@ for (let i = 0; i < 80; i++) {
 }
 
 // Math and fonts have to settle before anything is measured. MathJax attaches
-// `window.MathJax` only once its script arrives (the self-hosted 2.7.9 copy the
-// starter format ships, or a CDN on an unmigrated deck), so a fixed sleep
+// `window.MathJax` only once its script arrives (the self-hosted 2.7.9 copy
+// the formats ship, or a CDN on an unmigrated deck), so a fixed sleep
 // undershoots, and a wait guarded by `window.MathJax &&` skips entirely and
 // reports phantom UNRENDERED MATH. Poll up to 5s for either engine's ready
 // hook: v2 exposes Hub.Queue (a callback queued behind the initial Typeset

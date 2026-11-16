@@ -1,0 +1,199 @@
+---
+title: "Disclosure raises prices where search costs are high"
+subtitle: "Seminar, Department of Economics"
+author: "Your Name"     # the exact form you want on the title slide; see style/house.md
+date: last-modified
+format: editorial-revealjs
+# Symbols, one per quantity on every slide and figure:
+#   p_it price in market i, week t; High_i high-search-cost market;
+#   Post_t after the reform; beta the effect of interest.
+---
+
+## Notation {visibility="hidden"}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+```{r setup}
+#| include: false
+library(ggplot2)
+# Figure palette, matched to the Editorial theme.
+col_main <- "#D4371C"; col_soft <- "#8c8c8c"; col_text <- "#5c5c5c"; col_bg <- "#ffffff"
+# Figures in the deck face, from the static TTF cuts in the fonts/ copy
+# (FreeType cannot read the woff2 files); the system sans otherwise.
+sg <- "fonts/schibsted-grotesk/SchibstedGrotesk-"
+fig_family <- "sans"
+known <- c(systemfonts::system_fonts()$family, systemfonts::registry_fonts()$family)
+if ("Schibsted Grotesk" %in% known) {
+  fig_family <- "Schibsted Grotesk"
+} else if (file.exists(paste0(sg, "Regular.ttf"))) {
+  systemfonts::register_font("Schibsted Grotesk", plain = paste0(sg, "Regular.ttf"),
+                             bold = paste0(sg, "SemiBold.ttf"))
+  fig_family <- "Schibsted Grotesk"
+}
+# base_size 18 puts tick labels near 19px on the slide.
+theme_set(theme_minimal(base_size = 18, base_family = fig_family))
+knitr::opts_chunk$set(dev = "ragg_png", dev.args = list(bg = col_bg))
+# load the analysis objects the deck needs
+```
+
+## Mandated disclosure was supposed to lower prices {#puzzle}
+
+Forty states passed it in six years. Prices rose in half of them.
+
+::: {.aside-note}
+Source: Author (2024), Table 2.
+:::
+
+## Where search costs are high, disclosure raises prices instead {#claim}
+
+<!-- Clicks: 0 the estimate; 1 the number takes the accent; 2 the reading. -->
+
+::: {.result}
+[Estimate]{.label}
+[0.29 log points]{.fragment .highlight-accent fragment-index=1} (s.e. 0.04) in the top
+search-cost quartile, 0.06 (0.05) elsewhere.
+:::
+
+::: {.takeaway .fragment fragment-index=2}
+The sign of the policy effect flips with market structure.
+:::
+
+## Setting {.section-break}
+
+## The reform hit half the markets in 2018 and none of the others {#data}
+
+- 1,240 markets, 2014 to 2022
+- Treatment assigned by a statutory population cutoff
+- Prices from weekly scanner data
+
+## Identification {.section-break}
+
+## Identification compares high- and low-search-cost markets before and after {#id-equation}
+
+<!-- Clicks: 0 the fixed effects; 1 the effect of interest; 2 the error and
+     the assumption. -->
+
+::: {.eq-stack}
+::: {}
+$$\log p_{it} = \class{gr}{\alpha_i + \gamma_t}
+ \class{hid}{{}+ \class{ac}{\beta\,(\text{Post}_t \times \text{High}_i)}}
+ \class{hid}{{}+ \varepsilon_{it}}$$
+:::
+::: {.eq-layer .fragment fragment-index=1}
+$$\log p_{it} = \class{gr}{\alpha_i + \gamma_t}
+ {}+ \class{ac}{\beta\,(\text{Post}_t \times \text{High}_i)}
+ \class{hid}{{}+ \varepsilon_{it}}$$
+:::
+::: {.eq-layer .fragment fragment-index=2}
+$$\log p_{it} = \class{gr}{\alpha_i + \gamma_t}
+ {}+ \class{ac}{\beta\,(\text{Post}_t \times \text{High}_i)}
+ {}+ \varepsilon_{it}$$
+:::
+:::
+
+::: {.eq-notes}
+::: {}
+$\alpha_i$ absorbs the market and $\gamma_t$ the week.
+:::
+::: {.fragment fragment-index=1}
+$\beta$ is the effect of the reform in high-search-cost markets.
+:::
+:::
+
+::: {.assumption .fragment fragment-index=2}
+[Assumption 1.]{.label} Absent the reform, prices in high- and low-search-cost
+markets would have moved in parallel.
+:::
+
+## Estimates {.section-break}
+
+## Prices diverge only after the reform {#event-study}
+
+```{r}
+#| label: event-study
+#| fig-width: 11.2
+#| fig-height: 4.1
+# event-study plot; annotate the focal coefficient in the figure itself
+```
+
+## The estimate survives every control set {#robustness}
+
+:::: {.columns}
+::: {.column width="58%"}
+```{r}
+#| label: spec-curve
+#| fig-width: 6.8
+#| fig-height: 4.3
+# coefficient plot across specifications
+```
+:::
+::: {.column width="42%"}
+Point estimate moves by less than one standard error across specifications.
+
+::: {.result}
+[Estimate]{.label}
+0.29 (0.04)
+:::
+
+[Sample window]{.jump target="ap-window"}
+:::
+::::
+
+## Search costs explain the reversal, concentration does not {#mechanism}
+
+<!-- Clicks: 0 the first line; 1 and 2 one line each; earlier lines gray. -->
+
+::: {.dim-past}
+::: {}
+- Effect scales with baseline search cost.
+:::
+::: {.fragment fragment-index=1}
+- No gradient in concentration.
+:::
+::: {.fragment fragment-index=2}
+- Both hold within state and within year.
+:::
+:::
+
+## Takeaways {#takeaways .closing-slide}
+
+1. Disclosure raises prices by [0.29 log points]{.em} where search costs are high,
+   and has no effect elsewhere.
+2. Search costs, not concentration, carry the reversal.
+3. The claim, restated in the words you want quoted.
+
+::: {.contact}
+[you@example.edu](mailto:you@example.edu)  ·  [your-site.example](https://your-site.example)  ·  Paper at your-site.example/paper
+:::
+
+## Backup {.appendix-break}
+
+- Robustness to the sample window
+- Why not an instrument for search costs
+
+## Robustness to the sample window {#ap-window}
+
+| Specification | Estimate | s.e. |
+|---|---:|---:|
+| Baseline | 0.291 | 0.041 |
+| Drop 2020 | 0.284 | 0.044 |
+| Market-specific trends | 0.276 | 0.049 |
+
+Nothing moves the estimate by half a standard error.
+
+[]{.jump-back}
+
+## Why not an instrument for search costs {#ap-iv}
+
+Pre-built answer to the question you expect.
+
+[]{.jump-back data-return="mechanism" data-return-step="last"}
+
+<!-- Only on a deck that cites: add `bibliography: talk-refs.bib` to the front
+matter and the references block from references/citations.md. -->
+
+<!-- On this file as-is, the placeholder chunks draw nothing, so the fit gate
+warns that those slides are nearly empty; that resolves once real exhibits
+fill the chunks. -->

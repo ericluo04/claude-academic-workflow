@@ -86,7 +86,7 @@ HARD = [
 # plotly.py hardcodes include_mathjax="cdn" per figure, so a Python plotly deck
 # carries an inlined MathJax 2 whose own body mentions these hosts. Inlined means
 # nothing is fetched, and the reveal-math-config pattern above still catches the
-# case where a MathJax URL is genuinely load-bearing.
+# case where a page actually fetches a MathJax URL.
 MATHJAX_INERT = ["mathjax.org", "mathjax.rstudio.com"]
 
 

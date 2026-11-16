@@ -1,0 +1,56 @@
+title: Editorial talk format
+version: 1.0.0
+quarto-required: ">=1.10"
+contributes:
+  formats:
+    revealjs:
+      theme: [default, editorial.scss]
+      # A 16:9 canvas with no margin, so every length in editorial.scss is a
+      # canvas pixel and a section slide's accent reaches the edge.
+      width: 1280
+      height: 720
+      margin: 0
+      center: false
+      # No slide transition and no fragment fade (editorial.scss sets the
+      # fragment transition to none): reveals are instant.
+      transition: none
+      background-transition: none
+      # reveal's own chrome is off. after.html draws a thin progress line and a
+      # page number in its place.
+      progress: false
+      slide-number: false
+      menu: false
+      controls: false
+      hash: true
+      # Clicks are planned by hand. Lists arrive whole, and only a slide whose
+      # heading carries `{.stage}` is staged block by block by the filter.
+      incremental: false
+      auto-stage: false
+      # Back on a backup slide returns to the main-talk slide whose button
+      # leads into it, at the click where that button appears.
+      back-returns: fixed
+      filters:
+        - stage-slide.lua
+      # stage-slide.lua runs citeproc itself so it can paginate the reference
+      # list. Leaving `citeproc: false` out gives a second, unpaginated
+      # bibliography and `deck-check.mjs fit` fails the deck.
+      citeproc: false
+      # Reference-list budget for this theme's 18px entries on a 1136px
+      # measure, measured in headless Chrome on the example talk. The filter's
+      # presets are for the other themes, so the two numbers are given outright.
+      refs-lines: 20
+      refs-chars-per-line: 118
+      # Self-hosted MathJax 2.7.9. The url resolves in the browser relative to
+      # the rendered HTML, so the deck directory needs a `mathjax/` copy from
+      # slide-tooling/mathjax/, which carries extensions/TeX/HTML.js for \class.
+      html-math-method:
+        method: mathjax
+        url: mathjax/MathJax.js
+      include-in-header: head.html
+      include-after-body: after.html
+      highlight-style: a11y
+      date-format: long
+      fig-align: center
+      echo: false
+      warning: false
+      message: false

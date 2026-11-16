@@ -17,7 +17,7 @@ report exact fixes. This skill reports and does not edit, because a deck revisio
 ## Where things live
 
 The stages stay here; the detail sits in files this skill reads on demand. Paths are relative to
-this skill's directory. `$ASSETS` is `~/.claude/assets/quarto-yale`, and its `README.md` is the
+this skill's directory. `$SLIDES` is `~/.claude/assets/slide-tooling` (where SETUP.md installs `slide-tooling/`), and its `README.md` is the
 toolchain's own manual: gate internals, filter behaviour, theme classes, the offline recipe. Facts
 that README owns are cited below, never restated.
 
@@ -61,7 +61,7 @@ file is read.
 
 ```bash
 export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
-ASSETS="$HOME/.claude/assets/quarto-yale"
+SLIDES="$HOME/.claude/assets/slide-tooling"
 RUN="$HOME/.claude/state/slide-review/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$RUN"
 ```
@@ -81,9 +81,11 @@ PDF you need to look at, because `Read` cannot open one here.
 Settle this before running anything, because the whole review branches on it. Deck type picks
 the lens list (a lecture gets the pedagogy reviewer, a talk does not), the text-density standard
 (deliberately opposite targets per type; `style/house.md`), and the closing-slide expectation
-(stage 3c). The ground branches the contrast arithmetic: the shipped starter theme is dark ink on a
-paper ground, and a deck on a designed dark theme flips the ground every contrast number is taken
-against, so ink that is correct on one is invisible on the other.
+(stage 3c). The ground branches the contrast arithmetic: the shipped Editorial talk format is dark
+ink on a white page, and the shipped Dark lab lecture format flips the ground every contrast number
+is taken against, so ink that is correct on one is invisible on the other. `format:
+editorial-revealjs` or `format: darklab-revealjs` in the front matter settles both questions at
+once.
 
 Read the theme and the other front matter facts in one pass. In a Quarto website the format block
 usually sits in a `_metadata.yml` beside the `.qmd`, so search both:
@@ -97,21 +99,20 @@ For a rendered `.html` with no source, fingerprint the class names, since the tw
 mostly distinct vocabularies:
 
 ```bash
-grep -coE 'class="[^"]*\b(assumption|proposition|lemma|takeaway|result|thanks-slide|ymid)\b' deck.html   # talk
-grep -coE 'class="[^"]*\b(keyidea|definition|question|prompt|agenda|steps|demo-tag|hero|ypale)\b' deck.html # lecture
+grep -coE 'class="[^"]*\b(assumption|proposition|lemma|takeaway|result|eq-stack|swap|btn-corner)\b' deck.html   # talk
+grep -coE 'class="[^"]*\b(keyidea|definition|question|prompt|agenda|steps|demo-tag|hero|backup)\b' deck.html # lecture
 ```
 
 Whichever count is higher wins. A tie, or zero both ways, means ask. The root font size is a
 second signal when the themes in play differ, since a lecture theme typically runs a larger root
-than a talk theme (the starter theme serves both types at 30px). The stage 4 probe reports the root
+than a talk theme (Editorial sets 30px and Dark lab 31px, both on a 1280x720 canvas). The stage 4 probe reports the root
 size and the deck's ground colour, so confirm the answer there before writing the report. A deck
 reporting pure white when its theme sets a tinted or dark ground means the theme did not load,
 which is CRITICAL on its own.
 
 What the deck's ink should measure, hex by hex, comes from the theme's own palette table;
-`references/probe-reading.md` opens with the starter theme's. The class vocabulary is the README's
-`Theme classes` section; a cheap single fingerprint is that talk sources use `.ymid` where
-lecture sources use `.ypale` (the starter theme styles both).
+`references/probe-reading.md` opens with both shipped formats'. The class vocabulary is the README's
+`Theme classes` section.
 
 `.section-break` styling is per theme. The rule, from the README's `Things that will silently
 break the deck` section, is no `background-color` attribute on a section divider, whatever the
@@ -156,7 +157,7 @@ Offline is an opt-in variant, declared in front matter as `embed-resources: true
 in that case, using the facts stage 0 already read:
 
 ```bash
-python3 "$ASSETS/check-offline.py" deck.html; echo "exit=$?"    # opt-in decks only
+python3 "$SLIDES/check-offline.py" deck.html; echo "exit=$?"    # opt-in decks only
 ```
 
 Say which branch ran, in the report, on its own line. A default deck gets
@@ -178,7 +179,7 @@ the deck` section owns the mechanics of both:
 - The base theme was swapped off `default` onto one of the eight built-in reveal themes that
   `@import` Google Fonts, which no Quarto setting can make offline-safe; the README names the eight
   and the four clean ones. CRITICAL, with the fix being a return to `[default, <your-theme>.scss]`
-  (the starter extension layers `starter-theme.scss` on `default`).
+  (both shipped formats layer their theme on `default`).
 
 Run this grep on every deck, offline variant or not, because a swapped base theme also changes the
 variables the deck's own SCSS layers onto, and it can quietly undo the ground the
@@ -197,9 +198,9 @@ Run this on every deck, before touching the browser. It is the one mandatory gat
 and whatever the math engine. It owns every geometric finding in the report.
 
 ```bash
-node "$ASSETS/deck-check.mjs" fit deck.html; echo "exit=$?"
-node "$ASSETS/deck-check.mjs" fit deck.html --json > "$RUN/fit.json"
-node "$ASSETS/stage-check.mjs" deck.html; echo "exit=$?"
+node "$SLIDES/deck-check.mjs" fit deck.html; echo "exit=$?"
+node "$SLIDES/deck-check.mjs" fit deck.html --json > "$RUN/fit.json"
+node "$SLIDES/stage-check.mjs" deck.html; echo "exit=$?"
 ```
 
 The second gate is the step-0 check: every content slide must open as its heading alone, and every
@@ -212,7 +213,7 @@ the walk adds about two seconds. Mechanics, slide-kind classification, and what 
 step are the README's staging section, under `Checking it`.
 
 `deck-check.mjs fit` prints the canvas, one line per slide, then a verdict, and exits 1 whenever the
-verdict is `NO`, so the gate composes: `node "$ASSETS/deck-check.mjs" fit deck.html || <report>`.
+verdict is `NO`, so the gate composes: `node "$SLIDES/deck-check.mjs" fit deck.html || <report>`.
 Verified output on a deck whose third slide is overstuffed, where `quarto render` had exited 0 in
 silence:
 
@@ -428,7 +429,7 @@ either way; what this route gives up is stage 4's contrast and math-engine signa
 says so.
 
 ```bash
-node "$ASSETS/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
+node "$SLIDES/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
 ```
 
 That reuses the same headless Chrome the gate uses and needs nothing installed. decktape is the second

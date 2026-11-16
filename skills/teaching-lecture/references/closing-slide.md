@@ -3,9 +3,9 @@
 A lecture does not end on a thank-you slide. The last two slides of the class
 are the synthesis pair: the agenda with every item `.done`, then a closing slide
 carrying the one `.keyidea` you want them to leave with and a `.dim` line naming
-what next week does. After that comes the appendix divider, which the class only
-sees if a question sends you there. The thank-you slide belongs to
-`research-talk`, where the closing slide invites contact and carries the email
+what next week does. Extra material is not after it: on Dark lab it sits in
+vertical backups under the slides it belongs to, and only the references
+follow the closing slide. The thank-you slide belongs to `research-talk`, where the closing slide invites contact and carries the email
 and a QR code to the paper. The students already have your email and the deck
 itself on the course site, so the last slide they look at is worth spending on
 the idea they will be tested on.
@@ -25,9 +25,15 @@ Give it `.closing-slide` and wrap everything below the heading in one
 3. The one hands-on task that sets up next week.
 :::
 
-[One aside, if the slide needs one.]{.dim}
+::: {.next-week}
+One line on what next week builds on.
+:::
 ::::
 ```
+
+On Dark lab `.next-week` sets that line in mono under a teal rule at the foot of
+the slide, inside the one `.together` beat. A `[...]{.dim}` line works too and
+reads as a plain muted sentence.
 
 The heading and the wording register for this slide are yours and live in
 `style/house.md`.
@@ -41,9 +47,10 @@ instructor is wrapping up. The heading lands first, then the homework arrives
 whole on one keypress, still one photographable slide, with no item-by-item
 build of a list nobody is arguing about.
 
-Two classes are doing two jobs. `.closing-slide` is where the progress bar
-fills: `stage-slide.lua` knows the name, so the appendix and the references stay
-out of the denominator and the bar reads 100% here. `.together` is the filter's
+Two classes are doing two jobs. `.closing-slide` is read by name by
+`stage-slide.lua` and `stage-check.mjs` (Dark lab shows no progress bar, but a
+format that does fills it here), and on Dark lab it also hides the breadcrumb
+and sets the heading larger. `.together` is the filter's
 one-beat grouping: the whole div gets a single fragment wrapper, and the
 filter's `solidify` marks any list inside it `.nonincremental` on its own, so
 the items do not re-stage themselves and the list needs no `.nonincremental` of
