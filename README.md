@@ -206,6 +206,22 @@ Option+B and Option+F need the Option key sending Meta, which macOS Terminal doe
 
 While Claude is working on something long, `/btw` asks a quick question without interrupting it. The side question runs alongside the main task instead of derailing it, so you can check what a flag does or think out loud while a build or a research pass keeps going, and the main work resumes where it was. It keeps its own history, separate from the thread you interrupted.
 
+### A stronger advisor at decision points
+
+The main thread in this setup runs Opus 5.5 at high effort, and Fable 5.2 is set as the [advisor](https://code.claude.com/docs/en/advisor). Claude Code consults the advisor only at decision points: before it commits to an approach, when an error recurs, and before it declares a task done. Each call sends the full conversation to Fable, and the main model applies the guidance that comes back. Fable's judgment is there for the hard calls without running Fable on every turn, so Fable usage stays small.
+
+Set it with `/advisor` (a picker) or `/advisor fable`, or persistently in `~/.claude/settings.json`:
+
+```json
+{
+  "advisorModel": "fable"
+}
+```
+
+`claude --advisor fable` sets it for one session, and `/advisor off` stops it. With an Opus 5 or 5.5 main model, the accepted advisors are Fable or Opus 5 or later. Fable 5.2 as the advisor needs Claude Code v2.1.321 or later. On plans where Fable bills to usage credits, a Fable advisor bills there too, and it does not run until you give the one-time consent through `/model fable`. After that, switch the main model back with `/model opus`.
+
+Subagents inherit the advisor and can call it. Each call re-reads the calling agent's full transcript, uncached, at the advisor's rates. This setup lets subagents call it. To save credits, tell subagents in `CLAUDE.md` not to call the advisor, because the docs offer no per-agent switch.
+
 ### Running a model on your own machine (Ollama)
 
 Not many people know this one. If you need to work with material that is confidential, unpublished, or covered by an agreement about where data may go, or you need to work with no network at all on a flight or a bus ride, you can run a language model on your own computer. [Ollama](https://ollama.com) is the easiest way in: a free, open-source tool that downloads and runs open-weight models locally, so prompts and documents are processed on your machine and never transmitted to any cloud service or company. It is a separate tool from Claude Code, and the models it serves are open-weight ones from other labs; many of them are now performant enough for real work, though the larger ones want capable hardware. Setup is on the [download page](https://ollama.com/download), and the [project repository](https://github.com/ollama/ollama) has the rest.
