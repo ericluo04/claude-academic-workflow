@@ -115,7 +115,7 @@ HTML attribute and Quarto does not read it:
 `auto-animate` is for a thing that changes, not a thing that appears. Two
 consecutive slides with the same heading and `auto-animate="true"` tween
 between them, which is how you make a single quantity visibly move: a threshold
-sliding from 0.50 to 0.09, an equation rearranging, a bar growing. The starter
+sliding from 0.50 to 0.09, an equation rearranging, a bar growing. The
 template does the threshold. The format sets `auto-animate-duration: 0.4`; the
 1.0 default is long enough that the class waits on it and so do you,
 mid-sentence.

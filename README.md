@@ -14,7 +14,7 @@ cd claude-academic-workflow
 mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/assets ~/.claude/output-styles
 cp -R skills/* ~/.claude/skills/
 cp agents/tikz-reviewer.md ~/.claude/agents/
-cp -R slide-tooling ~/.claude/assets/quarto-yale
+cp -R slide-tooling ~/.claude/assets/slide-tooling
 cp output-styles/concise-research.md ~/.claude/output-styles/
 ```
 
@@ -41,7 +41,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `slide-review` | Renders a deck, screenshots every slide in a real browser, and reviews the pictures for overflow, contrast, broken figures, and a weak argument. |
 | `course-site` | Builds the semester course website the lecture decks hang off, and publishes it to GitHub Pages. |
 
-`agents/tikz-reviewer.md` is the adversarial visual critic the `compile-latex --figures` loop calls. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, a starter theme, and vendored MathJax and two webfont families; its README documents all of it.
+`agents/tikz-reviewer.md` is the adversarial visual critic the `compile-latex --figures` loop calls. `slide-tooling/` holds the machinery the slide skills share: the staging filter, the fit and staging gates, the offline checker, two deck formats (Editorial for talks, Dark lab for lectures), and vendored MathJax and webfonts; its README documents all of it.
 
 ### A note of caution on reviewing
 
@@ -79,9 +79,9 @@ Two live example decks, rendered by these skills and published on GitHub Pages:
 - [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck on the Editorial theme, with hand-planned clicks, an equation built term by term, a framing swapped in place, accent section slides, a Takeaways close, jump buttons into the backup slides with fixed-return Back, and a paginated reference list.
 - [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a comparison that arrives from both sides, a leaderboard that gains its error bars in place, a worked example, discussion prompts, and agenda tracking.
 
-Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.
+Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered on the two formats in `slide-tooling/`, exactly as they render out of the box: the talk on Editorial, the lecture on Dark lab.
 
-The decks demonstrate what the pipeline can do; how your slides should look stays your call. The starter theme carries the machinery inside one worked look (paper ground, Literata display headings over IBM Plex Sans text, a plum accent), and the theme file marks every spot where your own taste replaces it. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the content-doctrine section of the `research-talk` skill file, the pacing-and-structure section of the `teaching-lecture` one, and the SCSS variables at the top of the starter theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
+The decks demonstrate what the pipeline can do; how your slides should look stays your call. Each format carries the machinery inside one worked look: Editorial is a white page in Schibsted Grotesk with one vermilion accent, and Dark lab is a dark ground in Manrope with teal and amber. The SCSS files say where your own taste replaces them. How wordy each slide is, the palette, the typography, and the staging rhythm are all preferences written down in plain text, in the content-doctrine section of the `research-talk` skill file, the pacing-and-structure section of the `teaching-lecture` one, and the SCSS variables at the top of each format's theme, so changing any of them is editing a paragraph or a variable. If the examples strike you as ugly, that is the expected case: rewrite the preferences until the output matches your own taste.
 
 What Quarto reveal.js gives you:
 
@@ -214,4 +214,4 @@ On a 48 GB Apple Silicon machine the set I keep installed is `qwen3.8:27b` for r
 
 ## License and credit
 
-MIT, see [LICENSE](LICENSE). The skills adapt ideas from several public workflows (Pedro Sant'Anna, Scott Cunningham, Chris Blattman, Claes Bäckman, and others); [ATTRIBUTION.md](ATTRIBUTION.md) traces each one and covers the vendored Literata and IBM Plex Sans (both OFL) and MathJax (Apache 2.0) copies.
+MIT, see [LICENSE](LICENSE). The skills adapt ideas from several public workflows (Pedro Sant'Anna, Scott Cunningham, Chris Blattman, Claes Bäckman, and others); [ATTRIBUTION.md](ATTRIBUTION.md) traces each one and covers the vendored Schibsted Grotesk, Manrope, and JetBrains Mono (all OFL) and MathJax (Apache 2.0) copies.

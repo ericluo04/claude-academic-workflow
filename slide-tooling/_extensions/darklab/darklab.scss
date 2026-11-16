@@ -590,10 +590,8 @@ html .reveal .slides section > img.stretch + p.caption,
 .lab-hint { right: 76px; color: $lab-amber; font-weight: 600; }
 .lab-hint[hidden], .lab-crumb[hidden] { display: none; }
 html.print-pdf .lab-crumb, html.print-pdf .lab-hint { display: none; }
-// LOAD-BEARING. stage-slide.lua re-enables reveal's slide number at load even
-// when the format sets `slide-number: false`, so the theme hides it, and the
-// progress bar with it.
-.reveal .slide-number, .reveal .progress { display: none !important; }
+// The breadcrumb replaces reveal's progress bar, so the theme hides the bar.
+.reveal .progress { display: none !important; }
 
 // ---- CLICK MECHANICS ----
 // Five tools for building a slide in front of the room. Each is a class here
@@ -637,7 +635,7 @@ html.print-pdf .hid { visibility: visible; }
 .reveal .slides section .fragment.gray-out.visible,
 .reveal .slides section .fragment.gray-out.visible * { color: $lab-muted !important; }
 //
-// The theme's colour-on-cue variant, under the name the starter theme uses:
+// The theme's colour-on-cue variant, under the name the slide-tooling README lists:
 // the term takes teal and weight 700 (the weight change keeps it from being a
 // dead step).
 .reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; }

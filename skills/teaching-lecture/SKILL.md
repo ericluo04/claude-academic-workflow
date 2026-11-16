@@ -244,7 +244,7 @@ edge, a mono label) and differ by colour: `.keyidea` and `.definition` take the
 teal edge, `.keyidea` also a faint teal ground; `.example` the text-ink edge;
 `.warning` the amber edge; `.question` a full amber frame.
 
-The starter template exercises all five boxes, the agenda, the steps, `.hero`,
+The template exercises all five boxes, the agenda, the steps, `.hero`,
 and `.prompt`. Keep the class-to-meaning mapping fixed for the whole semester
 (`references/pedagogy.md` says why). Two blocks per slide is the limit, and it
 is physical as well as pedagogical: at a lecture-hall root, three blocks of two
@@ -496,9 +496,9 @@ under `incremental: true`. decktape is the fallback exporter, speaker notes
 appear in neither PDF, and `panel-tabset` prints only its first tab (README,
 "PDF handouts").
 
-## Starter template
+## The template
 
-`assets/starter-template.qmd` is the starter deck: recap and agenda, the five
+`assets/darklab-template.qmd` is the starting deck: recap and agenda, the five
 boxes, an equation built term by term, a worked example with its derivation in
 a vertical backup, an `auto-animate` pair, a `.prompt`, a gray-out and a swap,
 the synthesis pair, and the closing slide. It renders standalone, and passes
@@ -560,6 +560,6 @@ rendered HTML.
 | `references/closing-slide.md` | The closing slide: markup, heading-then-one-beat with `.together`, the rationale, how the gate classifies it. |
 | `references/staging.md` | Fragment variants, `.r-stack`, `fragment-index`, `auto-animate`, the animation budget, the breadcrumb and backup navigation, layout numbers. |
 | `style/house.md` | Your values, separated from the mechanisms: palette rationale, density calibration, the author line, dates, button diction, closing wording. A stub in the public repo; fill it in. |
-| `assets/starter-template.qmd` | The starter deck, rendering clean under `darklab-revealjs`. |
+| `assets/darklab-template.qmd` | The starting deck, rendering clean under `darklab-revealjs`. |
 | `$TOOLING/_extensions/darklab/` | The format: `_extension.yml` (every key commented), `darklab.scss` (palette table, click mechanics), `lab.html`, `title-slide.html`, and `vendor/` (fonts, MathJax) to copy beside each deck. |
 | `$TOOLING/README.md` | The machinery: the filter's six jobs, staging internals, both gates, citations and refs packing, the silent breakers, handouts. |

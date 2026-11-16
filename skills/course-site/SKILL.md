@@ -26,7 +26,7 @@ lecture was extracted from; the mechanisms are what transfer to yours.
 ~/teaching/<course>/
   _quarto.yml                  # project, website, navbar, format, post-render
   index.qmd                    # title, subtitle, instructor line, week table
-  _extensions/starter/         # the deck format, installed once by `quarto add`
+  _extensions/darklab/         # the deck format, installed once by `quarto add`
   assets/
     site.scss                  # your site theme (Bootstrap variables on a bootswatch base)
     logo.svg                   # the school or course mark for the navbar
@@ -35,6 +35,7 @@ lecture was extracted from; the mechanisms are what transfer to yours.
     _metadata.yml              # the per-course deck config, once
     w01-prediction.qmd         # content only, no format block
     w03-evaluation.qmd
+    fonts/                     # the format's two faces, beside the rendered decks
     images/                    # figures with a fixed pixel size
   R/
     make-figures.R             # pre-rendered exhibits, run from the project root
@@ -44,13 +45,16 @@ lecture was extracted from; the mechanisms are what transfer to yours.
     .nojekyll
 ```
 
-The decks run on the `starter-revealjs` extension format from the shared slide
-tooling. Adopt it once at the project root, and give the site a MathJax copy:
+The decks run on the `darklab-revealjs` extension format from the shared slide
+tooling. Adopt it once at the project root, give the site a MathJax copy, and put
+the fonts beside the lectures (the format's `@font-face` urls are relative to the
+rendered page):
 
 ```bash
 cd ~/teaching/<course>
-quarto add ~/.claude/assets/quarto-yale --no-prompt      # installs _extensions/starter/
-cp -R ~/.claude/assets/quarto-yale/{mathjax,fonts} assets/
+quarto add ~/.claude/assets/slide-tooling --no-prompt      # installs the formats, darklab among them
+cp -R ~/.claude/assets/slide-tooling/_extensions/darklab/vendor/mathjax assets/
+cp -R ~/.claude/assets/slide-tooling/_extensions/darklab/vendor/fonts lectures/
 ```
 
 `assets/` holds the site theme plus the mark, and `lectures/_metadata.yml` holds
@@ -69,6 +73,7 @@ project:
     - lectures/*.qmd
   resources:
     - assets/mathjax
+    - lectures/fonts
   post-render:
     - scripts/build-handouts.sh
 
@@ -90,8 +95,9 @@ format:
 
 `render:` is a glob, so a new lecture needs no config change. `output-dir: docs` is
 what lets GitHub Pages serve from a branch subdirectory with no Actions workflow.
-The `resources` entry keeps `docs/assets/mathjax/` in place across renders, which
-is where the deck config below points the math.
+The `resources` entries keep `docs/assets/mathjax/` and `docs/lectures/fonts/` in
+place across renders. The deck config below points the math at the first, and the
+format's font urls resolve to the second.
 
 `title: false` on the navbar is required once a logo is set. With no navbar title
 Quarto falls back to `website: title`, which prints the course name beside the mark
@@ -113,7 +119,7 @@ holds only what is per-course:
 
 ```yaml
 format:
-  starter-revealjs:
+  darklab-revealjs:
     # These lectures render to docs/lectures/<name>.html and the site's MathJax
     # copy is at docs/assets/mathjax/ (the `resources` entry in _quarto.yml
     # keeps it there across renders), so the url is the path from the rendered
@@ -329,7 +335,7 @@ bare machine, and exits nonzero when an export actually fails. Adding a lecture
 then needs no change to it. The per-deck export is one call:
 
 ```bash
-node ~/.claude/assets/quarto-yale/deck-check.mjs handout \
+node ~/.claude/assets/slide-tooling/deck-check.mjs handout \
   docs/lectures/w03-slug.html docs/lectures/w03-slug.pdf
 ```
 

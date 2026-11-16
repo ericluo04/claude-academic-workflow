@@ -35,16 +35,20 @@ re-deriving them, and so a reader can tell an adaptation from an oversight.
 ## Deliberate divergences
 
 The `.vmid` class in `research-talk`. The private theme defines a class that centres a div's
-content under a title pinned to the top, and the private skill documents it. The
-`starter-theme.scss` shipped here has no such class, so the public skill covers vertical alignment
-with reveal's own `{.center}` and never mentions `.vmid`. Keep it out until the shipped theme
-gains an equivalent.
+content under a title pinned to the top, and the private skill documents it. Neither shipped
+format has such a class, so the public skills cover vertical alignment with reveal's own
+`{.center}` and never mention `.vmid`. Keep it out until a shipped theme gains an equivalent.
 
-One reveal.js format instead of two. The private tooling ships a light talk format and a dark
-lecture format; `slide-tooling/` ships a single `starter-revealjs`. Every place the private skills
-contrast the two named themes is generalized here to "the shipped starter theme" and "a deck on a
-designed dark theme". The directory name `~/.claude/assets/quarto-yale/` and the
-`.highlight-yale` class survive as names only, because SETUP.md installs to that path.
+Two formats of the public repo's own. Since 2026-11-16 the public repo ships its own two
+themes, Editorial (`editorial-revealjs`) for talks and Dark lab (`darklab-revealjs`) for
+lectures, designed to differ from the private style. The private rewrite's general rules are
+ported (staging, hand-planned clicks, equation builds, fixed-return Back, reference pagination);
+its structure and look are not. The earlier single `starter-revealjs` format, its
+`starter-theme.scss`, and its two fonts were removed. SETUP.md installs the tooling to
+`~/.claude/assets/slide-tooling/`, and the skills name it by a placeholder (`$SLIDES`, `$TOOLING`,
+`$ASSETS`) instead of a private directory name. The accent fragment class is
+`.highlight-accent`. Every copy of `stage-slide.lua` (the root one and one per format) is kept
+identical.
 
 Stub house styles. `research-talk/style/house.md`, `teaching-lecture/style/house.md`, and
 `slide-review/style/house.md` are stubs for the reader's own author line, contact block, palette
@@ -64,7 +68,7 @@ Sections of `CLAUDE.md` not published. The private file carries a section on mir
 configuration to its own repositories and a section on a specific computing grid. Neither belongs
 in a file offered as an example, so neither is published.
 
-The 2026-11-16 Editorial theme. The public `research-talk` skill now runs on
+The 2026-11-16 Editorial and Dark lab themes. The public `research-talk` skill now runs on
 its own format, `editorial-revealjs` in `slide-tooling/_extensions/editorial/`,
 and no longer on the starter format. It ports the private skill's general rules
 (hand-planned clicks, the step equation with `\class{hid}`, the derivation
@@ -72,7 +76,9 @@ chain, swap in place, gray-out, shrink classes for overflow, fixed-return Back,
 the case for presenting someone else's paper) and leaves out the private
 deck's own structure: no navigation bar, no numbered section cards, no title
 band, no Thank you slide. Every worked example comes from the repricing example
-talk. The paragraph below describes the state before this change.
+talk. The public `teaching-lecture` skill moved the same day onto `darklab-revealjs` in
+`slide-tooling/_extensions/darklab/`, kept its teaching content, and gained backups nested under
+the slide they support. The paragraph below describes the state before these changes.
 
 The 2026-11-10 research-talk rewrite. The private skill was rewritten around a Beamer-match
 reveal.js format: hand-planned clicks, a nav bar with dots, and classes such as `.swap`,

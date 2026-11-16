@@ -330,9 +330,7 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 .reveal pre, .reveal code { font-size: 20px; }
 
 // ---- progress line and page number (drawn by after.html) ------------------------------------
-// The filter's progress script can switch reveal's own slide number back on;
-// after.html draws the page number instead.
-.reveal .slide-number { display: none !important; }
+// reveal's own slide number is off in the format; after.html draws the page number.
 .ed-progress { position: fixed; left: 0; right: 0; bottom: 0; height: 4px; z-index: 30; pointer-events: none; }
 .ed-progress-fill { height: 100%; width: 0; background: $accent; }
 .ed-num { position: fixed; right: 28px; bottom: 16px; font-family: $font-sans; font-size: 15px; color: $muted;

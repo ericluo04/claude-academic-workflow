@@ -1,7 +1,7 @@
 # Slide tooling
 
 Shared tooling for Quarto reveal.js decks: a Pandoc filter, two render-time
-quality gates, an offline checker, a starter theme, and the vendored assets
+quality gates, an offline checker, two deck formats, and the vendored assets
 that keep a deck self-hosted. Used by the `research-talk`, `teaching-lecture`,
 `slide-review`, and `course-site` skills. SETUP.md at the repo root installs
 it; below, `$SLIDES` stands for wherever this `slide-tooling/` directory
@@ -12,29 +12,28 @@ rewrites, what the gates assert, and the settings that break a deck without
 saying so. How sparse a slide should be, what a title should say, how to pace
 a lecture, and which block class means what all live in the skills.
 
-The research talk under `docs/talk/` is rendered with the Editorial format
-(`_extensions/editorial/`, described below). The other rendered decks under
-`docs/` use `starter-theme.scss`, a light theme (warm paper ground, Literata
-display headings over IBM Plex Sans text, plum accent) that implements every
-hook the filter and the gates expect, with comments marking where taste goes.
-Where a concrete number helps, this file cites measurements taken on a
-two-theme setup built on the same hooks (a talk theme and a lecture theme).
-Everything below about divider classes, the progress bar, jump buttons,
-citations, and the reference list holds for the starter theme too.
+The two formats implement every hook the filter and the gates expect. The
+research talk under `docs/talk/` renders on the Editorial format
+(`_extensions/editorial/`), a white page with one vermilion accent. The
+lecture under `docs/lectures/` renders on the Dark lab format
+(`_extensions/darklab/`), a charcoal ground with teal and amber. Both are
+described below. Where a concrete number helps, this file also cites
+measurements taken on an earlier two-theme setup built on the same hooks (a
+talk theme and a lecture theme); the `talk` and `lecture` reference presets
+come from it.
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `starter-theme.scss` | A plain light theme implementing every hook. Restyle it into your own. |
-| `_extensions/starter/` | A Quarto extension format (`starter-revealjs`) wiring the theme, the filter, and the verified defaults together. `quarto add` this directory. |
 | `_extensions/editorial/` | The `editorial-revealjs` format for research talks: a 1280x720 canvas, one vermilion accent, hand-planned clicks, fixed-return Back. See "The Editorial format" below. |
-| `stage-slide.lua` | Pandoc filter, six jobs. Read its header comment before changing any of them. |
+| `_extensions/darklab/` | The `darklab-revealjs` format for lectures: a 1280x720 dark canvas, teal and amber accents, auto-staging, backups nested under the slide they support. Its MathJax and fonts ship in `vendor/`. See "The Dark lab format" below. |
+| `stage-slide.lua` | Pandoc filter, six jobs. Read its header comment before changing any of them. Each format carries an identical copy; keep them in sync. |
 | `deck-check.mjs` | The fit gate, and the handout exporter. |
 | `stage-check.mjs` | The staging gate: asserts nothing but the heading is visible before a slide is advanced, and that no click is dead. On a hand-planned deck it checks dead clicks only. |
 | `check-offline.py` | Verifies a rendered deck fetches nothing at display time. For the offline variant only. |
 | `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. `extensions/TeX/HTML.js` provides `\class`, `\style`, and `\cssId`; `extensions/TeX/boldsymbol.js` provides `\boldsymbol`. |
-| `fonts/` | The theme's two faces as woff2 (both OFL 1.1), copied next to each deck the way `mathjax/` is: `literata/` for display and `ibm-plex-sans/` for text (the starter theme), and `schibsted-grotesk/` (OFL 1.1) for the Editorial format. |
+| `fonts/` | Schibsted Grotesk as woff2 (OFL 1.1), the Editorial format's face, copied next to each talk deck the way `mathjax/` is. Dark lab ships its own faces in `_extensions/darklab/vendor/fonts/`. |
 
 If you run a two-theme setup (say, a talk theme and a lecture theme on the
 same hooks), duplicate the
@@ -44,18 +43,19 @@ theme SCSS from a temp directory, so a relative `@import` cannot resolve.
 ## The recipe
 
 The short form is the extension: `quarto add <this directory> --no-prompt`
-installs `_extensions/starter/`, `cp -R <this directory>/{mathjax,fonts} .`
-gives the deck its math and its type, and the front matter is just
-`format: starter-revealjs` plus
-the title block. The manual recipe, for a deck that wires things itself:
+installs both formats. A talk copies `cp -R <this directory>/{mathjax,fonts} .`
+and its front matter is `format: editorial-revealjs` plus the title block. A
+lecture copies `cp -R <this directory>/_extensions/darklab/vendor/{mathjax,fonts} .`
+and uses `format: darklab-revealjs`. The manual recipe, for a deck that wires
+things itself:
 
 ```yaml
 bibliography: talk-refs.bib   # only on a deck that cites
 citeproc: false               # stage-slide.lua runs citeproc itself
-refs-fit: starter             # the preset measured for starter-theme.scss
+refs-fit: talk                # or lecture; see "How many entries fit"
 format:
   revealjs:
-    theme: [default, starter-theme.scss]
+    theme: [default, my-theme.scss]
     html-math-method: mathjax
     highlight-style: a11y              # a11y-dark on a dark theme
     slide-number: c/t
@@ -128,8 +128,8 @@ what the format changes in the machinery.
    `after.html` draws a 4px accent progress line and a page number. The line
    runs from the title to the `.closing-slide` (the Takeaways slide) and stays
    full after it, the same rule the filter's progress script applies to
-   reveal's bar. The theme hides `.slide-number`, which the filter's progress
-   script can switch back on.
+   reveal's bar. The filter's progress script leaves reveal's slide number
+   off when the format sets `slide-number: false`.
 3. `after.html` gives every `.section-break` slide the accent as its reveal
    background (`data-background-color`, then `Reveal.sync()`), so the colour
    reaches the window edge at any aspect ratio. A section slide that sets its
@@ -156,6 +156,37 @@ The click mechanics (`.eq-stack` and `.eq-layer`, `\class{hid}`, `.eq-notes`,
 `.swap`, `.dim-past`, `.li-dim`, `.shrink-NN`) are CSS only and are documented
 at the head of each rule in `editorial.scss` and in the skill's
 `references/staging.md`.
+
+## The Dark lab format
+
+`format: darklab-revealjs` is the lecture format. The `teaching-lecture` skill
+documents how to write a deck on it; this section says what the format changes
+in the machinery.
+
+1. The canvas is 1280x720 with `margin: 0` and a 31px root, the same physical
+   size as a 30px root on a 1050x700 canvas. Both gates size their window to
+   the deck's own canvas.
+2. reveal's progress bar, slide number, menu, and controls are off. `lab.html`
+   draws a breadcrumb at the foot of each slide from the `.section-break`
+   dividers, and a hint at the bottom right on a slide that has a backup.
+3. A heading with `{.backup}` becomes a vertical child of the slide above it,
+   so the right arrow and a clicker skip it and the down arrow opens it.
+   `lab.html` remaps Space and PageDown so a clicker never walks into a backup.
+   A level-1 heading would turn staging off, which is why backups use a class.
+4. `incremental: true` with auto-staging on: every content slide opens as its
+   title alone, and `stage-check.mjs` holds it to that.
+5. Equation builds: a term written `\class{hid bK}{...}` enters on the K-th
+   `.build` element of the slide and is drawn in teal for one press.
+6. The reference budget is given outright (`refs-lines: 18`,
+   `refs-chars-per-line: 124`) for 20px entries.
+7. MathJax 2.7.9 and the two faces (Manrope, JetBrains Mono) ship in
+   `vendor/` and are copied next to the deck as `mathjax/` and `fonts/`. They
+   sit under `vendor/` because Quarto resolves a format url against the
+   extension directory when the file exists there, which would break a copy
+   of the deck under `docs/` or on a course site.
+
+The palette table with measured contrast ratios is at the head of
+`darklab.scss`, and its CLICK MECHANICS block documents every build class.
 
 ## What stage-slide.lua does
 
@@ -430,7 +461,7 @@ itself.
 ```yaml
 bibliography: talk-refs.bib
 citeproc: false      # stage-slide.lua runs citeproc itself
-refs-fit: starter    # the preset measured for starter-theme.scss
+refs-fit: talk       # the preset for a 30px root; lecture for 34px
 ```
 
 ```markdown
@@ -467,17 +498,18 @@ so the style is where to change them. Do not fake a paren in CSS: a `::before`
 on `span.citation` also wraps a narrative cite, and "Author (2020) shows" comes
 out "(Author (2020)) shows".
 
-Sizes and colours, as the starter theme sets them; a citation is a size step
-down in a muted ink with a measured ratio, and your theme picks its own values:
+Sizes and colours, as Dark lab sets them; a citation is a size step down in a
+muted ink with a measured ratio, and your theme picks its own values. Editorial
+leaves inline citations in running text and sets its entries at 18px.
 
-| | starter |
+| | Dark lab |
 |---|---|
-| root | 30px |
-| `.citation` | 0.88em = 26.4px |
-| colour | `$muted-dark` #4f463c, 8.6:1 on the paper ground |
-| hover | `$accent` #7d3a5e, 7.5:1 |
-| inside `.aside-note`, `figcaption`, `.footer` | 1em (no compounding) |
-| `div.csl-entry` | 0.6em = 18px |
+| root | 31px |
+| `.citation` | 0.85em = 26.35px |
+| colour | `$lab-muted` #9ba3ad, 6.92:1 on the ground |
+| hover | `$lab-teal` #3fd6c1, 9.74:1 |
+| inside `.aside-note`, `figcaption` | 1em (no compounding) |
+| `div.csl-entry` | 20px |
 
 0.88em is a step the eye reads as subordinate without turning the cite into a
 footnote; pick your own and keep it on both the span and the anchor.
@@ -543,16 +575,20 @@ Each preset was measured against its own theme, in headless Chrome at
 rect comes back multiplied by about 0.9 and a two-line talk entry measures
 43.9px instead of its layout 48.7px.
 
-| | talk | lecture | starter |
-|---|---|---|---|
-| entry line-height | 24.3px | 27.54px | 24.3px |
-| list starts at | y = 75 | y = 76 | y = 70 |
-| room left | 625px = 25.72 lines | 624px = 22.66 lines | 630px = 25.93 lines |
-| `lines` preset | 25.7 | 22.6 | 25.9 |
-| chars per line, bracketed | 124.6 to 127.7 | 112.6 to 119.2 | 133.7 to 140.3 |
-| `cpl` preset | 125 | 113 | 134 |
-| `hang` preset | 0.026 | 0.029 | 0.026 |
-| entries per slide, in practice | 6 to 7 | 5 to 6 | 9 to 10 |
+| | talk | lecture |
+|---|---|---|
+| entry line-height | 24.3px | 27.54px |
+| list starts at | y = 75 | y = 76 |
+| room left | 625px = 25.72 lines | 624px = 22.66 lines |
+| `lines` preset | 25.7 | 22.6 |
+| chars per line, bracketed | 124.6 to 127.7 | 112.6 to 119.2 |
+| `cpl` preset | 125 | 113 |
+| `hang` preset | 0.026 | 0.029 |
+| entries per slide, in practice | 6 to 7 | 5 to 6 |
+
+Both shipped formats are on a 1280x720 canvas and give their budget outright
+(`refs-lines` and `refs-chars-per-line` in each `_extension.yml`), so the
+presets apply only to a deck that wires its own theme.
 
 The budgets are the measured room and nothing else. An earlier pair took about
 45px off each as clearance over the slide number and the progress bar, and that
@@ -583,22 +619,14 @@ shortest three-line one 252, and on the lecture the same pair was 222 and 235.
 Every preset sits at the low end of its bracket, so the model rounds a line up
 before it rounds one down. The lecture root is 13% larger while its line
 holds only 10% fewer characters, because Source Sans Pro is a narrower face than
-the one the talk led with when the presets were measured. The `starter` bracket
-was taken on the two example decks in `docs/`, which share the one theme: the
-longest two-line entry and the shortest three-line one both run 246 characters,
-because two entries of the same length can break differently, so the preset
-takes 124 and rounds the ambiguous one up. Starter holds fewer characters than
-the talk preset at the same 18px because its body face is the vendored IBM Plex
-Sans, which is wider than the system stack the talk resolves to. At 124 the
-model is exact on the talk and over-predicts the lecture by one line.
+the one the talk led with when the presets were measured.
 
-`refs-fit: starter | talk | lecture` picks the preset, because the theme cannot
+`refs-fit: talk | lecture` picks the preset, because the theme cannot
 be read from a filter: Quarto compiles the SCSS into a temp bundle and rewrites
 the metadata to its hash before any user filter runs (measured:
 `theme = quarto-760b0d5cd483963edc939aa138f6e90a` on a deck whose front matter
-names a real `.scss`). In this repo the starter extension's `_extension.yml`
-carries `refs-fit: starter`, so a deck on `format: starter-revealjs` names
-nothing and that yml line is the knob. An unrecognised value falls back to
+names a real `.scss`). A format's `_extension.yml` is the place for the line,
+so a deck on that format names nothing and that yml line is the knob. An unrecognised value falls back to
 `lecture` silently. Forgetting the line costs an under-filled slide and never an
 overflow, because the default is the tightest preset. `refs-lines` and
 `refs-chars-per-line` override the preset outright for a restyled theme, which
@@ -781,16 +809,17 @@ then adds the class `segmented`. A theme that wants a segmented bar draws them,
 for instance as background slabs in the page ground with a `$progress-cuts`
 loop over the `--section-cut-i` variables, so the bar reads as one dash per
 block with the ones behind you filled. A theme with no rule for the properties
-is unaffected, which is the starter theme's case: it leaves the bar one plain
-fill and only fixes the colours.
+is unaffected and keeps the bar one plain fill. Both shipped formats turn
+reveal's bar off and draw their own wayfinding (Editorial's progress line,
+Dark lab's breadcrumb).
 
 Every theme also has to fix reveal's default colours.
 reveal ships `color: #fff` over an `rgba(0, 0, 0, 0.2)` track, so on a
 near-black ground the track is invisible and only the filled part can be
 seen, and on a light ground the fill is white on white and only the track
-can be seen. Set both properties for your ground: the starter theme fills with
-`$accent` over a track of `rgba($ink, 0.12)`, and a dark theme makes the
-opposite move, a pale fill over a lightened track.
+can be seen. Set both properties for your ground: a light theme fills with
+its accent over a faint ink track, and a dark theme makes the opposite move,
+a pale fill over a lightened track.
 
 ### The appendix, the references, and the closing slide
 
@@ -935,8 +964,8 @@ happens once and it means the main deck is over:
 
 The theme publishes `--appendix-ground` and `--references-ground` on `:root`,
 so the hex lives
-in the theme and the deck asks for it by name. The starter theme keeps both on
-the page ground; a theme that wants a tinted back matter (a warm light gray on
+in the theme and the deck asks for it by name. A theme can keep both on the
+page ground; a theme that wants a tinted back matter (a warm light gray on
 a light theme, a slate on a dark one) changes only those two values. reveal assigns
 `data-background-color` straight to the background element's inline style, and
 when the value is not a colour it can parse it reads the painted result back off
@@ -1040,9 +1069,8 @@ A numbered theorem goes through Quarto's own crossref machinery. Write
 refer back; the number is written into the HTML at render time, so it renumbers
 itself and survives into the handout. `#thm-`, `#prp-`, `#lem-`, and `#cor-` each run their own counter,
 and `#def-` and `#exm-` arrive as `.theorem.definition` and `.theorem.example`,
-which the example lecture theme guards so they keep the teaching box they
-already have and take only the numbered label. The example talk theme and the
-starter theme style the hand-written
+which Dark lab guards so they keep the teaching box they already have and
+take only the numbered label. Editorial styles the hand-written
 `.theorem` / `.proposition` / `.lemma` divs instead and expects a
 `[Proposition 1]{.label}` span, so a native `#thm-` block on those themes gets
 the left border with an unstyled title. Quarto gives theorem divs no styling in
@@ -1134,7 +1162,7 @@ writes `.nojekyll` itself; the `docs/` route needs you to `touch .nojekyll`.
 
 ## Theme classes
 
-Both example themes and the starter theme define these. Everything here is typed by the author except
+Both formats define these, except where a row or paragraph below says otherwise. Everything here is typed by the author except
 `.references`, which the filter puts on every reference-list slide including the
 continuation pages.
 
@@ -1151,23 +1179,21 @@ continuation pages.
 | `.num` | Right-align a numeric table cell, with tabular figures. |
 | 4+ column table | No class. Both themes stretch it to the full text column (`width: 100%` of the section) via `table:has(tr > :nth-child(4))`, padding scaled up, so its right edge lands where the aside note and the takeaway rule end; 2-3 column tables keep natural width. Quarto's inline `width:100%` (from `tbl-colwidths`) agrees with the rule. |
 | `.jump`, `.jump-back` | The jump buttons above. Rendered by the filter as `a.jump-btn`. |
-| `.highlight-yale` | A fragment variant that turns a term to the accent colour on cue (`.highlight-accent` is the starter theme's alias). |
+| `.highlight-accent` | A fragment variant that turns a term to the accent colour on cue. |
 
-Colour spans differ by theme. The example talk theme has `.yblue` `.ymid`
-`.ygray` `.ygreen` `.yamber` `.yred` `.dim`; the example lecture theme swaps
-`.ymid` for `.ypale`. The starter theme defines the union of both, mapped to
-its neutral palette, so either example source renders; rename the vocabulary
-to your own when you build a theme.
+Colour spans differ by format. Editorial has `.em` (the accent phrase),
+`.gray` and its alias `.dim`, and `.ac`, `.bl`, `.gr` inside math. Dark lab has
+`.teal` and `.amber`, `.dim`, and maps the older `.yblue` `.ymid` `.ypale`
+`.ygreen` `.yamber` `.yred` `.ygray` vocabulary onto those so older sources
+render. Rename the vocabulary to your own when you build a theme.
 
-The example talk theme (and the starter theme) also defines `.result` (framed estimate), `.takeaway` (the
+Editorial (and Dark lab, in plainer form) also defines `.result` (framed estimate), `.takeaway` (the
 slide's one claim, on a rule under the content), `.assumption`, `.theorem` /
 `.proposition` / `.lemma` (hand-labelled, so give each a `[Proposition 1]{.label}`
 span), `.proof` (automatic QED square), `table.spec` for wide specification
-tables, and the closing archetype `.thanks-slide` with its four children
-`.thanks-title`, `.thanks-invite`, `.thanks-contact`, and `.qr-slot`.
+tables. Its closing slide is `## Takeaways {.closing-slide}`.
 
-The example lecture theme (and, in plainer form, the starter theme) also
-defines the five teaching blocks `.keyidea`, `.definition`, `.example`,
+Dark lab also defines the five teaching blocks `.keyidea`, `.definition`, `.example`,
 `.warning`, `.question`, each a distinct colour so the vocabulary is learnable
 over a semester; `.prompt` (large discussion question);
 `.hero` (one number, 3.2em); `ol.steps` and `ul.agenda` with `li.now` and
@@ -1194,29 +1220,20 @@ Inline emphasis: [this matters]{.yblue}
 
 ## Fonts
 
-The starter theme runs on two vendored families: Literata for headings,
-dividers, and display numbers, and IBM Plex Sans for everything else. Both are
-under the SIL Open Font License 1.1 and both ship in `fonts/`, so nothing is
-fetched at display time and the metrics are the same on every machine, which is
-what lets the fit gate's certification transfer.
-
-Each family is mastered as one variable roman covering weights 400 to 700 plus
-one static italic, four woff2 files and two license files, 434 KB in total.
-The variable roman is the smaller half of that trade: Literata's is 147 KB
-against 175 KB for the two static weights it replaces, and Plex's is 125 KB
-against 150 KB, and either one then also covers the weights in between. Both
-were built from the upstream variable TTFs (Literata from
-[googlefonts/literata](https://github.com/googlefonts/literata) by way of the
-Google Fonts release, Plex from [IBM/plex](https://github.com/IBM/plex) the
-same way), with the optical-size and width axes pinned and the weight axis
-clamped to 400-700 before the woff2 conversion.
+Each format runs on vendored faces under the SIL Open Font License 1.1, so
+nothing is fetched at display time and the metrics are the same on every
+machine, which is what lets the fit gate's certification transfer. Editorial
+uses Schibsted Grotesk (`fonts/schibsted-grotesk/`, a variable roman and a
+variable italic). Dark lab uses Manrope for text and JetBrains Mono for labels,
+numbers, and wayfinding (`_extensions/darklab/vendor/fonts/`). Manrope has no
+italic cut, so emphasis in Dark lab running text is a synthesized oblique.
 
 `fonts/` has to sit next to the rendered deck, the same rule the vendored
 `mathjax/` copy follows, and the @font-face rules live in the format's
 `header-includes` rather than in the theme, because theme SCSS compiles into
 `<deck>_files/` and a `url()` there resolves against the wrong base; urls in
 the header resolve against the rendered page. A deck that renders into a
-subdirectory rewrites those four paths. Nothing warns you when this is wrong:
+subdirectory rewrites those paths. Nothing warns you when this is wrong:
 a missing `fonts/` copy just falls back to the system stacks behind each
 family, and the deck still renders, a little wider and off its measured fit.
 Eight of the twelve built-in reveal themes

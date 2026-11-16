@@ -55,7 +55,7 @@
     div.csl-indent {
       margin-left: 2em;
     }  </style>
-  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-b033f9b1cd95a869f2334d5624f34860.css">
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-0093aea434e4ef61be927bdd5bd193b9.css">
   <link href="talk_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -928,6 +928,9 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
   // a string, `formatNumber` drops the delimiter and the second span and prints the
   // current slide alone.
   function numbering(slides) {
+    // A format that sets `slide-number: false` keeps it off. Installing the
+    // function would turn reveal's number back on, because a function is truthy.
+    if (!Reveal.getConfig().slideNumber) return;
     var tail = slides.length - main;
     if (tail < 1) return;   // nothing behind the argument, so c/t is already right
     // The list is read fresh on every call rather than closed over, so a sync that

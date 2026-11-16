@@ -23,8 +23,8 @@ Each source repo above ships under MIT, so redistribution under this repo's MIT 
 
 ## Vendored assets and tooling
 
-- Literata, by TypeTogether for Google ([googlefonts/literata](https://github.com/googlefonts/literata)). SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/literata/OFL.txt`.
-- IBM Plex Sans, by Mike Abbink and Bold Monday for IBM ([IBM/plex](https://github.com/IBM/plex)). SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/ibm-plex-sans/OFL.txt`.
+- Schibsted Grotesk, by the Schibsted Grotesk Project Authors ([schibsted/schibsted-grotesk](https://github.com/schibsted/schibsted-grotesk)), the Editorial talk format's face. SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/schibsted-grotesk/OFL.txt`.
+- Manrope, by the Manrope Project Authors ([googlefonts/manrope](https://github.com/googlefonts/manrope)), and JetBrains Mono, by the JetBrains Mono Project Authors ([JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)), the Dark lab lecture format's faces. SIL Open Font License 1.1; the licenses ship in `slide-tooling/_extensions/darklab/vendor/fonts/`.
 - MathJax 2.7.9 ([mathjax/MathJax](https://github.com/mathjax/MathJax)). Apache License 2.0; the license ships at `slide-tooling/mathjax/LICENSE`.
 - reveal.js, by Hakim El Hattab ([hakimel/reveal.js](https://github.com/hakimel/reveal.js)). MIT. Bundled into the rendered decks by Quarto.
 - Quarto ([quarto-dev/quarto-cli](https://github.com/quarto-dev/quarto-cli)). MIT. The render pipeline everything in `slide-tooling/` extends.

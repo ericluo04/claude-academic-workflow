@@ -21,7 +21,7 @@
 ---
 --- Usage, in the deck front matter:
 ---   filters:
----     - ~/.claude/assets/quarto-yale/stage-slide.lua
+---     - path/to/slide-tooling/stage-slide.lua
 ---
 --- Opt a single slide out with `{.no-stage}` on its heading:
 ---   ## Everything at once {.no-stage}
@@ -29,7 +29,9 @@
 --- AUTO-STAGING OFF. A format or a deck that sets `auto-stage: false` turns the
 --- default round: no slide is staged unless its heading carries `{.stage}`, and
 --- every other slide keeps exactly the fragments the author wrote. That is the
---- Beamer default, where clicks are planned by hand.
+--- Beamer default, where clicks are planned by hand. Such a deck also gets
+--- `data-auto-stage="false"` on <html>, which tells stage-check.mjs to check its
+--- unmarked slides for dead clicks only.
 ---
 --- FIXED RETURNS. A format or deck that sets `back-returns: fixed` gets Back
 --- buttons with a fixed return, wired at build time by `wire_back_buttons` below.
@@ -1191,6 +1193,9 @@ local progress_script = splice_closing(splice_past_main([[
   // a string, `formatNumber` drops the delimiter and the second span and prints the
   // current slide alone.
   function numbering(slides) {
+    // A format that sets `slide-number: false` keeps it off. Installing the
+    // function would turn reveal's number back on, because a function is truthy.
+    if (!Reveal.getConfig().slideNumber) return;
     var tail = slides.length - main;
     if (tail < 1) return;   // nothing behind the argument, so c/t is already right
     // The list is read fresh on every call rather than closed over, so a sync that
@@ -1359,10 +1364,6 @@ local refs_gap = 0.46
 --            left, which is 25.72 lines
 --   lecture  root 34px, entry 20.4px, line-height 27.54px, gap 12.648px, and the
 --            list starts at y=76, so 624px is left, which is 22.66 lines
---   starter  root 30px, entry 18.0px, line-height 24.3px, gap 11.16px, and the
---            list starts at y=70 under this theme's h2, so 630px is left,
---            which is 25.93 lines; both example decks measure identically,
---            because they share the one theme
 --
 -- THE BUDGETS ARE THOSE NUMBERS AND NOTHING ELSE. An earlier pair took about 45px
 -- off each as clearance over the slide number and the progress bar, and that
@@ -1386,33 +1387,21 @@ local refs_gap = 0.46
 -- Source Sans Pro is a narrower face than the system stack the talk resolves to and
 -- gives most of the difference back.
 --
--- The starter bracket, measured the same way on the two example decks in docs/:
--- the longest two-line entry runs 246 characters and the shortest three-line one
--- runs 246 as well, because two entries of the same length can break differently
--- on their word boundaries. No value separates that pair, so the preset takes
--- 124, just under the 124.6 both sides of the bracket land on, which rounds the
--- ambiguous entry up to three lines. Starter holds fewer characters than the talk
--- preset at the same 18px because its body face is the vendored IBM Plex Sans,
--- which is wider than the system stack the talk resolves to; the same 25 entries
--- render 57 lines here against 52 under the Source Sans Pro this theme used
--- before. At 124 the model is exact on the talk, 30 lines against 30, and
--- over-predicts the lecture by one, 28 against 27, which is the safe direction.
---
 -- `hang` is what the hanging indent takes off every line after an entry's first, as
 -- a fraction of the line. The rule is `padding-left: 1.5em; text-indent: -1.5em` on
 -- an entry set at 0.6 of root across the full 1050px canvas, so the fraction is
--- 1.5 * 0.6 * root / 1050: 27px of 1050 on the talk and the starter, 30.6px on
+-- 1.5 * 0.6 * root / 1050: 27px of 1050 on the talk, 30.6px on
 -- the lecture. Another theme computes its own from that formula.
 --
 -- The deck names its preset, because the theme cannot be read from here. Quarto
 -- compiles the SCSS into a temp bundle and rewrites the metadata to its hash before
 -- any user filter runs (measured: `theme = quarto-760b0d5cd483963edc939aa138f6e90a`
 -- on a deck whose front matter says `theme: [default, my-theme.scss]`), so there
--- is nothing left to sniff. In this repo the wiring is one line in the starter
--- extension's `_extension.yml`, `refs-fit: starter`, next to the theme it was
--- measured against; a deck on the starter format needs no refs line of its own,
--- and that yml line is the knob to move. `talk` and `lecture` are kept for the
--- research-talk and teaching-lecture skills' own themes (30px and 34px roots).
+-- is nothing left to sniff. The wiring is one line in a format's
+-- `_extension.yml` (`refs-fit: lecture`, say), next to the theme it was measured
+-- against, so a deck on that format needs no refs line of its own and that yml
+-- line is the knob to move. `talk` and `lecture` are the presets for a 30px and a
+-- 34px root.
 -- The default stays `lecture` because it is the tightest of the presets, so a
 -- deck that names no preset gets a slide of under-filled references and never an
 -- overflow. `refs-lines` and `refs-chars-per-line` override the preset outright,
@@ -1420,7 +1409,6 @@ local refs_gap = 0.46
 local refs_presets = {
   talk    = { lines = 25.7, cpl = 125, hang = 0.026 },
   lecture = { lines = 22.6, cpl = 113, hang = 0.029 },
-  starter = { lines = 25.9, cpl = 124, hang = 0.026 },
 }
 
 local function refs_budget(meta)
@@ -1759,6 +1747,13 @@ function Pandoc(doc)
   end
   if wants_jump then
     table.insert(out, pandoc.RawBlock("html", jump_script))
+  end
+  -- A hand-planned deck says so on the page, so stage-check.mjs knows that a
+  -- slide without `{.stage}` may show content at click 0 by design and checks
+  -- it for dead steps only. A deck with auto-staging on gets no marker.
+  if not auto_stage then
+    table.insert(out, pandoc.RawBlock("html",
+      '<script>document.documentElement.setAttribute("data-auto-stage", "false");</script>'))
   end
   -- Unconditional. It walks `span.citation` and does nothing on a deck that cites
   -- nothing, and gating it on the reference machinery would miss a deck that cites
