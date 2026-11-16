@@ -78,9 +78,7 @@ incumbent scores 0.79. What have you learned?
 <li>What to ask a vendor instead</li>
 </ul>
 
-## A benchmark score is an estimate {.section-break}
-
-## Two vendors, one number {#motivation}
+## Two vendors, one number {#motivation section="A benchmark score is an estimate"}
 
 :::: {.columns .fragment fragment-index="1"}
 ::: {.column width="50%"}
@@ -155,9 +153,7 @@ The 1.96 is the normal approximation. It is fine at $n = 900$ and wrong at
 $n = 20$, where you want the exact binomial interval.
 :::
 
-## How much a leaderboard can move on its own {.section-break}
-
-## The top of the leaderboard is a tie {#exhibit}
+## The top of the leaderboard is a tie {#exhibit section="How much a leaderboard can move on its own"}
 
 :::: {.swap .fragment fragment-index="1"}
 ::: {.swap-out}
@@ -237,7 +233,7 @@ own traffic.
 
 ## The interval you should have quoted {auto-animate="true" #ci1}
 
-::: {.hero .amber style="text-align: center; margin-top: 120px;"}
+::: {.hero .amber data-id="ci-hero" style="text-align: center; margin-top: 120px;"}
 $0.83 \pm 0.025$
 :::
 
@@ -247,7 +243,10 @@ $n = 900$ items. The gap to the incumbent disappears inside it.
 
 ## The interval you should have quoted {auto-animate="true" #ci2}
 
-::: {.hero style="text-align: center; margin-top: 120px;"}
+<!-- The hero is on screen at click 0 here (.no-stage), so the auto-animate
+     pair morphs 0.025 into 0.006 instead of dropping the number on entry. -->
+
+::: {.hero .no-stage data-id="ci-hero" style="text-align: center; margin-top: 120px;"}
 $0.83 \pm 0.006$
 :::
 
@@ -275,7 +274,7 @@ paired standard error is derived in the backup under this slide.
 
 ## Where the paired standard error comes from {.backup #ap-paired}
 
-::: {.proof name="of @thm-paired"}
+::: {.proof name="of Theorem 1"}
 Write $D_i = X_i - Y_i$ for the difference of the two pass indicators on item $i$.
 It is $+1$ where A passes and B fails, $-1$ where B passes and A fails, and 0
 otherwise, so $\E[D_i] = p_{10} - p_{01} = \Delta$. Since $D_i^2$ is 1 exactly on a
@@ -300,9 +299,7 @@ what does the other one still get you?
 :::
 :::
 
-## Three ways the number lies {.section-break}
-
-## The three failure modes {#failures}
+## The three failure modes {#failures section="Three ways the number lies"}
 
 <table>
 <thead>
@@ -388,9 +385,7 @@ the answer key.
 :::
 ::::
 
-## What to ask a vendor instead {.section-break}
-
-## Building your own eval set [demo]{.demo-tag} {#demo}
+## Building your own eval set [demo]{.demo-tag} {#demo section="What to ask a vendor instead"}
 
 We will do this live in the notebook. Three lines is the whole idea.
 
@@ -419,11 +414,6 @@ believing it.
 
 ## Check yourself {#check-answer}
 
-::: {.question}
-[Commit, then argue]{.label}
-Vendor C scores 0.96, up from 0.71 on an unchanged benchmark.
-:::
-
 ::: {.fragment}
 ::: {.example}
 [One good answer]{.label}
@@ -435,7 +425,52 @@ training.
 
 ## What the leaderboard hides {.full-bleed #grid}
 
-![](images/task-grid.png){.fig-card}
+```{r}
+#| label: task-grid
+#| fig-width: 10.5
+#| fig-height: 5.3
+#| out-width: 1050px
+# Three systems with the same headline score, by task family. Drawn on the
+# slide ground: the fill runs from the surface ink to the teal accent, and the
+# label is black on a light cell and white on a dark one, whichever contrasts
+# more. With pure black the worst cell on any fill is 4.58:1 (the crossover),
+# so every label clears 4.5:1; the flip point is computed, not set.
+tasks <- c("Arithmetic", "Reading", "Code repair", "Legal recall",
+           "Multi-step planning", "Tabular lookup", "Translation", "Safety refusal")
+grid <- data.frame(
+  task   = factor(rep(tasks, 3), levels = rev(tasks)),
+  system = factor(rep(c("System A\nheadline 0.76", "System B\nheadline 0.76",
+                        "System C\nheadline 0.76"), each = 8)),
+  score  = c(0.94, 0.88, 0.71, 0.62, 0.41, 0.90, 0.85, 0.75,
+             0.72, 0.79, 0.93, 0.81, 0.74, 0.68, 0.72, 0.67,
+             0.81, 0.83, 0.66, 0.55, 0.38, 0.95, 0.92, 0.96)
+)
+ramp <- grDevices::colorRamp(c("#1f2328", col_accent))
+t01 <- (grid$score - 0.35) / (0.97 - 0.35)
+grid$fill <- grDevices::rgb(ramp(t01), maxColorValue = 255)
+lum <- function(hex) {
+  v <- grDevices::col2rgb(hex) / 255
+  v <- ifelse(v <= 0.03928, v / 12.92, ((v + 0.055) / 1.055)^2.4)
+  0.2126 * v[1, ] + 0.7152 * v[2, ] + 0.0722 * v[3, ]
+}
+L <- lum(grid$fill)
+on_white <- (1.05) / (L + 0.05)
+on_black <- (L + 0.05) / 0.05
+grid$ink <- ifelse(on_white >= on_black, "#ffffff", "#000000")
+
+ggplot(grid, aes(system, task)) +
+  geom_tile(aes(fill = fill), width = 0.94, height = 0.86) +
+  geom_text(aes(label = sprintf("%.2f", score), colour = ink),
+            size = 8, fontface = "bold") +
+  scale_fill_identity() +
+  scale_colour_identity() +
+  scale_x_discrete(position = "top") +
+  labs(x = NULL, y = NULL) +
+  lecture_theme(22) +
+  theme(panel.grid.major = element_blank(),
+        axis.text.x = element_text(colour = col_text, face = "bold", lineheight = 1.05),
+        axis.text.y = element_text(colour = col_text))
+```
 
 ## Where we got to {#synthesis}
 

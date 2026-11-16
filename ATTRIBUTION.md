@@ -23,7 +23,7 @@ Each source repo above ships under MIT, so redistribution under this repo's MIT 
 
 ## Vendored assets and tooling
 
-- Schibsted Grotesk, by the Schibsted Grotesk Project Authors ([schibsted/schibsted-grotesk](https://github.com/schibsted/schibsted-grotesk)), the Editorial talk format's face. SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/schibsted-grotesk/OFL.txt`.
+- Schibsted Grotesk, by the Schibsted Grotesk Project Authors ([schibsted/schibsted-grotesk](https://github.com/schibsted/schibsted-grotesk)), the Editorial talk format's face. SIL Open Font License 1.1; the license ships at `slide-tooling/fonts/schibsted-grotesk/OFL.txt`. The two static TTF cuts there (Regular, SemiBold) are instances of the variable font, made with fontTools for drawing R figures.
 - Manrope, by the Manrope Project Authors ([googlefonts/manrope](https://github.com/googlefonts/manrope)), and JetBrains Mono, by the JetBrains Mono Project Authors ([JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)), the Dark lab lecture format's faces. SIL Open Font License 1.1; the licenses ship in `slide-tooling/_extensions/darklab/vendor/fonts/`.
 - MathJax 2.7.9 ([mathjax/MathJax](https://github.com/mathjax/MathJax)). Apache License 2.0; the license ships at `slide-tooling/mathjax/LICENSE`.
 - reveal.js, by Hakim El Hattab ([hakimel/reveal.js](https://github.com/hakimel/reveal.js)). MIT. Bundled into the rendered decks by Quarto.

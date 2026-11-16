@@ -120,6 +120,18 @@ template does the threshold. The format sets `auto-animate-duration: 0.4`; the
 1.0 default is long enough that the class waits on it and so do you,
 mid-sentence.
 
+The changing element has to be on screen when the second slide enters, or
+there is nothing to morph: the filter would stage it, and the number would
+vanish and reappear. Mark it `.no-stage` on the second slide and give both
+copies the same `data-id`, so reveal pairs them even though their text differs:
+
+```markdown
+::: {.hero data-id="thr-hero"}          (first slide)
+::: {.hero .no-stage data-id="thr-hero"} (second slide)
+```
+
+`stage-check.mjs` exempts a `.no-stage` block from the step-0 invariant.
+
 ## The animation budget
 
 Budget five to eight staged moments in a 75-minute deck beyond the incremental
@@ -132,24 +144,28 @@ the last step without overflowing at the first.
 Dark lab has no progress bar and no slide number. Students locate themselves off
 the breadcrumb at the bottom left of every slide: the section's number in teal
 and its title in 19px mono at 9.1:1 against the ground, which reads from the
-back of a room. `lab.html` builds it at load from the `.section-break`
-dividers, which `stage-slide.lua` numbers, so nothing is written per slide. The
-title slide, the dividers, the closing slide, and the reference pages carry no
-crumb, and neither do the recap and agenda before the first divider.
+back of a room. There are no section slides. `lab.html` builds the crumb at
+load from the `section="..."` attribute on the first slide of each section and
+numbers the sections itself, so nothing else is written per slide. The title
+slide, the closing slide, and the reference pages carry no crumb, and neither
+do the recap and agenda before the first named section.
 
 A backup is a vertical child of the slide it supports. `## Title {.backup}`
 written after a slide hangs it there; `lab.html` moves each backup into a
 vertical stack before reveal builds its index, so the gates, the hash, and the
 overview all see the stack. The bottom-right hint reads "↓ backup" on a slide
-with a backup under it and "↑ back" on the backup, and the breadcrumb adds
-"backup".
+with a backup under it, once the slide is at its last click (before that the
+down arrow advances a fragment), and "↑ back" on the backup. The breadcrumb adds
+"backup". One press of the up arrow on a backup returns to the parent slide at
+its last click; `lab.html` remaps the up arrow so it does not first step back
+through the backup's own fragments.
 
 The lecture's path skips backups. The right arrow already does in reveal's
 default navigation mode, and `lab.html` maps Space, PageDown and N to the same
 behaviour (PageUp and P to the left arrow), because reveal would otherwise send
 those keys, and most clickers, down into the stack. Measured on the sample
 lecture: PageDown at the last fragment of the estimator slide lands on the next
-section divider, and the down arrow lands on the backup at step 0.
+main slide, and the down arrow lands on the backup at step 0.
 
 A backup is staged like any content slide. That costs a press or two when a
 question sends you there, and it keeps the stage gate's invariant whole.

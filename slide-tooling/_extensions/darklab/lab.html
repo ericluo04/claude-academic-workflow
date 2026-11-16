@@ -7,12 +7,18 @@
 //    lecture's path. This runs before reveal builds its index; on a deck where
 //    reveal is already up it re-syncs.
 // 2. The breadcrumb at the bottom left: the number and title of the section the
-//    slide belongs to, read off the `.section-break` dividers (stage-slide.lua
-//    writes data-section-number on each). Nothing to write per slide.
+//    slide belongs to. Dark lab has no section slides. The first slide of a
+//    section names it in its heading attributes,
+//      ## Two vendors, one number {#motivation section="A benchmark score is an estimate"}
+//    (pandoc writes it as data-section), and every later slide inherits it
+//    until the next one. Sections are numbered here, in document order.
 // 3. The hint at the bottom right: "↓ backup" on a slide with a backup under it,
-//    "↑ back" on the backup itself.
+//    shown once the slide is at its last click (before that, the down arrow
+//    would advance a fragment), and "↑ back" on the backup itself.
 // 4. Key remap. Space, PageDown and N advance like the right arrow, and PageUp
 //    and P go back like the left arrow, so a clicker never walks into a backup.
+//    Up (and K) on a backup returns to the parent slide at its last click in one
+//    press, instead of first stepping back through the backup's own fragments.
 // 5. Equation builds. A term written \class{hid bK}{...} inside display math
 //    enters on the K-th `.build` element of the slide (an empty
 //    [ ]{.fragment .build} marker or any staged block carrying .build). The term
@@ -56,19 +62,17 @@
     slides.appendChild(crumb);
     slides.appendChild(hint);
 
-    // One pass in document order: each slide inherits the last divider above it.
+    // One pass in document order: each slide inherits the last section named
+    // at or above it.
     var label = new Map();
     var current = null;
+    var count = 0;
     Reveal.getSlides().forEach(function (s) {
       var c = s.classList;
-      if (c.contains("section-break")) {
-        var h = s.querySelector("h1, h2");
-        current = {
-          n: s.getAttribute("data-section-number") || "",
-          t: h ? h.textContent.trim() : ""
-        };
-        label.set(s, null);
-        return;
+      var named = s.getAttribute("data-section") || s.getAttribute("section");
+      if (named) {
+        count += 1;
+        current = { n: String(count), t: named.trim() };
       }
       if (s.id === "title-slide" || c.contains("closing-slide") ||
           c.contains("references-break") || c.contains("references") ||
@@ -95,7 +99,9 @@
         crumb.hidden = true;
       }
       var r = Reveal.availableRoutes();
-      if (r.down) { hint.textContent = "↓ backup"; hint.hidden = false; }
+      var more = Reveal.availableFragments().next;
+      if (r.down && !more) { hint.textContent = "↓ backup"; hint.hidden = false; }
+      else if (r.down) { hint.hidden = true; }
       else if (idx.v > 0) { hint.textContent = "↑ back"; hint.hidden = false; }
       else { hint.hidden = true; }
     }
@@ -121,16 +127,31 @@
     }
 
     function forward(e) { if (e && e.shiftKey) Reveal.left(); else Reveal.right(); }
+    // From a backup, back to the parent at its last click: the state the
+    // speaker left it in.
+    function up() {
+      var i = Reveal.getIndices();
+      if (!(i.v > 0)) { Reveal.up(); return; }
+      var parent = Reveal.getSlide(i.h, 0);
+      var last = -1;
+      if (parent) {
+        parent.querySelectorAll(".fragment[data-fragment-index]").forEach(function (f) {
+          last = Math.max(last, parseInt(f.getAttribute("data-fragment-index"), 10));
+        });
+      }
+      Reveal.slide(i.h, 0, last);
+    }
     Reveal.configure({
       keyboard: {
         32: forward, 34: forward, 78: forward,
-        33: function () { Reveal.left(); }, 80: function () { Reveal.left(); }
+        33: function () { Reveal.left(); }, 80: function () { Reveal.left(); },
+        38: up, 75: up
       }
     });
 
     Reveal.on("slidechanged", function () { update(); build(); });
-    Reveal.on("fragmentshown", build);
-    Reveal.on("fragmenthidden", build);
+    Reveal.on("fragmentshown", function () { update(); build(); });
+    Reveal.on("fragmenthidden", function () { update(); build(); });
     update();
     build();
     if (window.MathJax && MathJax.Hub) MathJax.Hub.Queue(build);

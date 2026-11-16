@@ -270,7 +270,8 @@ const report = await evaluate(`(async () => {
         !s.classList.contains('stage') ? 'hand-planned' : 'content';
 
     // What the room sees on this slide, as one string: every shown element inside
-    // the section that carries ink of its own, with the box it occupies. The
+    // the section that carries ink of its own, with the box it occupies and its
+    // colour (a phrase that turns to the accent on a click is a live step). The
     // heading is left out because an auto-animate pair morphs it between slides.
     const ink = () => {
       const parts = [];
@@ -283,7 +284,8 @@ const report = await evaluate(`(async () => {
         if (!own && !graphic) continue;
         const r = el.getBoundingClientRect();
         parts.push(el.tagName + '@' + Math.round(r.x) + ',' + Math.round(r.y) +
-                   ',' + Math.round(r.width) + ',' + Math.round(r.height) + ':' + own);
+                   ',' + Math.round(r.width) + ',' + Math.round(r.height) + ',' +
+                   getComputedStyle(el).color + ':' + own);
       }
       return parts.join('\\n');
     };
@@ -316,10 +318,14 @@ const report = await evaluate(`(async () => {
         if (!n.nodeValue.trim()) continue;
         const el = n.parentElement;
         if (!el || (head && head.contains(el)) || chrome(el)) continue;
+        // A block the author opted out with .no-stage is on screen by design
+        // (stage-slide.lua passes it through), e.g. the second number of an
+        // auto-animate pair, which has to be there for the morph.
+        if (el.closest('.no-stage')) continue;
         if (shown(el)) leaks.push(JSON.stringify(n.nodeValue.trim().slice(0, 60)));
       }
       for (const g of s.querySelectorAll('img, svg, canvas, video, iframe, table')) {
-        if ((head && head.contains(g)) || chrome(g)) continue;
+        if ((head && head.contains(g)) || chrome(g) || g.closest('.no-stage')) continue;
         if (shown(g)) leaks.push('<' + g.tagName.toLowerCase() + '>');
       }
     }

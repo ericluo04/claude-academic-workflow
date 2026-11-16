@@ -98,8 +98,7 @@ there is nothing to fix.
 Numbering is Quarto's and not a CSS counter, deliberately. reveal sets
 `display: none` on every slide outside its view distance and a `display: none`
 element does not increment a counter, so a counter would number results by where
-the presenter happens to be standing. Same reason `stage-slide.lua` numbers the
-section dividers in Lua.
+the presenter happens to be standing.
 
 ## Budget for the box
 

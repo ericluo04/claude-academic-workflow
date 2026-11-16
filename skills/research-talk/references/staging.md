@@ -206,7 +206,8 @@ return both to full ink on the next click.
 ### A phrase takes the accent (`#claim`)
 
 `[6.2 log points]{.fragment .highlight-accent fragment-index=1}` turns the
-phrase to the accent on its click. It is on screen from click 0.
+phrase to the accent on its click. It is on screen from click 0. The accent is
+a colour change only, never a weight change, so the line does not reflow.
 
 ### Reserved space
 

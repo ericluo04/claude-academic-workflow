@@ -20,9 +20,9 @@ not write (use `slide-review`), and LaTeX Beamer (use `compile-latex`). The
 table, the site theme, publishing.
 
 The lecture format is Dark lab, the Quarto extension in
-`slide-tooling/_extensions/darklab/` of this repository. Below, `$TOOLING`
+`slide-tooling/_extensions/darklab/` of this repository. Below, `$SLIDES`
 stands for wherever SETUP.md installed your copy of `slide-tooling/`.
-`$TOOLING/README.md` is the machinery reference: the filter, what the gates
+`$SLIDES/README.md` is the machinery reference: the filter, what the gates
 assert, and the settings that silently break a deck. Read it for any of that;
 where it and the source disagree, the source wins. The head of
 `_extensions/darklab/darklab.scss` carries the palette table, and its CLICK
@@ -57,8 +57,9 @@ Any hex copied out of an older deck gets checked against the table before it
 ships. Your own palette rationale goes in `style/house.md`.
 
 Wayfinding is the breadcrumb at the bottom left of every slide: the number and
-title of the section the slide belongs to, in 19px mono at 9.1:1, read off the
-`.section-break` dividers so nothing is written per slide. The progress bar,
+title of the section the slide belongs to, in 19px mono at 9.1:1. Dark lab has
+no section slides: the first slide of a section names it with `section="..."`
+on its heading, and every later slide inherits it. The progress bar,
 the slide number, the menu, and reveal's arrow controls are all off. Pair the
 theme with `highlight-style: a11y-dark` (the format sets it) so code does not
 arrive on a white card, and draw figures on the deck ground
@@ -93,8 +94,8 @@ directory (or once at the project root):
 
 ```bash
 cd <deck dir>
-quarto add $TOOLING --no-prompt                          # installs every format in _extensions/, darklab among them
-cp -R $TOOLING/_extensions/darklab/vendor/{mathjax,fonts} .     # MathJax (with HTML.js) and both faces at relative urls
+quarto add $SLIDES --no-prompt                          # installs every format in _extensions/, darklab among them
+cp -R $SLIDES/_extensions/darklab/vendor/{mathjax,fonts} .     # MathJax (with HTML.js) and both faces at relative urls
 ```
 
 A standalone deck then needs only:
@@ -300,21 +301,20 @@ appears alone first.
    fragments and then moves to the next main slide. There are no jump buttons
    and no Back buttons.
 
-## Dividers, backups, references
+## Sections, backups, references
 
-The section divider is a two-digit teal mono numeral over a short teal rule
-over the title, set on the left rail at mid-height:
+Dark lab has no section slides. The breadcrumb carries the section. Name the
+section on the heading of its first slide:
 
 ```markdown
-## How much a leaderboard can move {.section-break}
+## The top of the leaderboard is a tie {#exhibit section="How much a leaderboard can move on its own"}
 ```
 
-The number comes from `stage-slide.lua`, so nothing is hand-numbered and the
-dividers renumber on the next render. The same number and title then label
-every slide of the section in the breadcrumb. A divider carries its title and
-nothing else, no background attribute. Why a CSS counter is wrong here is in
-the README under "Things that will silently break the deck"; divider title
-diction is in `style/house.md`.
+`lab.html` numbers the sections in document order, so nothing is hand-numbered
+and the numbers follow a reorder on the next render. The number and title then
+label that slide and every later slide until the next `section=`. Keep the
+section titles identical to the agenda items on the roadmap slide. Section
+title diction is in `style/house.md`.
 
 Extra material goes in vertical backups, not an appendix. A derivation, a
 robustness table, or a proof sits directly under the slide that raises it,
@@ -418,11 +418,11 @@ cd <deck dir>
 quarto render lecture.qmd --to darklab-revealjs 2>&1 | tee /tmp/render.log
 grep '\[WARNING\]' /tmp/render.log     # unclosed divs and missing images warn here, still exit 0
 
-node $TOOLING/deck-check.mjs fit lecture.html   # must print DECK-FITS: YES
-node $TOOLING/stage-check.mjs lecture.html      # must print STEP-0-CLEAN: YES
+node $SLIDES/deck-check.mjs fit lecture.html   # must print DECK-FITS: YES
+node $SLIDES/stage-check.mjs lecture.html      # must print STEP-0-CLEAN: YES
 
 # only if this deck was built as the offline variant
-$TOOLING/check-offline.py lecture.html           # must print OFFLINE-SAFE: YES
+$SLIDES/check-offline.py lecture.html           # must print OFFLINE-SAFE: YES
 ```
 
 `deck-check.mjs fit` drives headless Chrome, visits every slide, forces its
@@ -482,7 +482,7 @@ Quarto just rendered (`QUARTO_PROJECT_OUTPUT_FILES`, so rendering one lecture
 rebuilds only that handout) and calls the exporter on each:
 
 ```bash
-node $TOOLING/deck-check.mjs handout \
+node $SLIDES/deck-check.mjs handout \
   docs/lectures/w03-slug.html docs/lectures/w03-slug.pdf
 ```
 
@@ -515,13 +515,11 @@ rendered HTML.
 | Figure axis labels unreadable, gate says the slide is ok | `auto-stretch` shrank the figure instead of overflowing | read `--json` per-image `w`, move the text into a column |
 | A blank slide in the count and the handout | macro block before the first `##` | `## Notation {visibility="hidden"}` |
 | `\argmin` errors as an unexpected control sequence | macros wrapped in `$$ ... $$` | bare raw LaTeX under the hidden slide |
-| Section divider carries a stray coloured panel | a `background-color` attribute copied from another deck or theme | drop the attribute; `{.section-break}` alone is the contract |
-| Divider numeral is missing | `stage-slide.lua` not running: a deck off the extension with no `filters:` line | use the extension format, or add the filter by absolute path |
 | A figure or a note appears with the heading instead of waiting | the filter is not running, or the heading carries `{.no-stage}` | `stage-check.mjs` names the slide |
-| Math unrendered even with wifi | the format's self-hosted `mathjax/MathJax.js` url resolves to nothing next to the rendered HTML | copy `$TOOLING/_extensions/darklab/vendor/mathjax/` beside the deck, or override the url as the course project does |
+| Math unrendered even with wifi | the format's self-hosted `mathjax/MathJax.js` url resolves to nothing next to the rendered HTML | copy `$SLIDES/_extensions/darklab/vendor/mathjax/` beside the deck, or override the url as the course project does |
 | `\class{hid ...}` term never appears, or MathJax prints `\class` | a `mathjax/` copy without `extensions/TeX/HTML.js`, or no `.build` element on the slide | copy the darklab `mathjax/`, which carries HTML.js; add the `.build` marker |
-| Type looks wider than the fit gate measured | no `fonts/` copy next to the deck, so both faces fell back to the system stacks | copy `$TOOLING/_extensions/darklab/vendor/fonts/` beside the deck, or override the three @font-face urls |
-| Breadcrumb missing on every slide | no `.section-break` dividers, or the filter is missing so the dividers carry no number | add the dividers; keep the filter |
+| Type looks wider than the fit gate measured | no `fonts/` copy next to the deck, so both faces fell back to the system stacks | copy `$SLIDES/_extensions/darklab/vendor/fonts/` beside the deck, or override the three @font-face urls |
+| Breadcrumb missing on every slide | no heading carries `section="..."`, or `lab.html` did not load | name each section on its first slide; use the format |
 | A backup slide shows up in the lecture's path | its heading lacks `{.backup}`, or the clicker sends a key `lab.html` does not remap | add the class; check the clicker's key in the browser |
 | The class walks into a backup on Space | `lab.html` did not load (a deck off the extension) | use the format, or add `include-after-body: lab.html` |
 | Dividers numbered 1, 2, 2, 2 | a CSS counter, which `display: none` slides do not increment | the attribute plus `content: attr(...)`, which the theme already does |
@@ -561,5 +559,5 @@ rendered HTML.
 | `references/staging.md` | Fragment variants, `.r-stack`, `fragment-index`, `auto-animate`, the animation budget, the breadcrumb and backup navigation, layout numbers. |
 | `style/house.md` | Your values, separated from the mechanisms: palette rationale, density calibration, the author line, dates, button diction, closing wording. A stub in the public repo; fill it in. |
 | `assets/darklab-template.qmd` | The starting deck, rendering clean under `darklab-revealjs`. |
-| `$TOOLING/_extensions/darklab/` | The format: `_extension.yml` (every key commented), `darklab.scss` (palette table, click mechanics), `lab.html`, `title-slide.html`, and `vendor/` (fonts, MathJax) to copy beside each deck. |
-| `$TOOLING/README.md` | The machinery: the filter's six jobs, staging internals, both gates, citations and refs packing, the silent breakers, handouts. |
+| `$SLIDES/_extensions/darklab/` | The format: `_extension.yml` (every key commented), `darklab.scss` (palette table, click mechanics), `lab.html`, `title-slide.html`, and `vendor/` (fonts, MathJax) to copy beside each deck. |
+| `$SLIDES/README.md` | The machinery: the filter's six jobs, staging internals, both gates, citations and refs packing, the silent breakers, handouts. |

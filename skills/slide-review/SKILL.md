@@ -17,7 +17,7 @@ report exact fixes. This skill reports and does not edit, because a deck revisio
 ## Where things live
 
 The stages stay here; the detail sits in files this skill reads on demand. Paths are relative to
-this skill's directory. `$ASSETS` is `~/.claude/assets/slide-tooling` (where SETUP.md installs `slide-tooling/`), and its `README.md` is the
+this skill's directory. `$SLIDES` is `~/.claude/assets/slide-tooling` (where SETUP.md installs `slide-tooling/`), and its `README.md` is the
 toolchain's own manual: gate internals, filter behaviour, theme classes, the offline recipe. Facts
 that README owns are cited below, never restated.
 
@@ -61,7 +61,7 @@ file is read.
 
 ```bash
 export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
-ASSETS="$HOME/.claude/assets/slide-tooling"
+SLIDES="$HOME/.claude/assets/slide-tooling"
 RUN="$HOME/.claude/state/slide-review/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$RUN"
 ```
@@ -157,7 +157,7 @@ Offline is an opt-in variant, declared in front matter as `embed-resources: true
 in that case, using the facts stage 0 already read:
 
 ```bash
-python3 "$ASSETS/check-offline.py" deck.html; echo "exit=$?"    # opt-in decks only
+python3 "$SLIDES/check-offline.py" deck.html; echo "exit=$?"    # opt-in decks only
 ```
 
 Say which branch ran, in the report, on its own line. A default deck gets
@@ -198,9 +198,9 @@ Run this on every deck, before touching the browser. It is the one mandatory gat
 and whatever the math engine. It owns every geometric finding in the report.
 
 ```bash
-node "$ASSETS/deck-check.mjs" fit deck.html; echo "exit=$?"
-node "$ASSETS/deck-check.mjs" fit deck.html --json > "$RUN/fit.json"
-node "$ASSETS/stage-check.mjs" deck.html; echo "exit=$?"
+node "$SLIDES/deck-check.mjs" fit deck.html; echo "exit=$?"
+node "$SLIDES/deck-check.mjs" fit deck.html --json > "$RUN/fit.json"
+node "$SLIDES/stage-check.mjs" deck.html; echo "exit=$?"
 ```
 
 The second gate is the step-0 check: every content slide must open as its heading alone, and every
@@ -213,7 +213,7 @@ the walk adds about two seconds. Mechanics, slide-kind classification, and what 
 step are the README's staging section, under `Checking it`.
 
 `deck-check.mjs fit` prints the canvas, one line per slide, then a verdict, and exits 1 whenever the
-verdict is `NO`, so the gate composes: `node "$ASSETS/deck-check.mjs" fit deck.html || <report>`.
+verdict is `NO`, so the gate composes: `node "$SLIDES/deck-check.mjs" fit deck.html || <report>`.
 Verified output on a deck whose third slide is overstuffed, where `quarto render` had exited 0 in
 silence:
 
@@ -429,7 +429,7 @@ either way; what this route gives up is stage 4's contrast and math-engine signa
 says so.
 
 ```bash
-node "$ASSETS/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
+node "$SLIDES/deck-check.mjs" handout deck.html "$RUN/deck.pdf"
 ```
 
 That reuses the same headless Chrome the gate uses and needs nothing installed. decktape is the second

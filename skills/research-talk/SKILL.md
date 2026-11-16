@@ -179,7 +179,7 @@ All defined in `editorial.scss`. Use Quarto div and span syntax.
 | `.section-break` | On a heading: the full-bleed accent section slide. One word or a short phrase, no number. |
 | `.closing-slide` | On the Takeaways heading: numbered claims, then a `.contact` div. The progress line is full here. |
 | `.appendix-break` | On the Backup heading. Its body is a short list of the backup slides' titles. |
-| `.references-break`, `.references` | The references divider and the list (the filter paginates the list). |
+| `.references` | The reference list (the filter paginates it). An Editorial deck has no References divider, so citation links land on the first page of the list. |
 | `.em` | The phrase the room keeps, in the accent. Once or twice per slide. |
 | `.gray` (alias `.dim`) | An aside said in passing. |
 | `.aside-note` | A source line or caveat, pinned above the bottom edge in small gray type. |

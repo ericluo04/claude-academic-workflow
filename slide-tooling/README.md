@@ -33,7 +33,7 @@ come from it.
 | `stage-check.mjs` | The staging gate: asserts nothing but the heading is visible before a slide is advanced, and that no click is dead. On a hand-planned deck it checks dead clicks only. |
 | `check-offline.py` | Verifies a rendered deck fetches nothing at display time. For the offline variant only. |
 | `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. `extensions/TeX/HTML.js` provides `\class`, `\style`, and `\cssId`; `extensions/TeX/boldsymbol.js` provides `\boldsymbol`. |
-| `fonts/` | Schibsted Grotesk as woff2 (OFL 1.1), the Editorial format's face, copied next to each talk deck the way `mathjax/` is. Dark lab ships its own faces in `_extensions/darklab/vendor/fonts/`. |
+| `fonts/` | Schibsted Grotesk as woff2 (OFL 1.1), the Editorial format's face, copied next to each talk deck the way `mathjax/` is. Two static TTF cuts (Regular, SemiBold, instanced from the variable woff2) sit beside them for R figures, because FreeType cannot read woff2: the deck's setup chunk registers them with `systemfonts::register_font` and draws with `ragg_png`. Dark lab ships its own faces in `_extensions/darklab/vendor/fonts/`. |
 
 If you run a two-theme setup (say, a talk theme and a lecture theme on the
 same hooks), duplicate the
@@ -166,12 +166,16 @@ in the machinery.
 1. The canvas is 1280x720 with `margin: 0` and a 31px root, the same physical
    size as a 30px root on a 1050x700 canvas. Both gates size their window to
    the deck's own canvas.
-2. reveal's progress bar, slide number, menu, and controls are off. `lab.html`
-   draws a breadcrumb at the foot of each slide from the `.section-break`
-   dividers, and a hint at the bottom right on a slide that has a backup.
+2. reveal's progress bar, slide number, menu, and controls are off. There
+   are no section slides: `lab.html` draws a breadcrumb at the foot of each
+   slide from the `section="..."` attribute on the first slide of each
+   section, numbering the sections itself, and a hint at the bottom right on
+   a slide that has a backup, once that slide is at its last click.
 3. A heading with `{.backup}` becomes a vertical child of the slide above it,
    so the right arrow and a clicker skip it and the down arrow opens it.
-   `lab.html` remaps Space and PageDown so a clicker never walks into a backup.
+   `lab.html` remaps Space and PageDown so a clicker never walks into a backup,
+   and remaps the up arrow so one press on a backup returns to the parent at
+   its last click.
    A level-1 heading would turn staging off, which is why backups use a class.
 4. `incremental: true` with auto-staging on: every content slide opens as its
    title alone, and `stage-check.mjs` holds it to that.
@@ -296,12 +300,12 @@ span or a nested div instead, where the enclosing beat hides them until it
 opens. `fade-in-then-out` and `fade-in-then-semi-out` start hidden and are safe
 as top-level blocks.
 
-A variant that changes only colour is a dead step. The gate's signature is the
-visible elements with their text and their boxes, so reveal's own
-`highlight-red` / `highlight-green` / `highlight-blue` and `strike` (a text
-decoration) advance the deck without changing what the room sees. The theme's
-`.highlight-accent` passes because it also takes the weight to 600, which
-widens the box. `grow` on a plain span is a dead step for a different reason:
+A colour change counts as a change. The gate's signature is the visible
+elements with their text, their boxes, and their computed colour, so the
+theme's `.highlight-accent` and reveal's own `highlight-red` /
+`highlight-green` / `highlight-blue` are live steps. The accent changes colour
+only: a weight change would widen the box and reflow the line on the click.
+`strike` (a text decoration) is still a dead step. `grow` on a plain span is a dead step for a different reason:
 transforms do not apply to a non-replaced inline element, so nothing moves
 until the span carries `style="display: inline-block"`.
 
@@ -498,21 +502,19 @@ so the style is where to change them. Do not fake a paren in CSS: a `::before`
 on `span.citation` also wraps a narrative cite, and "Author (2020) shows" comes
 out "(Author (2020)) shows".
 
-Sizes and colours, as Dark lab sets them; a citation is a size step down in a
-muted ink with a measured ratio, and your theme picks its own values. Editorial
-leaves inline citations in running text and sets its entries at 18px.
+Sizes and colours, as Dark lab sets them; your theme picks its own values.
+Editorial leaves inline citations in running text and sets its entries at 18px.
 
 | | Dark lab |
 |---|---|
 | root | 31px |
-| `.citation` | 0.85em = 26.35px |
-| colour | `$lab-muted` #9ba3ad, 6.92:1 on the ground |
+| `.citation` | inherits the size and colour of the text around it |
 | hover | `$lab-teal` #3fd6c1, 9.74:1 |
-| inside `.aside-note`, `figcaption` | 1em (no compounding) |
 | `div.csl-entry` | 20px |
 
-0.88em is a step the eye reads as subordinate without turning the cite into a
-footnote; pick your own and keep it on both the span and the anchor.
+A narrative citation is part of its sentence ("Read Golder et al. (2023)"),
+so a smaller gray cite inside full-size text reads as a typo. Keep the span
+and the anchor on the same rule.
 
 Both rules colour the span and the anchor inside it. Quarto renders a citation as
 `(<a role="doc-biblioref">Author 2020</a>)`, so `.reveal a` was winning on the

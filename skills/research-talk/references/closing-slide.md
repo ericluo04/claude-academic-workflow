@@ -58,15 +58,15 @@ The backup slides follow, in the order of the main talk. Each has a Back
 ## The references
 
 ```markdown
-## References {.references-break}
-
 ## References {.references}
 
 ::: {#refs}
 :::
 ```
 
-The divider has the same form as the Backup divider. The filter paginates the
+There is no References divider. A citation link lands on the slide that holds
+the `#refs` marker, and without a divider that is the first page of the list,
+so a click on a citation opens the entries themselves. The filter paginates the
 list across as many slides as it needs (`citations.md`).
 
 ## How the progress line and the page number end

@@ -121,7 +121,7 @@
     div.csl-indent {
       margin-left: 2em;
     }  </style>
-  <link rel="stylesheet" href="w03-evaluation_files/libs/revealjs/dist/theme/quarto-2860c122cdafb0b849083e9c6f326a48.css">
+  <link rel="stylesheet" href="w03-evaluation_files/libs/revealjs/dist/theme/quarto-5d60673bd1cc71dd8a4e87c64f138bd4.css">
   <link href="w03-evaluation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="w03-evaluation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="w03-evaluation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -269,10 +269,7 @@ What to ask a vendor instead
 </ul>
 </div>
 </section>
-<section id="a-benchmark-score-is-an-estimate" class="slide level2 section-break" data-section-number="1" data-section-total="4">
-<h2>A benchmark score is an estimate</h2>
-</section>
-<section id="motivation" class="slide level2">
+<section id="motivation" class="slide level2" data-section="A benchmark score is an estimate">
 <h2>Two vendors, one number</h2>
 <div class="columns fragment" data-fragment-index="1">
 <div class="column" style="width:50%;">
@@ -346,10 +343,7 @@ Take the root, and substitute <span class="math inline">\(\widehat{S}\)</span> f
 </div>
 </div>
 </section>
-<section id="how-much-a-leaderboard-can-move-on-its-own" class="slide level2 section-break" data-section-number="2" data-section-total="4">
-<h2>How much a leaderboard can move on its own</h2>
-</section>
-<section id="exhibit" class="slide level2">
+<section id="exhibit" class="slide level2" data-section="How much a leaderboard can move on its own">
 <h2>The top of the leaderboard is a tie</h2>
 <div class="swap fragment" data-fragment-index="1">
 <div class="swap-out">
@@ -408,7 +402,7 @@ Take the root, and substitute <span class="math inline">\(\widehat{S}\)</span> f
 <section id="ci1" class="slide level2" data-auto-animate="true">
 <h2 data-id="quarto-animate-title">The interval you should have quoted</h2>
 <div class="fragment" data-fragment-index="0">
-<div class="hero amber" style="text-align: center; margin-top: 120px;">
+<div class="hero amber" data-id="ci-hero" style="text-align: center; margin-top: 120px;">
 <p><span class="math inline">\(0.83 \pm 0.025\)</span></p>
 </div>
 </div>
@@ -420,12 +414,12 @@ Take the root, and substitute <span class="math inline">\(\widehat{S}\)</span> f
 </section>
 <section id="ci2" class="slide level2" data-auto-animate="true">
 <h2 data-id="quarto-animate-title">The interval you should have quoted</h2>
-<div class="fragment" data-fragment-index="0">
-<div class="hero" style="text-align: center; margin-top: 120px;">
+<!-- The hero is on screen at click 0 here (.no-stage), so the auto-animate
+     pair morphs 0.025 into 0.006 instead of dropping the number on entry. -->
+<div class="hero no-stage" data-id="ci-hero" style="text-align: center; margin-top: 120px;">
 <p><span class="math inline">\(0.83 \pm 0.006\)</span></p>
 </div>
-</div>
-<div class="fragment" data-fragment-index="1">
+<div class="fragment" data-fragment-index="0">
 <div style="text-align: center;">
 <p><span class="math inline">\(n = 15{,}000\)</span> items. Now a 0.04 gap is real, and it cost sixteen times the grading budget.</p>
 </div>
@@ -449,7 +443,7 @@ Take the root, and substitute <span class="math inline">\(\widehat{S}\)</span> f
 <h2>Where the paired standard error comes from</h2>
 <div class="fragment" data-fragment-index="0">
 <div class="proof">
-<p><span class="proof-title"><em>Proof</em> (of <a href="#/thm-paired" class="quarto-xref">Theorem&nbsp;1</a>). </span>Write <span class="math inline">\(D_i = X_i - Y_i\)</span> for the difference of the two pass indicators on item <span class="math inline">\(i\)</span>. It is <span class="math inline">\(+1\)</span> where A passes and B fails, <span class="math inline">\(-1\)</span> where B passes and A fails, and 0 otherwise, so <span class="math inline">\(\mathbb{E}[D_i] = p_{10} - p_{01} = \Delta\)</span>. Since <span class="math inline">\(D_i^2\)</span> is 1 exactly on a disagreement, <span class="math inline">\(\mathbb{E}[D_i^2] = p_{10} + p_{01}\)</span> and <span class="math inline">\(\operatorname{var}(D_i) = p_{10} + p_{01} - \Delta^2\)</span>. The difference in scores is the mean of <span class="math inline">\(n\)</span> independent draws of <span class="math inline">\(D_i\)</span>, which divides that variance by <span class="math inline">\(n\)</span>.</p>
+<p><span class="proof-title"><em>Proof</em> (of Theorem 1). </span>Write <span class="math inline">\(D_i = X_i - Y_i\)</span> for the difference of the two pass indicators on item <span class="math inline">\(i\)</span>. It is <span class="math inline">\(+1\)</span> where A passes and B fails, <span class="math inline">\(-1\)</span> where B passes and A fails, and 0 otherwise, so <span class="math inline">\(\mathbb{E}[D_i] = p_{10} - p_{01} = \Delta\)</span>. Since <span class="math inline">\(D_i^2\)</span> is 1 exactly on a disagreement, <span class="math inline">\(\mathbb{E}[D_i^2] = p_{10} + p_{01}\)</span> and <span class="math inline">\(\operatorname{var}(D_i) = p_{10} + p_{01} - \Delta^2\)</span>. The difference in scores is the mean of <span class="math inline">\(n\)</span> independent draws of <span class="math inline">\(D_i\)</span>, which divides that variance by <span class="math inline">\(n\)</span>.</p>
 </div>
 </div>
 <div class="fragment" data-fragment-index="0">
@@ -468,10 +462,7 @@ Take the root, and substitute <span class="math inline">\(\widehat{S}\)</span> f
 </div>
 </div>
 </section>
-<section id="three-ways-the-number-lies" class="slide level2 section-break" data-section-number="3" data-section-total="4">
-<h2>Three ways the number lies</h2>
-</section>
-<section id="failures" class="slide level2">
+<section id="failures" class="slide level2" data-section="Three ways the number lies">
 <h2>The three failure modes</h2>
 <div class="fragment" data-fragment-index="0">
 <table>
@@ -625,10 +616,7 @@ Independent items
 </div></div>
 </div>
 </section>
-<section id="what-to-ask-a-vendor-instead" class="slide level2 section-break" data-section-number="4" data-section-total="4">
-<h2>What to ask a vendor instead</h2>
-</section>
-<section id="demo" class="slide level2">
+<section id="demo" class="slide level2" data-section="What to ask a vendor instead">
 <h2>Building your own eval set <span class="demo-tag">demo</span></h2>
 <div class="fragment" data-fragment-index="0">
 <p>We will do this live in the notebook. Three lines is the whole idea.</p>
@@ -655,11 +643,6 @@ Independent items
 <section id="check-answer" class="slide level2">
 <h2>Check yourself</h2>
 <div class="fragment">
-<div class="question">
-<p><span class="label">Commit, then argue</span> Vendor C scores 0.96, up from 0.71 on an unchanged benchmark.</p>
-</div>
-</div>
-<div class="fragment">
 <div class="example">
 <p><span class="label">One good answer</span> The score on a <em>rewritten</em> version of the same items. If 0.96 survives a paraphrase, it is capability. If it falls to 0.72, the benchmark leaked into training.</p>
 </div>
@@ -667,10 +650,8 @@ Independent items
 </section>
 <section id="grid" class="slide level2 full-bleed">
 <h2>What the leaderboard hides</h2>
-<div class="fragment" data-fragment-index="0">
-<p><img data-src="images/task-grid.png" class="fig-card"></p>
-</div>
-</section>
+
+<img data-src="w03-evaluation_files/figure-revealjs/task-grid-1.png" class="fragment r-stretch" data-fragment-index="0" width="1050"></section>
 <section id="synthesis" class="slide level2">
 <h2>Where we got to</h2>
 <div class="fragment" data-fragment-index="0">
@@ -1241,12 +1222,18 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
     //    lecture's path. This runs before reveal builds its index; on a deck where
     //    reveal is already up it re-syncs.
     // 2. The breadcrumb at the bottom left: the number and title of the section the
-    //    slide belongs to, read off the `.section-break` dividers (stage-slide.lua
-    //    writes data-section-number on each). Nothing to write per slide.
+    //    slide belongs to. Dark lab has no section slides. The first slide of a
+    //    section names it in its heading attributes,
+    //      ## Two vendors, one number {#motivation section="A benchmark score is an estimate"}
+    //    (pandoc writes it as data-section), and every later slide inherits it
+    //    until the next one. Sections are numbered here, in document order.
     // 3. The hint at the bottom right: "↓ backup" on a slide with a backup under it,
-    //    "↑ back" on the backup itself.
+    //    shown once the slide is at its last click (before that, the down arrow
+    //    would advance a fragment), and "↑ back" on the backup itself.
     // 4. Key remap. Space, PageDown and N advance like the right arrow, and PageUp
     //    and P go back like the left arrow, so a clicker never walks into a backup.
+    //    Up (and K) on a backup returns to the parent slide at its last click in one
+    //    press, instead of first stepping back through the backup's own fragments.
     // 5. Equation builds. A term written \class{hid bK}{...} inside display math
     //    enters on the K-th `.build` element of the slide (an empty
     //    [ ]{.fragment .build} marker or any staged block carrying .build). The term
@@ -1290,19 +1277,17 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
         slides.appendChild(crumb);
         slides.appendChild(hint);
 
-        // One pass in document order: each slide inherits the last divider above it.
+        // One pass in document order: each slide inherits the last section named
+        // at or above it.
         var label = new Map();
         var current = null;
+        var count = 0;
         Reveal.getSlides().forEach(function (s) {
           var c = s.classList;
-          if (c.contains("section-break")) {
-            var h = s.querySelector("h1, h2");
-            current = {
-              n: s.getAttribute("data-section-number") || "",
-              t: h ? h.textContent.trim() : ""
-            };
-            label.set(s, null);
-            return;
+          var named = s.getAttribute("data-section") || s.getAttribute("section");
+          if (named) {
+            count += 1;
+            current = { n: String(count), t: named.trim() };
           }
           if (s.id === "title-slide" || c.contains("closing-slide") ||
               c.contains("references-break") || c.contains("references") ||
@@ -1329,7 +1314,9 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
             crumb.hidden = true;
           }
           var r = Reveal.availableRoutes();
-          if (r.down) { hint.textContent = "↓ backup"; hint.hidden = false; }
+          var more = Reveal.availableFragments().next;
+          if (r.down && !more) { hint.textContent = "↓ backup"; hint.hidden = false; }
+          else if (r.down) { hint.hidden = true; }
           else if (idx.v > 0) { hint.textContent = "↑ back"; hint.hidden = false; }
           else { hint.hidden = true; }
         }
@@ -1355,16 +1342,31 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
         }
 
         function forward(e) { if (e && e.shiftKey) Reveal.left(); else Reveal.right(); }
+        // From a backup, back to the parent at its last click: the state the
+        // speaker left it in.
+        function up() {
+          var i = Reveal.getIndices();
+          if (!(i.v > 0)) { Reveal.up(); return; }
+          var parent = Reveal.getSlide(i.h, 0);
+          var last = -1;
+          if (parent) {
+            parent.querySelectorAll(".fragment[data-fragment-index]").forEach(function (f) {
+              last = Math.max(last, parseInt(f.getAttribute("data-fragment-index"), 10));
+            });
+          }
+          Reveal.slide(i.h, 0, last);
+        }
         Reveal.configure({
           keyboard: {
             32: forward, 34: forward, 78: forward,
-            33: function () { Reveal.left(); }, 80: function () { Reveal.left(); }
+            33: function () { Reveal.left(); }, 80: function () { Reveal.left(); },
+            38: up, 75: up
           }
         });
 
         Reveal.on("slidechanged", function () { update(); build(); });
-        Reveal.on("fragmentshown", build);
-        Reveal.on("fragmenthidden", build);
+        Reveal.on("fragmentshown", function () { update(); build(); });
+        Reveal.on("fragmenthidden", function () { update(); build(); });
         update();
         build();
         if (window.MathJax && MathJax.Hub) MathJax.Hub.Queue(build);

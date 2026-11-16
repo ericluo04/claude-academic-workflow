@@ -31,7 +31,7 @@ Then read [SETUP.md](SETUP.md): it names every path and helper the skills assume
 | `reading-papers` | Looks up and reads a specific paper from a link, DOI, title, or vague description, across marketing, economics, psychology, and CS venues. |
 | `litreview` | Finds, ranks, and synthesizes the literature on a topic across Semantic Scholar, OpenAlex, and arXiv, then reads the top hits with parallel subagents. |
 | `bibcheck` | Audits a `.bib` file entry by entry against canonical metadata and writes a corrected copy; catches wrong years, mis-cited authors, and hallucinated entries. |
-| `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how load-bearing they are. |
+| `council` | Spawns five independent critic subagents in parallel on any target, then a synthesis pass that ranks findings by how much of the argument rests on them. |
 | `review-paper` | Runs a simulated referee review of your own draft with six agents in parallel, triaged CRITICAL/MAJOR/MINOR against a named target journal. See the [note of caution](#a-note-of-caution-on-reviewing) below. |
 | `referee-response` | Drafts an R&R response letter where every claimed change is located and read in the manuscript before a location pin is written. |
 | `replication-package` | Assembles a journal-ready replication archive and scans it for secrets, PII, and absolute local paths first. |

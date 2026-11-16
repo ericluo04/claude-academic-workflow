@@ -20,7 +20,21 @@ format: editorial-revealjs
 library(ggplot2)
 # Figure palette, matched to the Editorial theme.
 col_main <- "#D4371C"; col_soft <- "#8c8c8c"; col_text <- "#5c5c5c"; col_bg <- "#ffffff"
-knitr::opts_chunk$set(dev.args = list(bg = col_bg))
+# Figures in the deck face, from the static TTF cuts in the fonts/ copy
+# (FreeType cannot read the woff2 files); the system sans otherwise.
+sg <- "fonts/schibsted-grotesk/SchibstedGrotesk-"
+fig_family <- "sans"
+known <- c(systemfonts::system_fonts()$family, systemfonts::registry_fonts()$family)
+if ("Schibsted Grotesk" %in% known) {
+  fig_family <- "Schibsted Grotesk"
+} else if (file.exists(paste0(sg, "Regular.ttf"))) {
+  systemfonts::register_font("Schibsted Grotesk", plain = paste0(sg, "Regular.ttf"),
+                             bold = paste0(sg, "SemiBold.ttf"))
+  fig_family <- "Schibsted Grotesk"
+}
+# base_size 18 puts tick labels near 19px on the slide.
+theme_set(theme_minimal(base_size = 18, base_family = fig_family))
+knitr::opts_chunk$set(dev = "ragg_png", dev.args = list(bg = col_bg))
 # load the analysis objects the deck needs
 ```
 
@@ -99,8 +113,8 @@ markets would have moved in parallel.
 
 ```{r}
 #| label: event-study
-#| fig-width: 8
-#| fig-height: 4.2
+#| fig-width: 11.2
+#| fig-height: 4.1
 # event-study plot; annotate the focal coefficient in the figure itself
 ```
 
@@ -110,8 +124,8 @@ markets would have moved in parallel.
 ::: {.column width="58%"}
 ```{r}
 #| label: spec-curve
-#| fig-width: 5.4
-#| fig-height: 4.0
+#| fig-width: 6.8
+#| fig-height: 4.3
 # coefficient plot across specifications
 ```
 :::
@@ -129,12 +143,18 @@ Point estimate moves by less than one standard error across specifications.
 
 ## Search costs explain the reversal, concentration does not {#mechanism}
 
-<!-- Clicks: 1 to 3 one line each; earlier lines gray. -->
+<!-- Clicks: 0 the first line; 1 and 2 one line each; earlier lines gray. -->
 
-::: {.incremental .dim-past}
+::: {.dim-past}
+::: {}
 - Effect scales with baseline search cost.
+:::
+::: {.fragment fragment-index=1}
 - No gradient in concentration.
+:::
+::: {.fragment fragment-index=2}
 - Both hold within state and within year.
+:::
 :::
 
 ## Takeaways {#takeaways .closing-slide}

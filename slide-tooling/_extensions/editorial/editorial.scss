@@ -60,6 +60,8 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
   display: block;
   font-size: 44px;
   text-align: left;
+  // balance, not pretty: on a two-line title Chrome's pretty still leaves a
+  // one-word second line ("too"), and balance evens the lines out.
   text-wrap: balance;
 }
 .reveal .slides > section:not(#title-slide):not(.section-break):not(.appendix-break):not(.references-break) > h2::after {
@@ -71,6 +73,8 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 }
 
 .reveal p, .reveal li { color: $ink; }
+// No one-word last lines in running text.
+.reveal p, .reveal li, .reveal .aside-note, .reveal td { text-wrap: pretty; }
 .reveal p { margin: 0 0 0.7em 0; max-width: 1060px; }
 .reveal ul, .reveal ol { margin: 0 0 0.9em 0; padding-left: 1.1em; display: block; }
 .reveal ul li, .reveal ol li { margin-bottom: 0.45em; max-width: 1040px; }
@@ -81,8 +85,10 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 .reveal ol > li::before { content: counter(ed); position: absolute; left: 0; top: 0; color: $accent; font-weight: 750; }
 
 // Inline spans. One accent and one gray: `.em` is the phrase the room keeps,
-// `.gray` (alias `.dim`) is the aside said in passing.
-.reveal .em { color: $accent; font-weight: 650; }
+// `.gray` (alias `.dim`) is the aside said in passing. The accent is a colour
+// and never a weight: a weight change on a click reflows the line. An accent
+// phrase never breaks across lines.
+.reveal .em { color: $accent; white-space: nowrap; }
 .reveal .gray, .reveal .dim { color: $muted; }
 .reveal strong { font-weight: 700; }
 
@@ -101,7 +107,7 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
   padding: 0 $pad-x;
   text-align: left;
   .title {
-    position: absolute; left: $pad-x; right: 180px; bottom: 330px;
+    position: absolute; left: $pad-x; right: 180px; bottom: 342px;   // 12px clear of the rule at 390px, so descenders never touch it
     margin: 0;
     font-size: 64px; font-weight: 750; line-height: 1.04; letter-spacing: -0.03em;
     text-align: left; text-wrap: balance; color: $ink;
@@ -187,7 +193,7 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 //   \class{hid}{...} a term not yet entered: laid out exactly, drawn invisibly
 .reveal .ac { color: $accent; }
 .reveal .bl { color: $second; }
-.reveal .gr { color: #8a8a8a; }
+.reveal .gr { color: #6e6e6e; }   // 5.1:1 on white
 .reveal .hid { visibility: hidden; }
 
 // Reserved space in prose or a table cell (Beamer's \invisible).
@@ -207,6 +213,7 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 // drawn per line, so at every click it spans exactly the lines on screen.
 .reveal .eq-notes {
   font-size: 25px;
+  margin: 0 0 16px 0;
   > * { border-left: 3px solid $accent; padding: 0 0 0.35em 20px; margin: 0; }
   > *:last-child { padding-bottom: 0; }
   p { margin: 0; color: $ink; }
@@ -223,13 +230,20 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
 // said, so the current item is the only one in full ink. `.li-dim` on a
 // fragment grays that element only while its own click is the current one
 // (it is on screen before and after, in full ink).
-.reveal .dim-past .fragment.visible:not(.current-fragment) { opacity: 0.35; }
+// Dimmed text stays readable: 0.6 opacity keeps ink on white near 4.5:1.
+// A `.dim-past` block may open with one item in place at click 0 (a plain
+// child, not a fragment); it grays as soon as a later item is on screen.
+.reveal .dim-past .fragment.visible:not(.current-fragment),
+.reveal .dim-past > :not(.fragment):has(~ .fragment.visible) { opacity: 0.6; }
+.reveal .dim-past .fragment.visible:not(.current-fragment) .em,
+.reveal .dim-past > :not(.fragment):has(~ .fragment.visible) .em { color: inherit; }
 .reveal .slides section .fragment.li-dim { opacity: 1; visibility: inherit; }
-.reveal .slides section .fragment.li-dim.current-fragment { opacity: 0.35; }
+.reveal .slides section .fragment.li-dim.current-fragment { opacity: 0.6; }
 
 // Turn a term to the accent on cue.
 .reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; }
-.reveal .slides section .fragment.highlight-accent.visible { color: $accent; font-weight: 650; }
+.reveal .slides section .fragment.highlight-accent { white-space: nowrap; }
+.reveal .slides section .fragment.highlight-accent.visible { color: $accent; }
 
 // Overflow: shrink the body, never the title band. `.shrink-95` to `.shrink-85`
 // on the heading scale everything under the rule. Past `.shrink-85`, cut content.
@@ -292,6 +306,14 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
   display: block; margin: 0 auto;
   max-height: 415px; max-width: 100%;
 }
+// A pinned .aside-note starts about 90px above the bottom edge; a figure on
+// the same slide stops 24px short of it.
+.reveal section:has(> .aside-note) img.figure,
+.reveal section:has(> .aside-note) .quarto-figure img,
+.reveal section:has(> .aside-note) .cell-output-display img { max-height: 392px; }
+// Quarto's auto-stretch sizes a lone figure to the space left under the title,
+// and the pinned note is out of the flow, so cap the stretched image too.
+.reveal .slides section:has(> .aside-note) > img.r-stretch { max-height: 392px; width: auto; object-fit: contain; }
 .reveal .quarto-figure figcaption, .reveal .figure-caption { font-size: 18px; color: $muted; text-align: center; }
 
 // ---- tables -----------------------------------------------------------------------------
@@ -317,17 +339,28 @@ $rule-y: 150px;   // the title rule; every content slide's body starts below it
   font-size: 20px;
   td:first-child, th { white-space: nowrap; }
   td, th { padding-left: 8px; padding-right: 8px; }
+  // The same outer edges as every other table: flush with the title at 72px.
+  th:first-child, td:first-child { padding-left: 0; }
+  th:last-child, td:last-child { padding-right: 0; }
   tbody tr td { padding-top: 7px; padding-bottom: 7px; }
 }
 
 // ---- references ---------------------------------------------------------------------------
 .reveal section.references {
   #refs, .references, div.csl-bib-body { font-size: 18px; line-height: 1.35; }
+  // Quarto indents the list; the entries start at the title's left edge.
+  div.csl-bib-body, div.csl-entry { margin-left: 0; }
   .csl-entry { padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.45em; color: $ink; }
 }
 
+// Quarto stamps `smaller scrollable` on the slide holding the #refs marker
+// (the first page of the list when the deck has no References divider).
+.reveal .slides section.references.smaller { font-size: inherit; }
+.reveal .slides section.references.smaller h2 { font-size: 44px; }
+.reveal .slides section.references.scrollable { overflow-y: visible; }
+
 // ---- code ----------------------------------------------------------------------------------
-.reveal pre, .reveal code { font-size: 20px; }
+.reveal pre, .reveal code { font-size: 20px; font-variant-ligatures: none; }
 
 // ---- progress line and page number (drawn by after.html) ------------------------------------
 // reveal's own slide number is off in the format; after.html draws the page number.

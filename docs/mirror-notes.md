@@ -45,8 +45,8 @@ lectures, designed to differ from the private style. The private rewrite's gener
 ported (staging, hand-planned clicks, equation builds, fixed-return Back, reference pagination);
 its structure and look are not. The earlier single `starter-revealjs` format, its
 `starter-theme.scss`, and its two fonts were removed. SETUP.md installs the tooling to
-`~/.claude/assets/slide-tooling/`, and the skills name it by a placeholder (`$SLIDES`, `$TOOLING`,
-`$ASSETS`) instead of a private directory name. The accent fragment class is
+`~/.claude/assets/slide-tooling/`, and the skills name it by one placeholder, `$SLIDES` (the name the slide-tooling README uses),
+instead of a private directory name. The accent fragment class is
 `.highlight-accent`. Every copy of `stage-slide.lua` (the root one and one per format) is kept
 identical.
 

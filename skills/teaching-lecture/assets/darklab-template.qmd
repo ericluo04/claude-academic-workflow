@@ -39,7 +39,11 @@ after the hiring screen.
 <li>What breaks in deployment</li>
 </ul>
 
-## Two models, same accuracy {#motivation}
+<!-- No section slides in Dark lab. The first slide of a section names it with
+     section="..."; the breadcrumb numbers it and carries it to every slide
+     until the next one. -->
+
+## Two models, same accuracy {#motivation section="Why accuracy does not answer the question"}
 
 :::: {.columns .fragment fragment-index=1}
 ::: {.column width="50%"}
@@ -60,7 +64,7 @@ Same accuracy, different consequences. Accuracy cannot tell them apart.
 :::
 :::
 
-## What a decision needs {#definition}
+## What a decision needs {#definition section="The loss function does the work"}
 
 ::: {.definition}
 [Definition]{.label}
@@ -96,7 +100,7 @@ arrives as the bare loss, and the next press wraps it in the expectation, in
 teal: `\class{hid b1}` hides a term until the first `.build` on the slide.
 :::
 
-## Worked example: the hiring screen {#worked}
+## Worked example: the hiring screen {#worked section="Worked example: the hiring screen"}
 
 <ol class="steps">
 <li>Write the decision problem: choose $a$ to minimize expected loss.</li>
@@ -120,7 +124,7 @@ backup under this slide.
 
 ## The threshold moves {auto-animate="true" #thr1}
 
-::: {.hero}
+::: {.hero data-id="thr-hero"}
 $\tau = 0.50$
 :::
 
@@ -128,7 +132,9 @@ Equal costs.
 
 ## The threshold moves {auto-animate="true" #thr2}
 
-::: {.hero}
+<!-- The second hero is on screen at click 0 (.no-stage) so the pair morphs. -->
+
+::: {.hero .no-stage data-id="thr-hero"}
 $\tau = 0.09$
 :::
 
@@ -141,9 +147,7 @@ Your firm's model is 94% accurate. Your competitor's is 91%. Which would you
 rather deploy, and what do you need to know first?
 :::
 
-## What breaks in deployment {.section-break}
-
-## What breaks {#threats}
+## What breaks {#threats section="What breaks in deployment"}
 
 :::: {.columns}
 ::: {.column width="58%"}

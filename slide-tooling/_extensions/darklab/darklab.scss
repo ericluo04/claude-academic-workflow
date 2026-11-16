@@ -9,7 +9,7 @@
 // It implements every hook stage-slide.lua, deck-check.mjs and stage-check.mjs
 // expect (dividers, staging, citations, the reference list, the closing slide),
 // plus the click mechanics documented in the CLICK MECHANICS block below.
-// Blocks marked LOAD-BEARING make the tooling work and should survive a
+// Blocks marked REQUIRED make the tooling work and should survive a
 // restyle.
 //
 // ---- palette ----
@@ -55,7 +55,7 @@ $font-family-sans-serif: $font-sans;
 $font-family-monospace: $font-mono;
 $presentation-font-family: $font-sans;
 
-// LOAD-BEARING SIZES. A lecture-hall root: 31px on the 1280x720 canvas is the
+// REQUIRED SIZES. A lecture-hall root: 31px on the 1280x720 canvas is the
 // same physical size as a 30px root on a 1050x700 canvas, scaled by height.
 // The reference-list budget in _extension.yml was measured against it.
 $presentation-font-size-root: 31px;
@@ -89,7 +89,7 @@ $dark-bg-code-color: $lab-amber;
 
 /*-- scss:rules --*/
 
-// LOAD-BEARING. The two back-matter grounds by name, for
+// REQUIRED. The two back-matter grounds by name, for
 //   ## References {.references-break background-color="var(--references-ground)"}
 // Both stay on the page ground in this theme.
 :root {
@@ -101,11 +101,13 @@ $dark-bg-code-color: $lab-amber;
 
 .reveal { font-family: $font-sans; font-feature-settings: "ss01" on; }
 .reveal pre, .reveal code, .reveal kbd, .reveal samp { font-family: $font-mono; }
+// JetBrains Mono's ligatures turn `<-` into an arrow; code shows what is typed.
+.reveal pre, .reveal code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 
 // ---- layout ----
 // Every slide fills the canvas and sets its own gutter: 76px left and right,
 // 52px top, and 78px at the foot so content stops above the breadcrumb.
-// LOAD-BEARING for the fit gate: with height 100% and border-box, content that
+// REQUIRED for the fit gate: with height 100% and border-box, content that
 // runs into the foot strip raises scrollHeight past 720 and the gate fails it.
 .reveal .slides > section:not(.stack),
 .reveal .slides > section.stack > section {
@@ -126,7 +128,7 @@ $dark-bg-code-color: $lab-amber;
   text-wrap: balance;
 }
 .reveal .slides section h3 { color: $lab-muted; font-size: 0.9em; font-weight: 600; }
-// LOAD-BEARING. Pandoc emits a real empty <h2> for a titleless heading.
+// REQUIRED. Pandoc emits a real empty <h2> for a titleless heading.
 .reveal .slides section > h2:empty { display: none; }
 
 .reveal p { margin: 0 0 20px 0; }
@@ -172,7 +174,7 @@ $dark-bg-code-color: $lab-amber;
   margin-top: 22px;
 }
 .reveal .aside-note p { color: $lab-muted; margin: 0; }
-// LOAD-BEARING. The filter moves an addendum that follows a list into the last
+// REQUIRED. The filter moves an addendum that follows a list into the last
 // list item; pull it back to the text rail.
 .reveal li > .aside-note,
 .reveal li > div.citation,
@@ -365,7 +367,7 @@ $dark-bg-code-color: $lab-amber;
   box-sizing: border-box;
 }
 .reveal .fig-card { display: inline-block; }
-// LOAD-BEARING SELECTORS. Quarto's own figcaption rules load after the theme;
+// REQUIRED SELECTORS. Quarto's own figcaption rules load after the theme;
 // these win on specificity. The second pair covers the caption auto-stretch
 // leaves as a bare sibling <p class="caption">.
 .reveal .slides section figure > figcaption,
@@ -379,11 +381,11 @@ html .reveal .slides section > img.stretch + p.caption,
   margin: 8px 0 0;
 }
 .reveal .fig-cap p { color: $lab-muted; margin: 0; }
-// LOAD-BEARING. A caption hoisted next to a staged lone image rides the
+// REQUIRED. A caption hoisted next to a staged lone image rides the
 // image's own fragment state, so it costs no extra keypress.
 .reveal .slides section > img.fragment + p.caption { opacity: 0; visibility: hidden; transition: opacity 0.2s ease; }
 .reveal .slides section > img.fragment.visible + p.caption { opacity: 1; visibility: inherit; }
-// LOAD-BEARING. Never transition height on a stretched image.
+// REQUIRED. Never transition height on a stretched image.
 .reveal .slides section > img.r-stretch.fragment { transition-property: opacity; }
 // A slide that is one exhibit, capped under the heading.
 .reveal .slides section.full-bleed img {
@@ -399,20 +401,22 @@ html .reveal .slides section > img.stretch + p.caption,
 .reveal .columns.vcenter { align-items: center; }
 
 // ---- citations ----
-// Size and colour only; the parentheses come from the CSL.
-.reveal .citation, .reveal .cite { font-size: 0.85em; }
-.reveal .citation, .reveal .citation a, .reveal .cite, .reveal .cite a { color: $lab-muted; }
+// A citation takes the size and colour of the text around it (in running text
+// the author names are part of the sentence); the year link and hover add teal.
+// The parentheses come from the CSL.
+.reveal .citation, .reveal .cite { font-size: inherit; }
+.reveal .citation, .reveal .citation a, .reveal .cite, .reveal .cite a { color: inherit; }
 .reveal span.citation, .reveal span.cite { border-bottom: 1px solid transparent; }
 .reveal .citation:hover, .reveal .citation:hover a, .reveal .cite:hover, .reveal .cite:hover a { color: $lab-teal; }
-// LOAD-BEARING. Multi-cite spans hover per segment (the filter wraps each in
+// REQUIRED. Multi-cite spans hover per segment (the filter wraps each in
 // span.cite-seg and stamps .cite-multi).
-.reveal span.citation.cite-multi:hover, .reveal span.citation.cite-multi:hover a { color: $lab-muted; }
+.reveal span.citation.cite-multi:hover, .reveal span.citation.cite-multi:hover a { color: inherit; }
 .reveal span.citation.cite-multi .cite-seg:hover, .reveal span.citation.cite-multi .cite-seg:hover a { color: $lab-teal; }
 .reveal .aside-note .citation, .reveal .aside-note .cite,
 .reveal figcaption .citation, .reveal figcaption .cite { font-size: 1em; }
 
 // ---- reference list ----
-// LOAD-BEARING METRICS. The budget in _extension.yml (refs-lines 18,
+// REQUIRED METRICS. The budget in _extension.yml (refs-lines 18,
 // refs-chars-per-line 124) was measured at these values: 20px entries at a
 // 1.4 line height (28px a line), the list starting under a 46px heading, and
 // the foot strip reserved. Change them and re-measure with
@@ -423,7 +427,7 @@ html .reveal .slides section > img.stretch + p.caption,
 .reveal .slides div.csl-bib-body div.csl-entry { margin-left: 0; }
 .reveal .slides div.csl-bib-body.hanging-indent div.csl-entry { padding-left: 1.5em; text-indent: -1.5em; }
 .reveal div.csl-entry a, .reveal div.csl-entry em { color: inherit; }
-// LOAD-BEARING. Quarto stamps `smaller scrollable` on the slide holding #refs.
+// REQUIRED. Quarto stamps `smaller scrollable` on the slide holding #refs.
 .reveal .slides section.references-break.smaller,
 .reveal .slides section.references.smaller { font-size: inherit; }
 .reveal .slides section.references-break.scrollable,
@@ -461,27 +465,16 @@ html .reveal .slides section > img.stretch + p.caption,
 .reveal .theorem.definition { border-left-color: $lab-teal; }
 .reveal .theorem.example { border-left-color: $lab-text; }
 
-// ---- section dividers ----
-// A two-digit mono numeral in teal, a teal rule, and the title in white, set on
-// the left rail at mid-height. stage-slide.lua writes data-section-number;
-// never hand-number a divider. Height 100%, and never display:flex on the
-// section (reveal writes display inline).
-.reveal .slides section.section-break,
+// ---- sections and dividers ----
+// Dark lab has no section slides. The breadcrumb at the foot carries the
+// section: the first slide of a section names it with `section="..."` on its
+// heading, and lab.html numbers the sections and labels every slide.
+//
+// The one divider is the references one: a short muted rule and the title in
+// the breadcrumb ink, on the left rail at mid-height. Height 100%, and never
+// display:flex on the section (reveal writes display inline).
 .reveal .slides section.appendix-break,
 .reveal .slides section.references-break { height: 100%; }
-.reveal .slides section.section-break::before {
-  content: "0" attr(data-section-number);
-  position: absolute;
-  left: 76px;
-  top: 214px;
-  font-family: $font-mono;
-  font-size: 64px;
-  font-weight: 700;
-  line-height: 1;
-  color: $lab-teal;
-  letter-spacing: -0.02em;
-}
-.reveal .slides section.section-break::after,
 .reveal .slides section.appendix-break::after,
 .reveal .slides section.references-break::after {
   content: "";
@@ -490,11 +483,8 @@ html .reveal .slides section > img.stretch + p.caption,
   top: 304px;
   width: 64px;
   height: 4px;
-  background: $lab-teal;
+  background: $lab-muted;
 }
-.reveal .slides section.appendix-break::after,
-.reveal .slides section.references-break::after { background: $lab-muted; }
-.reveal .slides section.section-break h2,
 .reveal .slides section.appendix-break h2,
 .reveal .slides section.references-break h2 {
   margin: 0;
@@ -629,17 +619,17 @@ html.print-pdf .hid { visibility: visible; }
 // 3. Gray-out. A block or a span that has been said recedes to the muted ink
 //    on cue. It is a fragment that starts visible, so put it on a span or a
 //    nested div (a top-level one leaks at step 0) and give it the same
-//    fragment-index as whatever arrives on that press: a colour change on its
-//    own is a dead step to stage-check.mjs.
+//    fragment-index as whatever arrives on that press, so the press also
+//    brings something new.
 .reveal .slides section .fragment.gray-out { opacity: 1; visibility: inherit; transition: color 0.3s ease; }
 .reveal .slides section .fragment.gray-out.visible,
 .reveal .slides section .fragment.gray-out.visible * { color: $lab-muted !important; }
 //
 // The theme's colour-on-cue variant, under the name the slide-tooling README lists:
-// the term takes teal and weight 700 (the weight change keeps it from being a
-// dead step).
-.reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; }
-.reveal .slides section .fragment.highlight-accent.visible { color: $lab-teal; font-weight: 700; }
+// the term takes teal. Colour only: a weight change would reflow the line.
+// stage-check.mjs reads colour, so this is a live step.
+.reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; white-space: nowrap; }
+.reveal .slides section .fragment.highlight-accent.visible { color: $lab-teal; }
 //
 // 4. Shrink. `{.shrink-90}` (or 85, 80, 75) on a heading sets everything under
 //    the heading at that share of the root, for the one slide with a table or

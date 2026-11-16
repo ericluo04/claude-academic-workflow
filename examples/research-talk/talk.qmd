@@ -15,6 +15,8 @@ bibliography: talk-refs.bib
 #   cp -R ../../slide-tooling/mathjax .
 #   cp -R ../../slide-tooling/fonts .
 #   quarto render talk.qmd
+# The figures are drawn in the deck face, Schibsted Grotesk, from the static
+# TTF cuts in fonts/schibsted-grotesk/ (the browser uses the woff2 files).
 #
 # Symbols, one per quantity on every slide and figure: p_jmt price of listing j
 # in market m, week t; A_jt automation indicator; RivalShare_mt share of rival
@@ -35,6 +37,23 @@ format: editorial-revealjs
 #| include: false
 library(ggplot2)
 
+# Figures use the deck's own face. FreeType cannot read the woff2 files the
+# browser loads, so slide-tooling ships two static TTF cuts for R. Without
+# them the figures fall back to the system sans.
+sg_dir <- "fonts/schibsted-grotesk"
+fig_family <- "sans"
+known <- c(systemfonts::system_fonts()$family, systemfonts::registry_fonts()$family)
+if ("Schibsted Grotesk" %in% known) {
+  fig_family <- "Schibsted Grotesk"
+} else if (file.exists(file.path(sg_dir, "SchibstedGrotesk-Regular.ttf"))) {
+  systemfonts::register_font(
+    "Schibsted Grotesk",
+    plain = file.path(sg_dir, "SchibstedGrotesk-Regular.ttf"),
+    bold  = file.path(sg_dir, "SchibstedGrotesk-SemiBold.ttf")
+  )
+  fig_family <- "Schibsted Grotesk"
+}
+
 # Figure palette, matched to the Editorial theme: the vermilion accent for the
 # series the slide is about, gray for the comparison, a white ground. If you
 # restyle the slide theme, restyle this with it.
@@ -43,8 +62,10 @@ col_soft <- "#8c8c8c"
 col_text <- "#5c5c5c"
 col_bg   <- "#ffffff"
 
-talk_theme <- function(base_size = 15) {
-  theme_minimal(base_size = base_size) +
+# base_size 18 sets tick labels near 19px on the slide, since figures are drawn
+# at 96 dpi and shown close to 1:1.
+talk_theme <- function(base_size = 18) {
+  theme_minimal(base_size = base_size, base_family = fig_family) +
     theme(
       panel.grid.minor = element_blank(),
       panel.grid.major.x = element_blank(),
@@ -60,18 +81,24 @@ talk_theme <- function(base_size = 15) {
       plot.background = element_rect(fill = col_bg, colour = NA)
     )
 }
-knitr::opts_chunk$set(dev.args = list(bg = col_bg))
+knitr::opts_chunk$set(dev = "ragg_png", dev.args = list(bg = col_bg))
 ```
 
 ## Most prices on this marketplace are now set by software {#intro}
 
-<!-- Clicks: 0 title only; 1 to 3 one line each, and each earlier line grays
-     when the next arrives. -->
+<!-- Clicks: 0 the first line; 1 and 2 one line each, and each earlier line
+     grays when the next arrives. -->
 
-::: {.incremental .dim-past}
+::: {.dim-past}
+::: {}
 - [68%]{.em} of active listings change price at least once a week, against 4% in 2015.
+:::
+::: {.fragment fragment-index=1}
 - Repricing is delegated to a handful of third-party tools whose rules are published.
+:::
+::: {.fragment fragment-index=2}
 - Sellers meet the same rivals week after week, so rules respond to rules.
+:::
 :::
 
 ::: {.aside-note}
@@ -146,8 +173,8 @@ of algorithmic writing assistance the same way, on hires.
 
 ```{r}
 #| label: adoption-curves
-#| fig-width: 8
-#| fig-height: 4.2
+#| fig-width: 11.2
+#| fig-height: 4.1
 base <- subset(economics, date >= as.Date("2000-01-01") & date <= as.Date("2008-12-01"))
 n <- nrow(base)
 z <- as.numeric(scale(log(base$pce)))
@@ -163,13 +190,13 @@ ggplot(adoption, aes(date, share, colour = grp)) +
   geom_vline(xintercept = as.Date("2019-03-01"), linetype = "dashed",
              colour = col_soft, linewidth = 0.5) +
   geom_line(linewidth = 1.2) +
-  annotate("text", x = as.Date("2019-06-01"), y = 0.97, hjust = 0, size = 4.6,
-           colour = col_text, label = "Repricing API opens") +
+  annotate("text", x = as.Date("2019-06-01"), y = 0.97, hjust = 0, size = 6.2,
+           family = fig_family, colour = col_text, label = "Repricing API opens") +
   scale_colour_manual(values = c(col_main, col_soft)) +
   scale_y_continuous(limits = c(0, 1), labels = scales::label_percent(accuracy = 1)) +
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
   labs(x = NULL, y = "Share of listings automated") +
-  talk_theme(15)
+  talk_theme()
 ```
 
 ::: {.aside-note}
@@ -255,16 +282,15 @@ Pooling across markets averages a positive and a zero effect into a small positi
 
 ## Prices move at adoption, and stay moved {#event-study}
 
-<!-- Clicks: 0 title only; 1 the figure and the estimate; 2 the reading and the
-     pre-trend test. -->
+<!-- Clicks: 0 the figure and the estimate; 1 the reading and the pre-trend
+     test. -->
 
 :::: {.columns}
 ::: {.column width="58%"}
-::: {.fragment fragment-index=1}
 ```{r}
 #| label: event-study
-#| fig-width: 5.4
-#| fig-height: 4.0
+#| fig-width: 6.8
+#| fig-height: 4.3
 es <- data.frame(
   k  = -4:4,
   b  = c(-0.004, 0.002, -0.006, 0, 0.011, 0.038, 0.052, 0.059, 0.062),
@@ -279,30 +305,29 @@ ggplot(es, aes(k, b)) +
   scale_x_continuous(breaks = -4:4) +
   scale_y_continuous(limits = c(-0.04, 0.11)) +
   labs(x = "Quarters relative to adoption", y = "Effect on log price") +
-  talk_theme(14)
+  talk_theme()
 ```
 :::
-:::
 ::: {.column width="42%"}
-::: {.result .fragment fragment-index=1}
+::: {.result}
 [Estimate]{.label}
 0.062 (0.018) four quarters out
 :::
 
-::: {.fragment fragment-index=2}
+::: {.fragment fragment-index=1}
 High-exposure markets only. Nothing happens before adoption, the jump lands in the
 quarter of adoption, and the level persists for a year.
 :::
 :::
 ::::
 
-::: {.aside-note .fragment fragment-index=2}
+::: {.aside-note .fragment fragment-index=1}
 Pre-period coefficients are jointly insignificant, $p = 0.71$.
 :::
 
 ## The interaction survives every specification we can think of {#robustness}
 
-<table class="spec">
+<table class="spec regtable">
 <thead>
 <tr>
 <th>Outcome: log price</th>
@@ -487,8 +512,6 @@ a model propose the rule is the case @ludwig2024Machine make.
 :::
 
 []{.jump-back}
-
-## References {.references-break}
 
 ## References {.references}
 

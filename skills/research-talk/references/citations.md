@@ -70,8 +70,6 @@ slide-tooling README under "Citations and the reference list".
 
 ... backup slides ...
 
-## References {.references-break}
-
 ## References {.references}
 
 ::: {#refs}

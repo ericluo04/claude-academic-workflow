@@ -55,7 +55,7 @@
     div.csl-indent {
       margin-left: 2em;
     }  </style>
-  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-0093aea434e4ef61be927bdd5bd193b9.css">
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-c4ecaf413511888104122ee68de2d71c.css">
   <link href="talk_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -180,14 +180,24 @@ Claude Code
 
 <section id="intro" class="slide level2">
 <h2>Most prices on this marketplace are now set by software</h2>
-<!-- Clicks: 0 title only; 1 to 3 one line each, and each earlier line grays
-     when the next arrives. -->
+<!-- Clicks: 0 the first line; 1 and 2 one line each, and each earlier line
+     grays when the next arrives. -->
 <div class="dim-past">
+<div>
 <ul>
-<li class="fragment"><span class="em">68%</span> of active listings change price at least once a week, against 4% in 2015.</li>
-<li class="fragment">Repricing is delegated to a handful of third-party tools whose rules are published.</li>
-<li class="fragment">Sellers meet the same rivals week after week, so rules respond to rules.</li>
+<li><span class="em">68%</span> of active listings change price at least once a week, against 4% in 2015.</li>
 </ul>
+</div>
+<div class="fragment" data-fragment-index="1">
+<ul>
+<li>Repricing is delegated to a handful of third-party tools whose rules are published.</li>
+</ul>
+</div>
+<div class="fragment" data-fragment-index="2">
+<ul>
+<li>Sellers meet the same rivals week after week, so rules respond to rules.</li>
+</ul>
+</div>
 </div>
 <div class="aside-note">
 <p>Source: PriceScope weekly listing panel, 2015–2023. Own calculations. Online price competition on this kind of marketplace has been measured since <span class="citation" data-cites="chevalier2003Measuring">Chevalier and Goolsbee (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span>.</p>
@@ -244,7 +254,7 @@ Claude Code
 <section id="adoption" class="slide level2">
 <h2>Adoption tracks the tier queue that granted API access</h2>
 
-<img data-src="talk_files/figure-revealjs/adoption-curves-1.png" width="768" class="r-stretch"><div class="aside-note">
+<img data-src="talk_files/figure-revealjs/adoption-curves-1.png" width="1075" class="r-stretch"><div class="aside-note">
 <p>Groups are the earliest and latest thirds of the queue, fixed at seller signup. Seller behaviour on this marketplace has mostly been studied through reviews rather than prices <span class="citation" data-cites="he2022Market">(<a href="#/references" role="doc-biblioref" onclick="">He et al. 2022</a>)</span>.</p>
 </div>
 </section>
@@ -362,36 +372,34 @@ Claude Code
 </section>
 <section id="event-study" class="slide level2">
 <h2>Prices move at adoption, and stay moved</h2>
-<!-- Clicks: 0 title only; 1 the figure and the estimate; 2 the reading and the
-     pre-trend test. -->
+<!-- Clicks: 0 the figure and the estimate; 1 the reading and the pre-trend
+     test. -->
 <div class="columns">
 <div class="column" style="width:58%;">
-<div class="fragment" data-fragment-index="1">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="talk_files/figure-revealjs/event-study-1.png" width="518"></p>
+<p><img data-src="talk_files/figure-revealjs/event-study-1.png" width="652"></p>
 </figure>
 </div>
 </div>
 </div>
-</div>
 </div><div class="column" style="width:42%;">
-<div class="result fragment" data-fragment-index="1">
+<div class="result">
 <p><span class="label">Estimate</span> 0.062 (0.018) four quarters out</p>
 </div>
-<div class="fragment" data-fragment-index="2">
+<div class="fragment" data-fragment-index="1">
 <p>High-exposure markets only. Nothing happens before adoption, the jump lands in the quarter of adoption, and the level persists for a year.</p>
 </div>
 </div></div>
-<div class="aside-note fragment" data-fragment-index="2">
+<div class="aside-note fragment" data-fragment-index="1">
 <p>Pre-period coefficients are jointly insignificant, <span class="math inline">\(p = 0.71\)</span>.</p>
 </div>
 </section>
 <section id="robustness" class="slide level2">
 <h2>The interaction survives every specification we can think of</h2>
-<table class="spec">
+<table class="spec regtable">
 <thead>
 <tr>
 <th>
@@ -811,14 +819,11 @@ Listings
 </div>
 <p><a href="#/" class="jump-btn jump-back" data-jump-back="" data-return="queue" data-return-via="ap-measure">Back</a></p>
 </section>
-<section id="references" class="slide level2 references-break smaller scrollable">
+<section id="references" class="slide level2 references smaller scrollable" data-refs-page="1" data-refs-pages="2">
 <h2>References</h2>
 <div id="refs" role="list">
 
 </div>
-</section>
-<section id="references-1" class="slide level2 references" data-refs-page="1" data-refs-pages="2">
-<h2>References</h2>
 <div class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-bradlow2004LearningBased" class="csl-entry" role="listitem">
 Bradlow, Eric T., Ye Hu, and Teck-Hua Ho. 2004. <span>“A <span>Learning-Based Model</span> for <span>Imputing Missing Levels</span> in <span>Partial Conjoint Profiles</span>.”</span> <em>Journal of Marketing Research</em> 41 (4): 369–81. <a href="https://doi.org/10.1509/jmkr.41.4.369.47018">https://doi.org/10.1509/jmkr.41.4.369.47018</a>.
@@ -843,7 +848,7 @@ Gabel, Sebastian, and Daniel Ringel. 2024. <span>“The <span>Market Basket Tran
 </div>
 </div>
 </section>
-<section id="references-1-p2" class="slide level2 references" data-refs-page="2" data-refs-pages="2">
+<section id="references-p2" class="slide level2 references" data-refs-page="2" data-refs-pages="2">
 <h2>References</h2>
 <div class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-golder2023Learning" class="csl-entry" role="listitem">
