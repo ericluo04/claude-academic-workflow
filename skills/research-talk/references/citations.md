@@ -2,7 +2,7 @@
 
 A seminar deck cites constantly, so the citation has to be visible and has to
 stay under the claim. Cite on the slide where the borrowed thing appears; the
-full list goes at the very end, after the appendix, and paginates itself.
+full list goes at the very end, after the backup slides, and paginates itself.
 
 ## Never type a reference by hand
 
@@ -56,25 +56,21 @@ set of parens. A bare `\cite` used as a sentence subject is `@key`.
 
 ## How a citation renders
 
-The theme gives `span.citation` two properties and nothing else: 0.88em
-(26.4px against the 30px root, 8.9:1 in the appendix gray on white) and no
-compounding inside an `.aside-note` or a figcaption, which are already the
-quiet register. Hovering lights the whole citation, author, year, and
-parentheses together, in the mid blue at 5.2:1 on white, and the tooltip that
-pops the reference entry answers the whole citation too, on one line or two
-when it wraps; in a multi-cite each citation previews its own entry. That
-retargeting is the filter's, runs on every deck, and needs nothing in the
-front matter; the mechanics are in the README under "Citations and the
-reference list".
+A citation takes the size of the text around it: body size in the body, the
+small gray of an `.aside-note` in a note. The year is a link in the accent.
+Hovering a citation pops its reference entry in a tooltip, and in a multi-cite
+each citation previews its own entry. That retargeting is the filter's, runs on
+every deck, and needs nothing in the front matter; the mechanics are in the
+slide-tooling README under "Citations and the reference list".
 
 ## The reference list at the very end
 
 ```markdown
-## Appendix {.appendix-break background-color="var(--appendix-ground)"}
+## Backup {.appendix-break}
 
-... appendix slides ...
+... backup slides ...
 
-## References {.references-break background-color="var(--references-ground)"}
+## References {.references-break}
 
 ## References {.references}
 
@@ -82,42 +78,26 @@ reference list".
 :::
 ```
 
-`bibliography: talk-refs.bib` is the only front-matter line the deck adds; the
-format already carries `citeproc: false` and a `refs-fit` preset (this repo's
-starter extension sets `refs-fit: starter`).
+`bibliography: talk-refs.bib` is the only front-matter line the deck adds. The
+format already carries `citeproc: false` and the reference budget.
 
 `citeproc: false` is not cosmetic. Quarto runs pandoc's citeproc after its
 whole filter chain, so the only way a filter can see rendered entries and cut
 them into slides is to run citeproc itself, which `stage-slide.lua` does. A
-deck that loses the line (a plain `revealjs` format, say) renders a second,
-unpaginated bibliography; `deck-check.mjs fit` fails the deck and names the
-fix.
+deck that loses the line renders a second, unpaginated bibliography, and
+`deck-check.mjs fit` fails the deck and names the fix.
 
-The preset picks the measured line budget for its theme: `refs-fit: starter`
-budgets 25.9 rendered lines at 134 characters per line, with the hanging
-indent taking 0.026 of a line off every wrapped line (a `talk` preset for a
-30px root, 25.7 lines at 125, is also kept). The packer is greedy: it fills
-each slide to the budget and the last slide carries the remainder however
-short, so the sample talk packs 10 entries and then 3. How many entries fit
-depends on
-how long they run; `STAGE_REFS_DEBUG=1 quarto render talk.qmd` prints what the
-packer decided, so read that instead of expecting a fixed count. The filter
-cannot read the theme, because Quarto compiles the SCSS to a hashed bundle
-before any filter runs, which is why the format names the preset next to the
-theme. Forgetting the line costs an under-filled slide, never an overflow.
-`refs-lines` and `refs-chars-per-line` override the preset outright; the
-packing model and its derivation are in the README under "How many entries
-fit".
+The Editorial format sets the budget outright, `refs-lines: 20` and
+`refs-chars-per-line: 118`, for its 18px entries on the 1136px measure. On the
+example talk the 13 entries pack as 7 and 6, and the first page ends at y=627
+of the 656 px available. The packer is greedy: it fills each slide to the
+budget and the last slide carries the remainder. `STAGE_REFS_DEBUG=1 quarto
+render talk.qmd` prints what it decided. Forgetting the budget costs an
+under-filled slide, never an overflow.
 
-The divider is the appendix divider again, same ring and same gray. The
-references slides carry no pill: the standing label belongs to
-`section.appendix h2::before` alone, because the heading is already the word
-References and a label above it would repeat the heading. Nothing on them is
-staged: a reference list is not an argument being built, and `stage-check.mjs`
-reports them as `reference list` and skips them. A `.jump-back` written after
-the trailing `.aside-note` lands on the last page, if you want one.
+Nothing on the reference slides is staged, and `stage-check.mjs` reports them
+as `reference list` and skips them.
 
 Do not put `.scrollable` on a references slide. It hides overflow from the
-gate, breaks `auto-stretch`, and does not print. If the list still overflows,
-the budget is wrong: read the `STAGE_REFS_DEBUG=1` render and override with
-`refs-lines`.
+gate and does not print. If the list overflows, lower `refs-lines` in the deck's
+front matter.

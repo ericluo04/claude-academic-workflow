@@ -39,6 +39,12 @@
 // room is the wrong eight keypresses. stage-slide.lua puts the class on every page
 // of the list it generates, so this covers the continuation slides as well.
 //
+// HAND-PLANNED DECKS. A deck rendered with `auto-stage: false` carries
+// `data-auto-stage="false"` on <html> (stage-slide.lua writes it). There a slide
+// may open with content at click 0 by design, so every slide without `.stage`
+// is reported as `hand-planned` and checked only for a visible heading and for
+// dead steps. A `.stage` slide is still held to the full invariant.
+//
 // DEAD STEPS. Step 0 is only half the invariant. A press that reveals a wrapper
 // painting nothing advances the deck without changing anything on the wall, and
 // every assertion above is about the state before the first press, so none of them
@@ -256,7 +262,12 @@ const report = await evaluate(`(async () => {
       s.classList.contains('references-break') ? 'references divider' :
       s.classList.contains('references') ? 'reference list' :
       s.getAttribute('data-visibility') === 'hidden' ? 'hidden' :
-      !head ? 'no heading' : 'content';
+      !head ? 'no heading' :
+      // A hand-planned deck (auto-stage: false, marked on <html> by the filter)
+      // may show content at click 0 by design. Only a {.stage} slide is held to
+      // the step-0 invariant; the rest are walked for dead steps alone.
+      document.documentElement.getAttribute('data-auto-stage') === 'false' &&
+        !s.classList.contains('stage') ? 'hand-planned' : 'content';
 
     // What the room sees on this slide, as one string: every shown element inside
     // the section that carries ink of its own, with the box it occupies. The
@@ -282,7 +293,7 @@ const report = await evaluate(`(async () => {
     // only ever moves within the slide and returns false when it runs out, so the
     // walk cannot wander onto the next one.
     const dead = [];
-    if (kind === 'content') {
+    if (kind === 'content' || kind === 'hand-planned') {
       let prev = ink();
       for (let k = 0; k < 60; k++) {
         if (R.nextFragment() === false) break;
@@ -326,6 +337,11 @@ const report = await evaluate(`(async () => {
 let bad = 0;
 for (const s of report) {
   const flags = [];
+  if (s.kind === "hand-planned") {
+    if (s.headShown === false) flags.push("HEADING NOT VISIBLE");
+    if (s.dead.length === 1) flags.push(`DEAD STEP: press ${s.dead[0] + 1} changes nothing`);
+    else if (s.dead.length) flags.push(`DEAD STEPS: presses ${s.dead.map((k) => k + 1).join(", ")} change nothing`);
+  }
   if (s.kind === "content") {
     if (s.leaks.length) flags.push(`LEAKS AT STEP 0: ${[...new Set(s.leaks)].join(" ")}`);
     if (s.advanced) flags.push(`${s.advanced} FRAGMENT ALREADY VISIBLE`);
@@ -340,5 +356,5 @@ for (const s of report) {
     `${flags.length ? flags.join("; ") : "clean"}   ${s.title}`
   );
 }
-console.log(`\nSTEP-0-CLEAN: ${bad ? "NO" : "YES"}  (${report.length} slides, ${report.filter((s) => s.kind === "content").length} of them content)`);
+console.log(`\nSTEP-0-CLEAN: ${bad ? "NO" : "YES"}  (${report.length} slides, ${report.filter((s) => s.kind === "content").length} of them content, ${report.filter((s) => s.kind === "hand-planned").length} hand-planned)`);
 done(bad ? 1 : 0);

@@ -76,7 +76,7 @@ adopting a default you would have to defend to a referee.
 
 Two live example decks, rendered by these skills and published on GitHub Pages:
 
-- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck, with staged reveals, a framing withdrawn in place, a headline estimate that takes the accent on cue, jump buttons into the appendix, and a paginated reference list.
+- [Research talk](https://ericluo04.github.io/claude-academic-workflow/talk/talk.html): a seminar deck on the Editorial theme, with hand-planned clicks, an equation built term by term, a framing swapped in place, accent section slides, a Takeaways close, jump buttons into the backup slides with fixed-return Back, and a paginated reference list.
 - [Teaching lecture](https://ericluo04.github.io/claude-academic-workflow/lectures/w03-evaluation.html): a classroom deck, with teaching blocks, a comparison that arrives from both sides, a leaderboard that gains its error bars in place, a worked example, discussion prompts, and agenda tracking.
 
 Both are static pages that make zero network requests at display time; the [index](https://ericluo04.github.io/claude-academic-workflow/) links them with keyboard shortcuts. Their sources are in `examples/`, and the live copies are those sources rendered against the starter theme in `slide-tooling/`, exactly as they render out of the box.

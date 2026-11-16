@@ -3,16 +3,18 @@
 Shared tooling for Quarto reveal.js decks: a Pandoc filter, two render-time
 quality gates, an offline checker, a starter theme, and the vendored assets
 that keep a deck self-hosted. Used by the `research-talk`, `teaching-lecture`,
-`slide-review`, and `course-site` skills, which expect this directory
-installed at `~/.claude/assets/quarto-yale/` (see SETUP.md at the repo root).
+`slide-review`, and `course-site` skills. SETUP.md at the repo root installs
+it; below, `$SLIDES` stands for wherever this `slide-tooling/` directory
+lives on your machine.
 
 This file is the machinery reference: what each file does, what the filter
 rewrites, what the gates assert, and the settings that break a deck without
 saying so. How sparse a slide should be, what a title should say, how to pace
 a lecture, and which block class means what all live in the skills.
 
-The rendered decks under `docs/` are the example sources rendered with
-`starter-theme.scss`, a light editorial theme (warm paper ground, Literata
+The research talk under `docs/talk/` is rendered with the Editorial format
+(`_extensions/editorial/`, described below). The other rendered decks under
+`docs/` use `starter-theme.scss`, a light theme (warm paper ground, Literata
 display headings over IBM Plex Sans text, plum accent) that implements every
 hook the filter and the gates expect, with comments marking where taste goes.
 Where a concrete number helps, this file cites measurements taken on a
@@ -26,12 +28,13 @@ citations, and the reference list holds for the starter theme too.
 |---|---|
 | `starter-theme.scss` | A plain light theme implementing every hook. Restyle it into your own. |
 | `_extensions/starter/` | A Quarto extension format (`starter-revealjs`) wiring the theme, the filter, and the verified defaults together. `quarto add` this directory. |
+| `_extensions/editorial/` | The `editorial-revealjs` format for research talks: a 1280x720 canvas, one vermilion accent, hand-planned clicks, fixed-return Back. See "The Editorial format" below. |
 | `stage-slide.lua` | Pandoc filter, six jobs. Read its header comment before changing any of them. |
 | `deck-check.mjs` | The fit gate, and the handout exporter. |
-| `stage-check.mjs` | The staging gate: asserts nothing but the heading is visible before a slide is advanced. |
+| `stage-check.mjs` | The staging gate: asserts nothing but the heading is visible before a slide is advanced, and that no click is dead. On a hand-planned deck it checks dead clicks only. |
 | `check-offline.py` | Verifies a rendered deck fetches nothing at display time. For the offline variant only. |
-| `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. |
-| `fonts/` | The theme's two faces as woff2 (both OFL 1.1), copied next to each deck the way `mathjax/` is: `literata/` for display, `ibm-plex-sans/` for text. Each family is one variable roman covering 400-700 plus one static italic, 434 KB in total. |
+| `mathjax/` | Vendored MathJax 2.7.9 (Apache 2.0), copied next to each deck so math is self-hosted. `extensions/TeX/HTML.js` provides `\class`, `\style`, and `\cssId`; `extensions/TeX/boldsymbol.js` provides `\boldsymbol`. |
+| `fonts/` | The theme's two faces as woff2 (both OFL 1.1), copied next to each deck the way `mathjax/` is: `literata/` for display and `ibm-plex-sans/` for text (the starter theme), and `schibsted-grotesk/` (OFL 1.1) for the Editorial format. |
 
 If you run a two-theme setup (say, a talk theme and a lecture theme on the
 same hooks), duplicate the
@@ -58,13 +61,13 @@ format:
     slide-number: c/t
     incremental: true
 filters:
-  - ~/.claude/assets/quarto-yale/stage-slide.lua
+  - $SLIDES/stage-slide.lua
 ```
 
 ```bash
 quarto render deck.qmd --to revealjs
-node ~/.claude/assets/quarto-yale/deck-check.mjs fit deck.html  # must print DECK-FITS: YES
-node ~/.claude/assets/quarto-yale/stage-check.mjs deck.html     # must print STEP-0-CLEAN: YES
+node $SLIDES/deck-check.mjs fit deck.html  # must print DECK-FITS: YES
+node $SLIDES/stage-check.mjs deck.html     # must print STEP-0-CLEAN: YES
 ```
 
 Give the filter an absolute path in `filters:`. The `.scss` is different:
@@ -111,6 +114,48 @@ block:
 These are expanded at parse time, before any renderer sees the math, so they
 work under KaTeX even though KaTeX itself cannot do `\DeclareMathOperator`. Do
 not put them in a MathJax config header or a ` ```{=tex} ` block.
+
+## The Editorial format
+
+`format: editorial-revealjs` is the research-talk format. The
+`research-talk` skill documents how to write a deck on it; this section says
+what the format changes in the machinery.
+
+1. The canvas is 1280x720 with `margin: 0`, so every length in
+   `editorial.scss` is a canvas pixel. Both gates size their window to the
+   deck's own canvas.
+2. reveal's progress bar, slide number, menu, and controls are off.
+   `after.html` draws a 4px accent progress line and a page number. The line
+   runs from the title to the `.closing-slide` (the Takeaways slide) and stays
+   full after it, the same rule the filter's progress script applies to
+   reveal's bar. The theme hides `.slide-number`, which the filter's progress
+   script can switch back on.
+3. `after.html` gives every `.section-break` slide the accent as its reveal
+   background (`data-background-color`, then `Reveal.sync()`), so the colour
+   reaches the window edge at any aspect ratio. A section slide that sets its
+   own `background-color` keeps it.
+4. `incremental: false` and `auto-stage: false`: no slide is staged unless
+   its heading carries `{.stage}`. The filter then writes
+   `data-auto-stage="false"` on `<html>`, and `stage-check.mjs` reports every
+   slide without `{.stage}` as `hand-planned`: it checks that the heading is
+   visible and that no click is dead, and does not require the title alone at
+   click 0. A deck with auto-staging on gets no marker and no change.
+5. `back-returns: fixed`: Back returns to the main-talk slide whose button
+   leads into the backup section, at the click where that button appears
+   (`wire_back_buttons` in the filter). The `.appendix-break` divider (titled
+   Backup) opens the backup section.
+6. The reference budget is given outright (`refs-lines: 20`,
+   `refs-chars-per-line: 118`) for 18px entries on the 1136px measure.
+7. `head.html` loads Schibsted Grotesk from the deck's `fonts/` copy and pins
+   MathJax to its TeX webfonts. Display math is set at 36px through its
+   container. A `font-size` on `span.MathJax` itself overrides the size
+   MathJax measured with and leaves a gap after inline math.
+8. Fragments have no transition, so every reveal is instant.
+
+The click mechanics (`.eq-stack` and `.eq-layer`, `\class{hid}`, `.eq-notes`,
+`.swap`, `.dim-past`, `.li-dim`, `.shrink-NN`) are CSS only and are documented
+at the head of each rule in `editorial.scss` and in the skill's
+`references/staging.md`.
 
 ## What stage-slide.lua does
 
@@ -283,7 +328,7 @@ a run of raw HTML that opens a container into one unit.
 ### Checking it
 
 ```bash
-node ~/.claude/assets/quarto-yale/stage-check.mjs deck.html   # must print STEP-0-CLEAN: YES
+node $SLIDES/stage-check.mjs deck.html   # must print STEP-0-CLEAN: YES
 ```
 
 `stage-check.mjs` drives reveal rather than guessing. `Reveal.slide(h, v, -1)`
@@ -332,8 +377,8 @@ slide and wrong in the room.
 ## The fit gate
 
 ```bash
-node ~/.claude/assets/quarto-yale/deck-check.mjs fit deck.html [--json]
-node ~/.claude/assets/quarto-yale/deck-check.mjs handout deck.html out.pdf
+node $SLIDES/deck-check.mjs fit deck.html [--json]
+node $SLIDES/deck-check.mjs handout deck.html out.pdf
 ```
 
 `deck-check.mjs` drives headless Chrome over CDP (node 22's built-in WebSocket,
@@ -1046,7 +1091,7 @@ over CDP and open the deck over `file://`, with no server and no MCP.
 ## PDF handouts
 
 ```bash
-node ~/.claude/assets/quarto-yale/deck-check.mjs handout deck.html handout.pdf
+node $SLIDES/deck-check.mjs handout deck.html handout.pdf
 ```
 
 That loads `deck.html?print-pdf` and prints through CDP `Page.printToPDF` with

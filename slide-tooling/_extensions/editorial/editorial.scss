@@ -1,0 +1,341 @@
+/*-- scss:defaults --*/
+
+// Editorial: a white page, one vermilion accent, one sans family, hairline
+// rules. Every class a deck may use is defined in this file and documented in
+// skills/research-talk/SKILL.md ("Theme classes") and references/staging.md
+// (the click mechanics). The canvas is 1280x720 with no margin, so every
+// length below is a canvas pixel.
+
+$ink:     #151515;
+$muted:   #5c5c5c;
+$hair:    #d9d9d9;
+$accent:  #D4371C;   // vermilion: white on it is 4.8:1, it on white is 4.8:1
+$tint:    #fbeae6;   // the accent at roughly 10% on white
+$second:  #2f5e8c;   // a second term role in math only; never a second accent in prose
+
+$font-sans: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+$body-bg: #ffffff;
+$body-color: $ink;
+$link-color: $accent;
+$presentation-font-family: $font-sans;
+$presentation-heading-font: $font-sans;
+$presentation-heading-color: $ink;
+$presentation-heading-font-weight: 700;
+$presentation-heading-text-transform: none;
+$presentation-heading-letter-spacing: -0.02em;
+$presentation-heading-line-height: 1.08;
+$presentation-font-size-root: 30px;
+$presentation-line-height: 1.38;
+$presentation-h2-font-size: 44px;
+
+/*-- scss:rules --*/
+
+$pad-x: 72px;
+$rule-y: 150px;   // the title rule; every content slide's body starts below it
+
+.reveal { font-family: $font-sans; }
+.reveal .slides { text-align: left; }
+
+// Reveals are instant, as Beamer overlays are. A fade on every click pulls the
+// eye to the motion instead of the content.
+.reveal .slides section .fragment { transition: none !important; }
+
+// ---- content slides --------------------------------------------------------
+// A padded box, the title in a fixed band above a full-width rule. The band
+// never moves or resizes, so consecutive slides line up.
+.reveal .slides > section:not(#title-slide):not(.section-break):not(.appendix-break):not(.references-break) {
+  box-sizing: border-box;
+  height: 720px;
+  padding: ($rule-y + 40px) $pad-x 64px $pad-x;
+}
+
+.reveal .slides section h2 {
+  position: absolute;
+  left: $pad-x; right: $pad-x;
+  top: auto; bottom: 720px - $rule-y;
+  margin: 0;
+  padding-bottom: 22px;
+  box-sizing: border-box;
+  display: block;
+  font-size: 44px;
+  text-align: left;
+  text-wrap: balance;
+}
+.reveal .slides > section:not(#title-slide):not(.section-break):not(.appendix-break):not(.references-break) > h2::after {
+  content: "";
+  position: absolute;
+  left: -$pad-x; right: -$pad-x; bottom: 0;
+  height: 1.5px;
+  background: $ink;
+}
+
+.reveal p, .reveal li { color: $ink; }
+.reveal p { margin: 0 0 0.7em 0; max-width: 1060px; }
+.reveal ul, .reveal ol { margin: 0 0 0.9em 0; padding-left: 1.1em; display: block; }
+.reveal ul li, .reveal ol li { margin-bottom: 0.45em; max-width: 1040px; }
+.reveal ul li::marker { color: $accent; }
+.reveal ol { list-style: none; padding-left: 0; counter-reset: ed; }
+.reveal ol > li::marker { content: none; }
+.reveal ol > li { list-style: none !important; counter-increment: ed; position: relative; padding-left: 1.4em !important; }
+.reveal ol > li::before { content: counter(ed); position: absolute; left: 0; top: 0; color: $accent; font-weight: 750; }
+
+// Inline spans. One accent and one gray: `.em` is the phrase the room keeps,
+// `.gray` (alias `.dim`) is the aside said in passing.
+.reveal .em { color: $accent; font-weight: 650; }
+.reveal .gray, .reveal .dim { color: $muted; }
+.reveal strong { font-weight: 700; }
+
+// A source line or caveat, pinned above the bottom edge in small gray type.
+.reveal .aside-note {
+  position: absolute; left: $pad-x; right: $pad-x; bottom: 40px;
+  font-size: 18px; line-height: 1.4; color: $muted;
+  p { color: $muted; margin: 0; max-width: none; }
+}
+// Leave room for a Back button in the corner.
+.reveal section:has(a.jump-back) .aside-note { right: 220px; }
+
+// ---- title slide -------------------------------------------------------------
+.reveal #title-slide {
+  box-sizing: border-box; height: 720px;
+  padding: 0 $pad-x;
+  text-align: left;
+  .title {
+    position: absolute; left: $pad-x; right: 180px; bottom: 330px;
+    margin: 0;
+    font-size: 64px; font-weight: 750; line-height: 1.04; letter-spacing: -0.03em;
+    text-align: left; text-wrap: balance; color: $ink;
+  }
+  .subtitle {
+    position: absolute; left: $pad-x; right: $pad-x; top: 412px;
+    margin: 0; font-size: 26px; font-weight: 400; color: $muted;
+    text-align: left; letter-spacing: 0;
+  }
+  &::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 390px;
+    height: 1.5px; background: $ink;
+  }
+  .quarto-title-authors { position: absolute; left: $pad-x; bottom: 72px; display: block; margin: 0; }
+  .quarto-title-author { padding: 0; }
+  .quarto-title-author-name { font-size: 22px; font-weight: 650; color: $ink; text-align: left; }
+  .date { position: absolute; left: $pad-x; bottom: 40px; margin: 0; font-size: 20px; color: $muted; text-align: left; }
+}
+
+// ---- section slide -------------------------------------------------------------
+// `## Identification {.section-break}`: full-bleed accent, one word or a short
+// phrase low on the left, no number. after.html paints the slide background
+// with the accent so the colour reaches the window edge; the rule here paints
+// the canvas too, so the slide is right even before that script runs.
+.reveal .slides section.section-break {
+  box-sizing: border-box; height: 720px; padding: 0;
+  background: $accent;
+  h2 {
+    top: auto; bottom: 88px; height: auto;
+    padding: 0;
+    font-size: 132px; font-weight: 750; letter-spacing: -0.04em; line-height: 0.95;
+    color: #ffffff;
+  }
+}
+
+// ---- backup and references dividers --------------------------------------------
+// `## Backup {.appendix-break}` and `## References {.references-break}`: plain
+// white, one word above a hairline, and under it a short list of what follows
+// (the backup slides' titles), so the speaker can find a slide by eye.
+.reveal .slides section.appendix-break,
+.reveal .slides section.references-break {
+  box-sizing: border-box; height: 720px; padding: 0;
+  h2 { top: auto; bottom: 352px; height: auto; padding: 0; font-size: 56px; color: $muted; font-weight: 600; }
+  &::after { content: ""; position: absolute; left: 0; right: 0; top: 392px; height: 1.5px; background: $hair; }
+  > ul, > ol, > div, > p {
+    position: absolute; left: $pad-x; right: $pad-x; top: 420px; margin: 0;
+  }
+  ul, ol { padding-left: 1.1em; }
+  li { font-size: 24px; line-height: 1.35; color: $muted; margin-bottom: 0.3em; }
+}
+
+// ---- closing slide: Takeaways ----------------------------------------------------
+// `## Takeaways {.closing-slide}`: the numbered claims, then the contact line on
+// a hairline at the bottom. The progress line is full here and stays full
+// through the backup slides and the references.
+.reveal section.closing-slide {
+  ol li { font-size: 30px; margin-bottom: 0.7em; padding-left: 0.2em; }
+  .contact {
+    position: absolute; left: $pad-x; right: $pad-x; bottom: 40px;
+    padding-top: 16px; border-top: 1px solid $hair;
+    font-size: 19px; color: $muted;
+    p { color: $muted; margin: 0; max-width: none; }
+    a { color: $muted; }
+  }
+}
+
+// ---- math ------------------------------------------------------------------------
+.reveal .MathJax_Display { text-align: left !important; margin: 0.2em 0 0.9em 0 !important; }
+// Display math is set larger than the text through its container, before
+// MathJax measures it. Writing font-size on span.MathJax itself overrides the
+// size MathJax measured with and leaves a gap after inline math.
+.reveal div.MathJax_Display, .reveal .eq-stack { font-size: 36px; }
+// A derivation chain (an aligned block with a label column) is set smaller so
+// the equation and its labels fit the 1136px measure.
+.reveal .chain div.MathJax_Display, .reveal .eq-stack.chain { font-size: 28px; }
+.reveal .tight-math .MathJax_Display { margin: 0 0 0.4em 0 !important; }
+
+// Term roles inside math, through MathJax's \class (needs mathjax/extensions/TeX/HTML.js).
+// One colour per role on every equation and figure of the deck:
+//   \class{ac}{...}  the term the slide is about (accent)
+//   \class{bl}{...}  a second role, used only when two roles must be told apart
+//   \class{gr}{...}  a constant that does not change the story (gray, moved last)
+//   \class{hid}{...} a term not yet entered: laid out exactly, drawn invisibly
+.reveal .ac { color: $accent; }
+.reveal .bl { color: $second; }
+.reveal .gr { color: #8a8a8a; }
+.reveal .hid { visibility: hidden; }
+
+// Reserved space in prose or a table cell (Beamer's \invisible).
+.reveal .reserve, .reveal .ph { visibility: hidden; }
+
+// The step equation. `.eq-stack` stacks layers in one grid cell. Each layer is
+// the whole equation with every term in its final place and the terms not yet
+// entered wrapped in \class{hid}{...}. Layer 1 is a plain div; each later layer
+// is an `.eq-layer` fragment with the next index. A later layer has an opaque
+// ground and covers the one below, and since every layer has the same box no
+// term moves when the next one appears.
+.reveal .eq-stack { display: grid; }
+.reveal .eq-stack > * { grid-area: 1 / 1; background: $body-bg; }
+.reveal .eq-stack > .eq-layer { position: relative; z-index: 1; }
+
+// Notes under an equation, one variable or term per line. The accent bar is
+// drawn per line, so at every click it spans exactly the lines on screen.
+.reveal .eq-notes {
+  font-size: 25px;
+  > * { border-left: 3px solid $accent; padding: 0 0 0.35em 20px; margin: 0; }
+  > *:last-child { padding-bottom: 0; }
+  p { margin: 0; color: $ink; }
+}
+
+// ---- click mechanics ----------------------------------------------------------------
+// Swap in place. The old layer stays in the flow as `.fragment .fade-out` and
+// keeps its space after it goes; the new layer is `.swap-in`, a `.fragment` at
+// the same index, laid absolutely over it on an opaque ground.
+.reveal .swap { position: relative; }
+.reveal .swap > .swap-in { position: absolute; left: 0; top: 0; right: 0; background: $body-bg; }
+
+// Gray-out. `.dim-past` on a list built item by item grays every item already
+// said, so the current item is the only one in full ink. `.li-dim` on a
+// fragment grays that element only while its own click is the current one
+// (it is on screen before and after, in full ink).
+.reveal .dim-past .fragment.visible:not(.current-fragment) { opacity: 0.35; }
+.reveal .slides section .fragment.li-dim { opacity: 1; visibility: inherit; }
+.reveal .slides section .fragment.li-dim.current-fragment { opacity: 0.35; }
+
+// Turn a term to the accent on cue.
+.reveal .slides section .fragment.highlight-accent { opacity: 1; visibility: inherit; }
+.reveal .slides section .fragment.highlight-accent.visible { color: $accent; font-weight: 650; }
+
+// Overflow: shrink the body, never the title band. `.shrink-95` to `.shrink-85`
+// on the heading scale everything under the rule. Past `.shrink-85`, cut content.
+@each $s in 98, 95, 92, 90, 88, 85 {
+  .reveal .slides section.shrink-#{$s} > :not(h2):not(.aside-note):not(.btn-corner):not(.contact) { zoom: $s * 0.01; }
+}
+
+// ---- jump buttons ------------------------------------------------------------------
+// stage-slide.lua turns `[Label]{.jump target="ap-id"}` and `[]{.jump-back}`
+// into `<a class="jump-btn">`. A small outlined pill in the accent.
+.reveal a.jump-btn {
+  display: inline-block;
+  font-size: 18px; font-weight: 600; line-height: 1;
+  color: $accent; background: $body-bg;
+  border: 1.5px solid $accent; border-radius: 999px;
+  padding: 6px 14px 7px;
+  text-decoration: none;
+  vertical-align: middle;
+  margin-left: 0.4em;
+}
+.reveal a.jump-btn:hover { background: $accent; color: #ffffff; }
+.reveal p:has(> a.jump-btn:only-child) { text-align: right; max-width: none; }
+.reveal .btn-corner { position: absolute; right: $pad-x; bottom: 36px; }
+.reveal .btn-corner p { margin: 0; }
+// A Back on its own line goes to the bottom-right corner without a wrapper.
+.reveal .slides section p:has(> a.jump-btn.jump-back:only-child) {
+  position: absolute; right: $pad-x; bottom: 36px; margin: 0;
+}
+
+// ---- formal statements and results --------------------------------------------------
+.reveal .label { font-weight: 700; }
+.reveal .assumption, .reveal .proposition, .reveal .theorem, .reveal .lemma, .reveal .definition {
+  margin: 0 0 24px 0;
+  background: $tint; padding: 18px 24px;
+  font-size: 24px;
+  p { margin: 0 0 0.4em 0; }
+  p:last-child { margin-bottom: 0; }
+  .label { margin-right: 0.4em; }
+}
+.reveal .proof {
+  font-size: 22px; color: $muted;
+  p { color: $muted; margin: 0 0 0.4em 0; }
+  > :last-child::after { content: "\25A1"; float: right; color: $muted; }
+}
+.reveal .result {
+  margin: 0 0 24px 0;
+  border-left: 6px solid $accent; padding: 6px 0 6px 22px;
+  font-size: 30px;
+  p { margin: 0; }
+  .label { display: block; font-size: 20px; color: $muted; font-weight: 600; margin-bottom: 4px; }
+}
+.reveal .takeaway {
+  margin-top: 24px; padding-top: 14px; border-top: 1px solid $hair;
+  font-weight: 650;
+  p { margin: 0; }
+}
+
+// ---- figures -------------------------------------------------------------------------
+.reveal img.figure, .reveal .quarto-figure img, .reveal .cell-output-display img {
+  display: block; margin: 0 auto;
+  max-height: 415px; max-width: 100%;
+}
+.reveal .quarto-figure figcaption, .reveal .figure-caption { font-size: 18px; color: $muted; text-align: center; }
+
+// ---- tables -----------------------------------------------------------------------------
+// Rules only, no fills; numbers tabular. `.regtable` mutes every second body
+// row (the standard errors under their estimates); `.spec` is the wide form.
+.reveal table {
+  width: 100%; border-collapse: collapse; margin: 0 0 28px 0;
+  font-size: 23px;
+  th { font-weight: 650; border: 0; border-bottom: 1.5px solid $ink; padding: 6px 12px 10px; vertical-align: bottom; }
+  td { padding: 5px 12px; border: 0; }
+  tbody tr:last-child td { border-bottom: 1.5px solid $ink; padding-bottom: 10px; }
+  th:first-child, td:first-child { padding-left: 0; }
+  th:last-child, td:last-child { padding-right: 0; }
+  caption { caption-side: bottom; font-size: 18px; color: $muted; text-align: left; padding-top: 8px; }
+}
+.reveal table .num, .reveal table td.num, .reveal table th.num { text-align: right; }
+.reveal .regtable table, .reveal table.regtable {
+  tbody tr:nth-child(2n) td { color: $muted; padding-top: 0; }
+  tbody tr:nth-last-child(2) td { border-top: 1px solid $hair; padding-top: 10px; }
+  tbody tr:last-child td { color: $ink; }
+}
+.reveal .spec table, .reveal table.spec {
+  font-size: 20px;
+  td:first-child, th { white-space: nowrap; }
+  td, th { padding-left: 8px; padding-right: 8px; }
+  tbody tr td { padding-top: 7px; padding-bottom: 7px; }
+}
+
+// ---- references ---------------------------------------------------------------------------
+.reveal section.references {
+  #refs, .references, div.csl-bib-body { font-size: 18px; line-height: 1.35; }
+  .csl-entry { padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.45em; color: $ink; }
+}
+
+// ---- code ----------------------------------------------------------------------------------
+.reveal pre, .reveal code { font-size: 20px; }
+
+// ---- progress line and page number (drawn by after.html) ------------------------------------
+// The filter's progress script can switch reveal's own slide number back on;
+// after.html draws the page number instead.
+.reveal .slide-number { display: none !important; }
+.ed-progress { position: fixed; left: 0; right: 0; bottom: 0; height: 4px; z-index: 30; pointer-events: none; }
+.ed-progress-fill { height: 100%; width: 0; background: $accent; }
+.ed-num { position: fixed; right: 28px; bottom: 16px; font-family: $font-sans; font-size: 15px; color: $muted;
+  font-variant-numeric: tabular-nums; z-index: 30; }
+body.ed-on-accent .ed-progress-fill { background: #ffffff; }
+@media print { .ed-progress, .ed-num { display: none; } }

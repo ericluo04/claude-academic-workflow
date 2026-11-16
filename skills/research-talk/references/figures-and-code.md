@@ -1,8 +1,9 @@
 # Figures, code, tables, and layout
 
-Everything here is measured on the 1050x700 canvas, whose content box is 945 px
-wide. knitr renders at 192 dpi here, so `fig-width: 8` produces a 1536 px
-image.
+Everything here is measured on the Editorial format's 1280x720 canvas. The
+content box is 1136 px wide (72 px side padding) and runs from y=190, under the
+title rule, to y=656. knitr renders at 192 dpi, so `fig-width: 8` produces a
+1536 px image.
 
 ## Figures that fit
 
@@ -12,9 +13,8 @@ sets the aspect ratio more than the final size. Verified renders:
 
 | Chunk options | Rendered on slide |
 |---|---|
-| `fig-width: 8`, `fig-height: 4.2` | 945 x 496, comfortable under a two-line heading |
-| `fig-width: 9.5`, `fig-height: 5.5` | 908 x 526, fills the slide, no room for a takeaway line |
-| `fig-width: 5.4`, `fig-height: 4.0` in a 58% column | 466 x 346 |
+| `fig-width: 8`, `fig-height: 4.2` | 810 x 425, with room for an `.aside-note` under it (`#adoption`) |
+| `fig-width: 5.4`, `fig-height: 4.0` in a 58% column, inside a fragment | 518 x 384 (`#event-study`) |
 
 Start at `fig-width: 8`, `fig-height: 4.2` for a full-width exhibit and
 `fig-width: 5.4`, `fig-height: 4.0` for a two-column one. Set `base_size` in
@@ -23,7 +23,7 @@ print-sized axis labels is unreadable from the back of the room.
 
 Auto-stretch fails loudly in one case worth knowing: when a slide holds a
 figure plus enough other content to overflow, the stretch computes to zero and
-the figure renders 945 px wide by 0 px high. It looks like a missing image.
+the figure renders at full width and 0 px high. It looks like a missing image.
 The fit gate reports it as `CRUSHED FIG`.
 
 Auto-stretch stops applying the moment the image is nested in a fragment, a
@@ -33,10 +33,23 @@ off the bottom (the README, "Figures and tables", has the mechanism and the
 measured 424px overflow). Size a nested figure with `fig-width` and
 `fig-height`, and let the fit gate confirm it.
 
-A figure you write as a chunk needs none of this: the format's filter stages a
-figure cell by putting the fragment on the image itself, the one form
-auto-stretch survives, so the figure waits for its keypress and still fills
-the slide (`staging.md` has the caption case).
+A figure that arrives on a click sits inside a fragment div, so it loses
+auto-stretch. Size it with `fig-width` and `fig-height`, as `#event-study`
+does. On a `{.stage}` slide the filter puts the fragment on the image itself,
+the one form auto-stretch survives.
+
+Give a talk figure a plain chunk label. A label that starts with `fig-` makes
+Quarto add a "Figure 1" caption under it.
+
+## The figure palette
+
+Figures match the slide: the vermilion accent (`#D4371C`) for the series the
+slide is about, a mid gray (`#8c8c8c`) for the comparison, gray axis text
+(`#5c5c5c`), horizontal grid lines only (`#e6e6e6`), and a white ground. The
+setup chunk of the example talk defines `col_main`, `col_soft`, `col_text`,
+`col_bg`, and a `talk_theme()` for ggplot2. A figure made in Python uses the
+same five values. One accent per figure: a second highlighted series goes in
+gray or in the dark ink, never in a second bright colour.
 
 Missing image files fail silently at exit 0. The fit gate catches them as
 `MISSING IMG`.
@@ -53,14 +66,14 @@ For n images at a shared height h, the row occupies
 
     h * sum(w_i / h_i)  +  (n - 1) * gap  +  any separator column
 
-against the 945px content width, or 1050px if the row goes full bleed. Solve
+against the 1136px content width, or 1280px if the row goes full bleed. Solve
 for h, take the lesser of that and the vertical room under the heading, and
 back off about 20px.
 
 With portrait images the width term binds well before height does, which is
 counterintuitive on a slide showing a wide empty band under the row: four
 portrait images averaging 0.67 aspect need 2.68 times their height in width, so
-425px tall would need 1140px across on a 1050px slide however much vertical
+480px tall would need 1286px across on a 1280px slide however much vertical
 room is free. When a request for a much larger figure is geometrically
 impossible, the recoverable slack is in the gaps and the separator column, and
 it is worth saying what the real ceiling is rather than silently landing under
@@ -75,7 +88,7 @@ first.
 ## Code and output on the same slide
 
 Set `echo: true` on the chunk (the format defaults `echo: false`).
-`output-location` takes five values and they are not equivalent on a 1050x700
+`output-location` takes five values and they are not equivalent on a 1280x720
 canvas:
 
 - `column` is the right default when you are showing code. Code goes left,
@@ -117,17 +130,13 @@ Rscript -e 'install.packages("sandwich", repos="https://cloud.r-project.org")'
 
 ## Tables
 
-Tables sit flush against the left text rail, so a narrow table lines up with
-the heading above it. A table with four or more columns needs no class: both
-themes stretch it to the full text column via `table:has(tr > :nth-child(4))`,
-with padding scaled up, so its right edge lands where the aside note and the
-takeaway rule end; 2-3 column tables keep natural width. Quarto's inline
-`width:100%` (written when `tbl-colwidths` is set) agrees with the rule.
-
-Put `.spec` on a wide specification table so it shrinks instead of clipping
-(`: Caption text {.spec}` on the caption line), and `.num` on a column to
-right-align numerals. A table is always one beat to the staging filter; its
-cells are never staged.
+Tables span the content column and carry rules only, no fills: a rule under
+the header and one under the last row. Wrap a regression table in
+`::: {.regtable}` and every second body row (the standard errors under their
+estimates) turns gray, with a hairline above the last two rows (`#table`).
+Put `.spec` on a wide specification table, as a div around it or as a class on
+a raw `<table>`, so it sets at 20px (`#robustness`, `#ap-window`), and `.num`
+on a column to right-align numerals. Mark the focal estimate with `.em`.
 
 `modelsummary(..., output = "markdown")` with column names `(1)` and `(2)`
 gets mangled: pandoc reads the parenthesised numbers as ordered-list markers
@@ -160,6 +169,5 @@ Low-search-cost markets move by 0.06, not distinguishable from zero.
 ::::
 ````
 
-Four colons open the wrapper and three open each column. The theme sets
-`align-items: flex-start` so the interpretation lines up with the top of the
-exhibit. 58/42 leaves the text column wide enough to avoid two-word lines.
+Four colons open the wrapper and three open each column. The columns are
+top-aligned, so the interpretation lines up with the top of the exhibit. 58/42 leaves the text column wide enough to avoid two-word lines.

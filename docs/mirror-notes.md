@@ -64,6 +64,16 @@ Sections of `CLAUDE.md` not published. The private file carries a section on mir
 configuration to its own repositories and a section on a specific computing grid. Neither belongs
 in a file offered as an example, so neither is published.
 
+The 2026-11-16 Editorial theme. The public `research-talk` skill now runs on
+its own format, `editorial-revealjs` in `slide-tooling/_extensions/editorial/`,
+and no longer on the starter format. It ports the private skill's general rules
+(hand-planned clicks, the step equation with `\class{hid}`, the derivation
+chain, swap in place, gray-out, shrink classes for overflow, fixed-return Back,
+the case for presenting someone else's paper) and leaves out the private
+deck's own structure: no navigation bar, no numbered section cards, no title
+band, no Thank you slide. Every worked example comes from the repricing example
+talk. The paragraph below describes the state before this change.
+
 The 2026-11-10 research-talk rewrite. The private skill was rewritten around a Beamer-match
 reveal.js format: hand-planned clicks, a nav bar with dots, and classes such as `.swap`,
 `.li-dim`, `.eq-layer`, `.btn-corner`, and `.shrink-NN`, plus a step-video player and scripts

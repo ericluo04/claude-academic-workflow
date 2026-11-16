@@ -6,8 +6,8 @@
 <script src="talk_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="talk_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="talk_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="talk_files/libs/quarto-html/quarto-syntax-highlighting-3419ea62b3ca2d77d3d547f86109e84e.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.10.18">
+<link href="talk_files/libs/quarto-html/quarto-syntax-highlighting-e21500bb30e7ce080c64316834ee3be8.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.19">
 
   <meta name="author" content="Claude Code">
   <meta name="dcterms.date" content="2026-09-18">
@@ -55,7 +55,7 @@
     div.csl-indent {
       margin-left: 2em;
     }  </style>
-  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-5178932c97e4b507a45c9282dc5e97a2.css">
+  <link rel="stylesheet" href="talk_files/libs/revealjs/dist/theme/quarto-b033f9b1cd95a869f2334d5624f34860.css">
   <link href="talk_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="talk_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -147,36 +147,16 @@
       margin-right: 0; 
     }
   </style>
-  <script>window.MathJax = { "HTML-CSS": { availableFonts: [], preferredFont: null, webFont: "TeX" } };</script>
+  <!-- Editorial format, header include. Paths resolve against the rendered HTML,
+       so the deck directory needs the `fonts/` and `mathjax/` copies from
+       slide-tooling/. MathJax is pinned to its own TeX webfonts so glyph metrics do
+       not depend on the viewing machine. -->
+  <script>window.MathJax = { "HTML-CSS": { availableFonts: [], preferredFont: null, webFont: "TeX", scale: 100 } };</script>
   <style>
-  @font-face {
-    font-family: "Literata";
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: block;
-    src: url("fonts/literata/Literata-var.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Literata";
-    font-style: italic;
-    font-weight: 400;
-    font-display: block;
-    src: url("fonts/literata/Literata-Italic.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "IBM Plex Sans";
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: block;
-    src: url("fonts/ibm-plex-sans/IBMPlexSans-var.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "IBM Plex Sans";
-    font-style: italic;
-    font-weight: 400;
-    font-display: block;
-    src: url("fonts/ibm-plex-sans/IBMPlexSans-Italic.woff2") format("woff2");
-  }
+  @font-face { font-family: "Schibsted Grotesk"; font-style: normal; font-weight: 400 900; font-display: block;
+    src: url("fonts/schibsted-grotesk/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Schibsted Grotesk"; font-style: italic; font-weight: 400 900; font-display: block;
+    src: url("fonts/schibsted-grotesk/schibsted-grotesk-latin-wght-italic.woff2") format("woff2"); }
   </style>
 </head>
 <body class="quarto-light">
@@ -198,112 +178,136 @@ Claude Code
   <p class="date">September 18, 2026</p>
 </section>
 
-<section id="most-prices-on-this-marketplace-are-now-set-by-software" class="slide level2">
+<section id="intro" class="slide level2">
 <h2>Most prices on this marketplace are now set by software</h2>
+<!-- Clicks: 0 title only; 1 to 3 one line each, and each earlier line grays
+     when the next arrives. -->
+<div class="dim-past">
 <ul>
-<li class="fragment"><span class="yblue">68%</span> of active listings change price at least once a week, against 4% in 2015.</li>
+<li class="fragment"><span class="em">68%</span> of active listings change price at least once a week, against 4% in 2015.</li>
 <li class="fragment">Repricing is delegated to a handful of third-party tools whose rules are published.</li>
 <li class="fragment">Sellers meet the same rivals week after week, so rules respond to rules.</li>
 </ul>
-<div class="fragment">
-<p>The policy question is usually posed as whether automation is inflationary. That framing is incomplete: the answer depends on the composition of the market a seller automates into.</p>
+</div>
 <div class="aside-note">
 <p>Source: PriceScope weekly listing panel, 2015–2023. Own calculations. Online price competition on this kind of marketplace has been measured since <span class="citation" data-cites="chevalier2003Measuring">Chevalier and Goolsbee (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span>.</p>
 </div>
-</div>
 </section>
-<section id="automation-pulls-prices-in-two-directions-at-once" class="slide level2">
+<section id="two-forces" class="slide level2">
 <h2>Automation pulls prices in two directions at once</h2>
-<div class="fragment">
-<p>Delegating price setting cuts the cost of a revision from roughly $14 of seller attention to near zero. Two consequences run in opposite directions.</p>
-</div>
-<ul>
-<li class="fragment">Cheap revisions let a seller undercut a slow rival within hours, which pushes prices <span class="ygreen">down</span> toward marginal cost.</li>
-<li class="fragment">Cheap revisions also make undercutting visible and matchable within hours, which sustains higher prices when rivals are <span class="yred">equally fast</span>.</li>
-</ul>
-<div class="fragment">
-<p>Which force dominates is a question about the rival mix <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span>, the share of a market’s listings already under automated pricing, not about automation itself.</p>
-<div class="aside-note">
-<p>Both forces are old; what is new is that they can now run at machine speed. Undercutting is the mechanism <span class="citation" data-cites="chevalier2003Measuring">Chevalier and Goolsbee (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span> find between two online booksellers, and the variety it is traded against is what <span class="citation" data-cites="brynjolfsson2003Consumer">Brynjolfsson et al. (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span> price <span class="citation" data-cites="chevalier2006Effecta">(see also <a href="#/references" role="doc-biblioref" onclick="">Chevalier and Mayzlin 2006</a>)</span>.</p>
-</div>
-</div>
-</section>
-<section id="automation-raises-prices-only-where-rivals-automate-too" class="slide level2">
-<h2>Automation raises prices only where rivals automate too</h2>
-<div class="fragment">
-<div class="result">
-<p><span class="label">Headline estimate</span> Adoption raises a listing’s price by <span class="fragment highlight-accent">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.</p>
-</div>
-</div>
-<div class="fragment">
-<p>The two estimates come from the same regression, the same sellers, and the same weeks. The sign of the effect of automation is a property of the market, not of the technology.</p>
-</div>
-<div class="takeaway fragment fade-up">
-<p>Automation is not inflationary on its own. It is inflationary where it is already common.</p>
-</div>
-</section>
-<section id="setting-and-identification" class="slide level2 section-break" data-section-number="1" data-section-total="4">
-<h2>Setting and identification</h2>
-</section>
-<section id="api-access-arrived-in-a-queue-not-by-application" class="slide level2">
-<h2>API access arrived in a queue, not by application</h2>
-<ul>
-<li class="fragment">41,208 listings across 320 narrow product markets, priced weekly, 2015–2023.</li>
-<li class="fragment">API access arrived by seller tier between March 2019 and November 2021, with no application and no way to move up the queue.</li>
-<li class="fragment">A listing is coded as automated in the first week its price changes on three or more distinct days, <span class="ygray">a threshold no manual seller in the pre-period ever crosses</span>.</li>
-</ul>
-<div class="fragment">
-<p>Rival exposure <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span> is the share of other listings in market <span class="math inline">\(m\)</span> and week <span class="math inline">\(t\)</span> coded as automated. The full <a href="#/ap-measure" class="jump-btn" data-jump="ap-measure">measurement rule</a> is in the appendix.</p>
-<div class="aside-note">
-<p>A queue rollout is a design used elsewhere: <span class="citation" data-cites="wiles2025Algorithmic">Wiles et al. (<a href="#/references" role="doc-biblioref" onclick="">2025</a>)</span> identify the effect of algorithmic writing assistance the same way, on hires rather than prices.</p>
-</div>
-</div>
-</section>
-<section id="adoption-tracks-the-tier-queue-that-granted-api-access" class="slide level2">
-<h2>Adoption tracks the tier queue that granted API access</h2>
-
-<img data-src="talk_files/figure-revealjs/fig-adoption-curves-1.png" class="fragment r-stretch quarto-figure-center" data-fragment-index="0" width="768" id="fig-adoption-curves"><p class="caption">
-Figure&nbsp;1: Adoption of the repricing API, by queue position
-</p><div class="fragment" data-fragment-index="0">
-<div class="aside-note">
-<p>Groups are the earliest and latest thirds of the queue, fixed at seller signup. Seller behaviour on this marketplace has mostly been studied through reviews rather than prices <span class="citation" data-cites="he2022Market">(<a href="#/references" role="doc-biblioref" onclick="">He et al. 2022</a>)</span>.</p>
-</div>
-</div>
-</section>
-<section id="identification-compares-adopters-to-not-yet-adopters-inside-the-same-market-week" class="slide level2">
-<h2>Identification compares adopters to not-yet-adopters inside the same market-week</h2>
-<div class="fragment" data-fragment-index="0">
-<p><span class="math display">\[
-\begin{aligned}
-\log p_{jmt} = \;&amp; \beta_1 A_{jt} + \beta_2 \bigl(A_{jt} \times \mathrm{RivalShare}_{mt}\bigr) \\[2pt]
-                 &amp; + \gamma_j + \delta_{mt} + \varepsilon_{jmt}
-\end{aligned}
-\]</span></p>
-</div>
+<!-- Clicks: 0 the cost line; 1 the downward force; 2 the upward force; 3 the
+     question it leaves. -->
+<p>Delegating price setting cuts the cost of a revision from roughly $14 of seller attention to near zero.</p>
 <div class="fragment" data-fragment-index="1">
-<p>Here <span class="math inline">\(A_{jt} \in \{0,1\}\)</span> marks automation, <span class="math inline">\(\gamma_j\)</span> absorbs the listing and <span class="math inline">\(\delta_{mt}\)</span> the market-week, so <span class="math inline">\(\beta_2\)</span> is identified off variation in <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span> across sellers who adopt in different quarters. Standard errors are clustered by market.</p>
+<ul>
+<li>Cheap revisions let a seller undercut a slow rival within hours, which pushes prices <span class="em">down</span> toward marginal cost.</li>
+</ul>
 </div>
 <div class="fragment" data-fragment-index="2">
-<div class="assumption">
-<p><span class="label">Assumption 1 (Parallel trends given exposure)</span> Given rival exposure, adoption timing carries no information about the untreated price path: <span class="math display">\[\mathbb{E}\bigl[\Delta \log p_{jmt}(0) \mid A_{jt}, \mathrm{RivalShare}_{mt}\bigr]
-= \mathbb{E}\bigl[\Delta \log p_{jmt}(0) \mid \mathrm{RivalShare}_{mt}\bigr].\]</span></p>
+<ul>
+<li>Cheap revisions also make undercutting visible and matchable within hours, which sustains higher prices when rivals are <span class="em">equally fast</span>.</li>
+</ul>
 </div>
+<div class="fragment" data-fragment-index="3">
+<p>Which force dominates depends on the rival mix <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span>, the share of a market’s listings already under automated pricing.</p>
+</div>
+<div class="aside-note">
+<p>Undercutting is the mechanism <span class="citation" data-cites="chevalier2003Measuring">Chevalier and Goolsbee (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span> find between two online booksellers, and the variety it is traded against is what <span class="citation" data-cites="brynjolfsson2003Consumer">Brynjolfsson et al. (<a href="#/references" role="doc-biblioref" onclick="">2003</a>)</span> price <span class="citation" data-cites="chevalier2006Effecta">(see also <a href="#/references" role="doc-biblioref" onclick="">Chevalier and Mayzlin 2006</a>)</span>.</p>
 </div>
 </section>
-<section id="what-the-estimates-say" class="slide level2 section-break" data-section-number="2" data-section-total="4">
-<h2>What the estimates say</h2>
+<section id="claim" class="slide level2">
+<h2>Automation raises prices only where rivals automate too</h2>
+<!-- Clicks: 0 the estimate; 1 the number takes the accent; 2 the reading. -->
+<div class="result">
+<p><span class="label">Headline estimate</span> Adoption raises a listing’s price by <span class="fragment highlight-accent" data-fragment-index="1">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure, and by −0.4 (1.1) in the bottom quartile.</p>
+</div>
+<p>The two estimates come from the same regression, the same sellers, and the same weeks.</p>
+<div class="takeaway fragment" data-fragment-index="2">
+<p>Automation is inflationary where it is already common.</p>
+</div>
 </section>
-<section id="the-level-effect-is-a-wash-the-interaction-is-not" class="slide level2">
+<section id="setting" class="slide level2 section-break" data-section-number="1" data-section-total="5">
+<h2>Setting</h2>
+</section>
+<section id="queue" class="slide level2">
+<h2>API access arrived in a queue, not by application</h2>
+<ul>
+<li>41,208 listings in 320 product markets, priced weekly, 2015–2023.</li>
+<li>API access arrived by seller tier, March 2019 to November 2021, with no application and no way to move up the queue.</li>
+<li>A listing counts as automated from the first week its price changes on three or more distinct days. <a href="#/ap-measure" class="jump-btn" data-jump="ap-measure">Measurement</a></li>
+</ul>
+<p>Rival exposure <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span> is the share of other listings in market <span class="math inline">\(m\)</span> and week <span class="math inline">\(t\)</span> coded as automated.</p>
+<div class="aside-note">
+<p>A queue rollout is a design used elsewhere: <span class="citation" data-cites="wiles2025Algorithmic">Wiles et al. (<a href="#/references" role="doc-biblioref" onclick="">2025</a>)</span> identify the effect of algorithmic writing assistance the same way, on hires.</p>
+</div>
+</section>
+<section id="adoption" class="slide level2">
+<h2>Adoption tracks the tier queue that granted API access</h2>
+
+<img data-src="talk_files/figure-revealjs/adoption-curves-1.png" width="768" class="r-stretch"><div class="aside-note">
+<p>Groups are the earliest and latest thirds of the queue, fixed at seller signup. Seller behaviour on this marketplace has mostly been studied through reviews rather than prices <span class="citation" data-cites="he2022Market">(<a href="#/references" role="doc-biblioref" onclick="">He et al. 2022</a>)</span>.</p>
+</div>
+</section>
+<section id="identification" class="slide level2 section-break" data-section-number="2" data-section-total="5">
+<h2>Identification</h2>
+</section>
+<section id="id-equation" class="slide level2">
+<h2>Identification compares adopters to <span style="white-space:nowrap">not-yet-adopters</span> inside the same market-week</h2>
+<!-- Clicks: 0 the level term and its note; 1 the interaction; 2 the fixed
+     effects; 3 the error, the clustering note, and the assumption. Each layer
+     is the whole equation with the terms not yet entered under \class{hid}, so
+     nothing moves. -->
+<div class="eq-stack">
+<div>
+<p><span class="math display">\[\log p_{jmt} = \beta_1 A_{jt}
+\class{hid}{{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \mathrm{RivalShare}_{mt}\bigr)}}
+\class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}
+\class{hid}{{}+ \varepsilon_{jmt}}\]</span></p>
+</div>
+<div class="eq-layer fragment" data-fragment-index="1">
+<p><span class="math display">\[\log p_{jmt} = \beta_1 A_{jt}
+{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \mathrm{RivalShare}_{mt}\bigr)}
+\class{hid}{{}+ \class{gr}{\gamma_j + \delta_{mt}}}
+\class{hid}{{}+ \varepsilon_{jmt}}\]</span></p>
+</div>
+<div class="eq-layer fragment" data-fragment-index="2">
+<p><span class="math display">\[\log p_{jmt} = \beta_1 A_{jt}
+{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \mathrm{RivalShare}_{mt}\bigr)}
+{}+ \class{gr}{\gamma_j + \delta_{mt}}
+\class{hid}{{}+ \varepsilon_{jmt}}\]</span></p>
+</div>
+<div class="eq-layer fragment" data-fragment-index="3">
+<p><span class="math display">\[\log p_{jmt} = \beta_1 A_{jt}
+{}+ \class{ac}{\beta_2 \bigl(A_{jt} \times \mathrm{RivalShare}_{mt}\bigr)}
+{}+ \class{gr}{\gamma_j + \delta_{mt}}
+{}+ \varepsilon_{jmt}\]</span></p>
+</div>
+</div>
+<div class="eq-notes">
+<div>
+<p><span class="math inline">\(A_{jt} \in \{0,1\}\)</span> marks automation; <span class="math inline">\(\beta_1\)</span> is the level effect.</p>
+</div>
+<div class="fragment" data-fragment-index="1">
+<p><span class="math inline">\(\beta_2\)</span> is how the effect grows with the share of rivals already automated.</p>
+</div>
+<div class="fragment" data-fragment-index="2">
+<p><span class="math inline">\(\gamma_j\)</span> absorbs the listing and <span class="math inline">\(\delta_{mt}\)</span> the market-week.</p>
+</div>
+<div class="fragment" data-fragment-index="3">
+<p>Standard errors are clustered by market.</p>
+</div>
+</div>
+<div class="assumption fragment" data-fragment-index="3">
+<p><span class="label">Parallel trends given exposure.</span> Given rival exposure, adoption timing carries no information about the untreated price path.</p>
+</div>
+</section>
+<section id="estimates" class="slide level2 section-break" data-section-number="3" data-section-total="5">
+<h2>Estimates</h2>
+</section>
+<section id="table" class="slide level2">
 <h2>The level effect is a wash; the interaction is not</h2>
-<div class="fragment">
-<div data-tbl-colwidths="[43,15,24,18]">
+<div class="regtable">
 <table class="caption-top">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 15%">
-<col style="width: 24%">
-<col style="width: 18%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Outcome: log price</th>
@@ -329,7 +333,7 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 <td>Automation × top-quartile rival exposure</td>
 <td style="text-align: right;"></td>
 <td style="text-align: right;"></td>
-<td style="text-align: right;">0.066</td>
+<td style="text-align: right;"><span class="em">0.066</span></td>
 </tr>
 <tr class="even">
 <td></td>
@@ -352,15 +356,17 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 </tbody>
 </table>
 </div>
-</div>
-<div class="takeaway fragment fade-up">
+<div class="fragment" data-fragment-index="1">
 <p>Pooling across markets averages a positive and a zero effect into a small positive one.</p>
 </div>
 </section>
-<section id="prices-move-at-adoption-and-stay-moved" class="slide level2">
+<section id="event-study" class="slide level2">
 <h2>Prices move at adoption, and stay moved</h2>
-<div class="columns fragment" data-fragment-index="1">
+<!-- Clicks: 0 title only; 1 the figure and the estimate; 2 the reading and the
+     pre-trend test. -->
+<div class="columns">
 <div class="column" style="width:58%;">
+<div class="fragment" data-fragment-index="1">
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -370,21 +376,21 @@ Figure&nbsp;1: Adoption of the repricing API, by queue position
 </div>
 </div>
 </div>
-</div><div class="column" style="width:42%;">
-<div class="fragment" data-fragment-index="2">
-<p>High-exposure markets only. Nothing happens in the four quarters before adoption, the jump lands in the quarter of adoption, and the level persists for a year.</p>
 </div>
+</div><div class="column" style="width:42%;">
 <div class="result fragment" data-fragment-index="1">
 <p><span class="label">Estimate</span> 0.062 (0.018) four quarters out</p>
 </div>
+<div class="fragment" data-fragment-index="2">
+<p>High-exposure markets only. Nothing happens before adoption, the jump lands in the quarter of adoption, and the level persists for a year.</p>
+</div>
+</div></div>
 <div class="aside-note fragment" data-fragment-index="2">
 <p>Pre-period coefficients are jointly insignificant, <span class="math inline">\(p = 0.71\)</span>.</p>
 </div>
-</div></div>
 </section>
-<section id="the-interaction-survives-every-specification-we-can-think-of" class="slide level2">
+<section id="robustness" class="slide level2">
 <h2>The interaction survives every specification we can think of</h2>
-<div class="fragment" data-fragment-index="0">
 <table class="spec">
 <thead>
 <tr>
@@ -404,7 +410,7 @@ Drop 2020
 Balanced
 </th>
 <th class="num">
-Continuous exposure
+Continuous
 </th>
 <th class="num">
 Winsorized
@@ -573,105 +579,109 @@ Listings
 </tr>
 </tbody>
 </table>
-</div>
-<div class="fragment" data-fragment-index="0">
+<p><a href="#/ap-window" class="jump-btn" data-jump="ap-window">Sample window</a></p>
 <div class="aside-note">
-<p>Standard errors clustered by market throughout. The continuous-exposure column reports the effect of a one-standard-deviation move in <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span>. The empirics-first posture, a robust fact ahead of a model, is the one <span class="citation" data-cites="golder2023Learning"><span class="nocase">Golder et al.</span> (<a href="#/references" role="doc-biblioref" onclick="">2023</a>)</span> argue for. Sensitivity to the <a href="#/ap-window" class="jump-btn" data-jump="ap-window">sample window</a> is tabulated in the appendix.</p>
-</div>
+<p>Standard errors clustered by market throughout. The continuous column reports the effect of a one-standard-deviation move in <span class="math inline">\(\mathrm{RivalShare}_{mt}\)</span>. The empirics-first posture, a robust fact ahead of a model, is the one <span class="citation" data-cites="golder2023Learning"><span class="nocase">Golder et al.</span> (<a href="#/references" role="doc-biblioref" onclick="">2023</a>)</span> argue for.</p>
 </div>
 </section>
-<section id="why-the-effect-is-a-complementarity" class="slide level2 section-break" data-section-number="3" data-section-total="4">
-<h2>Why the effect is a complementarity</h2>
+<section id="mechanism" class="slide level2 section-break" data-section-number="4" data-section-total="5">
+<h2>Mechanism</h2>
 </section>
-<section id="complementarity-follows-from-the-slope-of-the-best-response" class="slide level2">
+<section id="proposition" class="slide level2">
 <h2>Complementarity follows from the slope of the best response</h2>
-<div class="fragment">
+<!-- Clicks: 0 the proposition; 1 the proof; 2 the reading. -->
 <div class="proposition">
-<p><span class="label">Proposition 1</span> Let <span class="math inline">\(\pi_j(p_j, p_{-j})\)</span> be log-concave in <span class="math inline">\(p_j\)</span> and suppose automation lowers the adjustment cost <span class="math inline">\(\kappa_j\)</span>. If <span class="math inline">\(\partial^2 \pi_j / \partial p_j \partial p_{-j} &gt; 0\)</span>, then <span class="math inline">\(p_j^\star = \mathop{\mathrm{arg\,max}}_p \pi_j(p, p_{-j}) - \kappa_j \mathbf{1}\{p \neq p_{j,t-1}\}\)</span> is increasing in <span class="math inline">\(p_{-j}\)</span>, and adoption decisions are strategic complements.</p>
+<p><span class="label">Proposition 1.</span> Let <span class="math inline">\(\pi_j(p_j, p_{-j})\)</span> be log-concave in <span class="math inline">\(p_j\)</span> and suppose automation lowers the adjustment cost <span class="math inline">\(\kappa_j\)</span>. If <span class="math inline">\(\partial^2 \pi_j / \partial p_j \partial p_{-j} &gt; 0\)</span>, then <span class="math inline">\(p_j^\star = \mathop{\mathrm{arg\,max}}_p \pi_j(p, p_{-j}) - \kappa_j \mathbf{1}\{p \neq p_{j,t-1}\}\)</span> is increasing in <span class="math inline">\(p_{-j}\)</span>, and adoption decisions are strategic complements.</p>
 </div>
+<div class="fragment proof" data-fragment-index="1">
+<p><span class="proof-title"><em>Proof</em>. </span>Log-concavity gives a unique interior maximizer, so <span class="math inline">\(p_j^\star\)</span> is characterized by the first-order condition. Falling <span class="math inline">\(\kappa_j\)</span> widens the region where the constraint <span class="math inline">\(p = p_{j,t-1}\)</span> does not bind, and on that region the cross-partial signs <span class="math inline">\(\mathrm{d} p_j^\star / \mathrm{d} p_{-j} &gt; 0\)</span> by Topkis.</p>
 </div>
-<div class="fragment">
-<div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>Log-concavity gives a unique interior maximizer, so <span class="math inline">\(p_j^\star\)</span> is characterized by the first-order condition. Falling <span class="math inline">\(\kappa_j\)</span> widens the region where the constraint <span class="math inline">\(p = p_{j,t-1}\)</span> does not bind, and on that region the cross-partial signs <span class="math inline">\(\mathrm{d} p_j^\star / \mathrm{d} p_{-j} &gt; 0\)</span> by Topkis. Adopting therefore raises the marginal return to a rival’s adoption.</p>
-</div>
-</div>
-<div class="takeaway fragment fade-up">
-<p>The empirical interaction is the comparative static the model predicts, not a specification artifact.</p>
+<div class="takeaway fragment" data-fragment-index="2">
+<p>The empirical interaction is the comparative static the model predicts.</p>
 </div>
 </section>
-<section id="three-checks-bound-the-demand-selection-threat" class="slide level2">
+<section id="threats" class="slide level2">
 <h2>Three checks bound the demand-selection threat</h2>
-<div class="fragment">
-<p>Sellers who automate first may be facing rising demand, which would raise prices with or without the API. Three pieces of evidence bound this.</p>
-</div>
+<!-- Clicks: 0 the threat; 1 to 3 one check each, earlier checks gray. The IV
+     button arrives with the second check, which it qualifies. -->
+<p>Sellers who automate first may be facing rising demand, which would raise prices with or without the API.</p>
+<div class="dim-past">
+<div class="fragment" data-fragment-index="1">
 <ul>
-<li class="fragment">Adoption timing is <span class="yblue">uncorrelated</span> with pre-period price and quantity trends once tier is held fixed (<span class="math inline">\(p = 0.71\)</span> above).</li>
-<li class="fragment">Within-tier queue position, which is set by a signup date years earlier, gives the same interaction estimate: 0.059 (0.022).</li>
-<li class="fragment">Rival exposure is <span class="yred">not</span> predicted by own-market demand growth, so the interaction is not a demand shock in disguise.
-<div class="aside-note">
-<p>The one case we cannot rule out is a market-level shock hitting exposure and prices together in the same week. <span class="dim">We treat this as an open question.</span> Demand dynamics on platforms of this kind are modelled directly by <span class="citation" data-cites="yin2024MetaLearning">Yin et al. (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span>.</p>
-</div></li>
+<li>Adoption timing is <span class="em">uncorrelated</span> with pre-period price and quantity trends once tier is held fixed (<span class="math inline">\(p = 0.71\)</span>).</li>
 </ul>
+</div>
+<div class="fragment" data-fragment-index="2">
+<ul>
+<li>Within-tier queue position, set by a signup date years earlier, gives the same interaction: 0.059 (0.022). <a href="#/ap-iv" class="jump-btn" data-jump="ap-iv">IV</a></li>
+</ul>
+</div>
+<div class="fragment" data-fragment-index="3">
+<ul>
+<li>Rival exposure is <span class="em">not</span> predicted by own-market demand growth.</li>
+</ul>
+</div>
+</div>
+<div class="aside-note">
+<p>A market-level shock hitting exposure and prices in the same week remains open. Demand dynamics on platforms of this kind are modelled directly by <span class="citation" data-cites="yin2024MetaLearning">Yin et al. (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span>.</p>
+</div>
 </section>
-<section id="what-this-means-for-policy" class="slide level2 section-break" data-section-number="4" data-section-total="4">
-<h2>What this means for policy</h2>
+<section id="policy" class="slide level2 section-break" data-section-number="5" data-section-total="5">
+<h2>Policy</h2>
 </section>
-<section id="a-composition-test-is-what-a-regulator-can-actually-run" class="slide level2">
+<section id="composition" class="slide level2">
 <h2>A composition test is what a regulator can actually run</h2>
-<div class="r-stack">
-<div class="fragment fade-in-then-out" style="width: 100%">
+<!-- Clicks: 0 the unavailable inputs; 1 swapped in place for the available
+     one; 2 the two regimes. -->
+<div class="swap">
+<div class="fragment fade-out" data-fragment-index="1">
 <p>A regulator could be asked to observe the pricing algorithms, which are private, or to prove intent, which is unfalsifiable. Neither is available.</p>
 </div>
-<div class="fragment" style="width: 100%">
+<div class="swap-in fragment" data-fragment-index="1">
 <p>This test asks for the share of a market already automated, which the platform records and publishes. That is the whole input.</p>
 </div>
 </div>
+<div class="fragment" data-fragment-index="2">
 <ul>
-<li class="fragment">Below roughly a 40% automated share, permitting automation moves prices by nothing we can distinguish from zero.</li>
-<li class="fragment">Above it, the same permission is worth 4 to 7 log points, <span class="yblue">rising in the share</span>.
+<li>Below roughly a 40% automated share, permitting automation moves prices by nothing we can distinguish from zero.</li>
+<li>Above it, the same permission is worth 4 to 7 log points, <span class="em">rising in the share</span>.</li>
+</ul>
+</div>
 <div class="aside-note">
-<p>The threshold is where the fitted interaction crosses zero, so it inherits the standard error on the interaction and should be read as a range. Whether firms adopt in the first place is a separate question with its own literature <span class="citation" data-cites="dietvorst2018Overcoming brynjolfsson2025Generative">(<a href="#/references" role="doc-biblioref" onclick="">Dietvorst et al. 2018</a>; <a href="#/references" role="doc-biblioref" onclick="">Brynjolfsson et al. 2025</a>)</span>.</p>
-</div></li>
+<p>The threshold is where the fitted interaction crosses zero, so it inherits the standard error on the interaction. Whether firms adopt in the first place is a separate question <span class="citation" data-cites="dietvorst2018Overcoming brynjolfsson2025Generative">(<a href="#/references" role="doc-biblioref" onclick="">Dietvorst et al. 2018</a>; <a href="#/references" role="doc-biblioref" onclick="">Brynjolfsson et al. 2025</a>)</span>.</p>
+</div>
+</section>
+<section id="takeaways" class="slide level2 closing-slide">
+<h2>Takeaways</h2>
+<ol type="1">
+<li>Automated pricing has no single price effect. It raises prices by <span class="em">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure and by −0.4 (1.1) in the bottom.</li>
+<li>The interaction is the comparative static a model with strategic complements predicts.</li>
+<li>A regulator can test market composition, the share of a market already automated, which the platform already records and publishes.</li>
+</ol>
+<div class="contact">
+<p><a href="mailto:you@example.edu">you@example.edu</a> · <a href="https://your-site.example">your-site.example</a> · Paper and replication files at example.edu/~presenter/repricing</p>
+</div>
+</section>
+<section id="backup" class="slide level2 appendix-break">
+<h2>Backup</h2>
+<ul>
+<li>Robustness to the sample window</li>
+<li>Why we do not instrument adoption with tier eligibility</li>
+<li>How automated pricing is measured</li>
 </ul>
 </section>
-<section id="automation-raises-prices-where-it-is-already-common" class="slide level2">
-<h2>Automation raises prices where it is already common</h2>
-<div class="fragment">
-<div class="result">
-<p><span class="label">Headline estimate</span> <span class="fragment highlight-accent">6.2 log points</span> (s.e. 1.4) in the top quartile of rival exposure, −0.4 (1.1) in the bottom quartile, from the same regression.</p>
-</div>
-</div>
-<div class="fragment">
-<p>A rule that permits automated pricing has no single price effect. Its effect is increasing in how much automation the market already has, which makes <span class="ymid">market composition</span> the object a regulator should be measuring.</p>
-<div class="aside-note">
-<p>Paper and replication files: <code>example.edu/~presenter/repricing</code></p>
-</div>
-</div>
-</section>
-<section id="thank-you" class="slide level2 thanks-slide no-stage" data-transition="fade">
-<h2>Thank you</h2>
-<p>Comments and objections are equally welcome, in the room or afterwards.</p>
-<div class="thanks-contact">
-<p>Write to me at <a href="mailto:you@example.edu">you@example.edu</a></p>
-<p>The paper and these slides live at <a href="https://your-site.example">your-site.example</a></p>
-</div>
-</section>
-<section id="appendix" class="slide level2 appendix-break" data-background-color="var(--appendix-ground)">
-<h2>Appendix</h2>
-</section>
-<section id="ap-window" class="slide level2 appendix">
+<section id="ap-window" class="slide level2">
 <h2>Robustness to the sample window</h2>
-<div class="fragment" data-fragment-index="0">
-<table class="spec caption-top">
-<caption>Sensitivity of the interaction estimate to the sample window</caption>
+<div class="spec">
+<table class="caption-top">
 <colgroup>
-<col style="width: 32%">
-<col style="width: 12%">
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 12%">
-<col style="width: 10%">
-<col style="width: 12%">
+<col style="width: 11%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -733,51 +743,30 @@ Listings
 </tbody>
 </table>
 </div>
-<div class="fragment" data-fragment-index="0">
-<div class="aside-note">
 <p>Nothing here moves the estimate by more than half a standard error.</p>
-</div>
-</div>
-<div class="fragment" data-fragment-index="0">
-<div class="with-previous">
-<p><a href="#/" class="jump-btn jump-back" data-jump-back="">Back to the talk</a>.</p>
-</div>
-</div>
+<p><a href="#/" class="jump-btn jump-back" data-jump-back="" data-return="robustness" data-return-via="ap-window">Back</a></p>
 </section>
-<section id="ap-iv" class="slide level2 appendix">
+<section id="ap-iv" class="slide level2">
 <h2>Why we do not instrument adoption with tier eligibility</h2>
-<div class="fragment" data-fragment-index="0">
-<p>Tier eligibility is a valid instrument for own adoption and a <span class="yamber">weak</span> one for the interaction, because the first stage for <span class="math inline">\(A_{jt} \times \mathrm{RivalShare}_{mt}\)</span> requires exogenous variation in both arguments at once. The available instrument moves only the first.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
+<p>Tier eligibility is a valid instrument for own adoption and a <span class="em">weak</span> one for the interaction, because the first stage for <span class="math inline">\(A_{jt} \times \mathrm{RivalShare}_{mt}\)</span> requires exogenous variation in both arguments at once. The available instrument moves only the first.</p>
 <p>The reduced form is reported instead: crossing an eligibility threshold raises price by 0.031 (0.012) in high-exposure markets and 0.002 (0.010) elsewhere, a ratio close to the interaction estimate scaled by the 0.48 first stage.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
 <div class="aside-note">
 <p>A two-sample approach using a second platform’s queue is in progress.</p>
 </div>
-</div>
-<div class="fragment" data-fragment-index="1">
-<div class="with-previous">
-<p><a href="#/" class="jump-btn jump-back" data-jump-back="">Back to the talk</a>.</p>
-</div>
-</div>
+<p><a href="#/" class="jump-btn jump-back" data-jump-back="" data-return="threats" data-return-via="ap-iv">Back</a></p>
 </section>
-<section id="ap-measure" class="slide level2 appendix">
+<section id="ap-measure" class="slide level2">
 <h2>How automated pricing is measured</h2>
-<div class="fragment" data-fragment-index="0">
 <p>The three-distinct-days rule is the middle of three thresholds. Tighter and looser rules move the classified share, but not the estimate.</p>
-</div>
-<div class="fragment" data-fragment-index="1">
-<table class="spec caption-top" style="width:100%;">
-<caption>Classification threshold and the interaction estimate</caption>
+<div class="spec">
+<table class="caption-top">
 <colgroup>
-<col style="width: 38%">
-<col style="width: 10%">
-<col style="width: 20%">
-<col style="width: 14%">
-<col style="width: 9%">
-<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -817,18 +806,12 @@ Listings
 </tbody>
 </table>
 </div>
-<div class="fragment" data-fragment-index="1">
 <div class="aside-note">
-<p>No listing in the 2015–2018 pre-period crosses the three-day rule for more than two consecutive weeks, which is what makes the threshold usable as a proxy. Imputing the level a listing would have been assigned under an unobserved rule follows <span class="citation" data-cites="bradlow2004LearningBased">Bradlow et al. (<a href="#/references" role="doc-biblioref" onclick="">2004</a>)</span>; richer platform data would allow the transformer approach of <span class="citation" data-cites="gabel2024Market">Gabel and Ringel (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span> or the multimedia features surveyed in <span class="citation" data-cites="grewal2021Marketing">Grewal et al. (<a href="#/references" role="doc-biblioref" onclick="">2021</a>)</span>, and letting a model propose the rule rather than fixing three by hand is the case <span class="citation" data-cites="ludwig2024Machine">Ludwig and Mullainathan (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span> make.</p>
+<p>No listing in the 2015–2018 pre-period crosses the three-day rule for more than two consecutive weeks. Imputing the level a listing would have been assigned under an unobserved rule follows <span class="citation" data-cites="bradlow2004LearningBased">Bradlow et al. (<a href="#/references" role="doc-biblioref" onclick="">2004</a>)</span>; richer platform data would allow the approach of <span class="citation" data-cites="gabel2024Market">Gabel and Ringel (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span> or the features surveyed in <span class="citation" data-cites="grewal2021Marketing">Grewal et al. (<a href="#/references" role="doc-biblioref" onclick="">2021</a>)</span>, and letting a model propose the rule is the case <span class="citation" data-cites="ludwig2024Machine">Ludwig and Mullainathan (<a href="#/references" role="doc-biblioref" onclick="">2024</a>)</span> make.</p>
 </div>
-</div>
-<div class="fragment" data-fragment-index="1">
-<div class="with-previous">
-<p><a href="#/" class="jump-btn jump-back" data-jump-back="">Back to the talk</a>.</p>
-</div>
-</div>
+<p><a href="#/" class="jump-btn jump-back" data-jump-back="" data-return="queue" data-return-via="ap-measure">Back</a></p>
 </section>
-<section id="references" class="slide level2 references-break smaller scrollable" data-background-color="var(--references-ground)">
+<section id="references" class="slide level2 references-break smaller scrollable">
 <h2>References</h2>
 <div id="refs" role="list">
 
@@ -858,17 +841,17 @@ Dietvorst, Berkeley J., Joseph P. Simmons, and Cade Massey. 2018. <span>“Overc
 <div id="ref-gabel2024Market" class="csl-entry" role="listitem">
 Gabel, Sebastian, and Daniel Ringel. 2024. <span>“The <span>Market Basket Transformer</span>: <span>A New Foundation Model</span> for <span>Retail</span>.”</span> <em>Available at SSRN 4335141</em>, ahead of print. <a href="https://doi.org/10.2139/ssrn.4335141">https://doi.org/10.2139/ssrn.4335141</a>.
 </div>
+</div>
+</section>
+<section id="references-1-p2" class="slide level2 references" data-refs-page="2" data-refs-pages="2">
+<h2>References</h2>
+<div class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-golder2023Learning" class="csl-entry" role="listitem">
 <span class="nocase">Golder, Peter N., Marnik G. Dekimpe, Jake T. An, Harald J. van Heerde, Darren S. U. Kim, and Joseph W. Alba</span>. 2023. <span>“Learning from <span>Data</span>: <span>An Empirics-First Approach</span> to <span>Relevant Knowledge Generation</span>.”</span> <em>Journal of Marketing</em> 87 (3): 319–36. <a href="https://doi.org/10.1177/00222429221129200">https://doi.org/10.1177/00222429221129200</a>.
 </div>
 <div id="ref-grewal2021Marketing" class="csl-entry" role="listitem">
 Grewal, Rajdeep, Sachin Gupta, and Rebecca Hamilton. 2021. <span>“Marketing <span>Insights</span> from <span>Multimedia Data</span>: <span>Text</span>, <span>Image</span>, <span>Audio</span>, and <span>Video</span>.”</span> <em>Journal of Marketing Research</em> 58 (6): 1025–33. <a href="https://doi.org/10.1177/00222437211054601">https://doi.org/10.1177/00222437211054601</a>.
 </div>
-</div>
-</section>
-<section id="references-1-p2" class="slide level2 references" data-refs-page="2" data-refs-pages="2">
-<h2>References</h2>
-<div class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-he2022Market" class="csl-entry" role="listitem">
 He, Sherry, Brett Hollenbeck, and Davide Proserpio. 2022. <span>“The <span>Market</span> for <span>Fake Reviews</span>.”</span> <em>Marketing Science</em> 41 (5): 896–921. <a href="https://doi.org/10.1287/mksc.2022.1353">https://doi.org/10.1287/mksc.2022.1353</a>.
 </div>
@@ -1100,11 +1083,31 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
       var to = Reveal.getIndices(sec);
       // Land it fully revealed. An appendix slide is a reference exhibit pulled
       // up under a question, and clicking through its staging in front of the
-      // room is the wrong three keypresses.
-      Reveal.slide(to.h, to.v, lastStep(sec));
+      // room is the wrong three keypresses. Exception: a slide
+      // marked data-jump-land="start" lands at click 0, so its clicks play.
+      Reveal.slide(to.h, to.v, sec.getAttribute("data-jump-land") === "start" ? -1 : lastStep(sec));
     } else {
-      var o = origin || lastMainSlide();
-      if (o) Reveal.setState(o);
+      // FIXED RETURNS (see above): the main slide and the jump that leads here
+      // were written onto this button at build time. Land on that slide at the
+      // step where the jump button shows: the largest index among the fragments
+      // that hold it (a fade-out wrapper does not hide it on arrival), or -1.
+      var rid = a.getAttribute("data-return"), via = a.getAttribute("data-return-via");
+      var rel = rid ? document.getElementById(rid) : null;
+      var rsec = rel && rel.closest ? rel.closest(".slides section") : null;
+      if (rsec) {
+        var btn = via ? rsec.querySelector('a.jump-btn[data-jump="' + via + '"]') : null, f = -1;
+        for (var e = btn; e && e !== rsec; e = e.parentElement) {
+          if (e.classList.contains("fragment") && !e.classList.contains("fade-out") && e.hasAttribute("data-fragment-index"))
+            f = Math.max(f, parseInt(e.getAttribute("data-fragment-index"), 10));
+        }
+        // data-return-step="last": a hand-set return lands fully revealed.
+        if (a.getAttribute("data-return-step") === "last") f = lastStep(rsec);
+        var at = Reveal.getIndices(rsec);
+        Reveal.slide(at.h, at.v, f);
+      } else {
+        var o = origin || lastMainSlide();
+        if (o) Reveal.setState(o);
+      }
     }
 
     // Drop focus. A focused link eats the next Enter, and reveal ignores the
@@ -1114,6 +1117,7 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
 })();
 </script>
 
+<script>document.documentElement.setAttribute("data-auto-stage", "false");</script>
 <script>
 (function () {
   function segment(span) {
@@ -1227,14 +1231,14 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
       // Full list of configuration options available at:
       // https://revealjs.com/config/
       Reveal.initialize({
-'controlsAuto': true,
+'controlsAuto': false,
 'previewLinksAuto': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
-'autoAnimateDuration': 0.4,
+'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
 'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":false},
 'smaller': false,
  
         // Display controls in the bottom right corner
@@ -1252,10 +1256,10 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
         controlsBackArrows: 'faded',
 
         // Display a presentation progress bar
-        progress: true,
+        progress: false,
 
         // Display the page number of the current slide
-        slideNumber: 'c/t',
+        slideNumber: false,
 
         // 'all', 'print', or 'speaker'
         showSlideNumber: 'all',
@@ -1380,12 +1384,12 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
         // The "normal" size of the presentation, aspect ratio will be preserved
         // when the presentation is scaled to fit different resolutions. Can be
         // specified using percentage units.
-        width: 1050,
+        width: 1280,
 
-        height: 700,
+        height: 720,
 
         // Factor of the display size that should remain empty around the content
-        margin: 0.1,
+        margin: 0,
 
         math: {
           mathjax: 'mathjax/MathJax.js',
@@ -1413,6 +1417,68 @@ Yin, Mingzhang, Khaled Boughanmi, Anirban Mukherjee, and Asim Ansari. 2024. <spa
           RevealZoom
         ]
       });
+    </script>
+    <!-- Editorial format, after-body include: the progress line, the page number,
+         and the full-bleed accent behind section slides.
+
+         The progress line measures the main talk only. It runs from the title to
+         the closing slide (`.closing-slide`, the Takeaways), is full there, and
+         stays full through the backup slides and the references, the same rule
+         stage-slide.lua applies to reveal's own bar. The page number counts every
+         visible slide and is blank on the title, section, and divider slides. -->
+    <div class="ed-progress"><div class="ed-progress-fill"></div></div>
+    <div class="ed-num"></div>
+    <script>
+    (function () {
+      function visible() {
+        return Reveal.getSlides().filter(function (s) {
+          return s.getAttribute('data-visibility') !== 'hidden' && !s.closest('[data-visibility="hidden"]');
+        });
+      }
+      function pastMain(s) {
+        var c = s.classList;
+        return c.contains('appendix-break') || c.contains('appendix') ||
+               c.contains('references-break') || c.contains('references');
+      }
+      function update() {
+        var slides = visible(), cur = Reveal.getCurrentSlide();
+        if (!cur) return;
+        var i = slides.indexOf(cur);
+        // The last main slide: the closing slide if the deck names one, otherwise
+        // the slide before the first backup or references slide.
+        var end = -1;
+        for (var k = 0; k < slides.length; k++) {
+          if (slides[k].classList.contains('closing-slide')) { end = k; break; }
+        }
+        if (end < 0) {
+          end = slides.length - 1;
+          for (var k2 = 0; k2 < slides.length; k2++) { if (pastMain(slides[k2])) { end = k2 - 1; break; } }
+        }
+        var frac = end > 0 ? Math.min(1, Math.max(0, i) / end) : 1;
+        document.querySelector('.ed-progress-fill').style.width = (100 * frac) + '%';
+        var c = cur.classList;
+        var onAccent = c.contains('section-break');
+        document.body.classList.toggle('ed-on-accent', onAccent);
+        var bare = onAccent || cur.id === 'title-slide' || c.contains('appendix-break') || c.contains('references-break');
+        document.querySelector('.ed-num').textContent = bare ? '' : String(i + 1);
+      }
+      // Section slides take the accent as their reveal background, so the colour
+      // reaches the window edge at any aspect ratio. A slide that sets its own
+      // background-color keeps it.
+      function paintSections() {
+        var changed = false;
+        document.querySelectorAll('.reveal .slides section.section-break').forEach(function (s) {
+          if (!s.hasAttribute('data-background-color')) {
+            s.setAttribute('data-background-color', getComputedStyle(s).backgroundColor || '#D4371C');
+            changed = true;
+          }
+        });
+        if (changed) Reveal.sync();
+      }
+      function ready() { paintSections(); update(); }
+      Reveal.on('slidechanged', update);
+      if (Reveal.isReady()) ready(); else Reveal.on('ready', ready);
+    })();
     </script>
     
     <script>

@@ -21,7 +21,7 @@
 ---
 --- Usage, in the deck front matter:
 ---   filters:
----     - ~/.claude/assets/quarto-yale/stage-slide.lua
+---     - path/to/slide-tooling/stage-slide.lua
 ---
 --- Opt a single slide out with `{.no-stage}` on its heading:
 ---   ## Everything at once {.no-stage}
@@ -29,7 +29,9 @@
 --- AUTO-STAGING OFF. A format or a deck that sets `auto-stage: false` turns the
 --- default round: no slide is staged unless its heading carries `{.stage}`, and
 --- every other slide keeps exactly the fragments the author wrote. That is the
---- Beamer default, where clicks are planned by hand.
+--- Beamer default, where clicks are planned by hand. Such a deck also gets
+--- `data-auto-stage="false"` on <html>, which tells stage-check.mjs to check its
+--- unmarked slides for dead clicks only.
 ---
 --- FIXED RETURNS. A format or deck that sets `back-returns: fixed` gets Back
 --- buttons with a fixed return, wired at build time by `wire_back_buttons` below.
@@ -1759,6 +1761,13 @@ function Pandoc(doc)
   end
   if wants_jump then
     table.insert(out, pandoc.RawBlock("html", jump_script))
+  end
+  -- A hand-planned deck says so on the page, so stage-check.mjs knows that a
+  -- slide without `{.stage}` may show content at click 0 by design and checks
+  -- it for dead steps only. A deck with auto-staging on gets no marker.
+  if not auto_stage then
+    table.insert(out, pandoc.RawBlock("html",
+      '<script>document.documentElement.setAttribute("data-auto-stage", "false");</script>'))
   end
   -- Unconditional. It walks `span.citation` and does nothing on a deck that cites
   -- nothing, and gating it on the reference machinery would miss a deck that cites
