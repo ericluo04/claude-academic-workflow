@@ -34,8 +34,9 @@ and where the one allowed aside goes.
 
 ## Button diction
 
-Your diction for `.jump` labels; see the research-talk stub for a workable
-default.
+Dark lab puts extra material in vertical backups and needs no jump labels.
+Your diction for the sentence that points at a backup ("the derivation is the
+backup under this slide") goes here.
 
 ## Divider titles
 

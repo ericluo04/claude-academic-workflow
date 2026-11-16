@@ -1,0 +1,10 @@
+<section id="$idprefix$title-slide"$for(title-slide-attributes/pairs)$ $it.key$="$it.value$"$endfor$ class="quarto-title-block lab-title">
+  <h1 class="title">$title$</h1>
+$if(subtitle)$
+  <p class="subtitle">$subtitle$</p>
+$endif$
+  <div class="lab-meta">
+    <p class="lab-author">$for(by-author)$$by-author.name.literal$$sep$, $endfor$</p>
+    <p class="lab-course">$if(course)$<span>$course$</span>$endif$$if(lecture)$<span>$lecture$</span>$endif$$if(date)$<span class="date">$date$</span>$endif$</p>
+  </div>
+</section>
