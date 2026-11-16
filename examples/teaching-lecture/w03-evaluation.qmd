@@ -518,8 +518,6 @@ pass, and arguing about where two graders disagree is next week's exercise.
 :::
 ::::
 
-## References {.references-break background-color="var(--references-ground)"}
-
 ## References {.references}
 
 ::: {#refs}

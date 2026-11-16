@@ -459,7 +459,7 @@ reads 0. That is why this is a tool rather than a snippet.
 
 ## Citations and the reference list
 
-Four lines of front matter, two slides at the end, and the list paginates
+Four lines of front matter, one slide at the end, and the list paginates
 itself.
 
 ```yaml
@@ -469,8 +469,6 @@ refs-fit: talk       # the preset for a 30px root; lecture for 34px
 ```
 
 ```markdown
-## References {.references-break background-color="var(--references-ground)"}
-
 ## References {.references}
 
 ::: {#refs}

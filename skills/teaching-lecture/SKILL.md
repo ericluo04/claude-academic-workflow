@@ -341,8 +341,6 @@ from CSS. The reference list goes at the very end, after the closing slide,
 and paginates itself:
 
 ```markdown
-## References {.references-break background-color="var(--references-ground)"}
-
 ## References {.references}
 
 ::: {#refs}
