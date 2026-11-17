@@ -40,8 +40,9 @@ literature:
 1. **Is everyone treated at the same time?** Yes, with a binary treatment: TWFE is fine, static
    or dynamic, without covariates; with covariates see Covariates below. If everyone starts on
    the same date but the dose differs across units, the design is a heterogeneous adoption
-   design, and TWFE on the dose is unbiased only if the mean outcome change is linear in the
-   dose (section "Beyond the absorbing binary treatment", did_had). For two groups and two periods the
+   design. Under parallel trends across all doses, a mean outcome change that is not linear in
+   the dose rules out TWFE on the dose. With quasi-untreated units, linearity also makes TWFE
+   recover the weighted average slope (WAS) (section "Beyond the absorbing binary treatment", did_had). For two groups and two periods the
    estimator is interaction OLS or the long difference, clustered at the level of assignment.
    The identity of interaction OLS, TWFE, and the long difference holds exactly only in that
    2x2 with no covariates, and it is what makes people reach for TWFE-with-controls, where it
@@ -412,9 +413,11 @@ counting clusters.
 - Treatments that turn on and off (promotions, price changes): dCDH estimators require
   no-carryover; for advertising and pricing that assumption is usually wrong, so check it and
   prefer the intertemporal extension (`DIDmultiplegtDYN` in R, `did_multiplegt_dyn` in Stata).
-  When past treatments plausibly stop affecting the outcome after a short, known lag, the static
-  dCDH estimators are the alternative (`did_multiplegt_stat`, `dechaisemartin2022stayers`). They
-  assume no effect beyond that lag. The price of `_dyn` instead is parallel trends over a longer
+  When past treatments plausibly do not affect the current outcome, the static dCDH estimators
+  are the alternative (`did_multiplegt_stat`, `dechaisemartin2022stayers`). They assume no
+  dynamic effects: the outcome depends only on the current treatment. The command has no lag
+  argument. To allow effects up to k lags, re-estimate on units whose treatment did not change
+  in the k prior periods (the paper's Appendix B.3), which shrinks the sample. The price of `_dyn` instead is parallel trends over a longer
   horizon. R: DIDmultiplegtSTAT 1.0.0, installed from GitHub only (not on CRAN).
 - Continuous treatment intensity: ATT(d|d) is identified under standard PT, but causal-response
   parameters need strong PT across doses (Callaway, Goodman-Bacon, Sant'Anna). With stayers
@@ -428,10 +431,12 @@ counting clusters.
   dose. Without them, use did_had (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau 2026,
   `dechaisemartin2026nountreated`). It relies on quasi-untreated units, whose dose is close to
   zero, and tests for their presence. Its `yatchew` option tests whether the mean outcome change
-  is linear in the dose, the condition under which TWFE on the dose is unbiased. R: DIDHAD 2.0.0
-  on CRAN (the name is case-sensitive, and `DIDhad` fails). With no quasi-untreated units, the
-  fallback compares against the least-treated units and needs homogeneous effects. State that
-  assumption as a limitation where the choice is made.
+  is linear in the dose. Under parallel trends across all doses, a rejection rules out TWFE on
+  the dose. With quasi-untreated units, linearity also makes TWFE recover the WAS (Theorem 3 of
+  the paper). R: DIDHAD 2.0.0 on CRAN (the name is case-sensitive, and `DIDhad` fails). With no
+  quasi-untreated units, the design falls under refusal item 2. The credible-answers guide's
+  least-treated comparison needs homogeneous effects across doses, which this skill does not
+  accept as a default.
 - Several treatments at once: references/details.md, section "Beyond the absorbing binary
   treatment in full" (`dechaisemartin2023several`).
 - Exposure designs (baseline exposure share times a national change): the linear-interaction

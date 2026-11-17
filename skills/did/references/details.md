@@ -693,18 +693,27 @@ Moved from SKILL.md (section "Beyond the absorbing binary treatment").
   never-treated units, the site's guide uses 2SLS of the outcome change on the dose, with
   1(dose > 0) as the instrument. Without never-treated units, use did_had (DIDHAD), which uses
   quasi-untreated units (dose close to zero) as the control group and tests that such units
-  exist. Its `yatchew` option tests linearity of E[change in Y | dose]. Under parallel trends,
-  that linearity is the condition under which TWFE on the dose is unbiased for the WAS
-  (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau 2026, `dechaisemartin2026nountreated`).
-  Without quasi-untreated units, the fallback uses the least-treated units as controls and
-  needs homogeneous effects. Signature (CRAN reference manual, DIDHAD 2.0.0):
+  exist. Its `yatchew` option tests linearity of E[change in Y | dose]. Under parallel trends
+  across all doses (the paper's Assumption 4, stronger than what did_had needs), a homogeneous
+  and linear effect makes TWFE on the dose equal the WAS and implies that linearity, so a
+  rejection rules TWFE out. With quasi-untreated units and bounded effects, linearity also
+  implies the homogeneous and linear effect, so TWFE recovers the WAS (Theorem 3 and the
+  recommendations after it, pp. 15-16 of arXiv 2405.04465v8). Without quasi-untreated units,
+  linearity is only a testable implication (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau
+  2026, `dechaisemartin2026nountreated`). With no quasi-untreated units, the design falls under
+  refusal item 2 in SKILL.md. The guide's least-treated comparison needs homogeneous effects
+  across doses, which this skill does not accept as a default. Signature (CRAN reference manual, DIDHAD 2.0.0):
   `did_had(df, outcome, group, time, treatment, effects = 1, placebo = 0, level = 0.05,
   kernel = "epa", bw_method = "mse-dpi", trends_lin = FALSE, dynamic = FALSE, yatchew = FALSE,
   graph_off = FALSE)`.
 - Static estimators with stayers (added 2026-11-17): did_multiplegt_stat (DIDmultiplegtSTAT,
   GitHub only) computes the AS, the WAS, and an IV variant for a binary, discrete, or
   continuous treatment when some units keep their treatment unchanged (stayers)
-  (`dechaisemartin2022stayers`). It assumes treatment has no effect beyond a set lag. The price
+  (`dechaisemartin2022stayers`). By default it assumes no dynamic effects: the period-t outcome
+  depends only on the period-t treatment (README, "Assumptions"; paper, Assumption 2). The R
+  function (1.0.0 source) has no lag argument. The site's phrase "beyond a pre-determined lag"
+  refers to the paper's extension (Appendix B.3): re-estimating on units whose treatment did
+  not change over the k prior periods allows effects up to k lags and shrinks the sample. The price
   of using did_multiplegt_dyn instead is parallel trends over a longer horizon. With no
   stayers, use did_had or de Chaisemartin, D'Haultfoeuille, and Vazquez-Bare (2024,
   `dechaisemartin2024nostayers`).
