@@ -24,15 +24,13 @@ Everything is resolved at runtime. There is no setup step and no state file to c
 
 Batch whatever still has to be asked into one message instead of interrogating the user step by step. Never block on a value that only affects a cosmetic README field; write `[FILL IN]` and flag it. The two questions that do block are the code root and the archive destination.
 
-PDFs turn up here as preregistrations, IRB approvals, and pasted data-editor letters. The Read tool cannot open them on this machine, since it needs `pdftoppm` (this setup assumes no Homebrew and no poppler; adjust to yours). Route every PDF through the helper:
+PDFs turn up here as preregistrations, IRB approvals, and pasted data-editor letters. Read them with the Read tool and its `pages` parameter (required above 10 pages, at most 20 per call). When the Read tool reports that `pdftoppm` is missing, or when you want plain text to grep, use the helper:
 
 ```bash
 ~/.claude/assets/bin/pdfread.py text prereg.pdf
 ~/.claude/assets/bin/pdfread.py text prereg.pdf --pages 1-5
 ~/.claude/assets/bin/pdfread.py png prereg.pdf --pages 1 --dpi 150 --out /tmp/p   # then Read /tmp/p-1.png
 ```
-
-Never call `pdftotext` or `pdftoppm`; neither is installed.
 
 ## Two roots, both given as input
 
@@ -118,7 +116,7 @@ Per-study subfolders under `code/` and `materials/` when the paper has numbered 
 - Code: glob `.R`, `.Rmd`, `.py`, `.ipynb`, `.do`, `.jl`. Sort by run order from numeric filename prefixes, else infer from `source()` / `import` / `%run` dependencies and note the guess in the README. Flag a missing master script; Management Science requires one.
 - Data: glob `.csv`, `.rds`, `.RData`, `.parquet`, `.dta`, `.feather`, `.h5`, `.npz`, `.sav` under the code root. Record per-file and total size. Read every CSV header for the dictionary stub.
 - Exhibits: everything under the paper root's `Tables/`, `Figures/`, `output/`.
-- Materials: `.qsf`, `.crdf`, stimulus images, experimenter instructions, preregistration PDFs, IRB approval. All four journals want the instruments as participants saw them. Read any PDF with `pdfread.py`, not the Read tool.
+- Materials: `.qsf`, `.crdf`, stimulus images, experimenter instructions, preregistration PDFs, IRB approval. All four journals want the instruments as participants saw them. Read any PDF with the Read tool.
 - Bibliography: copy `*.bib` to `meta/`. Do not copy the manuscript `.tex`.
 
 ### 2. Exhibit map
@@ -474,7 +472,7 @@ Reproducibility and metadata
 - Archive destination not given: ask for it, and say it will not be guessed. Nothing is written until there is an answer.
 - Destination inside `$HOME/Library/CloudStorage/Dropbox*/Apps/Overleaf/`: refuse, say it syncs to Overleaf, ask for another folder.
 - Code lives on the cluster: stop and have the user sync it locally first.
-- A PDF needs reading: use `~/.claude/assets/bin/pdfread.py`. In this setup the Read tool fails on PDFs and `pdftotext` and `pdftoppm` do not exist.
+- A PDF needs reading: use the Read tool with `pages`; fall back to `~/.claude/assets/bin/pdfread.py` when Read reports that `pdftoppm` is missing.
 - `Rscript` missing: write the placeholder, flag it, keep going.
 - `pip freeze` with no active virtualenv: it lists the global environment and is misleading. Prefer `uv pip freeze` or the static import scan, and say which was used.
 - Live credential found: stop before zipping, show file and line, ask for a decision.

@@ -38,14 +38,10 @@ stale. Never commit or push, Dropbox syncs the directory.
 
 ## Reading the decision letter
 
-The Read tool cannot open a PDF on this machine (it needs `pdftoppm`; this setup assumes no
-Homebrew and
-no poppler, so adjust to yours). Get the letter's text with `~/.claude/assets/bin/pdfread.py text letter.pdf`. Do not
-call `pdftotext`.
+Get the letter's text with `~/.claude/assets/bin/pdfread.py text letter.pdf`.
 
 If that returns almost nothing the letter is a scan (`pdfread.py pages letter.pdf` says so). Then
-rasterize it, `~/.claude/assets/bin/pdfread.py png letter.pdf --dpi 200 --out /tmp/letter`, and
-Read the PNGs. Read it if you genuinely can.
+Read the PDF pages directly with the Read tool's `pages` parameter.
 If any passage is illegible, stop and ask for a text version of that passage. Never reconstruct
 what a reviewer probably wrote.
 

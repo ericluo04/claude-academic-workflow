@@ -1,7 +1,8 @@
 # Conjoint canon
 
-Current as of 2026-10-09. The user picked fourteen sources and approved a fifteenth,
-`egami2019causal`, on 2026-08-05; nothing enters this file without their approval. BibTeX keys
+Current as of 2026-11-17. The user picked fourteen sources, approved a fifteenth,
+`egami2019causal`, on 2026-08-05, and a sixteenth, `rao2026applied`, on 2026-11-17.
+Nothing enters this file without their approval. BibTeX keys
 point into ../../causal-design/references/causal.bib, the family's shared bib. Refresh:
 litreview on conjoint methodology since the canon date; addenda need user approval.
 
@@ -226,7 +227,8 @@ Marketing Letters 19(3-4): 337-354. Key: `netzer2008beyond`.
   product-line optimization).
 - Binds when: the fork; adaptive designs; the marketing track's scope.
 - Caveats: an agenda paper, no estimands, no estimators, no software; never cite for
-  identification, inference, or diagnostics.
+  identification, inference, or diagnostics. Rao (2026) reprints it verbatim as chapter 14
+  (footnote, p. 455). Cite the 2008 article.
 
 ### Agarwal, DeSarbo, Malhotra, and Rao (2015)
 
@@ -245,7 +247,42 @@ a reader once proposed agarwal2015conjoint, the bib's key wins).
 - Binds when: marketing-track defaults; instrument-threat checks; MaxDiff and menu
   formats.
 - Caveats: heavy self-citation by the author group; dated 2014 (nothing on software or the
-  poli-sci wave); Perspectives genre.
+  poli-sci wave); Perspectives genre. Rao (2026) carries it as chapter 15 under the same
+  title and authors. Cite the 2015 article.
+
+### Rao (2026)
+
+Applied Conjoint Analysis: From Product and Service Design to Market and Pricing
+Strategies, 2nd ed., Springer Texts in Business and Economics. Key: `rao2026applied`.
+Added 2026-11-17 on the user's request. Chapters 1 to 14 and 16 read in full from the
+Springer PDF. Chapter 15 was skipped (see Caveats).
+
+- Role: the marketing practitioner's textbook for the preference-measurement track, from
+  study design through the decisions the output feeds (product lines, segmentation,
+  pricing).
+- Covers: choice-design construction for the multinomial logit and HB, including designs
+  built from prior partworths and the efficiency they buy (ch. 5); attribute ranges and
+  range-based importance (chs. 1, 3); many-attribute methods and partial profiles (ch. 6,
+  a reprint of Rao, Kartono, and Su 2008); noncompensatory and screening models (ch. 8);
+  market simulators, base-case checks against actual shares, and product-line
+  optimization (ch. 9); the WTP definitions behind pricing (ch. 11).
+- Binds when: preference-track design, share simulation, and the managerial translation.
+  Where the book reports another paper's result, cite that paper; cite the book, with
+  chapter and page, for its own syntheses.
+- Caveats: much of the evidence predates 2011, and the book mostly reports other papers'
+  results. It is silent on the design-based track (AMCEs, measurement error, multiple
+  testing). Two chapters say they reprint earlier work: ch. 6 (Rao, Kartono, and Su 2008)
+  and ch. 14 (Netzer et al. 2008). Ch. 15 carries the title and authors of Agarwal et al.
+  (2015) with no reprint note, and its text was not compared with the article. Ch. 13's
+  trends section comes from Rao (2008). Ch. 16 is Bryan Orme's account of Sawtooth Software, outside this
+  skill's scope (MaxDiff and Sawtooth's software were dropped on 2026-10-08; the skill
+  still cites Orme's 2024 research paper for HMC and share simulation). Practices this skill
+  supersedes: trade-offs and WTP as ratios of point estimates (pp. 152, 375, 426), HB
+  reported without convergence diagnostics (pp. 210-212), three of four optimal prices
+  above the highest tested rent (pp. 380-381), and "higher AIC preferred" (p. 200). The
+  reference lists have errors (Ding et al. 2005 printed with Agarwal for Grewal on pp.
+  112, 230, and 271, swapped years, wrong volumes), so bib entries come from Crossref,
+  never from the book.
 
 ### Rossi, Allenby, and Misra (2024) + bayesm
 
@@ -296,7 +333,7 @@ Already in the shared bib and key here: `hainmueller2014causal`,
 `hainmueller2015validating`, `bansak2021conjoint`, `bansak2018number`, `bansak2021beyond`,
 `leeper2020measuring`, `egami2019causal`, `delacuesta2022improving`, `abramson2022what`,
 `bansak2023using`, `clayton2026correcting`, `liu2023multiple`, `netzer2008beyond`,
-`agarwal2015interdisciplinary`, `rossi2024bayesian`, `rossi2025bayesm`,
+`agarwal2015interdisciplinary`, `rao2026applied`, `rossi2024bayesian`, `rossi2025bayesm`,
 `sonnier2007heterogeneity`.
 
 New to the bib with the Egami-Imai addendum, cited through it and NOT read: `post2013factor`
@@ -310,9 +347,29 @@ Analysis 32(3): 329-344 (the CRT carryover test's own paper); Dafoe-Zhang-Caughe
 desirability); Goplerud-Imai-Pashley 2025, Annals of Applied Statistics 19(2): 866-888
 (heterogeneity); Train-Weeks 2005 (econ-side WTP space; user declined 2026-07-29, cite only
 via Sonnier reception); the 2e book chapters 10-11
-(read before asserting their content); Rao 2026 Applied Conjoint Analysis 2e.
-The Rao entry and the Train-Weeks declination come from the
-build-session discussion; no reading note covers them.
+(read before asserting their content). Rao 2026 left this list for the canon on
+2026-11-17. The Train-Weeks declination comes from the build-session discussion; no reading
+note covers it.
+
+## Primaries read for the Rao pass (2026-11-17, approved with the Rao addition)
+
+The user approved adding Rao (2026) and ruled that each claim adopted from it cites a primary
+that was read. None is a canon anchor. Each supports one rule.
+
+- Preference-track design (track-hb.md, "Design on this track"): `sandor2001designing`,
+  `huber1996importance`, `toubia2007managerially`, `swait1993role`,
+  `traets2020generating` (idefix).
+- Adaptive designs on the preference track: `liu2007investigating`, `hauser2005impact`.
+- Threats and screening: `bradlow2004learning` (partial profiles), `gilbride2004choice`
+  (screening), `louis1984estimating` (the HB head-count rule).
+- Simulators, product lines, and pricing: `green1992application`, `green1985models`,
+  `belloni2008optimizing`, `volckner2008dual`, `swait2003enriching`,
+  `ellickson2019product`. Cited only as cited by Belloni et al.: `kohli1989optimal`.
+
+Named but unread: Page and Rosenbaum (1987, the Sunbeam base case), Volckner and Sattler
+(2005), Yee et al. (2007), and Dieckmann, Dippold, and Dietrich (2009), all cited through
+Rao, and Kim, Hardt, Kim, and Allenby (2022), named as echoice2's model paper in its CRAN
+manual.
 
 ## Tier-2 additions (2026-10-09, approved with the audit's tier 2)
 

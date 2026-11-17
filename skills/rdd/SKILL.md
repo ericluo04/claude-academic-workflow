@@ -125,7 +125,7 @@ Hard rules from the review, stated as prohibitions because that is how it states
   recommended the practice. This skill states it as a prohibition because Kolesar and Rothe 2018
   show that the confidence interval clustered on a discrete score can undercover, with coverage
   as low as 58 percent at a nominal 95 percent (p. 2279). Use heteroskedasticity-robust
-  variance, honest intervals for a discrete score (RDHonestBME, below), and cluster only on a
+  variance, honest intervals for a discrete score (RDHonestBME, references/details.md, section "Discrete scores"), and cluster only on a
   real assignment unit that is not the score. Replicating or refereeing an older RD, expect to
   find this and fix it. The family's clustering and multiplicity rules (cluster level, few
   clusters, a multiplicity statement for the balance battery) are in
@@ -286,8 +286,10 @@ Report each effect with the results sentence in ../causal-design/references/shar
 > sensitivity [and, for the fuzzy design, verify first-stage strength within the estimation
 > bandwidth and report intention-to-treat effects alongside the complier estimate]. The estimate
 > is local to the cutoff; a limitation of this design is that it does not identify effects for
-> [units far from the threshold], and I extrapolate only [not at all / under the stated
+> [units far from the threshold], and we extrapolate only [not at all / under the stated
 > assumption], which costs [generalizability across the score distribution].
+
+The template is written in "we". Match the paper's voice: switch to "I" for a sole-authored paper.
 
 Every claim traces to references/canon.md; keys live in ../causal-design/references/causal.bib.
 
@@ -295,8 +297,8 @@ Every claim traces to references/canon.md; keys live in ../causal-design/referen
 
 - causal-design: whether an RD exists at all; where to go when the design gate fails.
 - iv: the fuzzy branch's in-bandwidth first stage and exclusion argument live here;
-  weak-instrument inference (the F ladder, AR/CLR intervals) lives in iv, along with
-  many-instrument and shift-share logic.
+  the F ladder for reading an in-bandwidth F lives in iv, along with many-instrument and
+  shift-share logic. Weak-first-stage intervals stay here, from RD-native tools (Fuzzy designs).
 - did / synthetic-control: policy-date designs masquerading as RD in time.
 - Preregistration: the user writes it themselves; this skill supplies the RD field list for an
   upcoming threshold change.

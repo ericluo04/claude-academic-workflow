@@ -59,8 +59,8 @@ cp -R ~/.claude/assets/slide-tooling/_extensions/darklab/vendor/fonts lectures/
 
 `assets/` holds the site theme plus the mark, and `lectures/_metadata.yml` holds
 the deck config so a lecture file is content from its first line. Keep the
-project out of Dropbox: rendered decks run several MB each and the sync churns
-on every render.
+project out of Dropbox: every render rewrites `docs/` and the sync churns on
+it.
 
 ## `_quarto.yml`
 
@@ -401,8 +401,8 @@ file Jekyll drops every `_files` directory and all asset paths break.
 The repository has to be public, or on a plan that includes Pages for private
 repositories. A free private repository can hold the project and will not serve it.
 
-`docs/site_libs/` picks up its own copy of reveal.js even when the decks embed
-theirs, and `docs/search.json` appears whether or not search is wanted. Both are
+`docs/site_libs/` holds the one copy of reveal.js the decks share, and
+`docs/search.json` appears whether or not search is wanted. Both are
 harmless; commit them.
 
 ## Traps

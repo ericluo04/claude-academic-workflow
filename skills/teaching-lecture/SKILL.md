@@ -26,9 +26,9 @@ stands for wherever SETUP.md installed your copy of `slide-tooling/`.
 assert, and the settings that silently break a deck. Read it for any of that;
 where it and the source disagree, the source wins. The head of
 `_extensions/darklab/darklab.scss` carries the palette table, and its CLICK
-MECHANICS block documents every build class. This skill does not restate what `research-talk`
-already covers (`output-location` for code chunks, how `pdfread.py` works);
-read that skill where the two overlap. The pointer map at the end of this file
+MECHANICS block documents every build class. For `output-location` on code chunks, read
+`research-talk/references/figures-and-code.md`; for the PDF tool, run
+`~/.claude/assets/bin/pdfread.py --help`. The pointer map at the end of this file
 says which reference file holds what.
 
 ## The theme: Dark lab
@@ -459,8 +459,8 @@ complete but over the limit can also move its second half into a `{.backup}`
 under it.
 
 To look at slides rather than measure them, use decktape and `pdfread.py` per
-the README ("Looking at a rendered deck"). The Read tool cannot open a PDF on
-this machine.
+the README ("Looking at a rendered deck"), or Read the exported PDF with a
+`pages` range.
 
 ## Course site and handout
 

@@ -190,9 +190,7 @@ only when the entry has no identifier at all.
    match to either is PASS; record which one matched. With an arXiv id present and the entry year
    matching the arXiv submission year, WARN
    (`entry cites preprint year <y1>; published version is <y2>`), because citing the preprint year
-   is a legitimate choice. A year that matches none of these is FAIL. Added 2026-10-08 after six
-   false FAILs on print-year entries (Brutger 2023, Jia 2023, Jonker 2019, Lembregts 2024, Melumad
-   2025, Shamon 2022).
+   is a legitimate choice. A year that matches none of these is FAIL.
 
 7. Journal canonicalization. Compare `journal` against Crossref `container-title`. WARN on
    abbreviation drift (`J. Mark. Res.` for `Journal of Marketing Research`, `Mark. Sci.` for
@@ -332,7 +330,7 @@ and 6 through 8, and mark author-accent findings as skipped.
 
 ## Out of scope
 
-Do not add entries. Hand a DOI to `mcp__zotero__zotero_add_by_doi`, or use the reading-papers
+Do not add entries. Hand a DOI to `mcp__zotero__zotero_add_item`, or use the reading-papers
 skill for anything else.
 
 Do not overwrite the source `.bib` under any circumstances.
