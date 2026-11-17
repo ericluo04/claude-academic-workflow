@@ -29,8 +29,9 @@ re-deriving them, and so a reader can tell an adaptation from an oversight.
 9. No skill directory is added that is not already here. Files inside an existing skill may be
    added.
 10. A named model version becomes "a model". The private files pin rules to the model the author
-   runs, and a reader on a different model needs the rule without the attribution. The plagiarism
-   rule in the Research prose section is the current instance.
+   runs, and a reader on a different model needs the rule without the attribution. Since
+   2026-11-17 the private plagiarism rule names no model either, so no public file carries an
+   instance.
 
 ## Deliberate divergences
 
