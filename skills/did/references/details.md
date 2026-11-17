@@ -19,7 +19,9 @@ Heavy reference content the SKILL.md points into. Current as of 2026-10-09.
 | etwfe | CRAN; grantmcdermott.com/etwfe | 0.6.2 (2026-03-23) | Wooldridge extended TWFE, linear and nonlinear (family = "poisson", "logit", "negbin" through fixest::feglm); a nonlinear family forces ivar = NULL and enters cohort and period as explicit dummies (emfx cannot compute SEs with absorbed FEs in nonlinear models); controls on the RHS of fml are demeaned by cohort and the xvar moderator by cohort-by-period cell (source, not docs); nothing unit-level is used, so repeated cross sections run unchanged (run on simulated repeated-cross-section data 2026-08-26, pilot only); emfx returns APEs (predict = "response") or index-scale effects (predict = "link") and compresses to cohort-period cells above 500,000 rows unless compress = FALSE; verified 2026-08-26 |
 | jwdid (Stata) | SSC; github.com/friosavila/stpackages | 2.0 (2024-05-04) | Wooldridge ETWFE; no ivar means repeated cross-section; method(poisson), method(logit), method(ppmlhdfe); covariates demeaned and interacted by default (xasis to disable); verified 2026-08-26 |
 | ppmlhdfe (Stata) | SSC | | PPML with high-dimensional FEs (Correia-Guimarães-Zylkin 2020); R equivalent fixest::fepois |
-| DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. The older DIDmultiplegt (2.1.0, 2026-02-17) is the static estimator and is not the one the skill's reversal rule calls. Loading it requires the `polars` R package from rpolars.r-universe.dev (template section 8b) |
+| DIDmultiplegtDYN | CRAN; github.com/Credible-Answers | 2.4.0 (2026-06-30) | dCDH intertemporal, on/off treatments; the R port of Stata's did_multiplegt_dyn and the name to use. DIDmultiplegt (2.1.0, 2026-02-17) is now a wrapper: `did_multiplegt(mode, ...)` with mode "dyn" calls did_multiplegt_dyn, "had" calls did_had, and "old" calls the 2020 DID_M estimator (did_multiplegt_old); call did_multiplegt_dyn directly, as the skill's reversal rule does. Loading it requires the `polars` R package from rpolars.r-universe.dev (template section 8b) |
+| DIDHAD | CRAN; github.com/Credible-Answers | 2.0.0 (2025-08-18) | did_had, heterogeneous adoption designs with quasi-untreated units (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau, `dechaisemartin2026nountreated`); the package name is DIDHAD, and the site's `install.packages("DIDhad")` fails. The `yatchew` option needs the YatchewTest package; verified against the CRAN reference manual 2026-11-17 |
+| DIDmultiplegtSTAT | GitHub ONLY: github.com/Credible-Answers/did_multiplegt_stat (not on CRAN) | 1.0.0 (DESCRIPTION, checked 2026-11-17) | did_multiplegt_stat, static AS, WAS, and IV-WAS estimators with stayers (`dechaisemartin2022stayers`). Install with `remotes::install_github("Credible-Answers/did_multiplegt_stat/R")`; the repo README still points at the old chaisemartinPackages organization |
 | triplediff | CRAN | 0.2.4 (2026-06-13) | doubly robust triple differences with covariates and staggered adoption, `ddd()` and `agg_ddd()` (Ortiz-Villavicencio and Sant'Anna 2025, `ortizvillavicencio2025better`); template section 8c |
 | csdid / csdid2 (Stata) | SSC (Rios-Avila) | | Callaway-Sant'Anna in Stata. csdid 2.0.0 defaults to `base_period(universal)` (long differences); 1.8x defaulted to varying (short gaps), so on 1.8x pass `long2`, which 2.0.0 keeps only as a deprecated compatibility name. csdid 2.0.0 also made not-yet-treated units the default comparison group, where 1.82 used never-treated; pass `nevertreated` to restore the old group (changelog at psantanna.com/csdid/news.html, checked 2026-10-09). The csdid2 default is unverified |
 | summclust | ARCHIVED from CRAN 2025-11-02; install from s3alfisc.r-universe.dev | 0.7.0 (r-universe build 2026-09-02; last CRAN release 0.7.2, 2023-08-10) | CV3 cluster-jackknife vcov, leverage, partial leverage, leave-one-cluster-out betas |
@@ -686,3 +688,30 @@ Moved from SKILL.md (section "Beyond the absorbing binary treatment").
 - Exposure designs (baseline exposure share times a national change): the linear-interaction
   coefficient is an average marginal effect, roughly kappa + 2 phi E[M], not E[tau_s]; add the
   squared-exposure interaction when heterogeneity is plausible and report both (AAFP 2025).
+- Heterogeneous adoption designs (added 2026-11-17, from credible-answers.github.io): all units
+  are untreated at first, all treated units start on one date, and their doses differ. With
+  never-treated units, the site's guide uses 2SLS of the outcome change on the dose, with
+  1(dose > 0) as the instrument. Without never-treated units, use did_had (DIDHAD), which uses
+  quasi-untreated units (dose close to zero) as the control group and tests that such units
+  exist. Its `yatchew` option tests linearity of E[change in Y | dose]. Under parallel trends,
+  that linearity is the condition under which TWFE on the dose is unbiased for the WAS
+  (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau 2026, `dechaisemartin2026nountreated`).
+  Without quasi-untreated units, the fallback uses the least-treated units as controls and
+  needs homogeneous effects. Signature (CRAN reference manual, DIDHAD 2.0.0):
+  `did_had(df, outcome, group, time, treatment, effects = 1, placebo = 0, level = 0.05,
+  kernel = "epa", bw_method = "mse-dpi", trends_lin = FALSE, dynamic = FALSE, yatchew = FALSE,
+  graph_off = FALSE)`.
+- Static estimators with stayers (added 2026-11-17): did_multiplegt_stat (DIDmultiplegtSTAT,
+  GitHub only) computes the AS, the WAS, and an IV variant for a binary, discrete, or
+  continuous treatment when some units keep their treatment unchanged (stayers)
+  (`dechaisemartin2022stayers`). It assumes treatment has no effect beyond a set lag. The price
+  of using did_multiplegt_dyn instead is parallel trends over a longer horizon. With no
+  stayers, use did_had or de Chaisemartin, D'Haultfoeuille, and Vazquez-Bare (2024,
+  `dechaisemartin2024nostayers`).
+- Several treatments (added 2026-11-17): TwoWayFEWeights' `other_treatments` option returns
+  the weights when the TWFE regression includes other treatments; did_multiplegt_stat reports
+  effects per treatment. For sequential treatments, run did_multiplegt_dyn on the sample of
+  units that already received the first treatment, with the first treatment's adoption date in
+  `trends_nonparam` (tutorial chapter 4, Hollingsworth et al. 2022 on marijuana legalization).
+  Source: de Chaisemartin and D'Haultfoeuille (2023, Journal of Econometrics,
+  `dechaisemartin2023several`).

@@ -302,6 +302,22 @@ NBER abstract page on that date:
   place of the Mixtape for the design stage.
 - `liu2024practical`, already keyed: FEct imputation, the "LWX" of the PT-menu table.
 
+Addendum 2026-11-17 (flagged; approved by the user 2026-11-17), from a read of the de Chaisemartin
+and D'Haultfoeuille site credible-answers.github.io; each entry checked against Crossref,
+arXiv, HAL, or OpenAlex on that date:
+
+- `dechaisemartin2023several` (Journal of Econometrics 236(2), 105480): TWFE and DiD with
+  several treatments; supports the several-treatments item in details.md "Beyond the absorbing
+  binary treatment in full" (`other_treatments`, sequential treatments).
+- `dechaisemartin2024nostayers` (AEA P&P 114: 610-613): continuous treatment with no stayers;
+  supports the no-stayers route next to did_multiplegt_stat.
+- `dechaisemartin2026nountreated` (arXiv 2405.04465; preprint; R package DIDHAD): heterogeneous
+  adoption designs with quasi-untreated units and the linearity test for TWFE on the dose;
+  supports the did_had item.
+- `dechaisemartin2022stayers` (SSRN 4011782; preprint, current version 2025 with Doulo Sow
+  added; R package DIDmultiplegtSTAT): static AS, WAS, and IV estimators with stayers;
+  supports the did_multiplegt_stat item.
+
 ## Exemplar rows
 
 The recognition table's canonical cases and what each one teaches. New keys were
