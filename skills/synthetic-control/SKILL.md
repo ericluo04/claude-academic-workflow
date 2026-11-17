@@ -277,24 +277,27 @@ Package index with versions, links, and traps in references/details.md.
 Report each effect with the results sentence in ../causal-design/references/shared-rules.md
 (section "Results sentence"): magnitude, direction, a benchmark, and the calibration vocabulary.
 
-> [Treatment] hit [treated unit] at [date]; no comparable unit did, so I construct a
+> [Treatment] hit [treated unit] at [date]; no comparable unit did, so we construct a
 > synthetic control from [J] donors, excluding [units] for [own interventions / shocks /
 > spillovers] (Abadie 2021). Predictors are [pre-period outcomes and covariates]; predictor
 > weights are chosen by [cross-validation on the pre-period], and the resulting synthetic
 > unit puts weight on [named donors]. Pre-period fit is [shown in table/figure]. The
 > estimated effect of [effect] compares with a pre-period [RMSPE / detrended SD] of [value]
-> for [treated unit]. I report permutation inference with the post/pre RMSPE ratio over
+> for [treated unit]. We report permutation inference with the post/pre RMSPE ratio over
 > in-space placebos (Abadie, Diamond, and Hainmueller 2010); with [J] donors the smallest
 > attainable p is 1/(J+1), [which is a limitation of the donor count: statistical
-> significance in the conventional sense is out of reach, and I lean on magnitude and the
+> significance in the conventional sense is out of reach, and we lean on magnitude and the
 > placebo distribution].
-> I validate with backdating, leave-one-out donor exclusion, and robustness across predictor
+> We validate with backdating, leave-one-out donor exclusion, and robustness across predictor
 > sets and donor pools. [If fit is imperfect: because the synthetic unit cannot match
-> pre-period levels exactly, I use synthetic difference-in-differences (Arkhangelsky et al.
-> 2021), which differences out the remaining gap; I note this trades the perfect-fit
-> requirement for the assumption that the gap would have been stable, which I cannot test
-> directly.] The estimand is the effect on [treated unit] alone, and I generalize to
+> pre-period levels exactly, we use synthetic difference-in-differences (Arkhangelsky et al.
+> 2021), which differences out the remaining gap; we note this trades the perfect-fit
+> requirement for the assumption that the gap would have been stable, which we cannot test
+> directly.] The estimand is the effect on [treated unit] alone, and we generalize to
 > [other units] only [not at all / under the stated assumption].
+
+The template is written in "we". Match the paper's voice: switch to "I" for a
+sole-authored paper.
 
 Most claims trace to references/canon.md; keys live in ../causal-design/references/causal.bib.
 

@@ -1,7 +1,7 @@
 # Conjoint lookup details
 
 Heavy reference content the SKILL.md points into. Sources: reading notes in
-the maintainer's reading notes, current as of 2026-10-09.
+the maintainer's reading notes, current as of 2026-11-17 (Rao 2026 pass).
 
 ## The adjudicated dispute cell (AMCE interpretation)
 
@@ -23,7 +23,8 @@ consequence, their handedness case); AKM show the modal conjoint paper writes ma
 sentences anyway (83% preference talk, 51% electoral framing). The audits sample different
 literatures and both hold; the defect is in applied prose, and both papers say so.
 Asymmetries carried honestly: AKM's bounds (their Prop 2) and sign condition (Prop 3) are
-undisputed and are the only practical route to a proportion claim, because BHHY (p. 502)
+undisputed and are the only practical route to a proportion claim from AMCEs (an HB fit on
+the preference track has the model-based route in SKILL.md's claims firewall), because BHHY (p. 502)
 call the fraction preferring infeasible to estimate from typically sized conjoint data,
 where individual-level data are sparse ("biased toward 0.5" is unconfirmed: the main text
 does not say it, and the Supplementary Material was not read); AKM's ceteris paribus
@@ -356,12 +357,53 @@ fielded no-buy option, equalization prices do not.
 - Threat checklist at design time: no-choice option changes processing (include when
   feasible and salient); number-of-levels effect (equalize levels across attributes);
   attribute nonattendance; noncompensatory screening (consider-then-choose models when
-  suspected); context/compromise effects; do not elicit unacceptable levels directly.
+  suspected; the screening bullet in references/track-hb.md); context/compromise effects;
+  do not elicit unacceptable levels directly.
+- Partial profiles (each profile shows a subset of the attributes). Respondents impute
+  hidden levels from earlier profiles and from the attributes shown. In ratings data with
+  two-level attributes, the relative importance of the partworths shifted against full
+  profiles while the rankings mostly held (Bradlow, Hu, and Ho 2004, pp. 369, 378). The
+  authors read the shift as order sensitivity. That is a model-based reading, since order
+  was randomized and not manipulated (p. 379). On the experiment track (our judgment, not
+  a cited result), randomizing which attributes are shown keeps identification but changes
+  the estimand. A hidden attribute is imputed, not absent, so the AMCE of a shown attribute
+  averages over beliefs about the hidden ones (the masking problem of Abramson, Kocak, and
+  Magazinnik 2022). Imputation from earlier profiles is also carryover by construction,
+  outside the full-profile task-stability evidence (Bansak et al. 2018). Default: full
+  profiles. If partial profiles are unavoidable, state the AMCE as conditional on display
+  and run the carryover diagnostic expecting a trend. On the preference track, model the
+  imputation or hold the attribute set fixed within respondent.
 - The isomorphic/paramorphic rule (verbatim anchor): "Claiming that a model is isomorphic
   to the true underlying decision process ... seems to require exogenous manipulations
   and/or a set of process measures. Otherwise, a model may only be shown to be
   paramorphic to the true underlying decision process." Fit and prediction never license
   a process claim.
+
+## Product lines, price signals, and market data
+
+- Product lines. Maximize the contribution of the firm's whole line, so each new item is
+  charged for what it takes from the firm's own items. The problem is NP-hard (Kohli and
+  Krishnamurti 1989, as cited by Belloni et al. 2008, p. 1544). Enumerate when the design
+  space allows it. Otherwise use a named heuristic and say which. The seller's greedy
+  heuristic has no worst-case guarantee and can do arbitrarily badly (Green and Krieger
+  1985, pp. 9-10). On a real problem solved to global optimality, greedy reached 98.4% of
+  optimal earnings, and simulated annealing, divide-and-conquer, product-swapping, and
+  genetic algorithms came within about 1% (Belloni et al. 2008, p. 1549). Evaluate the
+  chosen line on posterior draws.
+- Price as a quality signal. A full-price conjoint estimates the net of a negative
+  sacrifice effect and a positive informational effect. A second scenario in which a third
+  party pays isolates the informational effect, and the difference is the sacrifice effect
+  (Volckner 2008, hotels, CBC with HB). When the informational effect is positive, the net
+  price coefficient understates sensitivity to price as a cost and inflates WTP. That is
+  the skill's inference from the decomposition. Consider the two-scenario design for
+  prestige goods and for categories where quality is hard to judge. Rao (2026, p. 384)
+  reports magnitudes from Volckner and Sattler (2005), which we have not read.
+- Fusion with market data, when purchase data exist. Swait and Andrews (2003) pooled
+  scanner and choice-experiment data with a relative error scale. Equality up to scale was
+  rejected (p. 457), yet the pooled model predicted holdout purchases better (p. 442).
+  Ellickson, Lovett, and Ranjan (2019) let survey preferences shift in mean and covariance
+  relative to a random-sample purchase panel. That beat a scale-only benchmark on purchases
+  made months after launch and priced attributes not yet on the market.
 
 ## Package index
 
@@ -381,6 +423,9 @@ CRTConjoint, bayesm, logitr, posterior, and bayesplot were re-run in the templat
 | ashr | 2.2-63 (CRAN 2023-08-21) | adaptive shrinkage: ash(betahat, sebetahat) on estimates + clustered SEs | composes with any estimator's output; BH/BC need only p.adjust |
 | CRTConjoint | 0.1.0 (verified 2026-07-31) | Ham-Imai-Janson carryover/profile-order randomization test | named in Clayton's appendix; signature verified in the template; re-verify at use |
 | bayesm | 3.1-7 (CRAN 2025-11-11) | rhierMnlRwMixture, rhierMnlDP, rhierLinearMixture, createX | the defaults/discrepancy traps above; unit-scale assumption; pass full Prior when sign-constrained |
+| idefix | 1.1.0 (CRAN 2025-03-13, verified 2026-11-17) | Bayesian D-efficient choice designs (Modfed, CEA); adaptive IASB designs for mixed logit | preference track only; methodology = traets2020generating (JSS 96(3)); its simulation helpers target the adaptive case, so the pre-fielding power check runs through cbcTools |
+| cbcTools | 0.7.1 (CRAN 2025-10-20, verified 2026-11-17) | wraps idefix: priors, design, dominance screening, simulated choices from the priors, power via logitr | preference track only; pre-1.0 API, re-verify signatures at use |
+| echoice2 | 0.2.5 (CRAN 2025-11-02, verified 2026-11-17 from the reference manual) | hierarchical MNL with conjunctive attribute screening and an optional price screen: dd_est_hmnl_screen(); volumetric version vd_est_vdm_screen() | not the Gilbride-Allenby probit and has no disjunctive rule; its model paper (Kim, Hardt, Kim, and Allenby 2022, IJRM) is unread; check the input format and priors against the package source before it enters the template, as was done for bayesm |
 | logitr | 1.2.0 (verified 2026-07-31) | preference-space AND WTP-space MNL/mixed logit | the Sonnier rule's code path; the space switch is scalePar = "price"; re-verify at use |
 
 Shared with other causal skills: estimatr, whose lm_robust with clusters= gives AMCEs and MMs by

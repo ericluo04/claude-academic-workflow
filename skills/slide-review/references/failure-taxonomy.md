@@ -31,6 +31,6 @@ a short form of the table.
 | `Reveal is not defined` | Page not finished loading, or an HTML that is not a reveal deck. Re-evaluate once, then stop. |
 | Page changes under you mid-capture | Another agent grabbed the browser. Abandon the capture and switch to the decktape path; do not retry browser work in parallel. |
 | Rasterizer reports an unrecoverable error | Usually not a PDF at all. Confirm the first five bytes are a PDF magic number. |
-| `Read` fails on a `.pdf` | Expected, there is no poppler. Convert with `pdfread.py png` and read the PNG. |
+| `Read` on a `.pdf` | Works when poppler is installed (this setup assumes Homebrew's; adjust to your machine): `Read` opens a PDF with a `pages` range. For PNGs at a fixed DPI, convert with `pdfread.py png` and read the PNG. |
 | `decktape` gives a blank or single-page PDF | Wrong exporter. It must be `decktape reveal`, with the deck's own `file://` path. |
 | Reviewer returns prose, not the numbered contract | Re-prompt once with "Please respond in the required format." On a second drift, surface the raw reply. |

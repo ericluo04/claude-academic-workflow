@@ -346,8 +346,8 @@ Every claim traces to references/canon.md. Keys for the canon papers live in
 - causal-design: whether IV is the right tool at all; clustering and inference questions shared
   across designs. This skill does not take control functions or Gaussian copulas. The decline
   paragraph at causal-design's triage question 3 carries the pointers for them.
-- rdd: fuzzy RD is IV at a cutoff; its first-stage and exclusion discipline lives there, the
-  weak-IV inference regime here.
+- rdd: fuzzy RD is IV at a cutoff; its first-stage, exclusion, and weak-first-stage intervals
+  live there. The F ladder for reading strength lives here.
 - did: the share-exogeneity path is a stack of DiD-style exposure designs, so parallel-trends
   scrutiny and pre-trend tools from did apply to share balance.
 - field-experiment: randomized encouragement designs end to end (including the ITT/LATE

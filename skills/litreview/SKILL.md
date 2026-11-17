@@ -51,8 +51,8 @@ Write two or three query strings, not one. Strip filler, keep substantive nouns,
 Run the variants as parallel Bash calls in a single message.
 
 Seed-title searches (looking up a list of known titles) run differently: in the foreground, one
-Bash call at a time, never as a background shell loop or `&` job. On 2026-10-07 four of six search
-agents detached their loops and stalled for 10 to 20 minutes waiting on their own background work.
+Bash call at a time, never as a background shell loop or `&` job: an agent that detaches its loop
+stalls waiting on its own background work.
 When search is delegated to a subagent, the subagent returns its report as text and never writes a
 report file.
 
@@ -99,7 +99,7 @@ candidate, call
 mark hits `[in Zotero: <key>]`. Prefer their copy over re-fetching, and route the reading subagent
 to the Zotero item when one exists.
 
-Zotero reads only work while the Zotero 7 desktop app is open with the local API enabled. A failed
+Zotero reads only work while the Zotero desktop app is open with the local API enabled. A failed
 call almost always means the app is closed. If it is, skip the check and do not report papers as
 absent from the library: a closed Zotero looks exactly like an empty one.
 
@@ -284,8 +284,7 @@ arXiv is a failed search, not a thin field.
 
 A venue pass uses a two-to-three-noun query ("conjoint presentation format"), never the full
 topic string. OpenAlex filters by the journal's exact source name and Semantic Scholar matches the
-venue as a raw string, so a long query inside a venue filter returns nothing: on 2026-10-07 every
-long-query venue pass came back empty in all five journals.
+venue as a raw string, so a long query inside a venue filter returns nothing.
 
 ## Failure modes
 

@@ -1,6 +1,6 @@
 ---
 name: did
-description: Design, estimate, validate, and write up a difference-in-differences analysis, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. TRIGGER on "difference-in-differences", "DiD", "TWFE", "event study", "staggered adoption", "staggered rollout", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "Sun-Abraham", "imputation estimator", "Goodman-Bacon", "stacked DiD", "not-yet-treated", "repeated cross-section", "HonestDiD", "triple differences", "Poisson DiD", "nonlinear DiD", or any panel or repeated-cross-section setting where units become treated over time (policy rollout, staggered feature launch, state law changes). One or a few treated aggregate units: synthetic-control. No design chosen yet: causal-design.
+description: Design, estimate, validate, and write up a difference-in-differences analysis, using the post-2018 heterogeneity-robust toolkit with an explicit statement of which parallel-trends assumption is imposed. TRIGGER on "difference-in-differences", "DiD", "TWFE", "event study", "staggered adoption", "staggered rollout", "parallel trends", "pre-trends", "Callaway-Sant'Anna", "Sun-Abraham", "imputation estimator", "Goodman-Bacon", "stacked DiD", "not-yet-treated", "repeated cross-section", "HonestDiD", "triple differences", "Poisson DiD", "nonlinear DiD", or any panel or repeated-cross-section setting where units become treated over time (policy rollout, staggered feature launch, state law changes). One treated aggregate unit, or a few with failed pretrends: synthetic-control. No design chosen yet: causal-design.
 ---
 
 # Difference-in-differences
@@ -63,15 +63,20 @@ literature:
    battery (CV1, CV3 jackknife, and a restricted wild cluster bootstrap side by side):
    agreement means stop, disagreement means escalate to the map.
 
-Two exits from DiD entirely, both routed to the synthetic-control skill: only one or a handful
-of treated units, or selection on lagged outcomes with autocorrelated errors, where DiD is
-inconsistent even as pre-periods grow while SC is consistent (Arkhangelsky and Hirshberg 2023,
-arXiv 2311.13575; Section 7.3.4 of the Arkhangelsky and Imbens 2024 survey relays it). A few
-treated aggregate units with staggered timing go to synthetic-control, which tries scpi first
+Two exits from DiD entirely, both routed to the synthetic-control skill: one or a handful of
+treated units whose pretrends fail, or selection on lagged outcomes with autocorrelated errors,
+where DiD is inconsistent even as pre-periods grow while SC is consistent (Arkhangelsky and
+Hirshberg 2023, arXiv 2311.13575; Section 7.3.4 of the Arkhangelsky and Imbens 2024 survey
+relays it). Two or more treated aggregate units whose pretrends pass stay here: estimate
+DiD with few-treated inference (randomization inference, or Conley and Taber 2011,
+`conley2011inference`, under the conditions on the few-clusters map in
+references/details.md), and report synthetic DiD from the synthetic-control skill as the
+robustness check. A single treated unit follows the one-treated-cluster rule below. A few treated aggregate units with
+staggered timing and failed pretrends go to synthetic-control, which tries scpi first
 (Cattaneo, Feng, Palomba, and Titiunik 2025, `cattaneo2025uncertainty`, for the intervals;
 `cattaneo2025scpi` for the package) or stagsynth (Cao, Lu, and Wu 2026, `cao2026synthetic`). Few
-treated aggregate UNITS with failed pretrends exit to synthetic-control; few treated CLUSTERS of
-micro units with plausible parallel trends stay here on the few-clusters inference map
+treated CLUSTERS of micro units with plausible parallel trends stay here on the few-clusters
+inference map
 (references/details.md), down to two treated clusters. With one treated cluster, the
 cluster-level methods fail: CV1, CV3, and the wild cluster bootstrap. Prefer synthetic-control,
 after aggregating the micro units to the treated unit, or Fallback B, the cluster-level Fisher
@@ -563,7 +568,7 @@ Adapt, keeping the first-person limitation at the point of the choice:
 > fixed effects estimands can place negative weights on some group-time effects (de
 > Chaisemartin and D'Haultfoeuille 2020; Sun and Abraham 2021 for the dynamic case; Roth,
 > Sant'Anna, Bilinski, and Poe 2023). Following the forward-engineering
-> approach of Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna (2026), I define the
+> approach of Baker, Callaway, Cunningham, Goodman-Bacon, and Sant'Anna (2026), we define the
 > target as [unit/person-weighted] group-time ATTs and their event-study aggregation on the
 > [level / log-mean / mean-log] scale, which is the [level / population-total proportional /
 > typical-unit proportional] effect the research question asks for (Winkler, Hotz-Behofsits,
@@ -572,15 +577,18 @@ Adapt, keeping the first-person limitation at the point of the choice:
 > [conditional on X] on that scale, and estimate with [the doubly robust procedure of
 > Callaway and Sant'Anna (2021) / pooled Poisson or logit quasi-maximum likelihood with
 > cohort-by-period treatment effects (Wooldridge 2023, 2026)], reporting uniform confidence
-> bands. I assess sensitivity to parallel-trends violations following Rambachan and Roth (2023):
+> bands. We assess sensitivity to parallel-trends violations following Rambachan and Roth (2023):
 > bounding post-treatment violations by the largest pre-treatment trend difference ([value])
 > gives an identified set of [set] and a robust confidence interval of [CI]; the conclusion
 > survives violations up to M-bar = [breakdown]. A limitation of this design is [the specific
 > PT variant imposed / the few treated clusters / the transformation choice], which costs
-> [what it costs]; I address it by [sensitivity/fallback]. Standard errors are clustered at the
+> [what it costs]; we address it by [sensitivity/fallback]. Standard errors are clustered at the
 > [level], the level at which treatment is independently assigned (Abadie, Athey, Imbens, and
 > Wooldridge 2023), with G = [n] clusters, [G1] of them treated, and cluster sizes from [min] to
 > [max] (median [m]).
+
+The template is written in "we". Match the paper's voice: switch to "I" for a sole-authored
+paper.
 
 Every claim in the paragraph must trace to a canon entry; references/canon.md maps claims to
 papers and BibTeX keys in the shared ../causal-design/references/causal.bib. Verify any primary
@@ -589,8 +597,8 @@ paper cited beyond the canon with bibcheck before submission.
 ## Handoffs
 
 - causal-design: design triage before this skill; shared inference material.
-- synthetic-control: few treated units, long pre-period, selection on lagged outcomes, failed
-  pretests ("sidesteps collinearity concerns while allowing for divergent nonlinear trends",
+- synthetic-control: few treated units with failed pretests, long pre-period, selection on
+  lagged outcomes ("sidesteps collinearity concerns while allowing for divergent nonlinear trends",
   AAFP citing Abadie 2021). Synthetic DiD is that skill's bridge topic, not this one's. A
   levels SDID inherits the baseline-gap sensitivity of levels DiD (Winkler et al. 2026), so the
   scale question travels with the handoff.

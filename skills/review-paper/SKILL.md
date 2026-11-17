@@ -71,11 +71,9 @@ comments.
 
 ## Phase 1: find the manuscript
 
-1. An explicit path argument wins. The Read tool cannot open a `.pdf` on this machine (it needs
-   `pdftoppm`; this setup assumes no Homebrew and no poppler, so adjust to yours), so route every PDF through the helper:
-   `~/.claude/assets/bin/pdfread.py text paper.pdf` for the text, or
-   `~/.claude/assets/bin/pdfread.py png paper.pdf --pages N --dpi 150 --out /tmp/p` and then Read
-   the PNG when the layout or a figure matters. Never call `pdftotext` or `pdftoppm`.
+1. An explicit path argument wins. For a `.pdf`, get the text with
+   `~/.claude/assets/bin/pdfread.py text paper.pdf`, and Read the PDF pages directly (the Read
+   tool's `pages` parameter, at most 20 pages per call) when the layout or a figure matters.
 2. No path: Glob `**/*.tex` in the working directory.
 3. Still nothing: Glob `~/Library/CloudStorage/Dropbox*/Apps/Overleaf/*/*.tex` (this setup
    assumes Overleaf projects sync there via Dropbox), show the matching project
@@ -107,9 +105,10 @@ nothing, so write the shared brief into every prompt in full. Agent 6 additional
 
 > You are reviewing an academic empirical manuscript. Read every file listed at
 > the end of this prompt, completely, before writing anything. Files are LaTeX source unless
-> noted. The Read tool cannot open a `.pdf` here, so get PDF text with
+> noted. Get PDF text with
 > `~/.claude/assets/bin/pdfread.py text <file.pdf>` (add `--pages 1-20` to work through a long
-> document in chunks). `pdftotext` and `pdftoppm` are not installed in this setup; do not call them.
+> document in chunks), and Read the PDF itself with the `pages` parameter when a page's layout or
+> a figure matters.
 >
 > Ignore LaTeX markup unless the markup is itself the problem. For every finding, quote the exact
 > text and give a location precise enough to find it without searching: file and section for

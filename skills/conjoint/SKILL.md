@@ -5,19 +5,19 @@ description: Design, analyze, and write up conjoint experiments in both traditio
 
 # Conjoint experiments
 
-Design, estimate, validate, and write up conjoint experiments. The canon is fifteen
+Design, estimate, validate, and write up conjoint experiments. The canon is sixteen
 user-picked sources (see references/canon.md) spanning two
 traditions that share one instrument: political science's design-based causal track
 (Hainmueller, Hopkins, and Yamamoto 2014 and its correction wave) and marketing's
-preference-measurement track (Netzer et al. 2008; Agarwal et al. 2015; Rossi, Allenby,
-and Misra 2024; Sonnier, Ainslie, and Otter 2007). The deliverable is the design or
+preference-measurement track (Netzer et al. 2008; Agarwal et al. 2015; Rao 2026; Rossi,
+Allenby, and Misra 2024; Sonnier, Ainslie, and Otter 2007). The deliverable is the design or
 analysis recommendation with the assumption that licenses it, R code with calls verified
 against package documentation, and a drafted methods paragraph. The skill stops at the
 four stop points in ../causal-design/references/shared-rules.md (section "Stop points")
 and puts each choice to the user. Bib keys live in
 ../causal-design/references/causal.bib, the family's shared bibliography.
 
-Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+Current as of 2026-11-17 (Rao 2026 added to the canon); refresh per shared-rules (../causal-design/references/shared-rules.md,
 section "Refresh path").
 Nothing enters the canon without the user's approval.
 
@@ -33,16 +33,41 @@ Ask this first (it is the marketing canon's own first question). Two answers, tw
   segmentation: the PREFERENCE-MEASUREMENT track. Hierarchical Bayes choice modeling.
   Judged by holdout prediction and the decision it supports, not by identification.
 
-The hard rule at the fork: adaptive questioning, utility-balanced or efficiency-optimized
-designs, and informative priors on the design side all break the response-independent
-randomization that gives the AMCE its design-based causal reading (Netzer et al. 2008 is
-the authority for the adaptive family; Hainmueller, Hopkins, and Yamamoto 2014 for what
-it breaks). If AMCEs are a deliverable, freeze the randomization. No AMCEs are computed from
-an adaptive or utility-balanced design. Asked for them, the skill declines and says why: the
-design broke the response-independent randomization the AMCE rests on, so the data goes to the
-preference-measurement track. A frozen-randomization
-design can feed BOTH tracks from the same data; an adaptive design feeds only the second.
-Never mix the interpretations silently.
+The hard rule at the fork: no AMCEs from an adaptive design or from a fixed
+efficiency-optimized design, for two different reasons.
+
+- Adaptive questioning picks each task from the respondent's earlier answers. That breaks
+  the response-independent randomization that gives the AMCE its design-based causal
+  reading (Netzer et al. 2008 is the authority for the adaptive family; Hainmueller,
+  Hopkins, and Yamamoto 2014 for what it breaks).
+- A fixed utility-balanced or D-efficient design is built before fielding from prior
+  partworths and never looks at responses. Its defect is aliasing. It shows a small
+  fraction of the attribute combinations, chosen for efficiency although the rest are
+  possible, and it ties attributes to each other by construction. Main effects are then
+  estimable only by assuming the interactions away (Rao 2026, pp. 78-81, on
+  fractional designs), and the AMCE would average over a support the designer picked for
+  efficiency. A sanctioned restriction differs: it drops only impossible combinations.
+  Fractional designs fail the AMIE's positivity condition for the same reason
+  (references/details.md, section "Causal interaction: the AMIE (Egami and Imai 2019)").
+- A design that draws each task's profiles at random from a distribution giving every
+  combination a known, nonzero probability is weighted randomization, a sanctioned
+  deviation (Design defaults below). Analyze it with the design ladder
+  (references/track-experiment.md, section "Design-based pAMCE randomization") and, where
+  attributes are drawn jointly, the linked-attribute interactions of the eq. 9 machinery.
+
+If AMCEs are a deliverable, freeze the randomization. Asked for AMCEs from an adaptive or
+fractional efficient design, the skill declines, names which of the two reasons applies,
+and sends the data to the preference-measurement track. A frozen-randomization design can
+feed BOTH tracks from the same data. An adaptive or fractional efficient design feeds only
+the second. Never mix the interpretations silently.
+
+On the preference track, adaptive data stay usable. The design is ignorable for likelihood
+or HB estimation only when the analysis conditions on every response the algorithm used to
+choose questions (Liu, Otter, and Allenby 2007, pp. 646, 650). Their worked examples are
+linear models, so the HB logit case is our inference. Hauser and Toubia (2005) report a
+bias that survives HB shrinkage, and the disagreement is unresolved. The full rule is in
+references/track-hb.md, section "Design on this track", which also holds the
+preference-track design rules (priors, efficiency, set size, ranges, scale).
 
 ## Estimands (randomized-experiment track)
 
@@ -113,7 +138,9 @@ Never mix the interpretations silently.
   effects losing significance first (Bansak et al. 2021 PSRM).
   The practical ceiling is a judgment about respondent burden, with no hard 20 in the
   evidence. Equalize the number of levels across attributes (the
-  number-of-levels effect inflates derived importance; Agarwal et al. 2015).
+  number-of-levels effect inflates derived importance; Agarwal et al. 2015). Show full
+  profiles. Partial profiles invite imputation of the hidden levels (Bradlow, Hu, and Ho
+  2004); see the threat checklist in references/details.md.
 - Randomization: uniform independent randomization is the parsimony default, with three
   sanctioned deviations (Bansak et al. 2021): weighted draws with disclosed odds to
   match real-world marginals, restrictions for genuinely impossible combinations only
@@ -188,8 +215,13 @@ The code is scripts/conjoint_template.R, sections 8 and 9.
 - Use incentive alignment for WTP-relevant tasks. Hold out one randomly selected middle task
   per respondent.
 - Shares: share of preference on the posterior draws. Run first choice on draws as the
-  check when the scenario adds products similar to existing ones.
+  check when the scenario adds products similar to existing ones. Before any what-if run,
+  check the base case against actual shares, state the simulator's no-reaction
+  assumption, and turn shares into volume before calling them demand (track-hb.md).
 - Heterogeneity defaults to mixtures. Flag latent class for segmentation deliverables.
+- When noncompensatory screening is plausible, fit a screening model beside the HB MNL and
+  compare them on holdout prediction (Gilbride and Allenby 2004; echoice2).
+- Head counts ("X% prefer") follow the HB rule in the claims firewall below.
 - Whether an IRR-style correction exists for HB partworths is unstudied. Flag it as open.
 
 ## Diagnostics battery
@@ -230,9 +262,11 @@ adjudicated cell is in Live disputes below).
   references/details.md; quick screens: a binary attribute in a large design needs an
   AMCE above 0.25). Bansak et al. (2023, p. 502) call the fraction preferring an
   attribute infeasible to estimate from typically sized conjoint data, because
-  individual-level data are sparse (the "biased toward 0.5" wording is unconfirmed:
-  their main text does not say it). Covariate pooling needs exact within-stratum
-  preference homogeneity, so the bounds are the only practical route.
+  individual-level data are sparse. Their main text does not say such estimates are
+  biased toward 0.5, so do not attribute that claim to them. Covariate pooling needs exact
+  within-stratum preference homogeneity, so the bounds are the only practical route from
+  AMCEs. An HB fit on the preference track has its own model-based route (the head-count
+  bullet below).
 - The uncorrelated-intensity escape hatch (sign correspondence when direction and
   intensity are uncorrelated) must be argued with evidence, never assumed: supporters
   and opponents attach different importance on 17 of 22 ANES issues.
@@ -246,7 +280,21 @@ adjudicated cell is in Live disputes below).
   and its intensity-weighting is then a feature (near-unanimous mild preferences carry
   near-zero choice consequence, the handedness case). In marketing, expected choice
   share IS usually the managerial estimand, so the vote-share reading needs no import
-  license; majority talk within segments still gates through the bounds.
+  license; majority talk within segments still gates through the bounds when it rests on
+  AMCEs.
+- Head counts from HB (preference track). "X% of respondents prefer A" from a
+  hierarchical Bayes fit is a model-based quantity that rests on the heterogeneity
+  distribution. It is the posterior of the in-sample share, computed draw by draw (in each draw, the share of
+  respondents whose contrast favors A) and reported with its interval. A count of
+  respondents whose posterior probability exceeds a stated threshold may sit beside it,
+  labeled as confident classifications. Never report the share of positive posterior
+  means or a count of per-respondent significance tests. The reason: HB pulls each
+  respondent toward the population mean, so an ensemble of posterior means is less
+  dispersed than the parameters (Louis 1984, p. 393), and individual estimates carry the
+  mixing distribution's pull (Liu, Otter, and Allenby 2007, p. 646). Our inference from
+  both: with few tasks per respondent, counts from posterior means overstate the majority
+  side. The 90.1% in a court study that Rao (2026, pp. 415-416) reports is this kind of
+  count, a sign count of individual estimates from about 15 choices each.
 
 ## External validity
 
@@ -257,9 +305,14 @@ adjudicated cell is in Live disputes below).
   dominant 15-19 point origin penalty almost exactly (Hainmueller, Hangartner, and
   Yamamoto 2015). Generalization beyond that domain is extrapolation, and this skill
   never cites the paper without the scope limit.
-- Levels never validate: the best design predicted a 21% rejection rate against the
+- Raw levels never validate: the best design predicted a 21% rejection rate against the
   actual 37%. Effects, orderings, and relative importance are what survived. No
-  absolute-level or uptake claims from stated-preference data.
+  absolute-level or uptake claim rests on uncalibrated stated-preference shares.
+  Calibrated simulated shares are allowed under two conditions. Label them "calibrated
+  to [source, date]". Report the base case, simulated against actual current shares,
+  both before and after calibration. Calibration fits the shares to the market by
+  construction (the exponent and brand multipliers of Green and Krieger 1992, pp.
+  124-125), so a calibrated base case is fit, never validation.
 - Report the satisficing diagnostic (share of respondents accepting or rejecting
   everything); origin effects shrank almost in proportion to it across designs.
 - Profile realism is the second external-validity axis alongside respondent

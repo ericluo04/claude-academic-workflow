@@ -105,9 +105,14 @@ taxonomy (data type, frame shape, assignment mechanism; did skill):
   covariates take did's adjusted estimators. Staggered: Callaway-Sant'Anna, Sun-Abraham, or
   stacked regression (whose implicit weights carry a caveat in did; Wing, Freedman, and
   Hollingsworth 2024, `wing2024stacked`), and justify the clean controls (AMA).
-- One or few treated aggregate units, long pre-period: synthetic-control (few treated
-  CLUSTERS of micro units with plausible parallel trends stay in did on its few-clusters
-  map). The AMA gate, both parts: plot treated vs fitted counterfactual and verify
+- Two or more treated aggregate units whose pretrends pass: did, with few-treated inference
+  (randomization inference or Conley-Taber, under the conditions on did's few-clusters map)
+  and synthetic DiD as the robustness check. Few treated CLUSTERS of micro units with
+  plausible parallel trends also stay in did on its few-clusters map. A single treated unit
+  follows the one-treated-cluster rule: synthetic-control, or the cluster-level Fisher
+  randomization test.
+- A few treated units whose pretrends fail, or units that select into treatment on lagged
+  outcomes, long pre-period: synthetic-control. The AMA gate, both parts: plot treated vs fitted counterfactual and verify
   pretreatment fit, AND run a backdating exercise; "only using the methods that satisfy
   both best practices." Both parts are necessary, never sufficient: backdating assumes
   strict exogeneity and backfires under selection on recent shocks, and

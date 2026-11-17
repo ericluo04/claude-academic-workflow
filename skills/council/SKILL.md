@@ -33,10 +33,8 @@ never edits the target.
 
 A file target may be `.tex`, `.md`, `.qmd`, `.txt`, `.pdf`, `.R`, `.py`, or a `SKILL.md`. Read it
 once in the main thread before dispatching, and pass the contents inline to the critics so five
-subagents do not each re-read it. This setup assumes the Read tool cannot open a `.pdf` (no
-poppler; adjust to your machine), so extract
-it with `~/.claude/assets/bin/pdfread.py text <file.pdf>` and pass that text inline. Do not call
-`pdftotext`.
+subagents do not each re-read it. For a `.pdf`, extract the text
+with `~/.claude/assets/bin/pdfread.py text <file.pdf>` and pass that text inline.
 
 If the user asks for more than five critics, refuse: "Hard cap is 5. Pick a tighter panel."
 
@@ -91,10 +89,10 @@ For a `SKILL.md` the user wants stress-tested before installing.
    `~/.claude/skills/reading-papers/scripts/paper.py` (search, resolve, get, author,
    cites, `--json`) for literature lookup and citation checks. This inventory may lag the
    machine, so verify against the live tool list in your own context before flagging a tool as
-   missing. LaTeX is MacTeX `latexmk`. This setup assumes
-   no Homebrew and no poppler, so `pdftotext` and `pdftoppm` do not exist and the Read tool cannot
-   open a PDF; PDFs go through `~/.claude/assets/bin/pdfread.py` (`text` to extract, `png` to
-   rasterize a page for Read). Images are read visually by the Read tool. An HPC cluster, if
+   missing. LaTeX is MacTeX `latexmk`. The Read tool
+   opens a PDF directly with its `pages` parameter (at most 20 pages per call);
+   `~/.claude/assets/bin/pdfread.py` (`text` to extract, `png` to rasterize a page) is the shell
+   route. Images are read visually by the Read tool. An HPC cluster, if
    you use one, may be reachable as `ssh hpc`. Flag any tool the skill names that is not on this list, any shell
    command that assumes a package manager, any Windows-ism, and any place the skill should be
    using a tool that exists and is not."
@@ -148,8 +146,8 @@ truncating to `--n`. Truncation keeps the first K critics in list order, so `--n
 default roster drops the academic editor and the harsh referee. Create a scratch directory `~/.claude/cache/council_<YYYYMMDD>_<run_id>/`
 for raw critic output.
 
-Phase 1, parallel dispatch. This is the key step. Send ONE message containing N subagent
-calls, one per critic, so they run concurrently. Never serialize them. Each call uses
+Phase 1, parallel dispatch. Send one message containing N subagent
+calls, one per critic, so they run concurrently. Each call uses
 `subagent_type: general-purpose`, a three-to-five word description, and a prompt made of the
 critic's role string, the goal line (`Goal, as stated by the user: ...` when `--goal` was passed;
 otherwise `Goal: not stated; infer it from the target and open your output with the goal you

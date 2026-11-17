@@ -59,7 +59,7 @@ is nothing to splice back, so the approved source goes to `--output` (default
 4. `latexmk` is at `/Library/TeX/texbin/latexmk` on a MacTeX install. If it is
    missing from `PATH`,
    prepend `/Library/TeX/texbin` before failing with `SETUP_MISSING:latexmk`.
-   With `--figures`, also check `gs` (e.g. `/usr/local/bin/gs`); if absent, report
+   With `--figures`, also check `gs` (Homebrew ghostscript in this setup; adjust to your machine); if absent, report
    `SETUP_MISSING:gs` and skip the figure pass, keeping the compile report.
 
 ## Step 1, detect engine and bib backend
@@ -225,9 +225,7 @@ long=$(sips -g pixelWidth -g pixelHeight page-1.png | awk '/pixel(Width|Height)/
 Under 700, re-render at double the DPI; over 2400, halve it. Correct once, do not
 loop. If `gs` exits non-zero or the PNG is missing or empty, surface
 `RENDER_FAILED:<message>` for that figure and move on. Ghostscript is the
-rasterizer here. This setup assumes no Homebrew and no poppler, so `pdftoppm`
-and `pdftotext` do not exist and nothing should reach for them; adjust to your
-machine.
+rasterizer here.
 
 ### 6.4 Review
 
@@ -272,9 +270,9 @@ the surrounding `figure` env, `\caption`, `\label`, `\centering`, and any
 
 Recompile once. Report which blocks changed and what each round fixed, and for
 every block that did not finish, the round it reached and why it stopped. To
-inspect the compiled document's text, run
-`~/.claude/assets/bin/pdfread.py text <outdir>/<jobname>.pdf`. This setup assumes
-the Read tool cannot open a PDF (no `pdftoppm`; adjust to your machine).
+inspect the compiled document, Read `<outdir>/<jobname>.pdf` with a `pages`
+range, or run `~/.claude/assets/bin/pdfread.py text <outdir>/<jobname>.pdf`
+for the whole text on stdout.
 
 ## Step 7, cleanup
 

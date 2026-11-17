@@ -12,11 +12,11 @@ proposing a change to any of them has produced a false finding.
 ## Layout
 
 
-All PNGs, plus `fit.json` from stage 3 and `probe.json` from stage 4. This is the lens that was fiction
-before.
+All PNGs, plus `fit.json` from stage 3 and `probe.json` from stage 4.
 
 > You are auditing a reveal.js deck for whether a seated audience can actually see it. Read every PNG
-> listed. The logical canvas is 1050x700 deck px; the screenshots are 2334x1556, so screenshot px / 2
+> listed. The logical canvas and the scale are the values stage 2 printed (1050x700 at scale 2.0 at the Quarto default, 1280x720 on the
+> Editorial and Dark lab themes); the screenshots are 2334x1556, so screenshot px / scale
 > = deck px. Judge from pixels, never from the source.
 >
 > The two JSON files below already measured what is measurable. The first carries a status token per

@@ -221,7 +221,7 @@ Use it to see what a paper is actually being used for.
   `academic.oup.com` / `journals.sagepub.com` (legally open, technically Cloudflare-dead), and
   SAGE 403s the script even on its open-access articles. Green-OA copies can be walled too: the
   Erasmus repository (`pure.eur.nl`) and SSRN sit behind Cloudflare, and so do CORE download links
-  (checked 2026-10-07). For those, `get` now falls back to Europe PMC and to Wayback snapshots.
+  (checked 2026-10-07). For those, `get` falls back to Europe PMC and to Wayback snapshots.
   Wiley behaves the same: `onlinelibrary.wiley.com` pdfdirect URLs 403 even for OA articles
   (confirmed twice, 2026-07), and the landing pages 403 too; the working route is an
   institutional-repository or author-page copy (MIT DSpace and an author's Harvard page both
@@ -297,7 +297,7 @@ identifier first, as the honesty rules above require. Run at most six concurrent
 concurrent readers. The cap is measured: on 2026-10-07, six parallel searchers drove Semantic
 Scholar to 429 on about 80 percent of calls under the old per-process backoff.
 
-`paper.py` now rate-limits per host across processes: a token bucket under a file lock in
+`paper.py` rate-limits per host across processes: a token bucket under a file lock in
 `~/.claude/cache/papers/ratelimit/` spaces requests to Semantic Scholar 1.1 s apart with a key
 (3.5 s without), to OpenAlex at 8 per second, to the arXiv API 3.2 s apart, and to any other host
 at 2 per second. Agents past the cap queue instead of failing, but they also wait, so more agents

@@ -72,9 +72,9 @@ are needed for the stage 3 gate and the stage 4 capture, neither of which is opt
 Chrome is `SETUP_MISSING:chrome`, never a reason to read the source, which is the failure this
 skill replaces.
 
-There is no Homebrew on this machine, so no `pdftoppm`, no `pdftotext`, no ImageMagick. Do not reach for
-them. Every PDF goes through `~/.claude/assets/bin/pdfread.py` (see stage 5), including any
-PDF you need to look at, because `Read` cannot open one here.
+PDFs that reviewers read go through `~/.claude/assets/bin/pdfread.py` (see stage 5), which
+writes PNG files at a chosen DPI. To look at a page yourself, the `Read` tool opens a PDF with a `pages`
+range. Crops go through PIL.
 
 ## Stage 0: deck type and ground
 
@@ -123,7 +123,7 @@ theme. On a dark deck the attribute is also a defect the probe can see, because 
 ## Stage 1: render
 
 ```bash
-cd "$(dirname deck.qmd)" && quarto render deck.qmd --to revealjs 2>&1 | tee "$RUN/render.log"
+cd "$(dirname deck.qmd)" && quarto render deck.qmd 2>&1 | tee "$RUN/render.log"   # the deck's own extension format
 ```
 
 On non-zero exit, extract the error from the log, surface `RENDER_FAILED:<message>`, and stop. Never
@@ -335,7 +335,6 @@ same positions off those.
 | talk | No closing slide anywhere | MAJOR. The talk stops instead of closing, and the room leaves with no address to write to. |
 | talk | Closing slide sits inside the appendix, or after it, or after the references | MAJOR. The audience meets the appendix before the invitation. The fix is to move it ahead of the `.appendix-break` divider. |
 | talk | Closing slide with no contact line and no invitation to get in touch | MINOR. Name the line that is missing. |
-| talk | No QR slot on the closing slide | MINOR. |
 | talk | QR slot present, image resolves to nothing | CRITICAL, and stage 3 has already printed `MISSING IMG` for that slide. Carry its token. |
 | lecture | A thank-you slide is present | MINOR. It belongs on a talk; the lecture's own closing slide is the one idea to leave with. |
 
@@ -439,8 +438,8 @@ Chrome's `--headless --print-to-pdf` is not an alternative; it produces a blank 
 
 ### Reading any PDF
 
-The `Read` tool cannot open PDFs on this machine. There is no poppler and so no `pdftoppm`, which is
-what `Read` needs, and it fails on every `.pdf`. Route through `pdfread.py`, then `Read` the PNG:
+The `Read` tool opens a PDF with a `pages` range (at most 20 pages a call). For pages the reviewers
+read at a fixed DPI, route through `pdfread.py`, then hand over the PNG:
 
 ```bash
 ~/.claude/assets/bin/pdfread.py png "$RUN/deck.pdf" --pages 3 --dpi 110 --out "$RUN/shots/s"
@@ -463,20 +462,20 @@ reviewers run alone and the report says which lenses were unavailable. Rasterize
 Check `head -c 5 deck.pdf` is `%PDF-` first. A download that was actually an HTML error page will die
 with `Unrecoverable error, exit code 1`, which reads like a rasterizer bug and is not one. Confirm the
 pixel size with `sips -g pixelWidth -g pixelHeight`; under 1400 wide, re-render at `--dpi 150` so the
-reviewers can judge small type. Correct once, do not loop. `gs` at `/usr/local/bin/gs` does the same job
+reviewers can judge small type. Correct once, do not loop. `gs` (ghostscript, on PATH) does the same job
 if PyMuPDF is unavailable, and `pdfread.py --help` prints the equivalent invocation.
 
 ## Stage 6: fan out
 
 Now the PNGs are on disk, so this part parallelizes safely. One `Agent` call
 per lens, all in one message, `subagent_type: "general-purpose"`. Every reviewer gets the deck facts
-(canvas 1050x700, screenshots at scale 2.0, root font size, deck type, and the ground colour from
+(the canvas and scale `capture.mjs` printed, root font size, deck type, and the ground colour from
 `deck.ground`) and absolute PNG paths, and every reviewer is told to read the images.
 
 Two facts every reviewer needs, or they will report the theme as a bug. A lecture deck is dark on
 purpose, so light text on a near-black ground is the design and not a rendering failure. And the deck
-is staged by `stage-slide.lua`, so the screenshots show the fully revealed slide even though the
-audience meets it one block at a time; a point that arrives on a later keypress is present, not
+reveals content on clicks (through `stage-slide.lua`, or by hand on a deck with `auto-stage: false`), so the
+screenshots show the fully revealed slide even though the audience meets it one click at a time; a point that arrives on a later keypress is present, not
 missing.
 
 Every reviewer gets one more instruction. Before ruling on a candidate defect, crop that region out of
@@ -488,7 +487,7 @@ came from:
 python3 -c "from PIL import Image; im=Image.open('$RUN/shots/slide-07.png').crop((x0,y0,x1,y1)); im.resize((im.width*3,im.height*3), Image.LANCZOS).save('$RUN/shots/slide-07-crop1.png')"
 ```
 
-A coordinate read off the crop gets the crop origin added back before the halving to deck px, so the
+A coordinate read off the crop gets the crop origin added back before dividing by the scale to get deck px, so the
 arithmetic in a finding is always full-image. A defect that resolves at full resolution in the crop is
 not reported, and a finding that survives names its crop file next to its evidence line.
 
@@ -519,8 +518,8 @@ Closing: thank-you slide at 22, ahead of the appendix divider
 
 ## Blocking (fix before presenting)
 1. [CRITICAL] Slide 3 "Results" - OVERFLOW +547px.
-   Bullets 9 to 14 and the specification table are off screen. Split the slide,
-   or move the table to its own.
+   Bullets 9 to 14 and the specification table are off screen. Shrink the body with
+   `.shrink-NN` and `.tight-math`, or move the table to the appendix behind a button.
 2. [CRITICAL] Slide 5 "A wide table" - TOO WIDE +308px.
    The rightmost three columns are off screen. Drop columns or mark the table `.spec`.
 3. [CRITICAL] Slide 4 "A formal result" - `\frobenius` renders as red literal text.
