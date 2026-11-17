@@ -12,7 +12,8 @@ code, and a methods paragraph. The skill stops at the four stop points in
 Where the literature is unsettled the skill names a default and the condition that moves you off
 it, and where the canon genuinely disagrees it says so instead of faking consensus.
 
-Current as of 2026-10-09; refresh per shared-rules (../causal-design/references/shared-rules.md,
+Current as of 2026-10-09, with the dCDH routes refreshed on 2026-11-17 from
+https://credible-answers.github.io/; refresh per shared-rules (../causal-design/references/shared-rules.md,
 section "Refresh path").
 Nothing enters the canon without the user's approval.
 
@@ -36,8 +37,11 @@ specification; what each one teaches is in references/canon.md, section "Exempla
 From Roth, Sant'Anna, Bilinski, and Poe (2023), the most condensed decision object in the
 literature:
 
-1. **Is everyone treated at the same time?** Yes: TWFE is fine, static or dynamic, without
-   covariates; with covariates see Covariates below. For two groups and two periods the
+1. **Is everyone treated at the same time?** Yes, with a binary treatment: TWFE is fine, static
+   or dynamic, without covariates; with covariates see Covariates below. If everyone starts on
+   the same date but the dose differs across units, the design is a heterogeneous adoption
+   design, and TWFE on the dose is unbiased only if the mean outcome change is linear in the
+   dose (section "Beyond the absorbing binary treatment", did_had). For two groups and two periods the
    estimator is interaction OLS or the long difference, clustered at the level of assignment.
    The identity of interaction OLS, TWFE, and the long difference holds exactly only in that
    2x2 with no covariates, and it is what makes people reach for TWFE-with-controls, where it
@@ -80,7 +84,9 @@ Refusal list. In five cases the skill declines the design and routes back to cau
 failed gate is a verdict.
 
 1. Always-treated units carry the estimand and cannot be dropped.
-2. No period has an untreated or not-yet-treated comparison unit.
+2. No period has an untreated, not-yet-treated, or quasi-untreated comparison unit. A
+   heterogeneous adoption design whose lowest doses are close to zero is not refused: it goes
+   to did_had (section "Beyond the absorbing binary treatment").
 3. Institutional detail documents selection on realized gains: units took the treatment because
    they correctly expected it to help them. Clean pre-trends are no defense (see "Why these
    units were treated"). causal-design checks whether an instrument for take-up exists (iv).
@@ -406,8 +412,28 @@ counting clusters.
 - Treatments that turn on and off (promotions, price changes): dCDH estimators require
   no-carryover; for advertising and pricing that assumption is usually wrong, so check it and
   prefer the intertemporal extension (`DIDmultiplegtDYN` in R, `did_multiplegt_dyn` in Stata).
+  When past treatments plausibly stop affecting the outcome after a short, known lag, the static
+  dCDH estimators are the alternative (`did_multiplegt_stat`, `dechaisemartin2022stayers`). They
+  assume no effect beyond that lag. The price of `_dyn` instead is parallel trends over a longer
+  horizon. R: DIDmultiplegtSTAT 1.0.0, installed from GitHub only (not on CRAN).
 - Continuous treatment intensity: ATT(d|d) is identified under standard PT, but causal-response
-  parameters need strong PT across doses (Callaway, Goodman-Bacon, Sant'Anna).
+  parameters need strong PT across doses (Callaway, Goodman-Bacon, Sant'Anna). With stayers
+  (units whose treatment does not change) and no carryover, the dCDH average-slope estimators
+  (AS and WAS in `did_multiplegt_stat`) apply. With no stayers, use did_had or de Chaisemartin,
+  D'Haultfoeuille, and Vazquez-Bare (2024, `dechaisemartin2024nostayers`).
+- Heterogeneous adoption design: every unit is untreated in the first period, all treated units
+  start on one date, and the dose differs across units (a same-day price change of different
+  sizes by store, an ad-weight change by market). With never-treated units, the credible-answers
+  guide uses 2SLS of the outcome change on the dose, instrumented by an indicator for a positive
+  dose. Without them, use did_had (de Chaisemartin, Ciccia, D'Haultfoeuille, and Knau 2026,
+  `dechaisemartin2026nountreated`). It relies on quasi-untreated units, whose dose is close to
+  zero, and tests for their presence. Its `yatchew` option tests whether the mean outcome change
+  is linear in the dose, the condition under which TWFE on the dose is unbiased. R: DIDHAD 2.0.0
+  on CRAN (the name is case-sensitive, and `DIDhad` fails). With no quasi-untreated units, the
+  fallback compares against the least-treated units and needs homogeneous effects. State that
+  assumption as a limitation where the choice is made.
+- Several treatments at once: references/details.md, section "Beyond the absorbing binary
+  treatment in full" (`dechaisemartin2023several`).
 - Exposure designs (baseline exposure share times a national change): the linear-interaction
   coefficient is an average marginal effect, roughly kappa + 2 phi E[M], not E[tau_s]; add the
   squared-exposure interaction when heterogeneity is plausible and report both (AAFP 2025).
@@ -515,7 +541,11 @@ template.
 
 Python route: `moderndid` (PyPI 0.2.0) and `diff-diff` (PyPI 3.12.0) both implement
 Callaway-Sant'Anna and HonestDiD (PyPI pages checked 2026-10-09). Neither has been run against
-this template, so reproduce one headline number in R before relying on either.
+this template, so reproduce one headline number in R before relying on either. The dCDH
+estimators have Python ports: py-did-multiplegt-dyn 0.1.9 (`from did_multiplegt_dyn import
+DidMultiplegtDyn`), did-multiplegt-stat 0.1.2, and did-had 0.2.1 (PyPI, checked 2026-11-17).
+The same rule applies to them. The tutorial's `pip install did-multiplegt-dyn` names a package
+that does not exist on PyPI; install `py-did-multiplegt-dyn`.
 
 ## Methods paragraph template
 

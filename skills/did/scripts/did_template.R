@@ -216,6 +216,7 @@ st <- staggered(df = df, i = IDNAME, t = TNAME, g = "g_inf", y = YNAME,
 # with "object 'pl' not found" (seen 2026-10-08).
 # Replace "treat" (the absorbing indicator from section 5) with your on-off treatment column.
 # effects = 5 and placebo = 3 are placeholders; match your panel.
+# Before trusting a pooled effect, add design = list(0.8, "console") to see switchers' treatment paths.
 library(polars); library(DIDmultiplegtDYN)
 dcdh <- did_multiplegt_dyn(df = df, outcome = YNAME, group = IDNAME, time = TNAME,
                            treatment = "treat", effects = 5, placebo = 3,
